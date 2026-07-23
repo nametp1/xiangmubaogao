@@ -1,0 +1,1747 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MySANY 管理后台 - 邮件服务配置</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+            background-color: #f5f6f8;
+            color: #333;
+        }
+
+        .app-wrapper {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .main-wrapper {
+            display: flex;
+            flex: 1;
+        }
+
+        /* 顶部导航栏 */
+        .navbar {
+            height: 50px;
+            background: #fff;
+            border-bottom: 1px solid #e8e8e8;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            flex-shrink: 0;
+        }
+
+        .navbar-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logo {
+            font-size: 20px;
+            font-weight: 700;
+            color: #E60012;
+            letter-spacing: -0.5px;
+        }
+
+        .navbar-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .navbar-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .navbar-item:hover {
+            color: #E60012;
+        }
+
+        .navbar-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #f0f0f0;
+            overflow: hidden;
+        }
+
+        /* 侧边栏 */
+        .sidebar {
+            width: 210px;
+            background: #fff;
+            border-right: 1px solid #e8e8e8;
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            overflow-y: auto;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 8px 0;
+        }
+
+        .sidebar-item {
+            position: relative;
+        }
+
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 16px;
+            font-size: 14px;
+            color: #666;
+            text-decoration: none;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .sidebar-link:hover {
+            color: #E60012;
+            background: #fff5f5;
+        }
+
+        .sidebar-item.active > .sidebar-link,
+        .sidebar-link.active {
+            background: #E60012;
+            color: #fff;
+            font-weight: 500;
+        }
+
+        .sidebar-item.active > .sidebar-link:hover,
+        .sidebar-link.active:hover {
+            background: #cc0010;
+            color: #fff;
+        }
+
+        .sidebar-submenu {
+            list-style: none;
+            padding: 0;
+        }
+
+        .sidebar-submenu .sidebar-link {
+            padding-left: 42px;
+            font-size: 13px;
+        }
+
+        .sidebar-icon {
+            width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        /* 主内容区 */
+        .main-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px;
+            background: #f5f6f8;
+        }
+
+        /* 标签页 */
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid #e8e8e8;
+            background: #fff;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .tab {
+            padding: 16px 24px;
+            font-size: 15px;
+            color: #666;
+            cursor: pointer;
+            position: relative;
+            transition: color 0.2s;
+            border: none;
+            background: transparent;
+        }
+
+        .tab:hover {
+            color: #E60012;
+        }
+
+        .tab.active {
+            color: #333;
+            font-weight: 500;
+        }
+
+        .tab.active::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 24px;
+            right: 24px;
+            height: 2px;
+            background: #E60012;
+            border-radius: 1px;
+        }
+
+        .tab-content {
+            display: none;
+            background: #fff;
+            border-radius: 0 0 8px 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .tab-inner {
+            padding: 24px;
+        }
+
+        .btn {
+            height: 34px;
+            padding: 0 16px;
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+            border: 1px solid #d9d9d9;
+            background: #fff;
+            color: #666;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn:hover {
+            border-color: #E60012;
+            color: #E60012;
+        }
+
+        .btn-primary {
+            background: #E60012;
+            color: #fff;
+            border-color: #E60012;
+        }
+
+        .btn-primary:hover {
+            background: #cc0010;
+            border-color: #cc0010;
+            color: #fff;
+        }
+
+        /* Tag 标签 */
+        .tag {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            line-height: 20px;
+        }
+
+        .tag-green { background: #f6ffed; color: #52c41a; border: 1px solid #b7eb8f; }
+        .tag-blue { background: #e6f7ff; color: #1890ff; border: 1px solid #91d5ff; }
+
+        /* 表单 */
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-title .dot {
+            width: 4px;
+            height: 18px;
+            background: #E60012;
+            border-radius: 2px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(3, 1fr);
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-group label {
+            font-size: 13px;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .form-group input, .form-group select {
+            height: 38px;
+            border: 1px solid #d9d9d9;
+            border-radius: 6px;
+            padding: 0 12px;
+            font-size: 14px;
+            color: #333;
+            outline: none;
+            transition: border-color 0.2s;
+            background: #fff;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            border-color: #E60012;
+        }
+
+        .form-group input[type="password"] {
+            letter-spacing: 2px;
+        }
+
+        .form-group .input-row {
+            display: flex;
+            gap: 8px;
+        }
+
+        .form-group .input-row input {
+            flex: 1;
+        }
+
+        .password-toggle {
+            width: 38px;
+            height: 38px;
+            border: 1px solid #d9d9d9;
+            border-radius: 6px;
+            background: #fff;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #999;
+            transition: all 0.2s;
+        }
+
+        .password-toggle:hover {
+            border-color: #E60012;
+            color: #E60012;
+        }
+
+        .form-section {
+            margin-bottom: 32px;
+            padding: 24px;
+            background: #fafafa;
+            border-radius: 8px;
+            border: 1px solid #f0f0f0;
+        }
+
+        .form-section .section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-bottom: 0;
+        }
+
+        .form-section .section-header .section-title {
+            margin-bottom: 20px;
+        }
+
+        .btn-delete {
+            height: 30px;
+            padding: 0 12px;
+            border-radius: 4px;
+            font-size: 12px;
+            cursor: pointer;
+            border: 1px solid #ffa39e;
+            background: #fff1f0;
+            color: #E60012;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 4px;
+            margin-bottom: 20px;
+            flex-shrink: 0;
+        }
+
+        .btn-delete:hover {
+            background: #E60012;
+            color: #fff;
+            border-color: #E60012;
+        }
+
+        .add-backup-area {
+            margin-top: 16px;
+            padding: 20px;
+            border: 2px dashed #d9d9d9;
+            border-radius: 8px;
+            text-align: center;
+            transition: border-color 0.2s;
+        }
+
+        .add-backup-area:hover {
+            border-color: #E60012;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 12px;
+            padding-top: 20px;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        .form-hint {
+            font-size: 12px;
+            color: #999;
+            margin-top: 4px;
+        }
+
+        /* 测试发送弹窗 */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.45);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal {
+            background: #fff;
+            border-radius: 8px;
+            padding: 24px;
+            width: 780px;
+            max-height: 85vh;
+            overflow-y: auto;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+        }
+
+        .modal h3 {
+            font-size: 16px;
+            margin-bottom: 16px;
+            color: #333;
+        }
+
+        .modal .form-group {
+            margin-bottom: 20px;
+        }
+
+        .modal .form-group textarea {
+            border: 1px solid #d9d9d9;
+            border-radius: 6px;
+            padding: 10px 12px;
+            font-size: 14px;
+            color: #333;
+            outline: none;
+            resize: vertical;
+            font-family: inherit;
+            transition: border-color 0.2s;
+        }
+
+        .modal .form-group textarea:focus {
+            border-color: #E60012;
+        }
+
+        .modal .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+
+        /* 邮件预览卡片 */
+        .email-preview {
+            border: 1px solid #e8e8e8;
+            border-radius: 8px;
+            overflow: hidden;
+            background: #fff;
+            margin-bottom: 20px;
+        }
+
+        .email-preview-header {
+            background: #fafafa;
+            padding: 10px 16px;
+            border-bottom: 1px solid #e8e8e8;
+            font-size: 12px;
+            color: #999;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+        }
+
+        .email-preview-header span {
+            display: flex;
+            gap: 8px;
+        }
+
+        .email-preview-header .ph-label {
+            color: #666;
+            min-width: 40px;
+            text-align: right;
+            flex-shrink: 0;
+        }
+
+        .email-preview-header .ph-value {
+            color: #333;
+            font-weight: 500;
+        }
+
+        .email-preview-body {
+            padding: 20px 24px;
+            font-size: 13px;
+            color: #333;
+            line-height: 1.8;
+            max-height: 320px;
+            overflow-y: auto;
+            background: #fff;
+        }
+
+        .email-preview-body table.report-table {
+            width: 100%;
+            border-collapse: collapse;
+            margin: 12px 0;
+            font-size: 12px;
+        }
+
+        .email-preview-body table.report-table th {
+            background: #f5f5f5;
+            padding: 8px 10px;
+            text-align: center;
+            font-weight: 500;
+            color: #555;
+            border: 1px solid #e8e8e8;
+        }
+
+        .email-preview-body table.report-table td {
+            padding: 7px 10px;
+            text-align: center;
+            border: 1px solid #e8e8e8;
+            color: #333;
+        }
+
+        .email-preview-body .report-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #E60012;
+            text-align: center;
+            margin-bottom: 8px;
+        }
+
+        .email-preview-body .report-subtitle {
+            font-size: 12px;
+            color: #999;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+
+        .email-preview-body .report-section {
+            margin-bottom: 16px;
+        }
+
+        .email-preview-body .report-section h4 {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            padding-left: 8px;
+            border-left: 3px solid #E60012;
+        }
+
+        .status-ok { color: #52c41a; font-weight: 600; }
+        .status-warn { color: #fa8c16; font-weight: 600; }
+        .status-error { color: #E60012; font-weight: 600; }
+
+        .section-divider {
+            border: none;
+            border-top: 1px dashed #e8e8e8;
+            margin: 16px 0;
+        }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            top: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 10px 24px;
+            border-radius: 6px;
+            font-size: 14px;
+            z-index: 2000;
+            animation: fadeInDown 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .toast-success { background: #f6ffed; color: #52c41a; border: 1px solid #b7eb8f; }
+        .toast-error { background: #fff1f0; color: #E60012; border: 1px solid #ffa39e; }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateX(-50%) translateY(-10px); }
+            to { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
+
+        /* 表格 */
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        table thead th {
+            background: #fafafa;
+            padding: 12px 14px;
+            text-align: left;
+            font-weight: 500;
+            color: #666;
+            border-bottom: 1px solid #e8e8e8;
+            white-space: nowrap;
+        }
+
+        table tbody td {
+            padding: 12px 14px;
+            border-bottom: 1px solid #f0f0f0;
+            color: #333;
+        }
+
+        table tbody tr:hover {
+            background: #fff5f5;
+        }
+
+        /* 操作日志 */
+        .audit-log {
+            margin-top: 32px;
+        }
+
+        .audit-log .section-title {
+            margin-bottom: 16px;
+        }
+
+        .last-modified {
+            font-size: 12px;
+            color: #999;
+            padding: 12px 0;
+        }
+
+        /* 操作日志 - 筛选栏 */
+        .filter-bar {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 20px;
+            padding: 16px;
+            background: #fafafa;
+            border-radius: 8px;
+            border: 1px solid #f0f0f0;
+        }
+
+        .filter-bar label {
+            font-size: 13px;
+            color: #666;
+            white-space: nowrap;
+        }
+
+        .filter-bar input, .filter-bar select {
+            height: 32px;
+            border: 1px solid #d9d9d9;
+            border-radius: 4px;
+            padding: 0 10px;
+            font-size: 13px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .filter-bar input:focus, .filter-bar select:focus {
+            border-color: #E60012;
+        }
+
+        .filter-bar input[type="date"] {
+            width: 140px;
+        }
+
+        .filter-bar select {
+            width: 110px;
+        }
+
+        .filter-bar input[type="text"] {
+            width: 160px;
+        }
+
+        .filter-sep {
+            color: #ccc;
+            font-size: 12px;
+        }
+
+        .total-count {
+            font-size: 13px;
+            color: #666;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .total-count strong {
+            color: #E60012;
+            font-size: 16px;
+        }
+
+        /* 分页 */
+        .pagination {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 20px;
+            padding-top: 16px;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        .pagination-pages {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .pagination-btn {
+            height: 30px;
+            min-width: 30px;
+            padding: 0 10px;
+            border-radius: 4px;
+            font-size: 13px;
+            cursor: pointer;
+            border: 1px solid #d9d9d9;
+            background: #fff;
+            color: #666;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .pagination-btn:hover:not(:disabled) {
+            border-color: #E60012;
+            color: #E60012;
+        }
+
+        .pagination-btn.active {
+            background: #E60012;
+            color: #fff;
+            border-color: #E60012;
+        }
+
+        .pagination-btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
+        .pagination-info {
+            font-size: 13px;
+            color: #999;
+        }
+
+        /* 批量变更展开 */
+        .batch-toggle {
+            color: #E60012;
+            cursor: pointer;
+            font-size: 13px;
+            text-decoration: underline;
+            white-space: nowrap;
+        }
+
+        .batch-toggle:hover {
+            color: #cc0010;
+        }
+
+        .batch-detail-pop {
+            position: relative;
+            display: inline-block;
+        }
+
+        .batch-detail-pop .batch-popover {
+            display: none;
+            position: absolute;
+            top: 28px;
+            left: 0;
+            z-index: 100;
+            background: #fff;
+            border: 1px solid #e8e8e8;
+            border-radius: 8px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+            padding: 12px;
+            min-width: 380px;
+        }
+
+        .batch-detail-pop.show .batch-popover {
+            display: block;
+        }
+
+        .batch-popover table {
+            font-size: 12px;
+        }
+
+        .batch-popover table thead th {
+            padding: 6px 12px;
+            font-size: 12px;
+            background: #fafafa;
+        }
+
+        .batch-popover table tbody td {
+            padding: 5px 12px;
+            font-size: 12px;
+        }
+
+        .batch-popover-close {
+            float: right;
+            cursor: pointer;
+            font-size: 16px;
+            color: #999;
+            line-height: 1;
+            border: none;
+            background: transparent;
+        }
+
+        .batch-popover-close:hover {
+            color: #E60012;
+        }
+
+        .batch-popover-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .tag-orange { background: #fff7e6; color: #fa8c16; border: 1px solid #ffd591; }
+
+        .empty-state {
+            text-align: center;
+            padding: 48px 0;
+            color: #999;
+            font-size: 14px;
+        }
+    </style>
+</head>
+<body>
+<div class="app-wrapper">
+    <!-- 顶部导航栏 -->
+    <nav class="navbar">
+        <div class="navbar-left">
+            <span class="logo">MySANY</span>
+            <span style="font-size:12px;color:#999;margin-left:4px;">管理后台</span>
+        </div>
+        <div class="navbar-right">
+            <span class="navbar-item">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                中文
+            </span>
+            <span class="navbar-item">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                admin@sany.com.cn
+            </span>
+        </div>
+    </nav>
+
+    <div class="main-wrapper">
+        <!-- 侧边栏 -->
+        <aside class="sidebar">
+            <ul class="sidebar-menu">
+                <li class="sidebar-item active">
+                    <a class="sidebar-link">
+                        <span class="sidebar-icon">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                        </span>
+                        系统设置
+                    </a>
+                    <ul class="sidebar-submenu">
+                        <li class="sidebar-item active">
+                            <a class="sidebar-link active">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                                邮件服务配置
+                            </a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a class="sidebar-link" href="邮件模版设置.html">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                                邮件模版设置
+                            </a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a class="sidebar-link" href="设备报告触发日志.html">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                                触发日志
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </aside>
+
+        <!-- 主内容 -->
+        <main class="main-content">
+            <!-- 标签页 -->
+            <div class="tabs">
+                <button class="tab active" onclick="switchPage('email')">邮件服务配置</button>
+                <button class="tab" onclick="switchPage('audit')">操作日志</button>
+            </div>
+
+            <!-- ==================== 邮件服务配置页 ==================== -->
+            <div class="tab-content active" id="page-email">
+                <div class="tab-inner">
+                    <!-- 主邮箱通道 -->
+                    <div class="form-section">
+                        <div class="section-title"><span class="dot"></span>主邮箱通道</div>
+                        <div class="form-grid">
+                            <div class="form-group">
+                                <label>SMTP 服务器地址 *</label>
+                                <input type="text" value="smtp.exmail.qq.com" placeholder="SMTP 主机名或 IP">
+                            </div>
+                            <div class="form-group">
+                                <label>端口 *</label>
+                                <input type="number" value="465" placeholder="465">
+                            </div>
+                            <div class="form-group">
+                                <label>加密方式 *</label>
+                                <select>
+                                    <option selected>TLS</option>
+                                    <option>STARTTLS</option>
+                                    <option>无</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label>发件邮箱地址 *</label>
+                                <input type="email" value="noreply@sany.com.cn" placeholder="发件人邮箱">
+                            </div>
+                            <div class="form-group">
+                                <label>发件人名称 *</label>
+                                <input type="text" value="三一设备管理平台" placeholder="收件箱显示名称">
+                            </div>
+                            <div class="form-group">
+                                <label>SMTP 用户名 *</label>
+                                <input type="text" value="noreply@sany.com.cn" placeholder="SMTP 认证账号">
+                            </div>
+                            <div class="form-group">
+                                <label>SMTP 密码 *</label>
+                                <div class="input-row">
+                                    <input type="password" value="" placeholder="SMTP 密码/授权码" id="primary-pwd">
+                                    <button class="password-toggle" onclick="togglePwd('primary-pwd', this)" title="显示/隐藏">👁</button>
+                                </div>
+                                <span class="form-hint">密码不回显，仅输入时覆盖</span>
+                            </div>
+                            <div class="form-group">
+                                <label>每日发送上限 *</label>
+                                <input type="number" value="50000" placeholder="50000">
+                            </div>
+                            <div class="form-group">
+                                <label>连接超时（秒） *</label>
+                                <input type="number" value="5" placeholder="3~15">
+                            </div>
+                            <div class="form-group">
+                                <label>发送超时（秒） *</label>
+                                <input type="number" value="30" placeholder="10~120">
+                            </div>
+                        </div>
+                        <div style="margin-top:16px;">
+                            <button class="btn btn-primary" onclick="testSend('主通道')">主通道测试发送</button>
+                        </div>
+                    </div>
+
+                    <!-- 备用邮箱通道容器 -->
+                    <div id="backup-channels-container">
+                        <!-- 动态生成的备用通道将插入此处 -->
+                    </div>
+
+                    <!-- 添加备用通道按钮 -->
+                    <div class="add-backup-area">
+                        <button class="btn btn-primary" onclick="addBackupChannel()">
+                            + 添加备用邮箱通道
+                        </button>
+                        <div style="font-size:12px;color:#999;margin-top:8px;">可添加多条备用通道，发送失败时按顺序自动切换</div>
+                    </div>
+
+                    <!-- 保存 -->
+                    <div class="form-actions">
+                        <button class="btn btn-primary" style="height:40px;padding:0 32px;font-size:14px;" onclick="saveConfig()">保存配置</button>
+                    </div>
+
+
+                </div>
+            </div>
+
+            <!-- ==================== 操作日志页 ==================== -->
+            <div class="tab-content" id="page-audit">
+                <div class="tab-inner">
+                    <div class="section-title"><span class="dot"></span>操作日志</div>
+
+                    <!-- 筛选栏 -->
+                    <div class="filter-bar">
+                        <label>时间范围</label>
+                        <input type="date" id="audit-date-from" onchange="filterAuditLog()">
+                        <span class="filter-sep">至</span>
+                        <input type="date" id="audit-date-to" onchange="filterAuditLog()">
+                        <label style="margin-left:8px;">操作类型</label>
+                        <select id="audit-optype" onchange="filterAuditLog()">
+                            <option value="">全部</option>
+                            <option value="新建">新建</option>
+                            <option value="修改">修改</option>
+                            <option value="删除">删除</option>
+                        </select>
+                        <label style="margin-left:8px;">操作人</label>
+                        <input type="text" id="audit-operator" placeholder="输入操作人" oninput="filterAuditLog()">
+                        <label style="margin-left:8px;">关键词</label>
+                        <input type="text" id="audit-keyword" placeholder="变更项/变更值搜索" oninput="filterAuditLog()">
+                        <button class="btn" onclick="filterAuditLog()" style="margin-left:auto;">搜索</button>
+                        <button class="btn" onclick="resetAuditFilter()">重置</button>
+                    </div>
+
+                    <!-- 结果计数 -->
+                    <div class="total-count" style="margin-bottom:12px;">
+                        共 <strong id="audit-total">0</strong> 条记录
+                    </div>
+
+                    <!-- 表格 -->
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>时间</th>
+                                    <th>操作人</th>
+                                    <th>IP 地址</th>
+                                    <th>操作类型</th>
+                                    <th>变更项</th>
+                                    <th>变更前</th>
+                                    <th>变更后</th>
+                                </tr>
+                            </thead>
+                            <tbody id="audit-tbody">
+                            </tbody>
+                        </table>
+                        <div class="empty-state" id="audit-empty" style="display:none;">暂无匹配的操作记录</div>
+                    </div>
+
+                    <!-- 分页 -->
+                    <div class="pagination" id="audit-pagination">
+                        <div class="pagination-info">显示第 <span id="audit-range">0-0</span> 条</div>
+                        <div class="pagination-pages" id="audit-page-btns"></div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<!-- 测试发送弹窗 -->
+<div class="modal-overlay" id="test-modal">
+    <div class="modal">
+        <h3 id="test-modal-title">测试发送</h3>
+
+        <!-- 收件人 -->
+        <div class="form-group">
+            <label>收件测试邮箱地址 *</label>
+            <input type="email" placeholder="请输入测试接收邮箱，多个邮箱用 ; 分隔" id="test-email" style="width:100%;">
+        </div>
+
+        <!-- 邮件主题 -->
+        <div class="form-group">
+            <label>邮件主题 *</label>
+            <input type="text" id="test-subject" style="width:100%;" value="三一设备运行日报 - 2026-07-17">
+        </div>
+
+        <!-- 邮件预览 -->
+        <div style="font-size:13px;font-weight:500;color:#666;margin-bottom:8px;">邮件正文预览 - 以下为发送时实际包含的报告内容：</div>
+        <div class="email-preview">
+            <div class="email-preview-header">
+                <span><span class="ph-label">发件人：</span><span class="ph-value" id="ph-from">三一设备管理平台 &lt;noreply@sany.com.cn&gt;</span></span>
+                <span><span class="ph-label">主　题：</span><span class="ph-value" id="ph-subject">三一设备运行日报 - 2026-07-17</span></span>
+            </div>
+            <div class="email-preview-body" id="email-body-preview">
+                <!-- 报告内容由 JS 渲染 -->
+            </div>
+        </div>
+
+        <div class="modal-actions">
+            <button class="btn" onclick="closeTestModal()">取消</button>
+            <button class="btn btn-primary" onclick="doTestSend()">发送测试邮件</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// 页面切换
+function switchPage(page) {
+    document.querySelectorAll('.tab').forEach((t, i) => {
+        t.classList.toggle('active', (page === 'email' && i === 0) || (page === 'audit' && i === 1));
+    });
+    document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+    document.getElementById('page-' + page).classList.add('active');
+}
+
+// 密码切换
+function togglePwd(inputId, btn) {
+    const input = document.getElementById(inputId);
+    if (input.type === 'password') {
+        input.type = 'text';
+        btn.textContent = '🙈';
+    } else {
+        input.type = 'password';
+        btn.textContent = '👁';
+    }
+}
+
+// Toast
+function showToast(msg, type) {
+    const toast = document.createElement('div');
+    toast.className = 'toast toast-' + type;
+    toast.textContent = msg;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 2500);
+}
+
+// 保存配置
+function saveConfig() {
+    showToast('配置已更新，SMTP 连接池已热更新', 'success');
+}
+
+// 测试发送
+let testChannel = '';
+function testSend(channel) {
+    testChannel = channel;
+    document.getElementById('test-modal-title').textContent = channel + ' 测试发送';
+    document.getElementById('test-modal').classList.add('show');
+    // 渲染邮件正文预览
+    renderEmailPreview();
+}
+function closeTestModal() {
+    document.getElementById('test-modal').classList.remove('show');
+    document.getElementById('test-email').value = '';
+    document.getElementById('test-subject').value = '三一设备运行日报 - 2026-07-17';
+}
+function doTestSend() {
+    const email = document.getElementById('test-email').value;
+    const subject = document.getElementById('test-subject').value;
+    if (!email) { showToast('请输入测试邮箱地址', 'error'); return; }
+    if (!subject) { showToast('请输入邮件主题', 'error'); return; }
+    closeTestModal();
+    showToast(testChannel + '测试邮件（主题：' + subject + '）已发送至 ' + email + '，请查收', 'success');
+}
+
+// ==================== 测试邮件正文 - 报告内容定义 ====================
+function renderEmailPreview() {
+    const subject = document.getElementById('test-subject').value || '三一设备运行日报 - 2026-07-17';
+    document.getElementById('ph-subject').textContent = subject;
+
+    // 监听主题变化实时更新预览
+    document.getElementById('test-subject').oninput = function() {
+        document.getElementById('ph-subject').textContent = this.value || '三一设备运行日报 - 2026-07-17';
+    };
+
+    const today = new Date().toISOString().slice(0, 10);
+    const reportHTML = `
+    <div class="report-title">三一设备运行日报</div>
+    <div class="report-subtitle">报告周期：${today} 00:00 - 23:59 ｜ 生成时间：${today} 08:00</div>
+
+    <div class="report-section">
+        <h4>一、总体概况</h4>
+        <p>本期共计监控设备 <strong>3,286</strong> 台，在线设备 <strong>2,941</strong> 台，在线率 <strong>89.5%</strong>。较昨日在线率 <span style="color:#52c41a;">↑ 2.3%</span>。</p>
+    </div>
+
+    <table class="report-table">
+        <thead>
+            <tr>
+                <th>设备类型</th>
+                <th>总数</th>
+                <th>在线数</th>
+                <th>在线率</th>
+                <th>异常数</th>
+                <th>异常率</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>挖掘机</td>
+                <td>1,245</td>
+                <td>1,132</td>
+                <td class="status-ok">91.0%</td>
+                <td>23</td>
+                <td class="status-warn">1.85%</td>
+            </tr>
+            <tr>
+                <td>混凝土机械</td>
+                <td>856</td>
+                <td>781</td>
+                <td class="status-ok">91.2%</td>
+                <td>15</td>
+                <td class="status-warn">1.75%</td>
+            </tr>
+            <tr>
+                <td>起重机</td>
+                <td>532</td>
+                <td>468</td>
+                <td class="status-ok">88.0%</td>
+                <td>18</td>
+                <td class="status-warn">3.38%</td>
+            </tr>
+            <tr>
+                <td>桩工机械</td>
+                <td>298</td>
+                <td>258</td>
+                <td class="status-warn">86.6%</td>
+                <td>11</td>
+                <td class="status-warn">3.69%</td>
+            </tr>
+            <tr>
+                <td>路面机械</td>
+                <td>201</td>
+                <td>172</td>
+                <td class="status-warn">85.6%</td>
+                <td>9</td>
+                <td class="status-error">4.48%</td>
+            </tr>
+            <tr>
+                <td>其他设备</td>
+                <td>154</td>
+                <td>130</td>
+                <td class="status-warn">84.4%</td>
+                <td>8</td>
+                <td class="status-error">5.19%</td>
+            </tr>
+            <tr style="background:#fafafa;font-weight:600;">
+                <td><strong>合计</strong></td>
+                <td><strong>3,286</strong></td>
+                <td><strong>2,941</strong></td>
+                <td><strong>89.5%</strong></td>
+                <td><strong>84</strong></td>
+                <td><strong>2.56%</strong></td>
+            </tr>
+        </tbody>
+    </table>
+
+    <hr class="section-divider">
+
+    <div class="report-section">
+        <h4>二、异常设备明细（Top 5）</h4>
+    </div>
+
+    <table class="report-table">
+        <thead>
+            <tr>
+                <th>序号</th>
+                <th>设备编号</th>
+                <th>设备类型</th>
+                <th>所属工地</th>
+                <th>异常类型</th>
+                <th>异常时长</th>
+                <th>状态</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>1</td>
+                <td>SY20240512003</td>
+                <td>挖掘机 SY485H</td>
+                <td>长沙梅溪湖工地</td>
+                <td>发动机高温报警</td>
+                <td>2h 35min</td>
+                <td class="status-error">未处理</td>
+            </tr>
+            <tr>
+                <td>2</td>
+                <td>SY20250108015</td>
+                <td>混凝土泵车 SY56</td>
+                <td>武汉光谷工地</td>
+                <td>液压系统压力不足</td>
+                <td>1h 48min</td>
+                <td class="status-error">未处理</td>
+            </tr>
+            <tr>
+                <td>3</td>
+                <td>SY20241120042</td>
+                <td>起重机 STC250</td>
+                <td>广州南沙工地</td>
+                <td>回转机构异响</td>
+                <td>45min</td>
+                <td class="status-warn">处理中</td>
+            </tr>
+            <tr>
+                <td>4</td>
+                <td>SY20250308007</td>
+                <td>旋挖钻机 SR285</td>
+                <td>郑州郑东新区</td>
+                <td>GPS 信号丢失</td>
+                <td>3h 12min</td>
+                <td class="status-error">未处理</td>
+            </tr>
+            <tr>
+                <td>5</td>
+                <td>SY20240915029</td>
+                <td>摊铺机 SAP120</td>
+                <td>成都天府新区</td>
+                <td>燃油消耗异常</td>
+                <td>1h 05min</td>
+                <td class="status-warn">处理中</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <hr class="section-divider">
+
+    <div class="report-section">
+        <h4>三、关键指标统计</h4>
+    </div>
+
+    <table class="report-table">
+        <thead>
+            <tr>
+                <th>指标项</th>
+                <th>今日值</th>
+                <th>昨日值</th>
+                <th>环比</th>
+                <th>预警阈值</th>
+                <th>状态</th>
+            </tr>
+        </thead>
+        <tbody>
+            <tr>
+                <td>平均工作时长 (h)</td>
+                <td>7.8</td>
+                <td>7.5</td>
+                <td style="color:#52c41a;">↑ 4.0%</td>
+                <td>&lt; 5h 告警</td>
+                <td class="status-ok">正常</td>
+            </tr>
+            <tr>
+                <td>设备总利用率</td>
+                <td>78.3%</td>
+                <td>76.1%</td>
+                <td style="color:#52c41a;">↑ 2.9%</td>
+                <td>&lt; 60% 告警</td>
+                <td class="status-ok">正常</td>
+            </tr>
+            <tr>
+                <td>平均油耗 (L/h)</td>
+                <td>28.5</td>
+                <td>29.1</td>
+                <td style="color:#52c41a;">↓ 2.1%</td>
+                <td>&gt; 35 告警</td>
+                <td class="status-ok">正常</td>
+            </tr>
+            <tr>
+                <td>故障响应时长 (min)</td>
+                <td>18.2</td>
+                <td>15.6</td>
+                <td style="color:#E60012;">↑ 16.7%</td>
+                <td>&gt; 30min 告警</td>
+                <td class="status-warn">关注</td>
+            </tr>
+            <tr>
+                <td>维修完成率</td>
+                <td>92.5%</td>
+                <td>94.8%</td>
+                <td style="color:#E60012;">↓ 2.4%</td>
+                <td>&lt; 85% 告警</td>
+                <td class="status-ok">正常</td>
+            </tr>
+        </tbody>
+    </table>
+
+    <hr class="section-divider">
+
+    <div class="report-section">
+        <h4>四、关注事项</h4>
+        <p>1. <span class="status-error">【紧急】</span>SY20240512003 发动机高温报警已持续 2h35min，建议立即安排现场检修，避免发动机损坏。</p>
+        <p>2. <span class="status-warn">【关注】</span>故障响应时长环比上升 16.7%，请核实服务团队排班情况。</p>
+        <p>3. <span style="color:#666;">【提示】</span>路面机械在线率 85.6% 低于平均水平，已连续 3 日下降，建议排查区域信号覆盖问题。</p>
+    </div>
+
+    <div style="text-align:center;font-size:11px;color:#bbb;margin-top:24px;padding-top:16px;border-top:1px solid #f0f0f0;">
+        本报告由 MySANY 设备管理平台自动生成 ｜ 如有疑问请联系 admin@sany.com.cn<br>
+        如需退订此报告，请登录平台在个人设置中关闭邮件订阅
+    </div>`;
+
+    document.getElementById('email-body-preview').innerHTML = reportHTML;
+}
+
+// ==================== 备用邮箱通道动态管理 ====================
+let backupChannelIndex = 0;
+
+// 默认初始配置
+const defaultBackupConfig = {
+    smtp: 'smtp.163.com',
+    port: 465,
+    encryption: 'TLS',
+    email: 'noreply-report@sany-backup.com',
+    name: '三一设备管理平台（备）',
+    username: 'noreply-report@sany-backup.com',
+    dailyLimit: 10000,
+    connTimeout: 5,
+    sendTimeout: 30
+};
+
+// 创建单个备用通道 HTML
+function buildBackupChannelHTML(idx, config) {
+    const encTLS = config.encryption === 'TLS' ? 'selected' : '';
+    const encSTARTTLS = config.encryption === 'STARTTLS' ? 'selected' : '';
+    const encNone = config.encryption === '无' ? 'selected' : '';
+
+    return `
+    <div class="form-section" id="backup-channel-${idx}">
+        <div class="section-header">
+            <div class="section-title"><span class="dot"></span>备用通道 ${idx}</div>
+            <button class="btn-delete" onclick="removeBackupChannel(${idx})" title="删除该备用通道">✕ 删除</button>
+        </div>
+        <div class="form-grid">
+            <div class="form-group">
+                <label>SMTP 服务器地址 *</label>
+                <input type="text" value="${config.smtp}" placeholder="SMTP 主机名或 IP">
+            </div>
+            <div class="form-group">
+                <label>端口 *</label>
+                <input type="number" value="${config.port}" placeholder="465">
+            </div>
+            <div class="form-group">
+                <label>加密方式 *</label>
+                <select>
+                    <option ${encTLS}>TLS</option>
+                    <option ${encSTARTTLS}>STARTTLS</option>
+                    <option ${encNone}>无</option>
+                </select>
+            </div>
+            <div class="form-group">
+                <label>发件邮箱地址 *</label>
+                <input type="email" value="${config.email}" placeholder="发件人邮箱">
+            </div>
+            <div class="form-group">
+                <label>发件人名称 *</label>
+                <input type="text" value="${config.name}" placeholder="收件箱显示名称">
+            </div>
+            <div class="form-group">
+                <label>SMTP 用户名 *</label>
+                <input type="text" value="${config.username}" placeholder="SMTP 认证账号">
+            </div>
+            <div class="form-group">
+                <label>SMTP 密码 *</label>
+                <div class="input-row">
+                    <input type="password" value="" placeholder="SMTP 密码/授权码" id="backup-pwd-${idx}">
+                    <button class="password-toggle" onclick="togglePwd('backup-pwd-${idx}', this)" title="显示/隐藏">👁</button>
+                </div>
+                <span class="form-hint">密码不回显，仅输入时覆盖</span>
+            </div>
+            <div class="form-group">
+                <label>每日发送上限 *</label>
+                <input type="number" value="${config.dailyLimit}" placeholder="10000">
+            </div>
+            <div class="form-group">
+                <label>连接超时（秒） *</label>
+                <input type="number" value="${config.connTimeout}" placeholder="3~15">
+            </div>
+            <div class="form-group">
+                <label>发送超时（秒） *</label>
+                <input type="number" value="${config.sendTimeout}" placeholder="10~120">
+            </div>
+        </div>
+        <div style="margin-top:16px;">
+            <button class="btn btn-primary" onclick="testSend('备用通道 ${idx}')">备用通道 ${idx} 测试发送</button>
+        </div>
+    </div>`;
+}
+
+// 添加备用通道
+function addBackupChannel(configOverride) {
+    backupChannelIndex++;
+    const idx = backupChannelIndex;
+    const config = configOverride || { ...defaultBackupConfig };
+    const container = document.getElementById('backup-channels-container');
+    const div = document.createElement('div');
+    div.innerHTML = buildBackupChannelHTML(idx, config);
+    container.appendChild(div.firstElementChild);
+    showToast('已添加备用通道 ' + idx, 'success');
+}
+
+// 删除备用通道
+function removeBackupChannel(idx) {
+    const el = document.getElementById('backup-channel-' + idx);
+    if (el) {
+        el.remove();
+        showToast('已删除备用通道 ' + idx, 'success');
+    }
+}
+
+// 初始化：默认添加 1 条备用通道
+// DOM 加载完成后初始化
+window.addEventListener('DOMContentLoaded', function() {
+    addBackupChannel();
+    initAuditLog();
+});
+
+// ==================== 操作日志 - 数据与逻辑 ====================
+const auditLogData = [
+    // 单条修改
+    { time: '2026-07-17 14:30:25', operator: 'admin@sany.com.cn', ip: '192.168.1.100', type: '修改', item: '主通道 SMTP 地址', before: 'smtp.qq.com', after: 'smtp.exmail.qq.com' },
+    // 批量操作 - 一次添加 3 条备用通道
+    { time: '2026-07-17 11:20:18', operator: 'admin@sany.com.cn', ip: '192.168.1.100', type: '修改',
+        batch: true, itemCount: 3,
+        item: '批量添加备用通道(3项)',
+        before: '—', after: '—',
+        details: [
+            { item: '新增备用通道2 SMTP 服务器', before: '—', after: 'smtp.aliyun.com' },
+            { item: '新增备用通道2 端口/加密', before: '—', after: '465 / TLS' },
+            { item: '新增备用通道3 SMTP 服务器', before: '—', after: 'smtp.126.com' }
+        ]
+    },
+    { time: '2026-07-16 09:15:03', operator: 'admin@sany.com.cn', ip: '192.168.1.100', type: '修改', item: '备用通道启用', before: '—', after: 'smtp.163.com:465' },
+    { time: '2026-07-15 17:42:11', operator: 'admin@sany.com.cn', ip: '192.168.1.100', type: '修改', item: '主通道连接超时', before: '10', after: '5' },
+    { time: '2026-07-15 16:08:33', operator: 'zhangwei@sany.com.cn', ip: '10.0.5.201', type: '修改', item: '主通道发件人名称', before: 'SANY Platform', after: '三一设备管理平台' },
+    // 批量操作 - 一次保存多条配置
+    { time: '2026-07-15 11:22:40', operator: 'admin@sany.com.cn', ip: '192.168.1.100', type: '修改',
+        batch: true, itemCount: 4,
+        item: '批量修改主通道(4项)',
+        before: '—', after: '—',
+        details: [
+            { item: '主通道每日上限', before: '30000', after: '50000' },
+            { item: '主通道发送超时', before: '15', after: '30' },
+            { item: '主通道 SMTP 服务器', before: 'smtp.qq.com', after: 'smtp.exmail.qq.com' },
+            { item: '主通道发件人名称', before: 'SANY Platform', after: '三一设备管理平台' }
+        ]
+    },
+    { time: '2026-07-14 14:55:20', operator: 'admin@sany.com.cn', ip: '192.168.1.100', type: '修改', item: '主通道发件名称', before: 'SANY Platform', after: '三一设备管理平台' },
+    { time: '2026-07-14 08:00:12', operator: 'admin@sany.com.cn', ip: '192.168.1.100', type: '修改', item: '主通道加密方式', before: 'STARTTLS', after: 'TLS' },
+    // 删除操作
+    { time: '2026-07-13 19:30:05', operator: 'admin@sany.com.cn', ip: '192.168.1.100', type: '删除', item: '备用通道2 完整配置', before: 'smtp.aliyun.com:465', after: '—' },
+    // 批量删除 2 条备用通道
+    { time: '2026-07-13 18:10:42', operator: 'admin@sany.com.cn', ip: '192.168.1.100', type: '删除',
+        batch: true, itemCount: 2,
+        item: '批量删除备用通道(2项)',
+        before: '—', after: '—',
+        details: [
+            { item: '删除备用通道3 SMTP 服务器', before: 'smtp.126.com:465', after: '—' },
+            { item: '删除备用通道4 完整配置', before: 'smtp.qq.com:587', after: '—' }
+        ]
+    },
+    { time: '2026-07-13 16:45:30', operator: 'admin@sany.com.cn', ip: '192.168.1.100', type: '新建', item: '初始配置', before: '—', after: '主备通道初始化' },
+    { time: '2026-07-12 15:30:00', operator: 'lisi@sany.com.cn', ip: '10.0.8.55', type: '修改', item: '备用通道每日上限', before: '5000', after: '10000' },
+    { time: '2026-07-12 10:11:22', operator: 'admin@sany.com.cn', ip: '192.168.1.100', type: '修改', item: '主通道端口', before: '587', after: '465' },
+    { time: '2026-07-11 14:22:18', operator: 'wangwu@sany.com.cn', ip: '10.0.3.120', type: '修改', item: '备用通道加密方式', before: '无', after: 'TLS' },
+    // 批量添加 5 条备用通道
+    { time: '2026-07-10 09:45:00', operator: 'admin@sany.com.cn', ip: '192.168.1.100', type: '新建',
+        batch: true, itemCount: 5,
+        item: '批量添加备用通道(5项)',
+        before: '—', after: '—',
+        details: [
+            { item: '新增备用通道2', before: '—', after: 'smtp.aliyun.com:465' },
+            { item: '新增备用通道3', before: '—', after: 'smtp.126.com:465' },
+            { item: '新增备用通道4', before: '—', after: 'smtp.qq.com:587' },
+            { item: '新增备用通道5', before: '—', after: 'smtp.gmail.com:587' },
+            { item: '新增备用通道6', before: '—', after: 'smtp.outlook.com:587' }
+        ]
+    },
+    { time: '2026-07-09 16:30:55', operator: 'zhangwei@sany.com.cn', ip: '10.0.5.201', type: '修改', item: '主通道 SMTP 用户名', before: 'report@sany.com.cn', after: 'noreply@sany.com.cn' },
+    { time: '2026-07-08 11:05:30', operator: 'admin@sany.com.cn', ip: '192.168.1.100', type: '修改', item: '备用通道连接超时', before: '10', after: '5' },
+    { time: '2026-07-07 08:30:00', operator: 'admin@sany.com.cn', ip: '192.168.1.100', type: '新建', item: '备用通道1 初始化', before: '—', after: 'smtp.163.com:465' },
+    { time: '2026-07-06 17:20:11', operator: 'lisi@sany.com.cn', ip: '10.0.8.55', type: '修改', item: '主通道每日上限', before: '20000', after: '50000' },
+    { time: '2026-07-05 13:15:44', operator: 'admin@sany.com.cn', ip: '192.168.1.100', type: '修改', item: '主通道发送超时', before: '30', after: '60' },
+    { time: '2026-07-04 10:40:00', operator: 'wangwu@sany.com.cn', ip: '10.0.3.120', type: '修改', item: '备用通道发件邮箱', before: 'backup@163.com', after: 'noreply-report@sany-backup.com' },
+    { time: '2026-07-02 09:00:00', operator: 'admin@sany.com.cn', ip: '192.168.1.100', type: '修改', item: '主通道启用', before: '—', after: 'smtp.exmail.qq.com:465' },
+    { time: '2026-06-30 16:50:00', operator: 'admin@sany.com.cn', ip: '192.168.1.100', type: '新建', item: '邮件服务初始配置', before: '—', after: '主通道初始化完成' },
+    { time: '2026-06-28 14:20:33', operator: 'zhangwei@sany.com.cn', ip: '10.0.5.201', type: '修改', item: '备用通道发送超时', before: '30', after: '45' },
+    { time: '2026-06-25 11:10:00', operator: 'admin@sany.com.cn', ip: '192.168.1.100', type: '修改', item: '主通道发件邮箱', before: 'admin@sany.com.cn', after: 'noreply@sany.com.cn' }
+];
+
+const auditPageSize = 10;
+let auditCurrentPage = 1;
+let auditFilteredData = [];
+
+function renderAuditLog() {
+    const tbody = document.getElementById('audit-tbody');
+    const empty = document.getElementById('audit-empty');
+    const totalEl = document.getElementById('audit-total');
+    const rangeEl = document.getElementById('audit-range');
+    const pageBtns = document.getElementById('audit-page-btns');
+
+    const total = auditFilteredData.length;
+    const totalPages = Math.ceil(total / auditPageSize);
+    if (auditCurrentPage > totalPages) auditCurrentPage = Math.max(1, totalPages);
+
+    const start = (auditCurrentPage - 1) * auditPageSize;
+    const pageData = auditFilteredData.slice(start, start + auditPageSize);
+
+    totalEl.textContent = total;
+    tbody.innerHTML = '';
+
+    if (total === 0) {
+        empty.style.display = 'block';
+        rangeEl.textContent = '0-0';
+        pageBtns.innerHTML = '';
+        return;
+    }
+
+    empty.style.display = 'none';
+    const end = Math.min(start + auditPageSize, total);
+    rangeEl.textContent = (start + 1) + '-' + end;
+
+    pageData.forEach((row, idx) => {
+        const globalIdx = start + idx;
+        let typeTag = '';
+        if (row.type === '新建') typeTag = '<span class="tag tag-green">新建</span>';
+        else if (row.type === '删除') typeTag = '<span class="tag tag-orange">删除</span>';
+        else typeTag = '<span class="tag tag-blue">修改</span>';
+
+        let itemCell = row.item;
+        let beforeCell = row.before === '—' ? '<span style="color:#ccc;">—</span>' : row.before;
+        let afterCell = row.after === '—' ? '<span style="color:#ccc;">—</span>' : '<span style="color:#E60012">' + row.after + '</span>';
+
+        if (row.batch) {
+            // 批量操作：变更项可点击展开明细
+            itemCell = '<span class="batch-detail-pop" id="batch-pop-' + globalIdx + '">' +
+                '<span class="batch-toggle" onclick="toggleBatchDetail(' + globalIdx + ', event)">' + row.item + ' ▼</span>' +
+                '<div class="batch-popover">' +
+                    '<button class="batch-popover-close" onclick="closeBatchPop(' + globalIdx + ', event)">✕</button>' +
+                    '<div class="batch-popover-title">变更明细（' + row.details.length + '项）</div>' +
+                    '<table>' +
+                        '<thead><tr><th>变更项</th><th>变更前</th><th>变更后</th></tr></thead>' +
+                        '<tbody>' +
+                            row.details.map(d => '<tr><td>' + d.item + '</td>' +
+                                '<td>' + (d.before === '—' ? '<span style="color:#ccc;">—</span>' : d.before) + '</td>' +
+                                '<td style="color:#E60012">' + (d.after === '—' ? '<span style="color:#ccc;">—</span>' : d.after) + '</td></tr>').join('') +
+                        '</tbody>' +
+                    '</table>' +
+                '</div>' +
+            '</span>';
+            beforeCell = '<span class="batch-toggle" onclick="toggleBatchDetail(' + globalIdx + ', event)">查看明细</span>';
+            afterCell = '<span class="batch-toggle" onclick="toggleBatchDetail(' + globalIdx + ', event)">查看明细</span>';
+        }
+
+        tbody.innerHTML += '<tr>' +
+            '<td>' + row.time + '</td>' +
+            '<td>' + row.operator + '</td>' +
+            '<td>' + row.ip + '</td>' +
+            '<td>' + typeTag + '</td>' +
+            '<td>' + itemCell + '</td>' +
+            '<td>' + beforeCell + '</td>' +
+            '<td>' + afterCell + '</td>' +
+        '</tr>';
+    });
+
+    // 渲染分页按钮
+    let pagesHTML = '';
+    pagesHTML += '<button class="pagination-btn" onclick="goAuditPage(' + (auditCurrentPage - 1) + ')"' + (auditCurrentPage <= 1 ? ' disabled' : '') + '>上一页</button>';
+    for (let i = 1; i <= totalPages; i++) {
+        if (totalPages <= 7 || i === 1 || i === totalPages || Math.abs(i - auditCurrentPage) <= 2) {
+            pagesHTML += '<button class="pagination-btn' + (i === auditCurrentPage ? ' active' : '') + '" onclick="goAuditPage(' + i + ')">' + i + '</button>';
+        } else if (i === 2 && auditCurrentPage > 4) {
+            pagesHTML += '<span style="padding:0 4px;color:#ccc;">...</span>';
+        } else if (i === totalPages - 1 && auditCurrentPage < totalPages - 3) {
+            pagesHTML += '<span style="padding:0 4px;color:#ccc;">...</span>';
+        }
+    }
+    pagesHTML += '<button class="pagination-btn" onclick="goAuditPage(' + (auditCurrentPage + 1) + ')"' + (auditCurrentPage >= totalPages ? ' disabled' : '') + '>下一页</button>';
+    pageBtns.innerHTML = pagesHTML;
+}
+
+function filterAuditLog() {
+    const dateFrom = document.getElementById('audit-date-from').value;
+    const dateTo = document.getElementById('audit-date-to').value;
+    const opType = document.getElementById('audit-optype').value;
+    const operator = document.getElementById('audit-operator').value.toLowerCase();
+    const keyword = document.getElementById('audit-keyword').value.toLowerCase();
+
+    auditFilteredData = auditLogData.filter(row => {
+        if (dateFrom && row.time < dateFrom) return false;
+        if (dateTo && row.time > dateTo + ' 23:59:59') return false;
+        if (opType && row.type !== opType) return false;
+        if (operator && !row.operator.toLowerCase().includes(operator)) return false;
+        if (keyword) {
+            const searchStr = (row.item + ' ' + row.before + ' ' + row.after + ' ' + row.operator).toLowerCase();
+            if (row.batch && row.details) {
+                const detailStr = row.details.map(d => d.item + ' ' + d.before + ' ' + d.after).join(' ').toLowerCase();
+                if (!searchStr.includes(keyword) && !detailStr.includes(keyword)) return false;
+            } else {
+                if (!searchStr.includes(keyword)) return false;
+            }
+        }
+        return true;
+    });
+
+    auditCurrentPage = 1;
+    renderAuditLog();
+}
+
+function resetAuditFilter() {
+    document.getElementById('audit-date-from').value = '';
+    document.getElementById('audit-date-to').value = '';
+    document.getElementById('audit-optype').value = '';
+    document.getElementById('audit-operator').value = '';
+    document.getElementById('audit-keyword').value = '';
+    filterAuditLog();
+}
+
+function goAuditPage(page) {
+    const totalPages = Math.ceil(auditFilteredData.length / auditPageSize);
+    if (page < 1 || page > totalPages) return;
+    auditCurrentPage = page;
+    renderAuditLog();
+    document.getElementById('page-audit').querySelector('.table-wrapper').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// 批量明细展开/收起
+let activeBatchPop = null;
+function toggleBatchDetail(globalIdx, event) {
+    event.stopPropagation();
+    const pop = document.getElementById('batch-pop-' + globalIdx);
+    if (!pop) return;
+    if (activeBatchPop && activeBatchPop !== pop) {
+        activeBatchPop.classList.remove('show');
+    }
+    pop.classList.toggle('show');
+    activeBatchPop = pop.classList.contains('show') ? pop : null;
+}
+
+function closeBatchPop(globalIdx, event) {
+    event.stopPropagation();
+    const pop = document.getElementById('batch-pop-' + globalIdx);
+    if (pop) {
+        pop.classList.remove('show');
+        if (activeBatchPop === pop) activeBatchPop = null;
+    }
+}
+
+// 点击其他区域关闭 popover
+document.addEventListener('click', function() {
+    if (activeBatchPop) {
+        activeBatchPop.classList.remove('show');
+        activeBatchPop = null;
+    }
+});
+
+// 页面加载时初始化审计日志
+function initAuditLog() {
+    auditFilteredData = [...auditLogData];
+    renderAuditLog();
+}
+
+</script>
+</body>
+</html>

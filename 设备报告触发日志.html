@@ -1,0 +1,824 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MySANY 管理后台 - 设备报告触发日志</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+            background-color: #f5f6f8;
+            color: #333;
+        }
+
+        .app-wrapper {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .main-wrapper {
+            display: flex;
+            flex: 1;
+        }
+
+        /* 顶部导航栏 */
+        .navbar {
+            height: 50px;
+            background: #fff;
+            border-bottom: 1px solid #e8e8e8;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            flex-shrink: 0;
+        }
+
+        .navbar-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logo {
+            font-size: 20px;
+            font-weight: 700;
+            color: #E60012;
+            letter-spacing: -0.5px;
+        }
+
+        .navbar-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .navbar-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .navbar-item:hover {
+            color: #E60012;
+        }
+
+        .navbar-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #f0f0f0;
+            overflow: hidden;
+        }
+
+        /* 侧边栏 */
+        .sidebar {
+            width: 210px;
+            background: #fff;
+            border-right: 1px solid #e8e8e8;
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            overflow-y: auto;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 8px 0;
+        }
+
+        .sidebar-item {
+            position: relative;
+        }
+
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 16px;
+            font-size: 14px;
+            color: #666;
+            text-decoration: none;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .sidebar-link:hover {
+            color: #E60012;
+            background: #fff5f5;
+        }
+
+        .sidebar-item.active > .sidebar-link,
+        .sidebar-link.active {
+            background: #E60012;
+            color: #fff;
+            font-weight: 500;
+        }
+
+        .sidebar-item.active > .sidebar-link:hover,
+        .sidebar-link.active:hover {
+            background: #cc0010;
+            color: #fff;
+        }
+
+        .sidebar-submenu {
+            list-style: none;
+            padding: 0;
+        }
+
+        .sidebar-submenu .sidebar-link {
+            padding-left: 42px;
+            font-size: 13px;
+        }
+
+        .sidebar-icon {
+            width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        /* 主内容区 */
+        .main-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px;
+            background: #f5f6f8;
+        }
+
+        /* 筛选区 */
+        .filter-bar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            padding: 16px 20px;
+            background: #fafafa;
+            border-radius: 8px;
+            margin-bottom: 16px;
+            flex-wrap: wrap;
+        }
+
+        .filter-bar label {
+            font-size: 13px;
+            color: #666;
+        }
+
+        .filter-bar select, .filter-bar input {
+            height: 34px;
+            border: 1px solid #d9d9d9;
+            border-radius: 6px;
+            padding: 0 10px;
+            font-size: 13px;
+            color: #333;
+            background: #fff;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .filter-bar select:focus, .filter-bar input:focus {
+            border-color: #E60012;
+        }
+
+        .filter-bar input[type="text"] {
+            width: 220px;
+        }
+
+        .btn {
+            height: 34px;
+            padding: 0 16px;
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+            border: 1px solid #d9d9d9;
+            background: #fff;
+            color: #666;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn:hover {
+            border-color: #E60012;
+            color: #E60012;
+        }
+
+        .btn-primary {
+            background: #E60012;
+            color: #fff;
+            border-color: #E60012;
+        }
+
+        .btn-primary:hover {
+            background: #cc0010;
+            border-color: #cc0010;
+            color: #fff;
+        }
+
+        .btn-danger {
+            background: #fff;
+            color: #E60012;
+            border-color: #E60012;
+        }
+
+        .btn-danger:hover {
+            background: #E60012;
+            color: #fff;
+        }
+
+        /* 表格 */
+        .table-wrapper {
+            overflow-x: auto;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        table thead th {
+            background: #fafafa;
+            padding: 12px 14px;
+            text-align: left;
+            font-weight: 500;
+            color: #666;
+            border-bottom: 1px solid #e8e8e8;
+            white-space: nowrap;
+        }
+
+        table tbody td {
+            padding: 12px 14px;
+            border-bottom: 1px solid #f0f0f0;
+            color: #333;
+        }
+
+        table tbody tr:hover {
+            background: #fff5f5;
+        }
+
+        /* Tag 标签 */
+        .tag {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            line-height: 20px;
+        }
+
+        .tag-green { background: #f6ffed; color: #52c41a; border: 1px solid #b7eb8f; }
+        .tag-orange { background: #fff7e6; color: #fa8c16; border: 1px solid #ffd591; }
+        .tag-red { background: #fff1f0; color: #E60012; border: 1px solid #ffa39e; }
+        .tag-blue { background: #e6f7ff; color: #1890ff; border: 1px solid #91d5ff; }
+        .tag-purple { background: #f9f0ff; color: #722ed1; border: 1px solid #d3adf7; }
+        .tag-gray { background: #fafafa; color: #999; border: 1px solid #d9d9d9; }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            top: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 10px 24px;
+            border-radius: 6px;
+            font-size: 14px;
+            z-index: 2000;
+            animation: fadeInDown 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .toast-success { background: #f6ffed; color: #52c41a; border: 1px solid #b7eb8f; }
+        .toast-error { background: #fff1f0; color: #E60012; border: 1px solid #ffa39e; }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateX(-50%) translateY(-10px); }
+            to { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
+
+        /* 抽屉 */
+        .drawer-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.45);
+            z-index: 1000;
+        }
+
+        .drawer-overlay.show {
+            display: block;
+        }
+
+        .drawer {
+            position: fixed;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            width: 720px;
+            background: #fff;
+            box-shadow: -4px 0 16px rgba(0,0,0,0.12);
+            z-index: 1001;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .drawer.show {
+            transform: translateX(0);
+        }
+
+        .drawer-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 24px;
+            border-bottom: 1px solid #e8e8e8;
+            flex-shrink: 0;
+        }
+
+        .drawer-header h3 {
+            font-size: 16px;
+            color: #333;
+        }
+
+        .drawer-close {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: none;
+            background: #f5f5f5;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            color: #999;
+            transition: all 0.2s;
+        }
+
+        .drawer-close:hover {
+            background: #E60012;
+            color: #fff;
+        }
+
+        .drawer-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px;
+        }
+
+        .drawer-section {
+            margin-bottom: 24px;
+        }
+
+        .drawer-section h4 {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 12px;
+            padding-left: 10px;
+            border-left: 3px solid #E60012;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .info-item {
+            font-size: 13px;
+        }
+
+        .info-item .info-label {
+            color: #999;
+            margin-bottom: 2px;
+        }
+
+        .info-item .info-value {
+            color: #333;
+            font-weight: 500;
+        }
+
+        .mini-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        .mini-table th, .mini-table td {
+            padding: 8px 12px;
+            text-align: left;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .mini-table th {
+            background: #fafafa;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .pagination {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 8px;
+            padding: 16px 0 0;
+        }
+
+        .pagination span {
+            font-size: 13px;
+            color: #666;
+        }
+
+        .operate-links a {
+            color: #E60012;
+            cursor: pointer;
+            margin-right: 12px;
+            font-size: 13px;
+            text-decoration: none;
+        }
+
+        .operate-links a:hover {
+            color: #cc0010;
+            text-decoration: underline;
+        }
+
+        .batch-id {
+            font-family: monospace;
+            cursor: pointer;
+            color: #E60012;
+        }
+
+        .batch-id.failed {
+            color: #E60012;
+        }
+
+        /* 统计卡片 */
+        .stat-cards {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+
+        .stat-card .stat-label {
+            font-size: 13px;
+            color: #999;
+            margin-bottom: 8px;
+        }
+
+        .stat-card .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #333;
+        }
+
+    </style>
+</head>
+<body>
+<div class="app-wrapper">
+    <!-- 顶部导航栏 -->
+    <nav class="navbar">
+        <div class="navbar-left">
+            <span class="logo">MySANY</span>
+            <span style="font-size:12px;color:#999;margin-left:4px;">管理后台</span>
+        </div>
+        <div class="navbar-right">
+            <span class="navbar-item">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                中文
+            </span>
+            <span class="navbar-item">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                admin@sany.com.cn
+            </span>
+        </div>
+    </nav>
+
+    <div class="main-wrapper">
+        <!-- 侧边栏 -->
+        <aside class="sidebar">
+            <ul class="sidebar-menu">
+                <li class="sidebar-item active">
+                    <a class="sidebar-link">
+                        <span class="sidebar-icon">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                        </span>
+                        系统设置
+                    </a>
+                    <ul class="sidebar-submenu">
+                        <li class="sidebar-item">
+                            <a class="sidebar-link" href="邮件服务配置.html">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                                邮件服务配置
+                            </a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a class="sidebar-link" href="邮件模版设置.html">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                                邮件模版设置
+                            </a>
+                        </li>
+                        <li class="sidebar-item active">
+                            <a class="sidebar-link active">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                                触发日志
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </aside>
+
+        <!-- 主内容 -->
+        <main class="main-content">
+            <!-- 筛选区 -->
+            <div class="filter-bar">
+                <label>时间范围:</label>
+                <input type="date" value="2026-07-10" style="width:140px;">
+                <span style="color:#999;">~</span>
+                <input type="date" value="2026-07-17" style="width:140px;">
+                <label>报告类型:</label>
+                <select>
+                    <option>全部</option>
+                    <option>单机报告</option>
+                    <option>设备机群报告</option>
+                </select>
+                <label>批次状态:</label>
+                <select>
+                    <option>全部</option>
+                    <option>全部成功</option>
+                    <option>部分失败</option>
+                    <option>全部失败</option>
+                    <option>已跳过</option>
+                </select>
+                <label>触发方式:</label>
+                <select>
+                    <option>全部</option>
+                    <option>定时触发</option>
+                    <option>即时触发</option>
+                    <option>手动重发</option>
+                </select>
+                <label>用户账号:</label>
+                <input type="text" placeholder="输入收件人账号/邮箱..." style="width:200px;">
+                <input type="text" placeholder="搜索批次号/报告名称...">
+                <button class="btn">搜索</button>
+                <button class="btn">重置筛选</button>
+                <button class="btn btn-primary" onclick="exportCSV()">导出 CSV</button>
+            </div>
+
+            <!-- 统计卡片 -->
+            <div class="stat-cards">
+                <div class="stat-card">
+                    <div class="stat-label">总推送批次</div>
+                    <div class="stat-value">1,248</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">成功批次</div>
+                    <div class="stat-value">1,201</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">失败批次</div>
+                    <div class="stat-value">47</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">总投递封数</div>
+                    <div class="stat-value">28,560</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">投递成功率</div>
+                    <div class="stat-value" style="color:#fa8c16;">96.2%</div>
+                </div>
+            </div>
+
+            <!-- 日志列表 -->
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>推送批次号</th>
+                            <th>关联报告</th>
+                            <th>报告类型</th>
+                            <th>触发方式</th>
+                            <th>触发时间</th>
+                            <th>涉及设备</th>
+                            <th>收件人</th>
+                            <th>推送通道</th>
+                            <th>投递结果</th>
+                            <th>批次状态</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="log-table-body">
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="pagination">
+                <span>共 1,248 条</span>
+                <button class="btn">&lt;</button>
+                <button class="btn btn-primary">1</button>
+                <button class="btn">2</button>
+                <button class="btn">3</button>
+                <span>...</span>
+                <button class="btn">63</button>
+                <button class="btn">&gt;</button>
+                <select style="height:34px;border:1px solid #d9d9d9;border-radius:6px;padding:0 8px;font-size:13px;">
+                    <option>20 条/页</option>
+                    <option>50 条/页</option>
+                </select>
+            </div>
+        </main>
+    </div>
+</div>
+
+<!-- 批次详情抽屉 -->
+<div class="drawer-overlay" id="drawer-overlay" onclick="closeDrawer()"></div>
+<div class="drawer" id="batch-drawer">
+    <div class="drawer-header">
+        <h3>批次详情</h3>
+        <button class="drawer-close" onclick="closeDrawer()">✕</button>
+    </div>
+    <div class="drawer-body" id="drawer-body">
+    </div>
+</div>
+
+<script>
+// Toast
+function showToast(msg, type) {
+    const toast = document.createElement('div');
+    toast.className = 'toast toast-' + type;
+    toast.textContent = msg;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 2500);
+}
+
+// CSV 导出
+function exportCSV() {
+    showToast('正在导出 CSV，最多 5000 条', 'success');
+}
+
+// 批次详情抽屉
+function openDrawer(batchId) {
+    const drawer = document.getElementById('batch-drawer');
+    const overlay = document.getElementById('drawer-overlay');
+    const body = document.getElementById('drawer-body');
+
+    const isFailed = batchId.includes('0035') ? false : true;
+    const statusLabel = isFailed ? '部分失败' : '全部成功';
+    const statusTag = isFailed ? 'tag-orange' : 'tag-green';
+
+    body.innerHTML = `
+        <div class="drawer-section">
+            <h4>批次概览</h4>
+            <div class="info-grid">
+                <div class="info-item"><div class="info-label">推送批次号</div><div class="info-value batch-id" onclick="navigator.clipboard.writeText('${batchId}');showToast('已复制','success')">${batchId} 📋</div></div>
+                <div class="info-item"><div class="info-label">关联报告</div><div class="info-value">单机日报（RPT-0042）</div></div>
+                <div class="info-item"><div class="info-label">报告类型</div><div class="info-value"><span class="tag tag-blue">单机报告</span></div></div>
+                <div class="info-item"><div class="info-label">触发方式</div><div class="info-value"><span class="tag tag-purple">定时触发</span></div></div>
+                <div class="info-item"><div class="info-label">触发时间</div><div class="info-value">2026-07-17 08:00:02</div></div>
+                <div class="info-item"><div class="info-label">推送通道</div><div class="info-value">主通道（noreply@sany.com.cn）</div></div>
+                <div class="info-item"><div class="info-label">邮件主题</div><div class="info-value">"单机日报 2026-07-16"</div></div>
+                <div class="info-item"><div class="info-label">批次状态</div><div class="info-value"><span class="tag ${statusTag}">● ${statusLabel}</span></div></div>
+                <div class="info-item"><div class="info-label">完成时间</div><div class="info-value">2026-07-17 08:00:15（耗时 13s）</div></div>
+            </div>
+        </div>
+        <div class="drawer-section">
+            <h4>涉及设备（3 台）</h4>
+            <table class="mini-table">
+                <thead><tr><th>#</th><th>设备编号</th><th>设备名称</th><th>校验状态</th></tr></thead>
+                <tbody>
+                    <tr><td>1</td><td><span style="color:#E60012;cursor:pointer">EX-001</span></td><td>挖掘机 SY350H</td><td><span style="color:#52c41a">✓ 在线正常</span></td></tr>
+                    <tr><td>2</td><td><span style="color:#E60012;cursor:pointer">EX-002</span></td><td>挖掘机 SY500H</td><td><span style="color:#52c41a">✓ 在线正常</span></td></tr>
+                    <tr><td>3</td><td><span style="color:#E60012;cursor:pointer">EX-003</span></td><td>装载机 SL60W</td><td><span style="color:#52c41a">✓ 在线正常</span></td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div class="drawer-section">
+            <h4>收件人投递明细（2 人）</h4>
+            <table class="mini-table">
+                <thead><tr><th>#</th><th>收件人邮箱</th><th>投递状态</th><th>投递时间</th><th>失败原因</th></tr></thead>
+                <tbody id="drawer-recipients">
+                </tbody>
+            </table>
+        </div>
+        ${isFailed ? `
+        <div class="drawer-section">
+            <h4>失败详情</h4>
+            <div style="background:#fff1f0;border:1px solid #ffa39e;border-radius:6px;padding:16px;font-size:13px;">
+                <div style="margin-bottom:12px;"><strong>收件人:</strong> wangwu@sany.com.cn</div>
+                <div style="margin-bottom:4px;"><strong>失败时间:</strong> 2026-07-17 08:00:12</div>
+                <div style="margin-bottom:4px;"><strong>SMTP 返回码:</strong> <span style="color:#E60012">550</span></div>
+                <div style="margin-bottom:4px;"><strong>错误信息:</strong> Mailbox not found / 收件人邮箱不存在</div>
+                <div><strong>重试链路:</strong> 主通道 1 次 → 备用通道 1 次 → 均失败</div>
+            </div>
+        </div>` : ''}
+        <div class="drawer-section">
+            <h4>报告附件</h4>
+            <div style="display:flex;align-items:center;justify-content:space-between;padding:12px;background:#fafafa;border-radius:6px;">
+                <div>
+                    <div style="font-weight:500;">单机日报_2026-07-16.xlsx</div>
+                    <div style="font-size:12px;color:#999;">2.4 MB</div>
+                </div>
+                <button class="btn btn-primary" onclick="showToast('报告下载已开始','success')">下载</button>
+            </div>
+        </div>
+        <div class="drawer-section">
+            <div style="display:flex;gap:12px;">
+                ${isFailed ? '<button class="btn btn-danger" onclick="closeDrawer();showToast(\'已重新入队，将对失败收件人重新推送\',\'success\')" style="height:40px;padding:0 24px;">重发本批次（失败收件人）</button>' : ''}
+            </div>
+        </div>
+    `;
+
+    // Populate recipient data
+    const recipientsBody = document.getElementById('drawer-recipients');
+    if (isFailed) {
+        recipientsBody.innerHTML = `
+            <tr><td>1</td><td>zhangwei@sany.com.cn</td><td><span style="color:#52c41a">✓ 已送达</span></td><td>07-17 08:00:12</td><td>—</td></tr>
+            <tr style="background:#fff1f0"><td>2</td><td>wangwu@sany.com.cn</td><td><span style="color:#E60012">✗ 失败</span></td><td>07-17 08:00:12</td><td>550 Mailbox not found</td></tr>
+        `;
+    } else {
+        recipientsBody.innerHTML = `
+            <tr><td>1</td><td>zhangwei@sany.com.cn</td><td><span style="color:#52c41a">✓ 已送达</span></td><td>07-17 08:00:12</td><td>—</td></tr>
+            <tr><td>2</td><td>liming@sany.com.cn</td><td><span style="color:#52c41a">✓ 已送达</span></td><td>07-17 08:00:15</td><td>—</td></tr>
+        `;
+    }
+
+    drawer.classList.add('show');
+    overlay.classList.add('show');
+}
+
+function closeDrawer() {
+    document.getElementById('batch-drawer').classList.remove('show');
+    document.getElementById('drawer-overlay').classList.remove('show');
+}
+
+// 模拟数据
+const logData = [
+    { batchId:'BATCH-20260717-0035', report:'单机日报', type:'单机报告', trigger:'定时触发', time:'2026-07-17 08:00:02', devices:'3 台', recipients:'2 人', channel:'主通道', result:'成功 2 / 失败 0', status:'ALL_SUCCESS', statusLabel:'全部成功', statusTag:'tag-green' },
+    { batchId:'BATCH-20260717-0034', report:'机群周报', type:'设备机群报告', trigger:'定时触发', time:'2026-07-17 07:00:01', devices:'28 台', recipients:'5 人', channel:'主通道', result:'成功 5 / 失败 0', status:'ALL_SUCCESS', statusLabel:'全部成功', statusTag:'tag-green' },
+    { batchId:'BATCH-20260717-0033', report:'单机日报', type:'单机报告', trigger:'即时触发', time:'2026-07-17 06:30:15', devices:'1 台', recipients:'1 人', channel:'主通道', result:'成功 1 / 失败 0', status:'ALL_SUCCESS', statusLabel:'全部成功', statusTag:'tag-green' },
+    { batchId:'BATCH-20260717-0032', report:'单机日报', type:'单机报告', trigger:'定时触发', time:'2026-07-17 06:00:03', devices:'1 台', recipients:'3 人', channel:'主+备', result:'成功 2 / 失败 1', status:'PARTIAL_FAILED', statusLabel:'部分失败', statusTag:'tag-orange' },
+    { batchId:'BATCH-20260717-0031', report:'机群月报', type:'设备机群报告', trigger:'定时触发', time:'2026-07-17 05:00:01', devices:'56 台', recipients:'8 人', channel:'主通道', result:'成功 8 / 失败 0', status:'ALL_SUCCESS', statusLabel:'全部成功', statusTag:'tag-green' },
+    { batchId:'BATCH-20260717-0030', report:'单机日报', type:'单机报告', trigger:'手动重发', time:'2026-07-16 18:22:40', devices:'1 台', recipients:'1 人', channel:'主通道', result:'成功 1 / 失败 0', status:'ALL_SUCCESS', statusLabel:'全部成功', statusTag:'tag-green' },
+    { batchId:'BATCH-20260716-0029', report:'单机日报', type:'单机报告', trigger:'定时触发', time:'2026-07-16 08:00:02', devices:'1 台', recipients:'2 人', channel:'主通道', result:'成功 0 / 失败 2', status:'ALL_FAILED', statusLabel:'全部失败', statusTag:'tag-red' },
+    { batchId:'BATCH-20260716-0028', report:'单机日报', type:'单机报告', trigger:'定时触发', time:'2026-07-16 08:00:01', devices:'2 台', recipients:'1 人', channel:'—', result:'成功 0 / 跳过 1', status:'SKIPPED_UNBOUND', statusLabel:'已跳过-解绑', statusTag:'tag-gray' },
+    { batchId:'BATCH-20260715-0027', report:'机群周报', type:'设备机群报告', trigger:'定时触发', time:'2026-07-15 07:00:01', devices:'30 台', recipients:'6 人', channel:'备用通道', result:'成功 6 / 失败 0', status:'ALL_SUCCESS', statusLabel:'全部成功', statusTag:'tag-green' },
+    { batchId:'BATCH-20260715-0026', report:'单机日报', type:'单机报告', trigger:'定时触发', time:'2026-07-15 06:00:05', devices:'1 台', recipients:'2 人', channel:'主通道', result:'成功 2 / 失败 0', status:'ALL_SUCCESS', statusLabel:'全部成功', statusTag:'tag-green' },
+];
+
+function renderLogTable() {
+    const tbody = document.getElementById('log-table-body');
+    tbody.innerHTML = logData.map(row => `
+        <tr>
+            <td><span class="batch-id${row.status === 'ALL_FAILED' ? ' failed' : ''}" onclick="navigator.clipboard.writeText('${row.batchId}');showToast('已复制','success')">${row.batchId} 📋</span></td>
+            <td>${row.report}</td>
+            <td><span class="tag tag-blue">${row.type}</span></td>
+            <td><span class="tag ${row.trigger === '定时触发' ? 'tag-purple' : row.trigger === '即时触发' ? 'tag-blue' : 'tag-orange'}">${row.trigger}</span></td>
+            <td>${row.time}</td>
+            <td title="${row.devices}">${row.devices}</td>
+            <td>${row.recipients}</td>
+            <td><span class="tag ${row.channel === '主通道' ? 'tag-blue' : row.channel === '备用通道' ? 'tag-orange' : row.channel === '主+备' ? 'tag-purple' : 'tag-gray'}">${row.channel}</span></td>
+            <td style="${row.result.includes('失败') && !row.result.includes('失败 0') ? 'color:#E60012;font-weight:500' : ''}">${row.result}</td>
+            <td><span class="tag ${row.statusTag}">${row.statusLabel}</span></td>
+            <td>
+                <span class="operate-links">
+                    <a onclick="openDrawer('${row.batchId}')">查看详情</a>
+                    ${row.status === 'ALL_FAILED' || row.status === 'PARTIAL_FAILED' ? '<a onclick="showToast(\'已重新入队，将对失败收件人重新推送\',\'success\')">重发失败</a>' : ''}
+                </span>
+            </td>
+        </tr>
+    `).join('');
+}
+
+// 初始化
+renderLogTable();
+</script>
+
+</body>
+</html>

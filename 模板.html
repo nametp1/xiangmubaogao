@@ -1,0 +1,1622 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>报告模板</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+            background-color: #f5f6f8;
+            color: #333;
+        }
+
+        .app-wrapper {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .main-wrapper {
+            display: flex;
+            flex: 1;
+        }
+
+        /* 顶部导航栏 */
+        .navbar {
+            height: 50px;
+            background: #fff;
+            border-bottom: 1px solid #e8e8e8;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            flex-shrink: 0;
+        }
+
+        .navbar-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logo {
+            font-size: 20px;
+            font-weight: 700;
+            color: #E60012;
+            letter-spacing: -0.5px;
+        }
+
+        .navbar-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .navbar-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .navbar-item:hover {
+            color: #E60012;
+        }
+
+        .navbar-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #f0f0f0;
+            overflow: hidden;
+        }
+
+        /* 侧边栏 */
+        .sidebar {
+            width: 210px;
+            background: #fff;
+            border-right: 1px solid #e8e8e8;
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            overflow-y: auto;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 8px 0;
+        }
+
+        .sidebar-item {
+            position: relative;
+        }
+
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 16px;
+            font-size: 14px;
+            color: #666;
+            text-decoration: none;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .sidebar-link:hover {
+            color: #E60012;
+            background: #fff5f5;
+        }
+
+        .sidebar-item.active > .sidebar-link,
+        .sidebar-link.active {
+            background: #E60012;
+            color: #fff;
+            font-weight: 500;
+        }
+
+        .sidebar-item.active > .sidebar-link:hover,
+        .sidebar-link.active:hover {
+            background: #cc0010;
+            color: #fff;
+        }
+
+        .sidebar-submenu {
+            list-style: none;
+            padding: 0;
+        }
+
+        .sidebar-submenu .sidebar-link {
+            padding-left: 42px;
+            font-size: 13px;
+        }
+
+        .sidebar-icon {
+            width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        /* 主内容区 */
+        .main-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px;
+            background: #f5f6f8;
+        }
+
+        .container {
+            max-width: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        .page-card {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            overflow: hidden;
+        }
+
+        /* 顶部标签页 */
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid #e8e8e8;
+        }
+
+        .tab {
+            padding: 16px 24px;
+            font-size: 15px;
+            color: #666;
+            cursor: pointer;
+            position: relative;
+            transition: color 0.2s;
+            text-decoration: none;
+        }
+
+        .tab:hover {
+            color: #E60012;
+        }
+
+        .tab.active {
+            color: #333;
+            font-weight: 500;
+        }
+
+        .tab.active::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background-color: #E60012;
+        }
+
+        /* 工具栏 */
+        .toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 24px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .toolbar-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .search-box {
+            display: flex;
+            align-items: center;
+            border: 1px solid #d9d9d9;
+            border-radius: 4px;
+            padding: 0 12px;
+            height: 32px;
+            width: 280px;
+            transition: border-color 0.2s;
+        }
+
+        .search-box:focus-within {
+            border-color: #E60012;
+        }
+
+        .search-box svg {
+            color: #999;
+            margin-right: 8px;
+            flex-shrink: 0;
+        }
+
+        .search-box input {
+            border: none;
+            outline: none;
+            font-size: 13px;
+            width: 100%;
+            color: #333;
+        }
+
+        .search-box input::placeholder {
+            color: #bfbfbf;
+        }
+
+        .toolbar-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .view-toggle {
+            display: flex;
+            border: 1px solid #d9d9d9;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .view-toggle button {
+            padding: 6px 12px;
+            font-size: 13px;
+            border: none;
+            background: #fff;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .view-toggle button.active {
+            background: #595959;
+            color: #fff;
+        }
+
+        .view-toggle button:not(.active):hover {
+            color: #E60012;
+        }
+
+        /* ====== 列表视图 ====== */
+        .dim-list-view {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+            padding: 24px;
+        }
+
+        .dim-list-item {
+            display: flex;
+            align-items: center;
+            padding: 16px 20px;
+            background: #fff;
+            border-bottom: 1px solid #f0f0f0;
+            transition: background 0.15s;
+            gap: 16px;
+        }
+
+        .dim-list-item:hover {
+            background: #fafafa;
+        }
+
+        .dim-list-item .list-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .dim-list-item .list-icon svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .dim-list-item .list-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .dim-list-item .list-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 2px;
+        }
+
+        .dim-list-item .list-desc {
+            font-size: 12px;
+            color: #999;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .dim-list-item .list-fields {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            flex: 1;
+            min-width: 0;
+            justify-content: center;
+        }
+
+        .dim-list-item .list-actions {
+            display: flex;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        /* 模板网格 */
+        .template-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 24px;
+            padding: 24px;
+        }
+
+
+
+        .template-card {
+            background: #fff;
+            border: 1px solid #e8e8e8;
+            border-radius: 8px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            transition: box-shadow 0.2s, border-color 0.2s;
+        }
+
+        .template-card:hover {
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+            border-color: #d9d9d9;
+        }
+
+        .template-card-header {
+            margin-bottom: 12px;
+        }
+
+        .template-card-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 12px;
+            line-height: 1.4;
+        }
+
+        .template-card-desc {
+            font-size: 13px;
+            color: #999;
+            line-height: 1.6;
+            display: -webkit-box;
+            -webkit-line-clamp: 4;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .template-card-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 24px;
+        }
+
+        .btn-link {
+            font-size: 13px;
+            color: #E60012;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+            transition: opacity 0.2s;
+        }
+
+        .btn-link:hover {
+            opacity: 0.8;
+            text-decoration: underline;
+        }
+
+        .btn-primary {
+            background: #E60012;
+            border: none;
+            border-radius: 4px;
+            padding: 0 16px;
+            height: 32px;
+            font-size: 13px;
+            font-weight: 500;
+            color: #fff;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-primary:hover {
+            background: #cc0010;
+        }
+
+        /* 空状态 */
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 80px 24px;
+            color: #999;
+        }
+
+        .empty-illustration {
+            width: 120px;
+            height: 120px;
+            margin-bottom: 16px;
+            opacity: 0.6;
+        }
+
+        .empty-text {
+            font-size: 14px;
+            color: #999;
+        }
+
+        /* 预览弹窗 */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.65);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 40px 24px;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: #fff;
+            border-radius: 8px;
+            width: 100%;
+            max-width: 1100px;
+            max-height: 92vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 12px 48px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 28px;
+            border-bottom: 1px solid #e8e8e8;
+            flex-shrink: 0;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .modal-close {
+            width: 36px;
+            height: 36px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #999;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .modal-close:hover {
+            color: #333;
+            background: #f5f5f5;
+        }
+
+        .modal-body {
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .modal-footer {
+            padding: 12px 24px;
+            border-top: 1px solid #f0f0f0;
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            flex-shrink: 0;
+        }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            height: 32px;
+            padding: 0 16px;
+            font-size: 13px;
+            border-radius: 4px;
+            border: 1px solid #d9d9d9;
+            background: #fff;
+            color: #333;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn:hover { border-color: #E60012; color: #E60012; }
+        .btn-primary {
+            background: #E60012;
+            border-color: #E60012;
+            color: #fff;
+        }
+        .btn-primary:hover { background: #cc0010; border-color: #cc0010; color: #fff; }
+
+        /* 邮件预览区 */
+        .email-preview {
+            border: none;
+            background: #f9f9fb;
+        }
+        .email-preview-header {
+            background: #f5f5f5;
+            padding: 12px 20px;
+            font-size: 12px;
+            color: #999;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            border-bottom: 1px solid #e8e8e8;
+        }
+        .email-preview-header .ph-row {
+            display: flex;
+            gap: 8px;
+        }
+        .email-preview-header .ph-label {
+            color: #666;
+            min-width: 48px;
+            text-align: right;
+            flex-shrink: 0;
+        }
+        .email-preview-header .ph-value {
+            color: #333;
+            font-weight: 500;
+        }
+        .email-preview-body {
+            padding: 24px 28px;
+            font-size: 13px;
+            color: #333;
+            line-height: 1.8;
+            max-height: 480px;
+            overflow-y: auto;
+            background: #fff;
+        }
+        .email-preview-body .report-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #E60012;
+            text-align: center;
+            margin-bottom: 6px;
+        }
+        .email-preview-body .report-subtitle {
+            font-size: 12px;
+            color: #999;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .email-preview-body .report-section {
+            margin-bottom: 16px;
+        }
+        .email-preview-body .report-section h4 {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            padding-left: 8px;
+            border-left: 3px solid #E60012;
+        }
+        .email-preview-body table {
+            width: 100%;
+            margin: 12px 0;
+            font-size: 12px;
+            border-collapse: collapse;
+        }
+        .email-preview-body table th {
+            background: #f5f5f5;
+            padding: 8px 10px;
+            text-align: center;
+            font-weight: 500;
+            color: #555;
+            border: 1px solid #e8e8e8;
+        }
+        .email-preview-body table td {
+            padding: 7px 10px;
+            text-align: center;
+            border: 1px solid #e8e8e8;
+            color: #333;
+        }
+        .email-footer {
+            margin-top: 20px;
+            padding-top: 12px;
+            border-top: 1px solid #f0f0f0;
+            font-size: 11px;
+            color: #bbb;
+            text-align: center;
+            line-height: 1.8;
+        }
+
+        /* 报告头部信息 */
+        .report-header {
+            background: #fafafa;
+            padding: 20px 28px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .report-header-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 12px;
+        }
+
+        .report-header-meta {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 8px 32px;
+        }
+
+        .report-meta-item {
+            display: flex;
+            gap: 8px;
+            font-size: 13px;
+        }
+
+        .report-meta-label {
+            color: #999;
+            white-space: nowrap;
+        }
+
+        .report-meta-value {
+            color: #333;
+        }
+
+        /* 预览表格区域 */
+        .preview-table-wrap {
+            padding: 0;
+            overflow-x: auto;
+        }
+
+        .preview-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            min-width: 800px;
+        }
+
+        .preview-table thead th {
+            background: #fafafa;
+            color: #666;
+            text-align: left;
+            padding: 14px 16px;
+            border-bottom: 1px solid #e8e8e8;
+            font-weight: 500;
+            white-space: nowrap;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+
+        .preview-table tbody td {
+            padding: 12px 16px;
+            border-bottom: 1px solid #f0f0f0;
+            color: #333;
+        }
+
+        .preview-table tbody tr:hover {
+            background: #fafafa;
+        }
+
+        .preview-table .group-header-row th.group-header {
+            background: #e6f0ff;
+            color: #1a6de0;
+            font-size: 12px;
+            font-weight: 600;
+            text-align: center;
+            padding: 8px 4px;
+            border-bottom: 2px solid #bdd7f5;
+            letter-spacing: 1px;
+        }
+
+        .preview-table .summary-row {
+            background: #f9fafb;
+        }
+
+        .preview-table .summary-row td {
+            padding: 8px 16px;
+            border-bottom: 2px solid #e8e8e8;
+            font-size: 12px;
+        }
+
+        .preview-table .summary-row td strong {
+            color: #333;
+        }
+
+        .preview-table .col-name {
+            color: #E60012;
+            font-weight: 500;
+        }
+
+        .preview-table .col-asset {
+            color: #E60012;
+            font-weight: 500;
+        }
+
+        .preview-table .cell-tag {
+            display: inline-block;
+            padding: 0 6px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        .preview-table .cell-tag.good { background: #f6ffed; color: #52c41a; }
+        .preview-table .cell-tag.warn { background: #fff7e6; color: #fa8c16; }
+        .preview-table .cell-tag.bad  { background: #fff2f0; color: #ff4d4f; }
+
+        .tag {
+            display: inline-block;
+            padding: 1px 8px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .tag-green {
+            background: #f6ffed;
+            color: #52c41a;
+            border: 1px solid #b7eb8f;
+        }
+
+        .tag-red {
+            background: #fff2f0;
+            color: #ff4d4f;
+            border: 1px solid #ffccc7;
+        }
+
+        .tag-blue {
+            background: #e6f7ff;
+            color: #E60012;
+            border: 1px solid #91d5ff;
+        }
+
+        .tag-orange {
+            background: #fff7e6;
+            color: #fa8c16;
+            border: 1px solid #ffd591;
+        }
+
+        /* 模板分类区块 */
+        .template-section {
+            padding: 24px 24px 0;
+        }
+
+        .template-section:last-child {
+            padding-bottom: 24px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .section-badge {
+            display: inline-block;
+            padding: 2px 12px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .badge-single {
+            background: #e6f7ff;
+            color: #E60012;
+            border: 1px solid #91d5ff;
+        }
+
+        .badge-fleet {
+            background: #fff7e6;
+            color: #fa8c16;
+            border: 1px solid #ffd591;
+        }
+
+        .section-desc {
+            font-size: 13px;
+            color: #999;
+            margin-bottom: 16px;
+        }
+
+        .template-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 24px;
+        }
+
+        .type-tag {
+            display: inline-block;
+            padding: 1px 8px;
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: 500;
+            margin-left: 8px;
+            vertical-align: middle;
+        }
+
+        .type-tag.single {
+            background: #e6f7ff;
+            color: #E60012;
+            border: 1px solid #91d5ff;
+        }
+
+        .type-tag.fleet {
+            background: #fff7e6;
+            color: #fa8c16;
+            border: 1px solid #ffd591;
+        }
+
+        .unified-fields {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px 8px;
+            margin-top: 10px;
+        }
+
+        .field-chip {
+            font-size: 11px;
+            color: #8c8c8c;
+            background: #fafafa;
+            border: 1px solid #f0f0f0;
+            border-radius: 3px;
+            padding: 1px 6px;
+        }
+
+        /* 单机/机群 切换 Tab */
+        .report-type-tabs {
+            display: flex;
+            gap: 0;
+            padding: 0 24px;
+            border-bottom: 1px solid #f0f0f0;
+            background: #fff;
+        }
+
+        .report-type-tab {
+            padding: 10px 20px;
+            font-size: 14px;
+            color: #666;
+            cursor: pointer;
+            position: relative;
+            transition: color 0.2s;
+            border: none;
+            background: none;
+        }
+
+        .report-type-tab:hover {
+            color: #E60012;
+        }
+
+        .report-type-tab.active {
+            color: #E60012;
+            font-weight: 600;
+        }
+
+        .report-type-tab.active::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background: #E60012;
+        }
+
+        /* 维度分组区块 */
+        .dimension-section {
+            padding: 24px 24px 0;
+        }
+
+        .dimension-section:last-child {
+            padding-bottom: 24px;
+        }
+
+        .dimension-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .dimension-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .dim-icon-run    { background: #e6f7ff; color: #1890ff; }
+        .dim-icon-energy { background: #fff7e6; color: #fa8c16; }
+        .dim-icon-alarm  { background: #fff2f0; color: #ff4d4f; }
+        .dim-icon-idle   { background: #f6ffed; color: #52c41a; }
+        .dim-icon-gear   { background: #f9f0ff; color: #722ed1; }
+        .dim-icon-summary{ background: #fff0f6; color: #eb2f96; }
+
+        .dimension-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .dimension-desc {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .dimension-fields {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px 6px;
+            margin-left: auto;
+        }
+
+        .dimension-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 20px;
+        }
+
+        .template-card.dim-card {
+            padding: 20px;
+        }
+
+        .template-card.dim-card .template-card-title {
+            font-size: 15px;
+            margin-bottom: 8px;
+        }
+
+        .template-card.dim-card .template-card-desc {
+            font-size: 12px;
+            -webkit-line-clamp: 3;
+        }
+
+        .template-card.dim-card .unified-fields {
+            margin-top: 8px;
+        }
+
+        .template-card.dim-card .template-card-footer {
+            margin-top: 16px;
+        }
+
+        /* ====== 统一网格卡片（无分组标题） ====== */
+        .dim-cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            padding: 24px;
+        }
+
+        .dim-card-unified {
+            position: relative;
+            background: #fff;
+            border-radius: 12px;
+            overflow: hidden;
+            transition: box-shadow 0.25s, transform 0.25s;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+            border: 1px solid #f0f0f0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .dim-card-unified:hover {
+            box-shadow: 0 6px 24px rgba(0,0,0,0.10);
+            transform: translateY(-2px);
+        }
+
+        .dim-card-unified .card-accent {
+            height: 4px;
+            border-radius: 0;
+        }
+
+        .accent-run     { background: linear-gradient(90deg, #1890ff, #69c0ff); }
+        .accent-energy  { background: linear-gradient(90deg, #fa8c16, #ffc069); }
+        .accent-alarm   { background: linear-gradient(90deg, #ff4d4f, #ff7875); }
+        .accent-idle    { background: linear-gradient(90deg, #52c41a, #95de64); }
+        .accent-gear    { background: linear-gradient(90deg, #722ed1, #b37feb); }
+        .accent-summary { background: linear-gradient(90deg, #eb2f96, #ff85c0); }
+
+        .dim-card-unified .card-body {
+            padding: 20px 20px 16px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .dim-card-unified .card-head-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .dim-card-unified .card-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .dim-card-unified .card-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: #222;
+        }
+
+        .dim-card-unified .card-subtitle {
+            font-size: 11px;
+            color: #999;
+            margin-top: 1px;
+        }
+
+        .dim-card-unified .card-desc {
+            font-size: 12px;
+            color: #777;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+
+        .dim-card-unified .fields-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: auto;
+        }
+
+        .dim-card-unified .field-chip {
+            display: inline-block;
+            padding: 3px 8px;
+            font-size: 11px;
+            border-radius: 4px;
+            background: #f5f5f5;
+            color: #666;
+        }
+
+        .dim-card-unified .card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 20px;
+            border-top: 1px solid #f5f5f5;
+            background: #fafafa;
+        }
+
+        .dim-card-unified .type-badge {
+            font-size: 11px;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-weight: 500;
+        }
+
+        .badge-single { background: #e6f7ff; color: #1890ff; }
+        .badge-fleet  { background: #fff7e6; color: #fa8c16; }
+    </style>
+
+</head>
+<body>
+    <div class="app-wrapper">
+        <nav class="navbar">
+            <div class="navbar-left">
+                <span class="logo">MySANY</span>
+            </div>
+            <div class="navbar-right">
+                <div class="navbar-item">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+                    简体中文
+                </div>
+                <div class="navbar-item">
+                    <span>童鹏</span>
+                    <div class="navbar-avatar"></div>
+                </div>
+            </div>
+        </nav>
+        <div class="main-wrapper">
+            <aside class="sidebar">
+                <ul class="sidebar-menu">
+                    <li class="sidebar-item">
+                        <a class="sidebar-link">
+                            <span class="sidebar-icon">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect></svg>
+                            </span>
+                            设备管理
+                        </a>
+                    </li>
+                    <li class="sidebar-item">
+                        <a class="sidebar-link">
+                            <span class="sidebar-icon">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"></path><path d="M18 17V9"></path><path d="M13 17V5"></path><path d="M8 17v-3"></path></svg>
+                            </span>
+                            数据大屏
+                        </a>
+                    </li>
+                    <li class="sidebar-item active">
+                        <a class="sidebar-link">
+                            <span class="sidebar-icon">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+                            </span>
+                            项目管理
+                        </a>
+                        <ul class="sidebar-submenu">
+                            <li class="sidebar-item"><a class="sidebar-link" href="javascript:;">项目管理</a></li>
+                            <li class="sidebar-item active"><a class="sidebar-link active" href="设备报告.html">设备报告</a></li>
+                        </ul>
+                    </li>
+                    <li class="sidebar-item">
+                        <a class="sidebar-link">
+                            <span class="sidebar-icon">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                            </span>
+                            设备保养
+                        </a>
+                    </li>
+                    <li class="sidebar-item">
+                        <a class="sidebar-link">
+                            <span class="sidebar-icon">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
+                            </span>
+                            维修管理
+                        </a>
+                    </li>
+                </ul>
+            </aside>
+            <main class="main-content">
+                <div class="container">
+                    <div class="page-card">
+            <!-- 顶部标签页 -->
+            <div class="tabs">
+                <a href="设备报告.html" class="tab">管理报告</a>
+                <a href="模板.html" class="tab active">模板</a>
+            </div>
+
+            <!-- 工具栏 -->
+            <div class="toolbar">
+                <div class="toolbar-left">
+                    <div class="search-box">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <path d="m21 21-4.35-4.35"></path>
+                        </svg>
+                        <input type="text" placeholder="搜索模板" id="templateSearch">
+                    </div>
+                </div>
+                <div class="toolbar-right">
+                    <div class="view-toggle">
+                        <button class="active" title="网格视图">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="3" width="7" height="7"></rect>
+                                <rect x="14" y="3" width="7" height="7"></rect>
+                                <rect x="3" y="14" width="7" height="7"></rect>
+                                <rect x="14" y="14" width="7" height="7"></rect>
+                            </svg>
+                        </button>
+                        <button title="列表视图">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="3" y1="6" x2="21" y2="6"></line>
+                                <line x1="3" y1="12" x2="21" y2="12"></line>
+                                <line x1="3" y1="18" x2="21" y2="18"></line>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div class="report-type-tabs" id="reportTypeTabs">
+                <button class="report-type-tab active" data-type="single">单机报告模板</button>
+                <button class="report-type-tab" data-type="fleet">机群报告模板</button>
+            </div>
+
+            <div id="templateContent">
+                <div class="empty-state"><div class="empty-text">加载中...</div></div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- 预览弹窗 -->
+    <div class="modal-overlay" id="previewModal">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">模板预览效果</div>
+                <button class="modal-close" id="previewClose" title="关闭">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body" style="padding:0;">
+                <div class="preview-table-wrap" id="previewTableContainer" style="padding:16px 24px 20px;">
+                    <div style="text-align:center;color:#bbb;padding:60px 0">正在加载预览...</div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn" onclick="closePreviewModal()">关闭</button>
+                <button class="btn btn-primary" onclick="closePreviewModal();alert('已选择此模板，请在管理报告中添加报告时使用')">使用该模板</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ====================================================================
+        // 五大维度定义（单机 + 机群各有对应模板）
+        // ====================================================================
+        const dimensions = [
+            {
+                key: 'summary', name: '综合报告', icon: 'summary', isSummary: true,
+                svg: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>',
+                desc: '涵盖运行、能耗、告警、闲置、挡位全部统计指标的综合视图',
+                fields: ['开工天数','发动机运行时长','实际操作时长','无动作时长','总能耗/油耗','油耗/小时','挡位','预警'],
+                fleetFields: ['开工天数','发动机运行时长','总能耗/油耗','挡位','预警','闲置'],
+                // 卡片精简列
+                demoCols: ['资产编号','资产名称','日期/周期','开工天数(d)','运行时长(h)','能耗(L)','预警','挡位(1-11挡)'],
+                fleetCols: ['设备编号','开工天数(d)','发动机工时(h)','油耗(L)','挡位汇总','预警'],
+                // 弹窗统一完整列
+                fullUnifiedCols: ['报告类型','统计时间','设备编号','资产名称','开工天数(天)','发动机运行时长(h)','实际操作时长(h)','无动作时长(h)','总能耗/油耗(L)','油耗/小时(L/h)','挡位(1-11挡)','预警类型','预警次数'],
+                // 卡片精简数据
+                singleRows: [
+                    ['F3S01395','挖掘机0102','2026-07-21','—','0.50','2.84','0','1挡0.02h-11挡0.30h'],
+                    ['F3S01395','挖掘机0102','2026-07-19~07-25','2','1.77','—','1','1-11挡共1.45h'],
+                    ['F3S01395','挖掘机0102','2026-07-01~07-31','13','53.72','—','2','1-11挡共35.35h']
+                ],
+                fleetRows: [
+                    ['挖掘机0102','13','53.72','2.84','共35.35h（1-11挡）','油位低:2次'],
+                    ['挖掘机0103','10','48.15','—','共28.60h（1-11挡）','—'],
+                    ['挖掘机0105','12','90.63','—','共62.10h（1-11挡）','水温高:1次']
+                ],
+                // 弹窗统一完整数据
+                fullSingleRows: [
+                    ['单机','日报 07-21','F3S01395','挖掘机0102','—','0.50','0.42','0.08','2.84','5.68','—','0','1挡0.02h、2挡0.04h、10挡0.02h、11挡0.30h'],
+                    ['单机','周报 07-19~07-25','F3S01395','挖掘机0102','2','1.77','1.68','0.09','—','—','油位低','1','1挡0.02h、2挡0.04h、5挡0.04h、7挡0.08h、10挡0.02h、11挡1.25h'],
+                    ['单机','月报 07-01~07-31','F3S01395','挖掘机0102','13','53.72','52.66','1.06','—','—','油位低','2','1挡1.20h、2挡0.04h、5挡0.04h、6挡0.37h、7挡0.09h、8挡0.62h、9挡0.10h、10挡11.20h、11挡21.75h']
+                ],
+                fullFleetRows: [
+                    ['机群','月报 07-01~07-31','挖掘机0102','挖掘机0102','13','53.72','—','1.06','2.84','—','共35.35h（1-11挡）','油位低','2'],
+                    ['机群','月报 07-01~07-31','挖掘机0103','挖掘机0103','10','48.15','—','2.35','—','—','共28.60h（1-11挡）','—','0'],
+                    ['机群','月报 07-01~07-31','挖掘机0105','挖掘机0105','12','90.63','—','0.82','—','—','共62.10h（1-11挡）','水温高','1']
+                ]
+            },
+            {
+                key: 'run', name: '运行报告', icon: 'run',
+                svg: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><polyline points="12 6 12 12 16 14"/></svg>',
+                desc: '开工天数、发动机运行时长、实际操作时长',
+                fields: ['开工天数','发动机运行时长','实际操作时长'],
+                demoCols: ['资产编号','资产名称','日期/周期','开工天数(天)','发动机运行时长(h)','实际操作时长(h)'],
+                fleetCols: ['设备编号','开工天数(天)','发动机运行时长(h)'],
+                fleetFields: ['开工天数','发动机运行时长'],
+                singleRows: [
+                    ['F3S01395','挖掘机0102','2026-07-21','—','0.50','0.42'],
+                    ['F3S01395','挖掘机0102','2026-07-19~07-25','2','1.77','1.68'],
+                    ['F3S01395','挖掘机0102','2026-07-01~07-31','13','53.72','52.66']
+                ],
+                fleetRows: [
+                    ['挖掘机0102','13','53.72'],
+                    ['挖掘机0103','10','48.15'],
+                    ['挖掘机0105','12','90.63']
+                ]
+            },
+            {
+                key: 'energy', name: '能耗报告', icon: 'energy',
+                svg: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M13 2L3 14h9l-1 8 10-12h-9l1-8z"/></svg>',
+                desc: '总能耗/油耗、油耗/小时',
+                fields: ['总能耗/油耗','油耗/小时'],
+                demoCols: ['资产编号','资产名称','日期/周期','总能耗/油耗(L)','油耗/小时(L/h)'],
+                fleetCols: ['设备编号','开工天数(天)','总能耗/油耗(L)'],
+                fleetFields: ['总能耗/油耗'],
+                singleRows: [
+                    ['F3S01395','挖掘机0102','2026-07-21','2.84','5.68'],
+                    ['F3S01395','挖掘机0102','2026-07-19~07-25','—','—'],
+                    ['F3S01395','挖掘机0102','2026-07-01~07-31','—','—']
+                ],
+                fleetRows: [
+                    ['挖掘机0102','13','2.84'],
+                    ['挖掘机0103','10','—'],
+                    ['挖掘机0105','12','—']
+                ]
+            },
+            {
+                key: 'alarm', name: '告警报告', icon: 'alarm',
+                svg: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M18 8A6 6 0 0 0 6 8c0 7-3 9-3 9h18s-3-2-3-9"/><path d="M13.73 21a2 2 0 0 1-3.46 0"/></svg>',
+                desc: '预警次数、预警类型',
+                fields: ['预警次数','预警类型'],
+                demoCols: ['资产编号','资产名称','日期/周期','预警类型','预警次数'],
+                fleetCols: ['设备编号','开工天数(天)','预警类型','预警次数'],
+                singleRows: [
+                    ['F3S01395','挖掘机0102','2026-07-21','—','0'],
+                    ['F3S01395','挖掘机0102','2026-07-19~07-25','油位低','1'],
+                    ['F3S01395','挖掘机0102','2026-07-01~07-31','油位低','2']
+                ],
+                fleetRows: [
+                    ['挖掘机0102','13','油位低','2'],
+                    ['挖掘机0103','10','—','0'],
+                    ['挖掘机0105','12','水温高','1']
+                ]
+            },
+            {
+                key: 'idle', name: '闲置报告', icon: 'idle',
+                svg: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><line x1="8" y1="15" x2="16" y2="15"/><line x1="9" y1="9" x2="9.01" y2="9"/><line x1="15" y1="9" x2="15.01" y2="9"/></svg>',
+                desc: '无动作时长（怠速）',
+                fields: ['无动作时长'],
+                demoCols: ['资产编号','资产名称','日期/周期','无动作时长(h)'],
+                fleetCols: ['设备编号','开工天数(天)','无动作时长(h)'],
+                singleRows: [
+                    ['F3S01395','挖掘机0102','2026-07-21','0.08'],
+                    ['F3S01395','挖掘机0102','2026-07-19~07-25','0.09'],
+                    ['F3S01395','挖掘机0102','2026-07-01~07-31','1.06']
+                ],
+                fleetRows: [
+                    ['挖掘机0102','13','1.06'],
+                    ['挖掘机0103','10','2.35'],
+                    ['挖掘机0105','12','0.82']
+                ]
+            },
+            {
+                key: 'gear', name: '挡位报告', icon: 'gear',
+                svg: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1-2.83 2.83l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-4 0v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1 0-4h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 2.83-2.83l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 4 0v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 2.83l-.06.06A1.65 1.65 0 0 0 19.4 9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 0 4h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>',
+                desc: '挡位(1-11挡)使用时长分布',
+                fields: ['挡位(1-11挡)'],
+                demoCols: ['资产编号','资产名称','日期/周期','挡位(1-11挡)'],
+                fleetCols: ['设备编号','开工天数(天)','挡位(1-11挡)'],
+                singleRows: [
+                    ['F3S01395','挖掘机0102','2026-07-21','1挡0.02h、2挡0.04h、10挡0.02h、11挡0.30h'],
+                    ['F3S01395','挖掘机0102','2026-07-19~07-25','1挡0.02h、2挡0.04h、5挡0.04h、7挡0.08h、10挡0.02h、11挡1.25h'],
+                    ['F3S01395','挖掘机0102','2026-07-01~07-31','1挡1.20h、2挡0.04h、5挡0.04h、6挡0.37h、7挡0.09h、8挡0.62h、9挡0.10h、10挡11.20h、11挡21.75h']
+                ],
+                fleetRows: [
+                    ['挖掘机0102','13','共35.35h（1-11挡）'],
+                    ['挖掘机0103','10','共28.60h（1-11挡）'],
+                    ['挖掘机0105','12','共62.10h（1-11挡）']
+                ]
+            }
+        ];
+
+        // ====================================================================
+        // 状态与DOM引用
+        // ====================================================================
+        let currentType = 'single'; // 'single' | 'fleet'
+        let currentViewMode = 'grid'; // 'grid' | 'list'
+        const searchInput = document.getElementById('templateSearch');
+        const templateContent = document.getElementById('templateContent');
+
+        // ====================================================================
+        // 渲染：统一网格卡片（无分组标题）
+        // ====================================================================
+        function renderCardUnified(dim) {
+            const typeText  = currentType === 'single' ? '单机' : '机群';
+            const badgeCls  = currentType === 'single' ? 'badge-single' : 'badge-fleet';
+            const rows = currentType === 'single' ? dim.singleRows : dim.fleetRows;
+            const cols = currentType === 'single' ? dim.demoCols : (dim.fleetCols || dim.demoCols);
+
+            // 取第一条数据
+
+            return `
+                <div class="dim-card-unified" data-dim="${dim.key}">
+                    <div class="card-accent accent-${dim.icon}"></div>
+                    <div class="card-body">
+                        <div class="card-head-row">
+                            <div class="card-icon dim-icon-${dim.icon}">${dim.svg}</div>
+                            <div>
+                                <div class="card-title">${dim.name}</div>
+                                <div class="card-subtitle">${dim.desc}</div>
+                            </div>
+                        </div>
+                        <div class="fields-row">
+                            ${(currentType==='fleet'&&dim.fleetFields?dim.fleetFields:dim.fields).map(f => `<span class="field-chip">${f}</span>`).join('')}
+                        </div>
+
+                    </div>
+                    <div class="card-footer">
+                        <span class="type-badge ${badgeCls}">${typeText}</span>
+                        <div style="display:flex;gap:8px;">
+                            <button class="btn-link" data-action="preview" data-dim="${dim.key}">预览</button>
+                            <button class="btn-primary" data-action="add" data-dim="${dim.key}">添加</button>
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderCardList(dim) {
+            const typeText  = currentType === 'single' ? '单机' : '机群';
+            const badgeCls  = currentType === 'single' ? 'badge-single' : 'badge-fleet';
+            return `
+                <div class="dim-list-item" data-dim="${dim.key}">
+                    <div class="list-icon dim-icon-${dim.icon}">${dim.svg}</div>
+                    <div class="list-info">
+                        <div class="list-name">${dim.name}</div>
+                        <div class="list-desc">${dim.desc}</div>
+                    </div>
+                    <div class="list-fields">
+                        ${(currentType==='fleet'&&dim.fleetFields?dim.fleetFields:dim.fields).map(f => `<span class="field-chip">${f}</span>`).join('')}
+                    </div>
+                    <span class="type-badge ${badgeCls}" style="flex-shrink:0;">${typeText}</span>
+                    <div class="list-actions">
+                        <button class="btn-link" data-action="preview" data-dim="${dim.key}">预览</button>
+                        <button class="btn-primary" data-action="add" data-dim="${dim.key}">添加</button>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderAll() {
+            const kw = searchInput.value.trim().toLowerCase();
+            let visibleDims = dimensions;
+            if (kw) {
+                visibleDims = dimensions.filter(d =>
+                    d.name.toLowerCase().includes(kw) ||
+                    d.desc.toLowerCase().includes(kw) ||
+                    d.fields.some(f => f.toLowerCase().includes(kw))
+                );
+            }
+
+            if (visibleDims.length === 0) {
+                templateContent.innerHTML = '<div class="empty-state"><div class="empty-text">未找到匹配的模板</div></div>';
+            } else if (currentViewMode === 'list') {
+                templateContent.innerHTML = '<div class="dim-list-view">' + visibleDims.map(renderCardList).join('') + '</div>';
+            } else {
+                templateContent.innerHTML = '<div class="dim-cards-grid">' + visibleDims.map(renderCardUnified).join('') + '</div>';
+            }
+        }
+
+        // ====================================================================
+        // 单机/机群 Tab 切换
+        // ====================================================================
+        const typeTabs = document.getElementById('reportTypeTabs');
+        typeTabs.addEventListener('click', (e) => {
+            const tab = e.target.closest('.report-type-tab');
+            if (!tab) return;
+            const type = tab.dataset.type;
+            if (type === currentType) return;
+            currentType = type;
+            // 更新Tab激活状态
+            typeTabs.querySelectorAll('.report-type-tab').forEach(t => t.classList.remove('active'));
+            tab.classList.add('active');
+            // 重新渲染
+            renderAll();
+        });
+
+        // ====================================================================
+        // 视图切换：网格 / 列表
+        // ====================================================================
+        document.querySelector('.view-toggle').addEventListener('click', (e) => {
+            const btn = e.target.closest('button');
+            if (!btn) return;
+            // 根据SVG内容判断：网格按钮(first button) → grid，列表按钮(last button) → list
+            const btns = Array.from(document.querySelectorAll('.view-toggle button'));
+            const idx = btns.indexOf(btn);
+            const newMode = idx === 0 ? 'grid' : 'list';
+            if (newMode === currentViewMode) return;
+            currentViewMode = newMode;
+            btns.forEach(b => b.classList.remove('active'));
+            btn.classList.add('active');
+            renderAll();
+        });
+
+        // ====================================================================
+        // 搜索
+        // ====================================================================
+        searchInput.addEventListener('input', renderAll);
+
+        // ====================================================================
+        // 卡片按钮事件委托
+        // ====================================================================
+        templateContent.addEventListener('click', (e) => {
+            const btn = e.target.closest('button[data-action]');
+            if (!btn) return;
+            const dimKey = btn.dataset.dim;
+            const dim = dimensions.find(d => d.key === dimKey);
+            if (!dim) return;
+            if (btn.dataset.action === 'preview') openPreviewModal(dim);
+            else if (btn.dataset.action === 'add') alert(`已添加模板：${dim.name}（${currentType === 'single' ? '单机' : '机群'}）`);
+        });
+
+        // ====================================================================
+        // 预览弹窗 —— 按维度展示对应数据
+        // ====================================================================
+        const previewModal        = document.getElementById('previewModal');
+        const previewTableContainer = document.getElementById('previewTableContainer');
+        const previewCloseBtn     = document.getElementById('previewClose');
+
+        function openPreviewModal(dim) {
+            const isSingle = currentType === 'single';
+            const isSummary = dim.isSummary;
+
+            let rows, cols;
+            if (isSummary) {
+                rows = isSingle ? dim.fullSingleRows : dim.fullFleetRows;
+                cols = [...dim.fullUnifiedCols];
+            } else {
+                rows = isSingle ? dim.singleRows : dim.fleetRows;
+                cols = isSingle ? [...dim.demoCols] : [...(dim.fleetCols || dim.demoCols)];
+            }
+
+            // 构建表格
+            let tableHTML = '<table class="preview-table"><thead><tr>';
+            cols.forEach(c => { tableHTML += `<th>${c}</th>`; });
+            tableHTML += '</tr></thead><tbody>';
+
+            rows.forEach(row => {
+                tableHTML += '<tr>';
+                row.forEach((cell, ci) => {
+                    let cls = ci === 0 ? 'col-asset' : '';
+                    let html = cls ? `<span class="${cls}">${cell}</span>` : cell;
+                    tableHTML += `<td>${html}</td>`;
+                });
+                tableHTML += '</tr>';
+            });
+            tableHTML += '</tbody></table>';
+
+            previewTableContainer.innerHTML = tableHTML;
+
+            previewModal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closePreviewModal() {
+            previewModal.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        previewCloseBtn.addEventListener('click', closePreviewModal);
+        previewModal.addEventListener('click', (e) => {
+            if (e.target === previewModal) closePreviewModal();
+        });
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && previewModal.classList.contains('active')) {
+                closePreviewModal();
+            }
+        });
+
+        // ====================================================================
+        // 初始化
+        // ====================================================================
+        renderAll();
+    </script>
+            </main>
+        </div>
+    </div>
+</body>
+</html>
+
+
