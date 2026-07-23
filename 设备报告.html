@@ -622,6 +622,152 @@
             border: 1px solid #ffccc7;
         }
 
+        .status-badge.expired {
+            background: #f5f5f5;
+            color: #999;
+            border: 1px solid #d9d9d9;
+            cursor: default;
+        }
+
+        /* 已失效行样式 */
+        tbody tr.expired {
+            background: #fafafa;
+        }
+
+        tbody tr.expired:hover {
+            background: #f0f0f0;
+        }
+
+        tbody tr.expired td {
+            color: #bbb;
+            border-bottom-color: #eee;
+        }
+
+        tbody tr.expired td.col-name {
+            color: #999;
+            cursor: default;
+        }
+
+        tbody tr.expired td.col-name:hover {
+            text-decoration: none;
+        }
+
+        tbody tr.expired td:last-child {
+            background: #fafafa;
+        }
+
+        tbody tr.expired:hover td:last-child {
+            background: #f0f0f0;
+        }
+
+        tbody tr.expired .operate-links .link-danger {
+            color: #bbb;
+        }
+
+        /* 悬浮提示气泡 */
+        .expired-tooltip {
+            position: relative;
+            cursor: help;
+        }
+
+        .expired-tooltip::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: calc(100% + 8px);
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 6px 12px;
+            background: rgba(0, 0, 0, 0.8);
+            color: #fff;
+            font-size: 12px;
+            white-space: nowrap;
+            border-radius: 4px;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.2s;
+            z-index: 100;
+            pointer-events: none;
+        }
+
+        .expired-tooltip:hover::after {
+            opacity: 1;
+            visibility: visible;
+        }
+
+        /* ====== 已过期状态样式 ====== */
+
+        .status-badge.overdue {
+            background: #fff7e6;
+            color: #d46b08;
+            border: 1px solid #ffd591;
+            cursor: default;
+        }
+
+        /* 已过期行样式 */
+        tbody tr.overdue {
+            background: #fffbe6;
+        }
+
+        tbody tr.overdue:hover {
+            background: #fff7cc;
+        }
+
+        tbody tr.overdue td {
+            color: #bbb;
+            border-bottom-color: #eee;
+        }
+
+        tbody tr.overdue td.col-name {
+            color: #999;
+            cursor: default;
+        }
+
+        tbody tr.overdue td.col-name:hover {
+            text-decoration: none;
+        }
+
+        tbody tr.overdue td:last-child {
+            background: #fffbe6;
+        }
+
+        tbody tr.overdue:hover td:last-child {
+            background: #fff7cc;
+        }
+
+        tbody tr.overdue .operate-links .link-danger {
+            color: #bbb;
+        }
+
+        /* 已过期悬浮提示气泡 */
+        .overdue-tooltip {
+            position: relative;
+            cursor: help;
+        }
+
+        .overdue-tooltip::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: calc(100% + 8px);
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 6px 12px;
+            background: rgba(180, 80, 0, 0.9);
+            color: #fff;
+            font-size: 12px;
+            white-space: nowrap;
+            border-radius: 4px;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.2s;
+            z-index: 100;
+            pointer-events: none;
+        }
+
+        .overdue-tooltip:hover::after {
+            opacity: 1;
+            visibility: visible;
+        }
+
         .switch-toggle {
             position: relative;
             display: inline-block;
@@ -1898,7 +2044,7 @@
                             <th>内容</th>
                             <th>日期和时间</th>
                             <th>结束日期</th>
-                            <th>开启/关闭</th>
+                            <th>状态</th>
                             <th>资产</th>
                             <th style="text-align:center;">操作</th>
                         </tr>
@@ -2256,6 +2402,40 @@
                     endDate: '-',
                     enabled: true,
                     assets: 'F3S01395, 000036, 000048, 000049, 000101, 000215'
+                },
+                {
+                    id: 3,
+                    name: 'G002发电机状态监控',
+                    type: '资产运行 - 单个资产',
+                    owner: 'Admin',
+                    frequency: '每日',
+                    format: 'XLSX',
+                    recipients: 'david.johnson@example.com',
+                    filters: '动力设备',
+                    subject: 'G002 每日运行报告',
+                    content: 'G002发电机每日运行数据汇总',
+                    datetime: '2026-07-10 08:00',
+                    endDate: '-',
+                    enabled: true,
+                    assets: 'G002',
+                    expired: true
+                },
+                {
+                    id: 4,
+                    name: '挖掘机月度能耗统计',
+                    type: '资产运行 - 设备机群',
+                    owner: 'Admin',
+                    frequency: '每月',
+                    format: 'XLSX',
+                    recipients: 'aubrey_lancaster@yanceybros.com',
+                    filters: '挖掘类设备',
+                    subject: '挖掘机月度能耗统计',
+                    content: '所有挖掘机设备月度油耗与电耗汇总',
+                    datetime: '2026-05-01 09:00',
+                    endDate: '2026-06-30',
+                    enabled: false,
+                    assets: 'F3S01395, 000036, 000048',
+                    overdue: true
                 }
             ];
 
@@ -2319,8 +2499,21 @@
                         </div>
                     </td></tr>`;
                 } else {
-                    reportTableBody.innerHTML = pageData.map(r => `
-                        <tr data-id="${r.id}">
+                    reportTableBody.innerHTML = pageData.map(r => {
+                        const rowClass = r.overdue ? 'overdue' : (r.expired ? 'expired' : '');
+                        let switchContent = '';
+                        if (r.overdue) {
+                            switchContent = `<span class="overdue-tooltip" data-tooltip="订阅的报告已超过截止日期，推送已停止。请重新设置有效期后恢复。"><span class="status-badge overdue">已过期</span></span>`;
+                        } else if (r.expired) {
+                            switchContent = `<span class="expired-tooltip" data-tooltip="订阅中的设备已被解绑或权限已变更，报告推送已失效。请重新选择设备后恢复。"><span class="status-badge expired">已失效</span></span>`;
+                        } else {
+                            switchContent = `<label class="switch-toggle" title="${r.enabled ? '关闭' : '开启'}">
+                                    <input type="checkbox" ${r.enabled ? 'checked' : ''} data-id="${r.id}">
+                                    <span class="switch-slider"></span>
+                                </label>`;
+                        }
+                        return `
+                        <tr data-id="${r.id}" class="${rowClass}">
                             <td class="col-name" title="${escapeHtml(r.name)}">${escapeHtml(r.name)}</td>
                             <td title="${escapeHtml(r.type)}">${escapeHtml(r.type)}</td>
                             <td title="${escapeHtml(r.owner)}">${escapeHtml(r.owner)}</td>
@@ -2333,10 +2526,7 @@
                             <td>${escapeHtml(r.datetime)}</td>
                             <td>${escapeHtml(r.endDate)}</td>
                             <td>
-                                <label class="switch-toggle" title="${r.enabled ? '关闭' : '开启'}">
-                                    <input type="checkbox" ${r.enabled ? 'checked' : ''} data-id="${r.id}">
-                                    <span class="switch-slider"></span>
-                                </label>
+                                ${switchContent}
                             </td>
                             <td class="col-assets" title="${escapeHtml(r.assets)}">${escapeHtml(r.assets)}</td>
                             <td style="text-align:center;">
@@ -2346,7 +2536,8 @@
                                 </span>
                             </td>
                         </tr>
-                    `).join('');
+                    `;
+                }).join('');
 
                     reportTableBody.querySelectorAll('.switch-toggle input').forEach(input => {
                         input.addEventListener('change', () => {
