@@ -991,6 +991,157 @@
             margin-top: 16px;
         }
 
+        /* ====== 新手引导 - 聚光灯 + 红框高亮 ====== */
+        .tour-backdrop {
+            position: fixed;
+            inset: 0;
+            z-index: 9998;
+            background: rgba(0,0,0,0.55);
+            pointer-events: all;
+            animation: onFadeIn 0.3s ease;
+        }
+        @keyframes onFadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* 红框高亮 - 静态呼吸微动 */
+        .tour-highlight {
+            position: relative;
+            z-index: 9999 !important;
+            box-shadow: 0 0 0 3px #E60012, 0 0 12px rgba(230,0,18,0.25) !important;
+            border-radius: 6px !important;
+            animation: tourBreathe 2.5s ease-in-out infinite;
+        }
+        @keyframes tourBreathe {
+            0%, 100% { box-shadow: 0 0 0 3px #E60012, 0 0 12px rgba(230,0,18,0.25); }
+            50%      { box-shadow: 0 0 0 3px #E60012, 0 0 18px rgba(230,0,18,0.35); }
+        }
+
+        /* 浮动提示卡片 */
+        .tour-tooltip {
+            position: fixed;
+            z-index: 10000;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+            padding: 24px;
+            width: 360px;
+            max-width: 90vw;
+            animation: tourSlideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            pointer-events: all;
+        }
+        @keyframes tourSlideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .tour-tooltip-arrow {
+            position: absolute;
+            width: 14px;
+            height: 14px;
+            background: #fff;
+            transform: rotate(45deg);
+        }
+        /* 箭头在弹窗上方（目标在弹窗下方） */
+        .tour-tooltip.arrow-below .tour-tooltip-arrow {
+            top: -7px;
+            box-shadow: -2px -2px 4px rgba(0,0,0,0.06);
+        }
+        /* 箭头在弹窗下方（目标在弹窗上方） */
+        .tour-tooltip.arrow-above .tour-tooltip-arrow {
+            bottom: -7px;
+            box-shadow: 2px 2px 4px rgba(0,0,0,0.06);
+        }
+        /* 箭头在弹窗左侧（目标在弹窗右侧） */
+        .tour-tooltip.arrow-right .tour-tooltip-arrow {
+            left: -7px;
+            box-shadow: -2px 2px 4px rgba(0,0,0,0.06);
+        }
+        /* 箭头在弹窗右侧（目标在弹窗左侧） */
+        .tour-tooltip.arrow-left .tour-tooltip-arrow {
+            right: -7px;
+            box-shadow: 2px -2px 4px rgba(0,0,0,0.06);
+        }
+
+        .tour-step-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            background: #fff0f1;
+            color: #E60012;
+            margin-bottom: 12px;
+            border: 1px solid #ffd6d9;
+        }
+        .tour-step-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 10px;
+        }
+        .tour-step-desc {
+            font-size: 13px;
+            color: #666;
+            line-height: 1.7;
+        }
+        .tour-step-desc .hl { color: #E60012; font-weight: 600; }
+
+        .tour-dots {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 18px;
+        }
+        .tour-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #ddd;
+            transition: all 0.3s;
+        }
+        .tour-dot.active {
+            width: 18px;
+            border-radius: 3px;
+            background: #E60012;
+        }
+
+        .tour-actions {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 20px;
+            gap: 8px;
+        }
+        .tour-skip {
+            font-size: 13px;
+            color: #999;
+            cursor: pointer;
+            border: none;
+            background: none;
+            padding: 6px 0;
+            transition: color 0.2s;
+        }
+        .tour-skip:hover { color: #E60012; }
+        .tour-nav { display: flex; gap: 10px; }
+        .tour-btn {
+            padding: 8px 20px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            border: 1px solid #e0e0e0;
+            background: #fff;
+            color: #666;
+            transition: all 0.2s;
+        }
+        .tour-btn:hover { border-color: #ccc; color: #333; }
+        .tour-btn.primary {
+            background: #E60012;
+            border-color: #E60012;
+            color: #fff;
+        }
+        .tour-btn.primary:hover { background: #c40011; border-color: #c40011; }
+
         /* ====== 统一网格卡片（无分组标题） ====== */
         .dim-cards-grid {
             display: grid;
@@ -1498,7 +1649,10 @@
             if (btn.dataset.action === 'preview') openPreviewModal(dim, type);
             else if (btn.dataset.action === 'add') {
                 const typeText = type === 'single' ? '单机' : '机群';
-                alert(`已添加报表：${dim.name}（${typeText}）`);
+                // 跳转到管理报表页面添加报表
+                if (confirm(`已选择报表：${dim.name}（${typeText}）\n\n将在"管理报表"页面中配置报表信息。\n是否立即前往？`)) {
+                    window.location.href = '管理报表.html';
+                }
             }
         });
 
@@ -1563,6 +1717,248 @@
         // 初始化
         // ====================================================================
         renderAll();
+
+        // ======== 新手引导 - 红框高亮真实按钮 ========
+        (function initOnboarding() {
+            const steps = [
+                {
+                    selector: '.sidebar-link.active',
+                    badge: '步骤 1/4',
+                    title: '机群报表，全新上线',
+                    desc: '为您带来全新的报表体验，助您随时全盘掌握设备运行状况。',
+                    placement: 'right'
+                },
+                {
+                    selector: '#templateContent [data-action="preview"]',
+                    badge: '步骤 2/4',
+                    title: '浏览并预览模板',
+                    desc: '点击卡片上的<span class="hl">"预览"</span>按钮，即可查看该报表模板包含的字段与数据展示效果。',
+                    placement: 'below'
+                },
+                {
+                    selector: '#templateContent [data-action="add"]',
+                    badge: '步骤 3/4',
+                    title: '选择需要的模板',
+                    desc: '确定模板后，点击卡片上的<span class="hl">"添加"</span>按钮，选择您所需的报表模板进行设置。',
+                    placement: 'below'
+                },
+                {
+                    selector: '.tabs a[href*="管理报表"]',
+                    badge: '步骤 4/4',
+                    title: '管理已有报表',
+                    desc: '点击顶部<span class="hl">"管理报表"</span>标签页，即可查看、编辑或删除您已添加的所有报表配置。',
+                    placement: 'below'
+                }
+            ];
+
+            let currentIdx = 0;
+            let backdropEl, tooltipEl, prevHighlightEl = null;
+
+            function getTarget() {
+                const sel = steps[currentIdx].selector;
+                const sels = sel.split(',').map(s => s.trim());
+                for (const s of sels) {
+                    const el = document.querySelector(s);
+                    if (el) return el;
+                }
+                return null;
+            }
+
+            function highlightTarget(target) {
+                if (!target) return;
+                if (prevHighlightEl && prevHighlightEl !== target) {
+                    prevHighlightEl.classList.remove('tour-highlight');
+                }
+                target.classList.add('tour-highlight');
+                prevHighlightEl = target;
+                target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+
+            function positionTooltip(target) {
+                if (!target || !tooltipEl) return;
+                const tr = target.getBoundingClientRect();
+                const tpEl = tooltipEl;
+                const placement = steps[currentIdx].placement || 'below';
+                const gap = 18;
+
+                const tw = tpEl.offsetWidth;
+                const th = tpEl.offsetHeight;
+                const vw = window.innerWidth;
+                const vh = window.innerHeight;
+
+                let left, top;
+                let arrowClass = '';
+
+                const tcx = tr.left + tr.width / 2;
+                const tcy = tr.top + tr.height / 2;
+
+                if (placement === 'right') {
+                    left = tr.right + gap;
+                    top = tcy - th / 2;
+                    top = Math.max(12, Math.min(top, vh - th - 12));
+                    if (left + tw > vw - 12) {
+                        left = tr.left - tw - gap;
+                        arrowClass = 'left';
+                    } else {
+                        arrowClass = 'right';
+                    }
+                } else if (placement === 'left') {
+                    left = tr.left - tw - gap;
+                    top = tcy - th / 2;
+                    top = Math.max(12, Math.min(top, vh - th - 12));
+                    if (left < 12) {
+                        left = tr.right + gap;
+                        arrowClass = 'right';
+                    } else {
+                        arrowClass = 'left';
+                    }
+                } else if (placement === 'below') {
+                    left = tcx - tw / 2;
+                    top = tr.bottom + gap;
+                    left = Math.max(12, Math.min(left, vw - tw - 12));
+                    if (top + th > vh - 12) {
+                        top = tr.top - th - gap;
+                        arrowClass = 'above';
+                    } else {
+                        arrowClass = 'below';
+                    }
+                } else { // above
+                    left = tcx - tw / 2;
+                    top = tr.top - th - gap;
+                    left = Math.max(12, Math.min(left, vw - tw - 12));
+                    if (top < 12) {
+                        top = tr.bottom + gap;
+                        arrowClass = 'below';
+                    } else {
+                        arrowClass = 'above';
+                    }
+                }
+
+                const arrowEl = tpEl.querySelector('.tour-tooltip-arrow');
+                if (arrowEl) {
+                    arrowEl.style.cssText = '';
+                    if (arrowClass === 'right') {
+                        arrowEl.style.left = '-7px';
+                        arrowEl.style.top = Math.max(14, Math.min(th - 14, tcy - top)) + 'px';
+                        arrowEl.style.boxShadow = '-2px 2px 4px rgba(0,0,0,0.06)';
+                    } else if (arrowClass === 'left') {
+                        arrowEl.style.right = '-7px';
+                        arrowEl.style.top = Math.max(14, Math.min(th - 14, tcy - top)) + 'px';
+                        arrowEl.style.boxShadow = '2px -2px 4px rgba(0,0,0,0.06)';
+                    } else if (arrowClass === 'below') {
+                        arrowEl.style.top = '-7px';
+                        arrowEl.style.left = Math.max(16, Math.min(tw - 16, tcx - left)) + 'px';
+                        arrowEl.style.boxShadow = '-2px -2px 4px rgba(0,0,0,0.06)';
+                    } else { // above
+                        arrowEl.style.bottom = '-7px';
+                        arrowEl.style.left = Math.max(16, Math.min(tw - 16, tcx - left)) + 'px';
+                        arrowEl.style.boxShadow = '2px 2px 4px rgba(0,0,0,0.06)';
+                    }
+                }
+
+                tpEl.className = 'tour-tooltip arrow-' + arrowClass;
+                tpEl.style.left = left + 'px';
+                tpEl.style.top = top + 'px';
+            }
+
+            function render() {
+                const s = steps[currentIdx];
+                const target = getTarget();
+
+                if (prevHighlightEl) {
+                    prevHighlightEl.classList.remove('tour-highlight');
+                    prevHighlightEl = null;
+                }
+
+                if (target) {
+                    highlightTarget(target);
+                    setTimeout(() => positionTooltip(target), 300);
+                    setTimeout(() => { const t = getTarget(); if (t) positionTooltip(t); }, 900);
+                }
+
+                const badgeEl = tooltipEl.querySelector('.tour-step-badge');
+                const titleEl = tooltipEl.querySelector('.tour-step-title');
+                const descEl = tooltipEl.querySelector('.tour-step-desc');
+                const prevBtn = tooltipEl.querySelector('.tour-prev');
+                const nextBtn = tooltipEl.querySelector('.tour-next');
+                const dots = tooltipEl.querySelectorAll('.tour-dot');
+
+                if (badgeEl) badgeEl.textContent = s.badge;
+                if (titleEl) titleEl.textContent = s.title;
+                if (descEl) descEl.innerHTML = s.desc;
+                if (prevBtn) prevBtn.style.visibility = currentIdx === 0 ? 'hidden' : 'visible';
+                if (nextBtn) nextBtn.textContent = currentIdx === steps.length - 1 ? '开始使用' : '下一步';
+
+                dots.forEach((d, i) => d.classList.toggle('active', i === currentIdx));
+            }
+
+            function next() {
+                if (currentIdx >= steps.length - 1) { close(); return; }
+                currentIdx++;
+                render();
+            }
+
+            function prev() {
+                if (currentIdx <= 0) return;
+                currentIdx--;
+                render();
+            }
+
+            function close() {
+                if (prevHighlightEl) {
+                    prevHighlightEl.classList.remove('tour-highlight');
+                    prevHighlightEl = null;
+                }
+                if (tooltipEl) { tooltipEl.remove(); tooltipEl = null; }
+                if (backdropEl) { backdropEl.remove(); backdropEl = null; }
+            }
+
+            // ---- 构建 DOM ----
+            backdropEl = document.createElement('div');
+            backdropEl.className = 'tour-backdrop';
+            backdropEl.addEventListener('click', function(e) { e.stopPropagation(); });
+            document.body.appendChild(backdropEl);
+
+            tooltipEl = document.createElement('div');
+            tooltipEl.className = 'tour-tooltip arrow-below';
+            tooltipEl.innerHTML = `
+                <div class="tour-tooltip-arrow"></div>
+                <div class="tour-step-badge"></div>
+                <div class="tour-step-title"></div>
+                <div class="tour-step-desc"></div>
+                <div class="tour-dots">
+                    ${steps.map(() => '<span class="tour-dot"></span>').join('')}
+                </div>
+                <div class="tour-actions">
+                    <button class="tour-skip">跳过指引</button>
+                    <div class="tour-nav">
+                        <button class="tour-btn tour-prev">上一步</button>
+                        <button class="tour-btn primary tour-next">下一步</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(tooltipEl);
+
+            tooltipEl.querySelector('.tour-skip').addEventListener('click', close);
+            tooltipEl.querySelector('.tour-prev').addEventListener('click', prev);
+            tooltipEl.querySelector('.tour-next').addEventListener('click', next);
+
+            function onEsc(e) {
+                if (e.key === 'Escape') { close(); document.removeEventListener('keydown', onEsc); }
+            }
+            document.addEventListener('keydown', onEsc);
+
+            let resizeTimer;
+            window.addEventListener('resize', () => {
+                clearTimeout(resizeTimer);
+                resizeTimer = setTimeout(() => {
+                    const target = getTarget();
+                    if (target) positionTooltip(target);
+                }, 200);
+            });
+
+            setTimeout(() => render(), 100);
+        })();
     </script>
             </main>
         </div>
