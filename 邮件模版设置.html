@@ -311,7 +311,140 @@
         }
         .kv-add-btn:hover { background: #f0f7ff; }
 
+        /* 机群数据列配置——三级联动变量选择器 */
+        .kv-cascade-trigger {
+            display: flex; align-items: center; min-height: 32px; border: 1px solid #d9d9d9;
+            border-radius: 4px; background: #fff; font-size: 12px; box-sizing: border-box;
+            cursor: pointer; transition: border-color .2s; overflow: hidden;
+        }
+        .kv-cascade-trigger:hover { border-color: #1677ff; }
+        .kv-cascade-trigger .kv-cascade-tags-area {
+            display: flex; flex-wrap: wrap; gap: 3px; align-items: center;
+            padding: 3px 6px; flex: 1; min-width: 0; max-height: 64px; overflow-y: auto;
+        }
+        .kv-cascade-trigger .kv-cascade-tag {
+            display: inline-flex; align-items: center; gap: 2px; padding: 1px 2px 1px 6px;
+            background: #e6f0ff; color: #1677ff; border-radius: 3px;
+            font-size: 11px; max-width: 150px; overflow: hidden;
+            text-overflow: ellipsis; white-space: nowrap;
+        }
+        .kv-cascade-trigger .kv-cascade-tag .tag-close {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 14px; height: 14px; border-radius: 50%; cursor: pointer;
+            font-size: 13px; line-height: 1; color: #91caff; flex-shrink: 0;
+            transition: all .15s; margin-left: 1px;
+        }
+        .kv-cascade-trigger .kv-cascade-tag .tag-close:hover {
+            background: #ff4d4f; color: #fff;
+        }
+        .kv-cascade-trigger .kv-cascade-placeholder {
+            color: #bfbfbf; font-size: 12px; padding: 0 4px;
+        }
+        .kv-cascade-btn-trigger {
+            display: flex; align-items: center; gap: 4px; flex-shrink: 0;
+            padding: 0 12px; height: 32px; background: #f5f5f5;
+            border-left: 1px solid #d9d9d9; color: #1677ff; font-size: 12px;
+            font-weight: 500; white-space: nowrap; transition: background .2s;
+        }
+        .kv-cascade-btn-trigger:hover { background: #e6f0ff; }
+        .kv-cascade-btn-trigger .trigger-arrow { font-size: 10px; color: #999; }
 
+        .kv-cascade-overlay {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: rgba(0,0,0,0.4); z-index: 10003;
+            display: none; align-items: center; justify-content: center;
+        }
+        .kv-cascade-overlay.show { display: flex; }
+        .kv-cascade-panel {
+            width: 800px; max-height: 560px; background: #fff; border-radius: 10px;
+            box-shadow: 0 20px 60px rgba(0,0,0,0.2); display: flex; flex-direction: column;
+            overflow: hidden;
+        }
+        .kv-cascade-header {
+            display: flex; align-items: flex-start; justify-content: space-between;
+            padding: 14px 20px; border-bottom: 1px solid #edf0f4; flex-wrap: wrap;
+            gap: 6px;
+        }
+        .kv-cascade-header .header-left { flex: 1; min-width: 0; }
+        .kv-cascade-header h5 {
+            font-size: 15px; font-weight: 600; color: #1a1f36; margin: 0;
+        }
+        .kv-cascade-header p { font-size: 11px; color: #999; margin: 2px 0 0 0; }
+        .kv-cascade-close {
+            width: 28px; height: 28px; border: none; background: #f3f4f6;
+            border-radius: 6px; cursor: pointer; display: flex; align-items: center;
+            justify-content: center; color: #666; font-size: 16px; transition: .2s;
+        }
+        .kv-cascade-close:hover { background: #e5e7eb; color: #1a1f36; }
+        .kv-cascade-body {
+            display: flex; flex: 1; overflow: hidden; min-height: 0;
+        }
+        .kv-cascade-col {
+            overflow-y: auto; border-right: 1px solid #f0f0f0; padding: 6px 0;
+        }
+        .kv-cascade-col:last-child { border-right: none; }
+        .kv-cascade-col-label {
+            padding: 8px 14px 6px; font-size: 11px; font-weight: 600;
+            color: #8c8c8c; text-transform: uppercase; letter-spacing: 0.3px;
+            position: sticky; top: 0; background: #fff; z-index: 1;
+            border-bottom: 1px solid #f5f5f5;
+        }
+        .kv-cascade-col-l1 { width: 180px; min-width: 180px; }
+        .kv-cascade-col-l2 { width: 200px; min-width: 200px; }
+        .kv-cascade-col-l3 { flex: 1; min-width: 300px; }
+        .kv-cascade-item {
+            display: flex; align-items: center; padding: 8px 14px; font-size: 12px;
+            color: #374151; cursor: pointer; transition: background .15s;
+            gap: 6px; border: none; background: transparent; width: 100%;
+            text-align: left; position: relative;
+        }
+        .kv-cascade-item:hover { background: #f0f5ff; }
+        .kv-cascade-item.active { background: #e6f0ff; color: #1677ff; font-weight: 600; }
+        .kv-cascade-item .cascade-dot {
+            display: inline-block; width: 5px; height: 5px; border-radius: 50%;
+            background: #1677ff; flex-shrink: 0;
+        }
+        .kv-cascade-item .cascade-badge {
+            font-size: 10px; color: #8c8c8c; background: #f5f5f5;
+            border-radius: 8px; padding: 1px 6px; margin-left: auto; flex-shrink: 0;
+        }
+        .kv-cascade-check-item {
+            display: flex; align-items: center; padding: 7px 14px; font-size: 12px;
+            color: #374151; cursor: pointer; transition: background .15s; gap: 8px;
+            border: none; background: transparent; width: 100%; text-align: left;
+        }
+        .kv-cascade-check-item:hover { background: #f0f5ff; }
+        .kv-cascade-check-item input[type="checkbox"] {
+            width: 15px; height: 15px; accent-color: #1677ff; cursor: pointer; flex-shrink: 0;
+        }
+        .kv-cascade-check-item .check-var-name { color: #6b7280; font-size: 11px; }
+        .kv-cascade-check-item .check-var-tag {
+            font-size: 11px; color: #1677ff; background: #e6f0ff;
+            padding: 1px 6px; border-radius: 3px; font-family: monospace;
+        }
+        .kv-cascade-footer {
+            display: flex; align-items: center; justify-content: space-between;
+            padding: 12px 20px; border-top: 1px solid #edf0f4; background: #fafbfc;
+        }
+        .kv-cascade-selected {
+            font-size: 12px; color: #6b7280; display: flex; align-items: center;
+            gap: 6px; flex-wrap: wrap; flex: 1; overflow: hidden;
+        }
+        .kv-cascade-selected span { color: #1677ff; font-weight: 500; }
+        .kv-cascade-actions { display: flex; gap: 8px; flex-shrink: 0; }
+        .kv-cascade-btn {
+            padding: 6px 18px; border-radius: 6px; font-size: 13px; cursor: pointer;
+            border: 1px solid #d9d9d9; background: #fff; color: #374151; transition: .2s;
+        }
+        .kv-cascade-btn:hover { border-color: #1677ff; color: #1677ff; }
+        .kv-cascade-btn.primary {
+            background: #1677ff; color: #fff; border-color: #1677ff;
+        }
+        .kv-cascade-btn.primary:hover { background: #0958d9; }
+        .kv-cascade-empty {
+            display: flex; align-items: center; justify-content: center;
+            padding: 40px 20px; color: #bfbfbf; font-size: 13px; height: 100%;
+        }
 
         /* Quill 富文本编辑器 */
         #editor-container { border: 1px solid #d9d9d9; border-radius: 6px; overflow: hidden; }
@@ -524,6 +657,58 @@
         /* 列表操作列 - 删除链接用红色警示色 */
         .operate-links a.danger { color: #E60012; }
         .operate-links a.danger:hover { color: #cc0010; }
+
+        /* 变量词典模态框 */
+        .dict-modal-overlay {position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.45);z-index:10002;display:none;align-items:center;justify-content:center;}
+        .dict-modal-overlay.show {display:flex;}
+        .dict-modal {width:900px;max-height:680px;background:#fff;border-radius:10px;box-shadow:0 20px 60px rgba(0,0,0,0.2);display:flex;flex-direction:column;overflow:hidden;}
+        .dict-modal-header {display:flex;align-items:center;justify-content:space-between;padding:16px 22px;border-bottom:1px solid #edf0f4;}
+        .dict-modal-header h5 {font-size:16px;font-weight:600;color:#1a1f36;margin:0;}
+        .dict-close-btn {width:32px;height:32px;border:none;background:#f3f4f6;border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#666;font-size:18px;transition:.2s;}
+        .dict-close-btn:hover {background:#e5e7eb;color:#1a1f36;}
+        .dict-tab-bar {display:flex;gap:0;padding:0 22px;border-bottom:1px solid #edf0f4;background:#fafbfc;}
+        .dict-tab-item {padding:10px 20px;font-size:13px;font-weight:500;color:#6b7280;cursor:pointer;border-bottom:2px solid transparent;transition:.2s;background:transparent;border-top:none;border-left:none;border-right:none;}
+        .dict-tab-item:hover {color:#1a1f36;background:#f0f2f5;}
+        .dict-tab-item.active {color:#1677ff;border-bottom-color:#1677ff;background:#fff;}
+
+        /* 词典级联字段行（仅查看） */
+        .dict-field-item {display:flex;align-items:center;padding:7px 14px;font-size:12px;color:#374151;gap:8px;border:none;background:transparent;width:100%;text-align:left;}
+        .dict-field-item .dict-field-name {color:#374151;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+        .dict-field-item .dict-field-tag {font-size:11px;color:#1677ff;background:#e6f0ff;padding:1px 6px;border-radius:3px;font-family:monospace;flex-shrink:0;}
+        .dict-field-search {padding:0 0 6px 0;margin:0 14px;border-bottom:1px solid #f0f0f0;}
+        .dict-field-search input {width:100%;padding:6px 10px;border:1px solid #e5e7eb;border-radius:6px;font-size:12px;outline:none;box-sizing:border-box;}
+        .dict-field-search input:focus {border-color:#1677ff;box-shadow:0 0 0 2px rgba(22,119,255,0.1);}
+
+        /* 机群变量-简单表格 */
+        .dict-fleet-summary {background:#f6f9fc;border:1px solid #dce6f0;border-radius:6px;padding:10px 14px;margin-bottom:10px;font-size:12px;color:#4b5563;line-height:1.8;}
+        .dict-fleet-summary .fs-head {font-weight:600;color:#1a1f36;margin-bottom:2px;}
+        .dict-fleet-summary .fs-tags {display:flex;flex-wrap:wrap;gap:4px 6px;margin-top:4px;}
+        .dict-fleet-summary .fs-tag {display:inline-flex;align-items:center;gap:2px;font-size:11px;padding:1px 6px;border-radius:3px;background:#fff;border:1px solid #dce6f0;color:#6b7280;cursor:pointer;transition:all .15s;user-select:none;}
+        .dict-fleet-summary .fs-tag:hover {border-color:#91d5ff;background:#f0f9ff;}
+        .dict-fleet-summary .fs-tag.active {background:#1677ff;border-color:#1677ff;color:#fff;font-weight:500;}
+        .dict-fleet-summary .fs-tag.all {background:#e6f7ff;border-color:#91d5ff;color:#1890ff;}
+        .dict-fleet-summary .fs-tag .fs-icon {font-size:10px;}
+        .dict-fleet-summary .fs-tag .fs-filter-hint {font-size:9px;opacity:0.7;margin-left:1px;}
+        .dict-fleet-table {width:100%;border-collapse:collapse;font-size:13px;}
+        .dict-fleet-table th {background:#fafbfc;padding:9px 14px;text-align:left;font-weight:600;color:#4b5563;border-bottom:2px solid #e5e7eb;font-size:12px;}
+        .dict-fleet-table td {padding:8px 14px;border-bottom:1px solid #f3f4f6;color:#374151;}
+        .dict-fleet-table tbody tr {border-bottom:1px solid #f3f4f6;color:#374151;}
+        .dict-fleet-table code {background:#f0f2f5;color:#1677ff;padding:2px 7px;border-radius:4px;font-size:12px;font-family:inherit;}
+        .dict-modal-footer {padding:10px 22px;border-top:1px solid #edf0f4;text-align:left;font-size:12px;color:#9ca3af;}
+
+        /* 单机数据列配置（三栏级联） */
+        .single-col-body {display:flex;overflow:hidden;min-height:0;height:420px;border:1px solid #e8e8e8;border-radius:8px 8px 0 0;background:#fff;}
+
+        /* 已选模型标签区 */
+        .sc-model-tags-wrap {border:1px solid #e8e8e8;border-top:1px dotted #e0e0e0;background:#fafbfc;padding:10px 16px;min-height:36px;display:flex;align-items:flex-start;flex-wrap:wrap;gap:8px;}
+        .sc-model-tags-wrap .sc-tags-label {font-size:12px;color:#999;white-space:nowrap;line-height:26px;margin-right:2px;}
+        .sc-model-tag {display:inline-flex;align-items:center;gap:4px;padding:3px 10px;background:#e6f7ff;border:1px solid #91d5ff;border-radius:4px;font-size:12px;color:#1890ff;cursor:pointer;transition:all .15s;max-width:260px;}
+        .sc-model-tag:hover {background:#bae7ff;border-color:#69c0ff;}
+        .sc-model-tag .sc-tag-name {overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+        .sc-model-tag .sc-tag-count {font-size:11px;color:#69c0ff;flex-shrink:0;}
+        .sc-model-tag .sc-tag-del {cursor:pointer;color:#91d5ff;font-size:15px;line-height:1;margin-left:2px;flex-shrink:0;transition:color .15s;}
+        .sc-model-tag .sc-tag-del:hover {color:#E60012;}
+        .sc-model-tags-wrap .sc-tags-empty {font-size:12px;color:#bbb;line-height:26px;}
     </style>
     <link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">
 </head>
@@ -621,7 +806,7 @@
                 <div class="form-group"><label>模版描述</label><input type="text" id="edit-tpl-desc" placeholder="如：适用于挖掘机设备每日运行数据汇报"></div>
                 <div class="form-group">
                     <label>模版类型 <span class="required">*</span></label>
-                    <select id="edit-tpl-machine-type">
+                    <select id="edit-tpl-machine-type" onchange="toggleDataColumnConfig()">
                         <option value="单机">单机</option>
                         <option value="机群">机群</option>
                     </select>
@@ -639,10 +824,11 @@
             <div class="step-panel" id="step-body">
                 <!-- 变量提示 -->
                 <div class="var-hint-box" id="edit-var-hint">
-                    <strong>可用变量：</strong>点击下方变量即可插入到正文光标处，发送时将自动替换<br>
-                    <strong>基础信息：</strong><span class="clickable-var" onclick="insertVarEdit('{{报告名称}}')">{{报告名称}}</span> <span class="clickable-var" onclick="insertVarEdit('{{报告日期}}')">{{报告日期}}</span> <span class="clickable-var" onclick="insertVarEdit('{{收件人姓名}}')">{{收件人姓名}}</span> <span class="clickable-var" onclick="insertVarEdit('{{生成时间}}')">{{生成时间}}</span> <span class="clickable-var" onclick="insertVarEdit('{{设备编号}}')">{{设备编号}}</span> <span class="clickable-var" onclick="insertVarEdit('{{异常类型}}')">{{异常类型}}</span><br>
-                    <strong>生产力度量：</strong>反映作业效率与开工情况 — <span class="clickable-var" onclick="insertVarEdit('{{开工天数}}')">{{开工天数}}</span> <span class="clickable-var" onclick="insertVarEdit('{{实际操作时长}}')">{{实际操作时长}}</span><br>
-                    <strong>设备监控：</strong>反映设备运行状态与能耗挡位 — <span class="clickable-var" onclick="insertVarEdit('{{发动机运行时长}}')">{{发动机运行时长}}</span> <span class="clickable-var" onclick="insertVarEdit('{{空转时长}}')">{{空转时长}}</span> <span class="clickable-var" onclick="insertVarEdit('{{能耗油耗}}')">{{能耗油耗}}</span> <span class="clickable-var" onclick="insertVarEdit('{{各挡位分布}}')">{{各挡位分布}}</span> <span class="clickable-var" onclick="insertVarEdit('{{异常预警}}')">{{异常预警}}</span>
+                    <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
+                        <strong>可用变量：</strong>
+                    </div>
+                    <span style="font-size:12px;color:#8c6d00;">点击下方变量即可插入到正文光标处，发送时将自动替换</span><br>
+                    <strong>基础信息：</strong><span class="clickable-var" onclick="insertVarEdit('{{模版名称}}')">{{模版名称}}</span> <span class="clickable-var" onclick="insertVarEdit('{{发送日期}}')">{{发送日期}}</span> <span class="clickable-var" onclick="insertVarEdit('{{收件人姓名}}')">{{收件人姓名}}</span> <span class="clickable-var" onclick="insertVarEdit('{{生成时间}}')">{{生成时间}}</span>
                 </div>
 
                 <!-- 富文本编辑器（全宽） -->
@@ -665,46 +851,64 @@
                         <div class="section-title">附件基本设置</div>
                         <div class="form-group">
                             <label>文件名模板</label>
-                            <input type="text" id="attach-filename" style="width:100%;" placeholder="如：{{报告名称}}_{{报告日期}}">
+                            <input type="text" id="attach-filename" style="width:100%;" placeholder="如：{{模版名称}}_{{发送日期}}">
                         </div>
                         <div class="attach-config-filename-hint">
-                            支持变量占位符，如 <code>{{报告名称}}</code> <code>{{报告日期}}</code> <code>{{设备编号}}</code>，发送时将自动替换为实际值。系统会自动补充文件扩展名。
+                            支持变量占位符，如 <code>{{模版名称}}</code> <code>{{发送日期}}</code>，发送时将自动替换为实际值。系统会自动补充文件扩展名。
                         </div>
                     </div>
                 </div>
 
-                <!-- 数据列配置 -->
-                <div class="attachment-section" style="margin-top:12px;">
-                    <div class="attach-config" style="padding-bottom:0;">
-                        <div class="section-title">数据列配置</div>
+                    <!-- 数据列配置（机群模版） -->
+                    <div class="attachment-section" id="fleet-column-config" style="margin-top:12px;display:none;">
+                        <div class="attach-config" style="padding-bottom:0;">
+                            <div class="section-title">数据列配置</div>
+                            <p style="font-size:11px;color:#999;margin:0 0 8px 0;">填写列名后，点击右侧「选择字段」通过三级联动弹窗选择映射变量</p>
+                        </div>
+                        <div class="pdf-kv-section">
+                            <table class="kv-table">
+                                <thead><tr><th style="width:30%;">列名</th><th>模板变量</th><th style="width:40px;"></th></tr></thead>
+                                <tbody id="tb-kv-body"></tbody>
+                            </table>
+                            <button class="kv-add-btn" onclick="tbKVAddRow()">+ 添加列</button>
+                        </div>
                     </div>
-                    <div class="tb-toolbar">
-                        <span class="tb-label">列数</span>
-                        <input type="number" id="tb-cols" value="7" min="1" max="20" onchange="tbRebuild()">
-                        <button class="btn-icon btn-xs" onclick="tbAddCol()">+ 列</button>
-                        <span class="tb-sep"></span>
-                        <button class="btn btn-xs" onclick="tbResetToDefault()">恢复默认</button>
+
+                    <!-- 数据列配置（单机模版） -->
+                    <div class="attachment-section" id="single-column-config" style="margin-top:12px;display:none;">
+                        <div class="attach-config" style="padding-bottom:0;">
+                            <div class="section-title">数据列配置</div>
+                            <p style="font-size:11px;color:#999;margin:0 0 8px 0;">选择设备类型 → 物模型 → 勾选需在附件表格中展示的字段</p>
+                        </div>
+                        <div class="single-col-body">
+                            <!-- 第一列：设备类型 -->
+                            <div class="kv-cascade-col kv-cascade-col-l1">
+                                <div class="kv-cascade-col-label">设备类型</div>
+                                <div id="sc-l1"></div>
+                            </div>
+                            <!-- 第二列：物模型 -->
+                            <div class="kv-cascade-col kv-cascade-col-l2">
+                                <div class="kv-cascade-col-label">物模型</div>
+                                <div id="sc-l2"></div>
+                            </div>
+                            <!-- 第三列：字段 -->
+                            <div class="kv-cascade-col kv-cascade-col-l3">
+                                <div class="kv-cascade-col-label">字段（可多选）</div>
+                                <div id="sc-l3"></div>
+                            </div>
+                        </div>
+                        <div class="kv-cascade-footer" style="border-radius:0;border:1px solid #e8e8e8;border-top:none;">
+                            <div class="kv-cascade-selected" id="sc-footer-count">已选：<span>0</span> 个变量</div>
+                            <div class="kv-cascade-actions">
+                                <button class="kv-cascade-btn" onclick="scToggleAll(false)">取消全选</button>
+                                <button class="kv-cascade-btn primary" onclick="scToggleAll(true)">全选当前模型</button>
+                            </div>
+                        </div>
+                        <div class="sc-model-tags-wrap" id="sc-model-tags" style="border-radius:0 0 8px 8px;border:1px solid #e8e8e8;border-top:1px dotted #e0e0e0;">
+                            <span class="sc-tags-label">已配置模型：</span>
+                            <span class="sc-tags-empty">暂未选择任何字段</span>
+                        </div>
                     </div>
-                    <div class="tb-table-wrap" id="tb-table-wrap">
-                        <table id="tb-table"></table>
-                    </div>
-                    <div class="tb-var-list" id="tb-var-list">
-                        <span class="tb-var-label">点击变量插入到选中单元格：</span>
-                        <span class="var-tag table-var" onclick="tbInsertVar('{{设备编号}}')"><code>{{设备编号}}</code></span>
-                        <span class="var-tag table-var" onclick="tbInsertVar('{{资产名称}}')"><code>{{资产名称}}</code></span>
-                        <span class="var-tag table-var" onclick="tbInsertVar('{{报告名称}}')"><code>{{报告名称}}</code></span>
-                        <span class="var-tag table-var" onclick="tbInsertVar('{{报告日期}}')"><code>{{报告日期}}</code></span>
-                        <span class="var-tag table-var var-tag-prod" onclick="tbInsertVar('{{开工天数}}')"><code>{{开工天数}}</code></span>
-                        <span class="var-tag table-var var-tag-prod" onclick="tbInsertVar('{{实际操作时长}}')"><code>{{实际操作时长}}</code></span>
-                        <span class="var-tag table-var" onclick="tbInsertVar('{{发动机运行时长}}')"><code>{{发动机运行时长}}</code></span>
-                        <span class="var-tag table-var" onclick="tbInsertVar('{{空转时长}}')"><code>{{空转时长}}</code></span>
-                        <span class="var-tag table-var" onclick="tbInsertVar('{{能耗油耗}}')"><code>{{能耗油耗}}</code></span>
-                        <span class="var-tag table-var" onclick="tbInsertVar('{{油耗小时}}')"><code>{{油耗小时}}</code></span>
-                        <span class="var-tag table-var" onclick="tbInsertVar('{{各挡位分布}}')"><code>{{各挡位分布}}</code></span>
-                        <span class="var-tag table-var" onclick="tbInsertVar('{{异常预警}}')"><code>{{异常预警}}</code></span>
-                        <span class="var-tag table-var" onclick="tbInsertVar('{{异常类型}}')"><code>{{异常类型}}</code></span>
-                    </div>
-                </div>
 
             </div>
 
@@ -717,10 +921,10 @@
                         <div class="section-title">附件基本设置</div>
                         <div class="form-group">
                             <label>文件名模板</label>
-                            <input type="text" id="pdf-attach-filename" style="width:100%;" placeholder="如：{{报告名称}}_{{报告日期}}">
+                            <input type="text" id="pdf-attach-filename" style="width:100%;" placeholder="如：{{模版名称}}_{{发送日期}}">
                         </div>
                         <div class="attach-config-filename-hint">
-                            支持变量占位符，如 <code>{{报告名称}}</code> <code>{{报告日期}}</code> <code>{{设备编号}}</code>，发送时将自动替换为实际值。系统会自动补充文件扩展名。
+                            支持变量占位符，如 <code>{{模版名称}}</code> <code>{{发送日期}}</code>，发送时将自动替换为实际值。系统会自动补充文件扩展名。
                         </div>
                     </div>
                 </div>
@@ -754,10 +958,10 @@
                         <!-- PDF 键值输入区 -->
                         <div class="pdf-kv-section" id="pdf-kv-section">
                             <!-- 文档键值 -->
-                            <div class="section-title">文档键值</div>
-                            <p style="font-size:11px;color:#999;margin:0 0 8px 0;">将 DOCX 模板中的占位符映射到系统数据字段</p>
+                        <div class="section-title">文档键值</div>
+                            <p style="font-size:11px;color:#999;margin:0 0 8px 0;">填写文档键值后，点击右侧「选择字段」通过三级联动弹窗选择映射变量</p>
                             <table class="kv-table">
-                                <thead><tr><th style="width:40%;">模板变量</th><th style="width:55%;">系统字段</th><th style="width:5%;"></th></tr></thead>
+                                <thead><tr><th style="width:30%;">文档键值</th><th>模版变量</th><th style="width:40px;"></th></tr></thead>
                                 <tbody id="pdf-doc-kv-body"></tbody>
                             </table>
                             <button class="kv-add-btn" onclick="pdfKVAddRow('doc')">+ 添加映射</button>
@@ -776,10 +980,15 @@
             </div>
         </div>
         <div class="modal-footer">
-            <button class="btn btn-text" style="margin-right:auto;color:#999" onclick="deleteCurrentTemplate()">
-                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-                删除此模版
-            </button>
+            <div style="display:flex;align-items:center;gap:12px;margin-right:auto;">
+                <button class="btn btn-text" style="color:#999" onclick="deleteCurrentTemplate()">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
+                    删除此模版
+                </button>
+                <button class="btn btn-sm" onclick="openVarDict()" style="font-size:11px;padding:3px 10px;background:#fff;color:#1677ff;border:1px solid #1677ff;">
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:2px;"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>变量词典
+                </button>
+            </div>
             <button class="btn" onclick="resetTemplate()">重置</button>
             <button class="btn btn-primary" onclick="saveTemplate()">保存模版</button>
         </div>
@@ -805,6 +1014,83 @@
         <div class="confirm-actions">
             <button class="btn" onclick="closeDeleteConfirm()">取消</button>
             <button class="btn btn-danger" id="del-confirm-ok" onclick="confirmDeleteTemplate()">确认删除</button>
+        </div>
+    </div>
+</div>
+
+<!-- ========== 变量词典弹窗 ========== -->
+<div class="dict-modal-overlay" id="dict-modal" onclick="if(event.target===this)closeVarDict()">
+    <div class="dict-modal">
+        <div class="dict-modal-header">
+            <h5>变量词典</h5>
+            <button class="dict-close-btn" onclick="closeVarDict()" title="关闭">&times;</button>
+        </div>
+        <div class="dict-tab-bar">
+            <button class="dict-tab-item active" onclick="switchDictTab('single')">单机变量</button>
+            <button class="dict-tab-item" onclick="switchDictTab('fleet')">机群变量</button>
+        </div>
+
+        <!-- 单机：三栏级联 -->
+        <div class="kv-cascade-body" id="dict-cascade-body" style="height:420px;">
+            <div class="kv-cascade-col kv-cascade-col-l1">
+                <div class="kv-cascade-col-label">设备类型</div>
+                <div id="dict-l1"></div>
+            </div>
+            <div class="kv-cascade-col kv-cascade-col-l2">
+                <div class="kv-cascade-col-label">物模型</div>
+                <div id="dict-l2"></div>
+            </div>
+            <div class="kv-cascade-col kv-cascade-col-l3">
+                <div class="kv-cascade-col-label">字段</div>
+                <div class="dict-field-search"><input type="text" placeholder="搜索字段..." id="dict-search-input" oninput="dictFilterL3()"></div>
+                <div id="dict-l3"></div>
+            </div>
+        </div>
+
+        <!-- 机群：简单表格 -->
+        <div id="dict-fleet-body" style="display:none;overflow-y:auto;max-height:420px;padding:12px 16px;">
+            <div class="dict-fleet-summary" id="dict-fleet-summary" style="display:none;"></div>
+            <div class="dict-field-search" style="margin:0 0 8px 0;"><input type="text" placeholder="搜索变量..." id="dict-fleet-search-input" oninput="dictFilterFleet()"></div>
+            <div id="dict-fleet-table-wrap"></div>
+        </div>
+
+        <div class="dict-modal-footer">仅查看变量列表</div>
+    </div>
+</div>
+
+<!-- ========== 机群数据列配置——三级联动变量选择弹窗 ========== -->
+<div class="kv-cascade-overlay" id="kv-cascade-overlay" onclick="closeFleetCascade(event)">
+    <div class="kv-cascade-panel" onclick="event.stopPropagation()">
+        <div class="kv-cascade-header">
+            <div class="header-left">
+                <h5>选择映射字段</h5>
+                <p>设备类型 → 物模型 → 字段（勾选需映射的变量，可跨模型多选）</p>
+            </div>
+            <button class="kv-cascade-close" onclick="closeFleetCascade()">×</button>
+        </div>
+        <div class="kv-cascade-body">
+            <!-- 第一列：设备类型 -->
+            <div class="kv-cascade-col kv-cascade-col-l1">
+                <div class="kv-cascade-col-label">设备类型</div>
+                <div id="kv-cascade-l1"></div>
+            </div>
+            <!-- 第二列：物模型 -->
+            <div class="kv-cascade-col kv-cascade-col-l2">
+                <div class="kv-cascade-col-label">物模型</div>
+                <div id="kv-cascade-l2"></div>
+            </div>
+            <!-- 第三列：字段 -->
+            <div class="kv-cascade-col kv-cascade-col-l3">
+                <div class="kv-cascade-col-label">字段（可多选）</div>
+                <div id="kv-cascade-l3"></div>
+            </div>
+        </div>
+        <div class="kv-cascade-footer">
+            <div class="kv-cascade-selected" id="kv-cascade-selected">已选：<span>0</span> 个变量</div>
+            <div class="kv-cascade-actions">
+                <button class="kv-cascade-btn" onclick="closeFleetCascade()">取消</button>
+                <button class="kv-cascade-btn primary" onclick="confirmFleetCascade()">确认选择</button>
+            </div>
         </div>
     </div>
 </div>
@@ -869,16 +1155,14 @@ const LANG_CONFIG = [
 
 // 示例数据（预览用，仅简体中文）
 const SAMPLE_DATA_ZH = {
-    '{{报告名称}}':    '三一设备运行日报',
-    '{{报告日期}}':    '2026-07-17',
+    '{{模版名称}}':    '三一设备运行日报',
+    '{{发送日期}}':    '2026-07-17',
     '{{收件人姓名}}':  '张伟',
     '{{生成时间}}':    '2026-07-17 08:00',
     '{{设备编号}}':    'SY20240512003',
     '{{异常类型}}':    '发动机高温报警',
-    // 生产力度量（反映作业效率与开工情况）
     '{{开工天数}}':      '27天',
     '{{实际操作时长}}':  '156.5h',
-    // 设备监控（反映设备运行状态与能耗挡位）
     '{{发动机运行时长}}':'168.8h',
     '{{空转时长}}':      '12.3h',
     '{{能耗油耗}}':      '3,250L',
@@ -901,11 +1185,11 @@ function defaultBody(rt) {
     return defaultBodyOffline();
 }
 function defaultBodyReport() {
-    return `<div class="report-title">{{报告名称}}</div>
-<div class="report-subtitle">报告周期：{{报告日期}} ｜ 生成时间：{{生成时间}}</div>
+    return `<div class="report-title">{{模版名称}}</div>
+<div class="report-subtitle">报告周期：{{发送日期}} ｜ 生成时间：{{生成时间}}</div>
 <div class="report-section"><h4>一、总体概况</h4>
 <p>尊敬的{{收件人姓名}}，您好！</p>
-<p>本期开工天数 <strong>{{开工天数}}</strong>，实际操作时长 <strong>{{实际操作时长}}</strong>。</p></div>
+<p>本报表为您汇总近段时间范围内的统计数据，具体请查看相关附件。</p></div>
 <hr class="section-divider">
 <div class="report-section"><h4>二、设备运行监控</h4></div>
 <table><thead><tr><th>指标项</th><th>本期值</th><th>指标项</th><th>本期值</th></tr></thead>
@@ -915,20 +1199,16 @@ function defaultBodyReport() {
 <tr style="background:#fafafa;font-weight:600;"><td>异常预警</td><td>{{异常预警}}</td><td></td><td></td></tr>
 </tbody></table>
 <hr class="section-divider">
-<div class="report-section"><h4>三、异常设备明细</h4></div>
-<table><thead><tr><th>序号</th><th>设备编号</th><th>设备类型</th><th>所属工地</th><th>异常类型</th><th>异常时长</th><th>状态</th></tr></thead>
-<tbody>
-<tr><td>1</td><td>SY20240512003</td><td>挖掘机 SY485H</td><td>长沙梅溪湖工地</td><td>发动机高温报警</td><td>2h 35min</td><td class="status-error">未处理</td></tr>
-</tbody></table>
+<div class="report-section"><h4>三、异常设备明细</h4><p>请查看附件～</p></div>
 <div class="email-footer">本报告由 MySANY 设备管理平台自动生成 ｜ 如有疑问请联系 admin@sany.com.cn<br>如需退订此报告，请登录平台在个人设置中关闭邮件订阅</div>`;
 }
 function defaultAttachmentTable() {
     // 默认附件表格结构：表头行 + 变量占位符行
     return {
-        cols: 7,
+        cols: 6,
         cells: [
-            ['资产编号', '资产名称', '开工天数(d)', '运行时长(h)', '实际工时(h)', '能耗(L)', '异常预警'],
-            ['{{设备编号}}', '{{报告名称}}', '{{开工天数}}', '{{发动机运行时长}}', '{{实际操作时长}}', '{{能耗油耗}}', '{{异常预警}}']
+            ['统计周期', '设备机型', '设备编号', '工时', '能耗', '里程'],
+            ['{{统计周期}}', '{{设备机型}}', '{{设备编号}}', '{{工时}}', '{{能耗}}', '{{里程}}']
         ]
     };
 }
@@ -938,7 +1218,7 @@ function defaultBodyAlert() {
 <div class="report-section"><h4>告警详情</h4><p>尊敬的{{收件人姓名}}，您好！</p>
 <p>系统监测到以下设备出现异常，请及时处理：</p>
 <table><thead><tr><th>设备编号</th><th>设备类型</th><th>所属工地</th><th>异常类型</th><th>发生时间</th></tr></thead>
-<tbody><tr><td>{{设备编号}}</td><td>挖掘机 SY485H</td><td>长沙梅溪湖工地</td><td class="status-error">{{异常类型}}</td><td>{{报告日期}} 14:30</td></tr></tbody></table></div>
+<tbody><tr><td>{{设备编号}}</td><td>挖掘机 SY485H</td><td>长沙梅溪湖工地</td><td class="status-error">{{异常类型}}</td><td>{{发送日期}} 14:30</td></tr></tbody></table></div>
 <div class="email-footer">此为自动告警通知，请勿回复 ｜ 登录平台可配置告警规则</div>`;
 }
 function defaultBodyOffline() {
@@ -952,8 +1232,8 @@ function defaultBodyOffline() {
 // 英文默认模板
 function defaultEnBody(rt) {
     if (rt !== '日报' && rt !== '周报' && rt !== '月报') return '';
-    return `<div class="report-title">{{报告名称}}</div>
-<div class="report-subtitle">Period: {{报告日期}} | Generated: {{生成时间}}</div>
+    return `<div class="report-title">{{模版名称}}</div>
+<div class="report-subtitle">Period: {{发送日期}} | Generated: {{生成时间}}</div>
 <div class="report-section"><h4>1. Overview</h4>
 <p>Dear {{收件人姓名}},</p>
 <p>Working days: <strong>{{开工天数}}</strong>, Actual operating hours: <strong>{{实际操作时长}}</strong>.</p></div>
@@ -981,14 +1261,14 @@ function defaultEnAlertBody() {
 <div class="report-section"><h4>Alarm Details</h4><p>Dear {{收件人姓名}},</p>
 <p>The system detected the following equipment abnormality, please handle promptly:</p>
 <table><thead><tr><th>Equipment ID</th><th>Type</th><th>Site</th><th>Abnormal</th><th>Time</th></tr></thead>
-<tbody><tr><td>{{设备编号}}</td><td>Excavator SY485H</td><td>Changsha Site</td><td class="status-error">{{异常类型}}</td><td>{{报告日期}} 14:30</td></tr></tbody></table></div>
+<tbody><tr><td>{{设备编号}}</td><td>Excavator SY485H</td><td>Changsha Site</td><td class="status-error">{{异常类型}}</td><td>{{发送日期}} 14:30</td></tr></tbody></table></div>
 <div class="email-footer">Auto alarm, do not reply | Configure alarm rules in platform</div>`;
 }
 
 // 能耗分析月报模版
 function defaultBodyEnergy() {
     return `<div class="report-title">能耗分析月报</div>
-<div class="report-subtitle">统计周期：{{报告日期}} ｜ 生成时间：{{生成时间}}</div>
+<div class="report-subtitle">统计周期：{{发送日期}} ｜ 生成时间：{{生成时间}}</div>
 <div class="report-section"><h4>一、能耗总览</h4>
 <p>尊敬的{{收件人姓名}}，您好！</p>
 <p>本月设备累计能耗油耗 <strong>{{能耗油耗}}</strong>，开工天数 <strong>{{开工天数}}</strong> 天。</p></div>
@@ -1008,41 +1288,41 @@ const templates = [
     {
         id: 0, machineType: '单机', enabled: true, updatedAt: '2026-07-17 08:00',
         translations: {
-            'zh-CN': { name: '设备运行日报模版', description: '适用于单台设备每日运行数据汇报', body: defaultBodyReport(), attachmentFileName: '{{报告名称}}_{{报告日期}}' },
-            'en':    { name: 'Daily Equipment Report', description: 'Single machine daily operation report', body: defaultEnBody('日报'), attachmentFileName: '{{报告名称}}_{{报告日期}}' }
+            'zh-CN': { name: '设备运行日报模版', description: '适用于单台设备每日运行数据汇报', body: defaultBodyReport(), attachmentFileName: '{{模版名称}}_{{发送日期}}' },
+            'en':    { name: 'Daily Equipment Report', description: 'Single machine daily operation report', body: defaultEnBody('日报'), attachmentFileName: '{{模版名称}}_{{发送日期}}' }
         }
     },
     {
         id: 1, machineType: '单机', enabled: true, updatedAt: '2026-07-17 08:30',
         translations: {
-            'zh-CN': { name: '设备运行周报模版', description: '适用于单台设备每周运行数据汇总汇报', body: defaultBodyReport(), attachmentFileName: '{{报告名称}}_{{报告日期}}' },
-            'en':    { name: 'Weekly Equipment Report', description: 'Single machine weekly operation report', body: defaultEnBody('周报'), attachmentFileName: '{{报告名称}}_{{报告日期}}' }
+            'zh-CN': { name: '设备运行周报模版', description: '适用于单台设备每周运行数据汇总汇报', body: defaultBodyReport(), attachmentFileName: '{{模版名称}}_{{发送日期}}' },
+            'en':    { name: 'Weekly Equipment Report', description: 'Single machine weekly operation report', body: defaultEnBody('周报'), attachmentFileName: '{{模版名称}}_{{发送日期}}' }
         }
     },
     {
         id: 2, machineType: '机群', enabled: true, updatedAt: '2026-07-18 09:00',
         translations: {
-            'zh-CN': { name: '设备运行月报模版', description: '适用于机群设备每月运行数据汇总汇报', body: defaultBodyReport(), attachmentFileName: '{{报告名称}}_{{报告日期}}' },
-            'en':    { name: 'Monthly Fleet Report', description: 'Fleet monthly operation report', body: defaultEnBody('月报'), attachmentFileName: '{{报告名称}}_{{报告日期}}' }
+            'zh-CN': { name: '设备运行月报模版', description: '适用于机群设备每月运行数据汇总汇报', body: defaultBodyReport(), attachmentFileName: '{{模版名称}}_{{发送日期}}' },
+            'en':    { name: 'Monthly Fleet Report', description: 'Fleet monthly operation report', body: defaultEnBody('月报'), attachmentFileName: '{{模版名称}}_{{发送日期}}' }
         }
     },
     {
         id: 3, machineType: '机群', enabled: true, updatedAt: '2026-07-19 10:15',
         translations: {
-            'zh-CN': { name: '设备异常告警通知模版', description: '设备发生异常时自动发送告警通知', body: defaultBodyAlert(), attachmentFileName: '异常告警_{{报告日期}}' },
-            'en':    { name: 'Abnormal Alarm Notification', description: 'Auto alarm notification on equipment exception', body: defaultEnAlertBody(), attachmentFileName: 'Alarm_{{报告日期}}' }
+            'zh-CN': { name: '设备异常告警通知模版', description: '设备发生异常时自动发送告警通知', body: defaultBodyAlert(), attachmentFileName: '异常告警_{{发送日期}}' },
+            'en':    { name: 'Abnormal Alarm Notification', description: 'Auto alarm notification on equipment exception', body: defaultEnAlertBody(), attachmentFileName: 'Alarm_{{发送日期}}' }
         }
     },
     {
         id: 4, machineType: '机群', enabled: false, updatedAt: '2026-07-20 14:20',
         translations: {
-            'zh-CN': { name: '设备离线提醒模版', description: '设备离线超过阈值时自动发送提醒', body: defaultBodyOffline(), attachmentFileName: '离线提醒_{{报告日期}}' }
+            'zh-CN': { name: '设备离线提醒模版', description: '设备离线超过阈值时自动发送提醒', body: defaultBodyOffline(), attachmentFileName: '离线提醒_{{发送日期}}' }
         }
     },
     {
         id: 5, machineType: '单机', enabled: true, updatedAt: '2026-07-21 16:00',
         translations: {
-            'zh-CN': { name: '能耗分析月报模版', description: '单台设备月度能耗油耗分析报告', body: defaultBodyEnergy(), attachmentFileName: '能耗月报_{{报告日期}}' }
+            'zh-CN': { name: '能耗分析月报模版', description: '单台设备月度能耗油耗分析报告', body: defaultBodyEnergy(), attachmentFileName: '能耗月报_{{发送日期}}' }
         }
     }
 ];
@@ -1111,7 +1391,8 @@ function openEditModal(index, isNew) {
     else if (langs.length > 0) currentEditLang = langs[0];
 
     // 清空表格构建器缓存并重置到步骤1
-    tbData = null;
+    tbDataKV = null;
+    window._scModelKV = null;
     switchStep(1);
 
     document.getElementById('edit-modal').classList.add('show');
@@ -1128,6 +1409,7 @@ function loadEditForm(isNew) {
     document.getElementById('edit-tpl-name').value = hasTr ? tr.name : '';
     document.getElementById('edit-tpl-desc').value = hasTr ? (tr.description || '') : '';
     document.getElementById('edit-tpl-machine-type').value = t.machineType || '单机';
+    toggleDataColumnConfig(true);
     document.getElementById('edit-tpl-enabled').checked = t.enabled;
 
     // 更新语言选择器
@@ -1172,14 +1454,16 @@ function switchEditLang(lang) {
             pdfTemplateFile: zhTr.pdfTemplateFile || '',
             pdfAttachmentFileName: zhTr.pdfAttachmentFileName || '',
             pdfDocKV: zhTr.pdfDocKV ? zhTr.pdfDocKV.map(r => [r[0]||'', r[1]||'']) : [['', '']],
-            attachmentTable: zhTr.attachmentTable ? {
-                cols: zhTr.attachmentTable.cols,
-                cells: [zhTr.attachmentTable.cells[0].slice(), zhTr.attachmentTable.cells[1].slice()]
-            } : undefined
+            attachmentTableKV: zhTr.attachmentTableKV ? (
+                Array.isArray(zhTr.attachmentTableKV)
+                    ? zhTr.attachmentTableKV.map(r => [r[0]||'', r[1]||''])
+                    : JSON.parse(JSON.stringify(zhTr.attachmentTableKV))
+            ) : undefined
         };
     }
     // 重置到步骤1并清空表格构建器缓存
-    tbData = null;
+    tbDataKV = null;
+    window._scModelKV = null;
     switchStep(1);
     loadEditForm();
 }
@@ -1208,12 +1492,11 @@ function saveEditToState() {
     t.translations[currentEditLang].pdfAttachmentFileName = pdfFilenameEl ? pdfFilenameEl.value.trim() : '';
     // PDF 键值数据
     t.translations[currentEditLang].pdfDocKV = pdfDocKV.map(r => [r[0]||'', r[1]||'']);
-    if (tbData) {
-        tbSaveAllCells();
-        t.translations[currentEditLang].attachmentTable = {
-            cols: tbData.cols,
-            cells: [tbData.cells[0].slice(), tbData.cells[1].slice()]
-        };
+    const mt = document.getElementById('edit-tpl-machine-type').value;
+    if (mt === '单机' && window._scModelKV && Object.keys(window._scModelKV).length > 0) {
+        t.translations[currentEditLang].attachmentTableKV = JSON.parse(JSON.stringify(window._scModelKV));
+    } else if (tbDataKV && tbDataKV.length) {
+        t.translations[currentEditLang].attachmentTableKV = tbDataKV.map(r => [r[0]||'', r[1]||'']);
     }
     t.machineType = document.getElementById('edit-tpl-machine-type').value;
     t.enabled = document.getElementById('edit-tpl-enabled').checked;
@@ -1399,7 +1682,7 @@ function switchStep(stepNum) {
     // 离开步骤1时保存正文内容
     if (stepNum !== 1) { saveEditToState(); }
     // 离开步骤2时保存表格数据
-    if (stepNum !== 2 && tbData) { tbSaveAllCells(); }
+    if (stepNum !== 2 && tbDataKV) { }
 
     document.getElementById('step-body').style.display = stepNum === 1 ? '' : 'none';
     document.getElementById('step-attachment').style.display = stepNum === 2 ? '' : 'none';
@@ -1410,9 +1693,21 @@ function switchStep(stepNum) {
     });
 
     // 进入步骤2时初始化 XLSX/CSV 表格
-    if (stepNum === 2) { initAttachmentTable(); }
+    if (stepNum === 2) { initAttachmentTable(); toggleDataColumnConfig(); }
     // 进入步骤3时初始化 PDF 区域
     if (stepNum === 3) { initPdfSection(); }
+}
+
+// 数据列配置：机群显示键值对，单机显示勾选式
+function toggleDataColumnConfig(skipInit) {
+    const mt = document.getElementById('edit-tpl-machine-type').value;
+    const fleetEl = document.getElementById('fleet-column-config');
+    const singleEl = document.getElementById('single-column-config');
+    if (fleetEl) fleetEl.style.display = mt === '机群' ? '' : 'none';
+    if (singleEl) {
+        singleEl.style.display = mt !== '机群' ? '' : 'none';
+        if (mt !== '机群' && !skipInit) scInit();
+    }
 }
 
 function initAttachmentTable() {
@@ -1422,25 +1717,34 @@ function initAttachmentTable() {
     const defName = defaultAttachmentFileName();
     document.getElementById('attach-filename').value = tr.attachmentFileName || defName;
 
-    if (tr.attachmentTable && tr.attachmentTable.cols) {
-        // 从已保存数据恢复
-        tbData = {
-            cols: tr.attachmentTable.cols,
-            cells: [tr.attachmentTable.cells[0].slice(), tr.attachmentTable.cells[1].slice()]
-        };
-        document.getElementById('tb-cols').value = tbData.cols;
-    } else {
-        // 无历史数据，尝试从正文解析
-        const bodyHTML = getBodyHTML();
-        const tableMatch = bodyHTML.match(/<table[\s\S]*?<\/table>/i);
-        if (tableMatch) {
-            tbParseTableHTML(tableMatch[0]);
-        } else {
-            tbInit(0, 7);
-            document.getElementById('tb-cols').value = 7;
+    if (tr.attachmentTableKV) {
+        if (Array.isArray(tr.attachmentTableKV)) {
+            // 旧格式：扁平数组
+            window._scModelKV = null;
+            if (tr.attachmentTableKV.length) {
+                tbDataKV = tr.attachmentTableKV.map(r => [r[0]||'', r[1]||'']);
+            }
+        } else if (typeof tr.attachmentTableKV === 'object') {
+            // 新 per-model 格式：{modelKey: [['name','{{tag}}'],...]}
+            window._scModelKV = JSON.parse(JSON.stringify(tr.attachmentTableKV));
+            const modelKeys = Object.keys(tr.attachmentTableKV);
+            if (modelKeys.length > 0) {
+                const firstCols = tr.attachmentTableKV[modelKeys[0]];
+                if (Array.isArray(firstCols) && firstCols.length) {
+                    tbDataKV = firstCols.map(r => [r[0]||'', r[1]||'']);
+                }
+            }
         }
+    } else if (tr.attachmentTable && tr.attachmentTable.cols) {
+        // 旧格式迁移
+        tbDataKV = [];
+        for (let c = 0; c < tr.attachmentTable.cols; c++) {
+            tbDataKV.push([tr.attachmentTable.cells[0][c]||'', tr.attachmentTable.cells[1][c]||'']);
+        }
+    } else {
+        tbDataKV = JSON.parse(JSON.stringify(tbDefaultKV));
     }
-    tbRender();
+    tbKVRender();
 }
 
 function initPdfSection() {
@@ -1469,7 +1773,7 @@ function initPdfSection() {
 }
 
 function defaultAttachmentFileName() {
-    return '{{报告名称}}_{{报告日期}}';
+    return '{{模版名称}}_{{发送日期}}';
 }
 
 // ==================== PDF 模板上传处理 ====================
@@ -1502,7 +1806,7 @@ function removePdfTemplate() {
 }
 
 // ==================== PDF 键值对管理 ====================
-let pdfDocKV = [['', '']];    // 文档键值：模板变量 → 系统字段
+let pdfDocKV = [['', '']];    // 文档键值：文档键值（占位符）→ 模版变量
 
 function pdfKVAddRow(type) {
     pdfDocKV.push(['', '']);
@@ -1523,14 +1827,27 @@ function renderPdfKV() {
     // 文档键值表
     const docBody = document.getElementById('pdf-doc-kv-body');
     if (docBody) {
-        docBody.innerHTML = pdfDocKV.map((row, i) => `
-            <tr>
-                <td><input type="text" value="${escapeAttr(row[0])}" placeholder="{{模板变量}}" oninput="pdfKVUpdate('doc',${i},0,this.value)" onblur="saveEditToState()"></td>
-                <td><input type="text" value="${escapeAttr(row[1])}" placeholder="系统字段" oninput="pdfKVUpdate('doc',${i},1,this.value)" onblur="saveEditToState()"></td>
-                <td style="width:32px;text-align:center;">
+        docBody.innerHTML = pdfDocKV.map((row, i) => {
+            const tags = parseVarTags(row[1]);
+            let tagHtml = '';
+            if (tags.length) {
+                tagHtml = tags.map(t => `<span class="kv-cascade-tag" title="${escapeAttr(t)}">${escapeHtml(t)}<span class="tag-close" onclick="event.stopPropagation();removeCascadeTag(${i},'${escapeAttr(t)}','pdf')">×</span></span>`).join('');
+            } else {
+                tagHtml = '<span class="kv-cascade-placeholder">点击选择映射字段...</span>';
+            }
+            return `<tr>
+                <td><input type="text" value="${escapeAttr(row[0])}" placeholder="文档键值/占位符" oninput="pdfKVUpdate('doc',${i},0,this.value)" onblur="saveEditToState()"></td>
+                <td>
+                    <div class="kv-cascade-trigger" onclick="openFleetCascade(${i},'pdf')" title="点击弹出三级联动选择器">
+                        <div class="kv-cascade-tags-area">${tagHtml}</div>
+                        <div class="kv-cascade-btn-trigger">选择字段<span class="trigger-arrow">▼</span></div>
+                    </div>
+                </td>
+                <td style="width:40px;text-align:center;">
                     ${pdfDocKV.length > 1 ? `<span class="kv-icon-del" onclick="pdfKVRemoveRow('doc',${i})">×</span>` : ''}
                 </td>
-            </tr>`).join('');
+            </tr>`;
+        }).join('');
     }
 
 }
@@ -1540,176 +1857,574 @@ function escapeAttr(str) {
 }
 
 
+// ==================== 数据列配置（键值对：列名 ↔ 模板变量） ====================
+let tbDataKV = null; // [[列名, 模板变量], ...]
 
-function tbSaveAttachmentToState() {
-    if (!tbData) return;
-    tbSaveAllCells();
-    const t = templates[currentTemplateId];
-    const tr = getT(currentTemplateId, currentEditLang);
-    tr.attachmentTable = {
-        cols: tbData.cols,
-        cells: [tbData.cells[0].slice(), tbData.cells[1].slice()]
-    };
+// 默认的 6 列配置（机群）
+const tbDefaultKV = [
+    ['统计周期', '{{统计周期}}'],
+    ['设备机型', '{{设备机型}}'],
+    ['设备编号', '{{设备编号}}'],
+    ['工时', '{{工时}}'],
+    ['能耗', '{{能耗}}'],
+    ['里程', '{{里程}}']
+];
+
+function tbKVRender() {
+    if (!tbDataKV) return;
+    const tbody = document.getElementById('tb-kv-body');
+    if (!tbody) return;
+    let html = '';
+    tbDataKV.forEach((row, i) => {
+        const tags = parseVarTags(row[1]);
+        let tagHtml = '';
+        if (tags.length) {
+            tagHtml = tags.map(t => `<span class="kv-cascade-tag" title="${escapeAttr(t)}">${escapeHtml(t)}<span class="tag-close" onclick="event.stopPropagation();removeCascadeTag(${i},'${escapeAttr(t)}','fleet')">×</span></span>`).join('');
+        } else {
+            tagHtml = '<span class="kv-cascade-placeholder">点击选择映射字段...</span>';
+        }
+        html += `<tr>
+            <td><input type="text" class="kv-input" value="${escapeAttr(row[0])}" placeholder="列名" oninput="tbKVInput(${i},0,this.value)"></td>
+            <td>
+                <div class="kv-cascade-trigger" onclick="openFleetCascade(${i})" title="点击弹出三级联动选择器">
+                    <div class="kv-cascade-tags-area">${tagHtml}</div>
+                    <div class="kv-cascade-btn-trigger">选择字段<span class="trigger-arrow">▼</span></div>
+                </div>
+            </td>
+            <td><span class="kv-icon-del" onclick="tbKVRemoveRow(${i})" title="删除此行">×</span></td>
+        </tr>`;
+    });
+    tbody.innerHTML = html || '<tr><td colspan="3" style="text-align:center;color:#999;padding:12px;">暂无列配置，点击下方按钮添加</td></tr>';
 }
 
-function tbResetToDefault() {
-    tbInit(0, 7);
-    document.getElementById('tb-cols').value = 7;
-    tbRender();
-    showToast('已恢复默认列结构', 'success');
+function tbKVInput(i, col, val) {
+    if (!tbDataKV || !tbDataKV[i]) return;
+    tbDataKV[i][col] = val;
 }
 
-// ==================== 表格构建器（简化版：标题行 + 变量行） ====================
-let tbData = null; // { cols, cells: [[titleRow...], [varRow...]] }
-let tbActiveCell = null;
-
-function tbInit(rows, cols) {
-    // 固定2行：row0=表头标题, row1=变量占位符
-    tbData = { cols, cells: [new Array(cols).fill(''), new Array(cols).fill('')] };
+function tbKVAddRow() {
+    if (!tbDataKV) tbDataKV = [];
+    tbDataKV.push(['', '']);
+    tbKVRender();
+}
+function tbKVRemoveRow(i) {
+    if (!tbDataKV) return;
+    tbDataKV.splice(i, 1);
+    tbKVRender();
 }
 
-function tbRebuild() {
-    const cols = parseInt(document.getElementById('tb-cols').value) || 6;
-    if (!tbData) { tbInit(0, cols); }
-    const old = tbData.cells;
-    const newCells = [[], []];
-    for (let c = 0; c < cols; c++) {
-        newCells[0][c] = (old[0] && old[0][c] !== undefined) ? old[0][c] : '';
-        newCells[1][c] = (old[1] && old[1][c] !== undefined) ? old[1][c] : '';
-    }
-    tbData.cols = cols;
-    tbData.cells = newCells;
-    tbRender();
-}
-
-function tbAddCol() {
-    if (!tbData) return;
-    tbData.cols++;
-    tbData.cells[0].push('');
-    tbData.cells[1].push('');
-    document.getElementById('tb-cols').value = tbData.cols;
-    tbRender();
-}
-
-function tbDeleteCol(c) {
-    if (!tbData || tbData.cols <= 1) return;
-    tbData.cells[0].splice(c, 1);
-    tbData.cells[1].splice(c, 1);
-    tbData.cols--;
-    document.getElementById('tb-cols').value = tbData.cols;
-    tbRender();
-}
-
-function tbRender() {
-    if (!tbData) return;
-    const table = document.getElementById('tb-table');
-    const cols = tbData.cols;
-
-    let html = '<thead><tr>';
-    html += '<th class="col-label-hd">列名</th>';
-    // 标题行
-    for (let c = 0; c < cols; c++) {
-        html += `<th>
-            <div class="cell-inner" contenteditable="true" data-row="0" data-col="${c}" onfocus="tbFocusCell(this)" onblur="tbSaveCell(this)" oninput="tbOnCellInput(this)">${tbData.cells[0][c] || '&nbsp;'}</div>
-            <span class="th-del" onclick="tbDeleteCol(${c})" title="删除此列">×</span></th>`;
-    }
-    html += '</tr></thead><tbody><tr>';
-    // 变量行
-    html += '<td class="col-label">变量</td>';
-    for (let c = 0; c < cols; c++) {
-        const val = tbData.cells[1][c] || '';
-        const display = val.replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/\{\{(.+?)\}\}/g, '<span class="cell-var">{{$1}}</span>');
-        html += `<td data-row="1" data-col="${c}">
-            <div class="cell-inner" contenteditable="true" data-row="1" data-col="${c}" onfocus="tbFocusCell(this)" onblur="tbSaveCell(this)" oninput="tbOnCellInput(this)">${display || '&nbsp;'}</div>
-        </td>`;
-    }
-    html += '</tr></tbody>';
-    table.innerHTML = html;
-    tbActiveCell = null;
-}
-
-function tbFocusCell(el) {
-    tbActiveCell = el;
-    document.querySelectorAll('#tb-table .cell-inner').forEach(c => c.style.background = '');
-    el.style.background = '#fff7e6';
-}
-
-function tbSaveCell(el) {
-    const r = parseInt(el.dataset.row), c = parseInt(el.dataset.col);
-    if (tbData && !isNaN(r) && !isNaN(c)) {
-        tbData.cells[r][c] = el.innerText.trim();
+// 移除某行里的单个模板变量标签
+function removeCascadeTag(rowIdx, tag, mode) {
+    if (mode === 'pdf') {
+        if (!pdfDocKV || !pdfDocKV[rowIdx]) return;
+        const tags = parseVarTags(pdfDocKV[rowIdx][1]);
+        pdfDocKV[rowIdx][1] = tags.filter(t => t !== tag).join(',');
+        renderPdfKV();
+    } else {
+        if (!tbDataKV || !tbDataKV[rowIdx]) return;
+        const tags = parseVarTags(tbDataKV[rowIdx][1]);
+        tbDataKV[rowIdx][1] = tags.filter(t => t !== tag).join(',');
+        tbKVRender();
     }
 }
 
-function tbOnCellInput(el) {
-    const r = parseInt(el.dataset.row), c = parseInt(el.dataset.col);
-    if (tbData && !isNaN(r) && !isNaN(c)) {
-        tbData.cells[r][c] = el.innerText.trim();
-    }
+// ==================== 机群/PDF数据列配置——三级联动变量选择器 ====================
+let _fleetCascadeMode = 'fleet';       // 'fleet' | 'pdf' 当前目标
+let _fleetCascadeActiveRow = -1;        // 当前编辑的行索引
+let _fleetCascadeL1Idx = -1;           // 选中的设备类型索引
+let _fleetCascadeL2Idx = -1;           // 选中的物模型索引
+let _fleetCascadeTempChecked = {};      // 临时勾选状态 { '{{变量}}': true }
+
+// 解析模板变量字符串为数组 {{a}},{{b}} → ['{{a}}','{{b}}']
+function parseVarTags(str) {
+    if (!str) return [];
+    const matches = String(str).match(/\{\{[^}]+\}\}/g);
+    return matches || [];
 }
 
-function tbInsertVar(v) {
-    if (!tbActiveCell) {
-        showToast('请先点击选中第二行（变量行）的某个单元格', 'error');
+// HTML 转义
+function escapeHtml(str) {
+    return String(str || '').replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;').replace(/"/g, '&quot;');
+}
+
+// 构建三级联动数据（从 SINGLE_MACHINE_VARS 提取，cat=设备类型, name=物模型, vars+SC_COMMON_FIELDS=字段）
+function buildFleetCascadeData() {
+    return SINGLE_MACHINE_VARS.map(g => {
+        const allVars = [...SC_COMMON_FIELDS, ...g.vars]; // 基础字段 + 设备特有字段
+        return {
+            label: g.cat,
+            models: g.models.map(m => ({
+                key: m.key,
+                label: m.name,
+                vars: allVars.map(v => [v[0], v[1]]) // [[变量名, '{{模板变量}}'], ...]
+            }))
+        };
+    });
+}
+
+// 打开三级联动选择器（mode: 'fleet'=机群数据列, 'pdf'=PDF文档键值）
+function openFleetCascade(rowIdx, mode) {
+    _fleetCascadeMode = mode || 'fleet';
+    _fleetCascadeActiveRow = rowIdx;
+    // 根据模式读取当前行的变量值
+    const dataArr = _fleetCascadeMode === 'pdf' ? pdfDocKV : tbDataKV;
+    const currentVal = dataArr && dataArr[rowIdx] ? (dataArr[rowIdx][1] || '') : '';
+    const tags = parseVarTags(currentVal);
+    _fleetCascadeTempChecked = {};
+    tags.forEach(t => { _fleetCascadeTempChecked[t] = true; });
+    _fleetCascadeL1Idx = -1;
+    _fleetCascadeL2Idx = -1;
+    renderCascadeL1();
+    updateCascadeSelectedCount();
+    document.getElementById('kv-cascade-overlay').classList.add('show');
+}
+
+// 关闭选择器（点击遮罩或取消按钮）
+function closeFleetCascade(e) {
+    if (e && e.target !== document.getElementById('kv-cascade-overlay')) return;
+    document.getElementById('kv-cascade-overlay').classList.remove('show');
+}
+
+// 渲染第一列：设备类型
+function renderCascadeL1() {
+    const data = buildFleetCascadeData();
+    const el = document.getElementById('kv-cascade-l1');
+    let html = '';
+    data.forEach((g, i) => {
+        html += `<div class="kv-cascade-item${_fleetCascadeL1Idx === i ? ' active' : ''}" onclick="selectCascadeL1(${i})">
+            <span class="cascade-dot"></span>${escapeHtml(g.label)}
+            <span class="cascade-badge">${g.models.length}模型</span>
+        </div>`;
+    });
+    el.innerHTML = html;
+    // 清空L2、L3
+    document.getElementById('kv-cascade-l2').innerHTML = '<div class="kv-cascade-empty">请选择设备类型</div>';
+    document.getElementById('kv-cascade-l3').innerHTML = '<div class="kv-cascade-empty">请选择物模型</div>';
+}
+
+// 选择设备类型
+function selectCascadeL1(idx) {
+    _fleetCascadeL1Idx = idx;
+    _fleetCascadeL2Idx = -1;
+    renderCascadeL1();
+    renderCascadeL2();
+}
+
+// 渲染第二列：物模型
+function renderCascadeL2() {
+    const data = buildFleetCascadeData();
+    const el = document.getElementById('kv-cascade-l2');
+    if (_fleetCascadeL1Idx < 0 || _fleetCascadeL1Idx >= data.length) {
+        el.innerHTML = '<div class="kv-cascade-empty">请选择设备类型</div>';
+        document.getElementById('kv-cascade-l3').innerHTML = '<div class="kv-cascade-empty">请选择物模型</div>';
         return;
     }
-    tbActiveCell.focus();
-    const sel = window.getSelection();
-    if (sel.rangeCount > 0) {
-        const range = sel.getRangeAt(0);
-        range.deleteContents();
-        const textNode = document.createTextNode(v);
-        range.insertNode(textNode);
-        range.setStartAfter(textNode);
-        range.collapse(true);
-        sel.removeAllRanges();
-        sel.addRange(range);
-    } else {
-        tbActiveCell.textContent += v;
+    const group = data[_fleetCascadeL1Idx];
+    let html = '';
+    group.models.forEach((m, i) => {
+        html += `<div class="kv-cascade-item${_fleetCascadeL2Idx === i ? ' active' : ''}" onclick="selectCascadeL2(${i})">
+            ${escapeHtml(m.label)}
+            <span class="cascade-badge">${m.vars.length}字段</span>
+        </div>`;
+    });
+    el.innerHTML = html;
+    document.getElementById('kv-cascade-l3').innerHTML = '<div class="kv-cascade-empty">请选择物模型</div>';
+}
+
+// 选择物模型
+function selectCascadeL2(idx) {
+    _fleetCascadeL2Idx = idx;
+    renderCascadeL2();
+    renderCascadeL3();
+}
+
+// 渲染第三列：字段复选框（多选）
+function renderCascadeL3() {
+    const data = buildFleetCascadeData();
+    const el = document.getElementById('kv-cascade-l3');
+    if (_fleetCascadeL1Idx < 0 || _fleetCascadeL2Idx < 0 ||
+        _fleetCascadeL1Idx >= data.length ||
+        _fleetCascadeL2Idx >= data[_fleetCascadeL1Idx].models.length) {
+        el.innerHTML = '<div class="kv-cascade-empty">请先选择设备类型和物模型</div>';
+        return;
     }
-    tbOnCellInput(tbActiveCell);
-    tbActiveCell.focus();
+    const model = data[_fleetCascadeL1Idx].models[_fleetCascadeL2Idx];
+    let html = '';
+    model.vars.forEach(v => {
+        const name = v[0], tag = v[1];
+        const checked = _fleetCascadeTempChecked[tag] ? ' checked' : '';
+        html += `<label class="kv-cascade-check-item">
+            <input type="checkbox"${checked} onchange="toggleCascadeCheck('${escapeAttr(tag)}')">
+            <span class="check-var-name">${escapeHtml(name)}</span>
+            <span class="check-var-tag">${escapeHtml(tag)}</span>
+        </label>`;
+    });
+    el.innerHTML = html;
+    updateCascadeSelectedCount();
+}
+
+// 切换字段勾选状态
+function toggleCascadeCheck(tag) {
+    if (_fleetCascadeTempChecked[tag]) {
+        delete _fleetCascadeTempChecked[tag];
+    } else {
+        _fleetCascadeTempChecked[tag] = true;
+    }
+    updateCascadeSelectedCount();
+}
+
+// 更新已选计数
+function updateCascadeSelectedCount() {
+    const count = Object.keys(_fleetCascadeTempChecked).length;
+    const el = document.getElementById('kv-cascade-selected');
+    if (el) el.innerHTML = '已选：<span>' + count + '</span> 个变量';
+}
+
+// 确认选择，写入目标数据源并刷新表格
+function confirmFleetCascade() {
+    if (_fleetCascadeActiveRow < 0) return;
+    const selected = Object.keys(_fleetCascadeTempChecked).sort();
+    if (_fleetCascadeMode === 'pdf') {
+        if (!pdfDocKV || !pdfDocKV[_fleetCascadeActiveRow]) return;
+        pdfDocKV[_fleetCascadeActiveRow][1] = selected.join(',');
+        closeFleetCascade();
+        renderPdfKV();
+    } else {
+        if (!tbDataKV || !tbDataKV[_fleetCascadeActiveRow]) return;
+        tbDataKV[_fleetCascadeActiveRow][1] = selected.join(',');
+        closeFleetCascade();
+        tbKVRender();
+    }
+}
+
+// ==================== 单机数据列配置（三栏级联：设备类型 → 物模型 → 字段） ====================
+let scCurrentGroupIdx = 0;   // 当前选中的设备类型索引
+let scCurrentModelKey = '';  // 当前选中的模型 key
+let scSelectedMap = {};      // 按模型存储：{ modelKey: { '{{变量}}': true } }
+
+// 单机数据列配置——基础字段（所有模型通用）
+const SC_COMMON_FIELDS = [
+    ['统计周期', '{{统计周期}}'],
+    ['设备机型', '{{设备机型}}'],
+    ['设备编号', '{{设备编号}}']
+];
+
+// 获取当前设备类型对象
+function scGetCurrentGroup() {
+    return SINGLE_MACHINE_VARS[scCurrentGroupIdx] || null;
+}
+
+// 获取当前模型对象
+function scGetCurrentModel() {
+    const group = scGetCurrentGroup();
+    if (!group) return null;
+    return group.models.find(m => m.key === scCurrentModelKey) || null;
+}
+
+// 获取当前模型下已选的 map（确保 scSelectedMap[modelKey] 存在）
+function scGetCurrentMap() {
+    if (!scSelectedMap[scCurrentModelKey]) scSelectedMap[scCurrentModelKey] = {};
+    return scSelectedMap[scCurrentModelKey];
+}
+
+// 收集所有机器类型中的全部指标（已去重）
+function scAllIndicators() {
+    const seen = {};
+    const all = [];
+    SC_COMMON_FIELDS.forEach(v => { seen[v[1]] = true; all.push({name: v[0], tag: v[1]}); });
+    SINGLE_MACHINE_VARS.forEach(g => {
+        g.vars.forEach(v => {
+            const tag = v[1];
+            if (!seen[tag]) { seen[tag] = true; all.push({name: v[0], tag: tag}); }
+        });
+    });
+    return all;
+}
+
+// 从 attachmentTableKV 同步到 scSelectedMap（per-model）
+function scSyncFromTbDataKV() {
+    scSelectedMap = {};
+    // 优先读取 per-model 格式（_scModelKV）
+    if (window._scModelKV && typeof window._scModelKV === 'object' && !Array.isArray(window._scModelKV) && Object.keys(window._scModelKV).length > 0) {
+        for (const [mk, cols] of Object.entries(window._scModelKV)) {
+            scSelectedMap[mk] = {};
+            if (Array.isArray(cols)) {
+                cols.forEach(r => { if (r[1]) scSelectedMap[mk][r[1]] = true; });
+            }
+        }
+        return;
+    }
+    // 旧格式 tbDataKV 数组：全部归入第一个模型
+    if (!tbDataKV || !tbDataKV.length) return;
+    const firstModelKey = SINGLE_MACHINE_VARS[0].models[0].key;
+    scSelectedMap[firstModelKey] = {};
+    tbDataKV.forEach(r => { if (r[1]) scSelectedMap[firstModelKey][r[1]] = true; });
+}
+
+// 从 scSelectedMap 同步当前模型到 tbDataKV
+function scSyncToTbDataKV() {
+    const curMap = scGetCurrentMap();
+    const all = scAllIndicators();
+    tbDataKV = all.filter(item => curMap[item.tag]).map(item => [item.name, item.tag]);
+    if (tbDataKV.length === 0) tbDataKV = [];
+    _scSaveToAttachmentKV();
+    tbKVRender();
+}
+
+// 将 scSelectedMap 保存为 per-model 格式到全局 attachmentTableKV
+function _scSaveToAttachmentKV() {
+    const result = {};
+    let hasAny = false;
+    for (const [mk, map] of Object.entries(scSelectedMap)) {
+        const all = scAllIndicators();
+        const cols = all.filter(item => map[item.tag]).map(item => [item.name, item.tag]);
+        if (cols.length > 0) { result[mk] = cols; hasAny = true; }
+    }
+    window._scModelKV = hasAny ? result : {};
+}
+
+// 计算所有模型下的总已选字段数
+function scTotalSelectedCount() {
+    let total = 0;
+    SINGLE_MACHINE_VARS.forEach(g => {
+        g.models.forEach(m => {
+            const map = scSelectedMap[m.key] || {};
+            const allVars = [...SC_COMMON_FIELDS, ...g.vars];
+            total += allVars.filter(v => map[v[1]]).length;
+        });
+    });
+    return total;
+}
+
+// 初始化
+function scInit() {
+    scSyncFromTbDataKV();
+    scCurrentGroupIdx = 0;
+    scCurrentModelKey = SINGLE_MACHINE_VARS[0].models[0].key;
+    let hasAnySelection = false;
+    for (const mk of Object.keys(scSelectedMap)) {
+        if (Object.keys(scSelectedMap[mk]).length > 0) { hasAnySelection = true; break; }
+    }
+    if (!hasAnySelection) {
+        const firstGroup = SINGLE_MACHINE_VARS[0];
+        scSelectedMap[firstGroup.models[0].key] = {};
+        const allVars = [...SC_COMMON_FIELDS, ...firstGroup.vars];
+        allVars.forEach(v => { scSelectedMap[firstGroup.models[0].key][v[1]] = true; });
+    }
+    scRenderL1();
+    scRenderL2();
+    scRenderL3();
+    scUpdateFooterCount();
+    scSyncToTbDataKV();
+}
+
+// 渲染第一列：设备类型
+function scRenderL1() {
+    const el = document.getElementById('sc-l1');
+    if (!el) return;
+    let html = '';
+    SINGLE_MACHINE_VARS.forEach((g, i) => {
+        const isActive = i === scCurrentGroupIdx;
+        const modelCount = g.models.length;
+        let hasSelected = false;
+        g.models.forEach(m => {
+            const map = scSelectedMap[m.key] || {};
+            if (Object.keys(map).length > 0) hasSelected = true;
+        });
+        html += '<div class="kv-cascade-item' + (isActive ? ' active' : '') + '" onclick="scSelectGroup(' + i + ')">' +
+            '<span class="cascade-dot" style="opacity:' + (hasSelected ? 1 : 0) + '"></span>' + escapeHtml(g.cat) +
+            '<span class="cascade-badge">' + modelCount + '模型</span>' +
+            '</div>';
+    });
+    el.innerHTML = html;
+}
+
+// 选择设备类型
+function scSelectGroup(idx) {
+    scCurrentGroupIdx = idx;
+    const group = SINGLE_MACHINE_VARS[idx];
+    scCurrentModelKey = group.models[0].key;
+    scRenderL1();
+    scRenderL2();
+    scRenderL3();
+    scUpdateFooterCount();
+}
+
+// 渲染第二列：物模型
+function scRenderL2() {
+    const el = document.getElementById('sc-l2');
+    if (!el) return;
+    const group = SINGLE_MACHINE_VARS[scCurrentGroupIdx];
+    if (!group) {
+        el.innerHTML = '<div class="kv-cascade-empty">请选择设备类型</div>';
+        return;
+    }
+    let html = '';
+    group.models.forEach((m, i) => {
+        const isActive = m.key === scCurrentModelKey;
+        const allVars = [...SC_COMMON_FIELDS, ...group.vars];
+        html += '<div class="kv-cascade-item' + (isActive ? ' active' : '') + '" onclick="scSelectModel(\'' + m.key + '\')">' +
+            escapeHtml(m.name) +
+            '<span class="cascade-badge">' + allVars.length + '字段</span>' +
+            '</div>';
+    });
+    el.innerHTML = html;
+}
+
+// 选择物模型
+function scSelectModel(key) {
+    scCurrentModelKey = key;
+    for (let i = 0; i < SINGLE_MACHINE_VARS.length; i++) {
+        if (SINGLE_MACHINE_VARS[i].models.some(m => m.key === key)) {
+            scCurrentGroupIdx = i;
+            break;
+        }
+    }
+    scRenderL1();
+    scRenderL2();
+    scRenderL3();
+    scUpdateFooterCount();
+}
+
+// 渲染第三列：字段
+function scRenderL3() {
+    const el = document.getElementById('sc-l3');
+    if (!el) return;
+    const group = SINGLE_MACHINE_VARS[scCurrentGroupIdx];
+    if (!group) {
+        el.innerHTML = '<div class="kv-cascade-empty">请选择设备类型</div>';
+        return;
+    }
+    const model = group.models.find(m => m.key === scCurrentModelKey);
+    if (!model) {
+        el.innerHTML = '<div class="kv-cascade-empty">请选择物模型</div>';
+        return;
+    }
+    const allVars = [...SC_COMMON_FIELDS, ...group.vars];
+    const map = scSelectedMap[scCurrentModelKey] || {};
+    let html = '';
+    allVars.forEach((v, idx) => {
+        const isCommon = idx < SC_COMMON_FIELDS.length;
+        const checked = map[v[1]] ? ' checked' : '';
+        html += '<label class="kv-cascade-check-item">' +
+            '<input type="checkbox"' + checked + ' onchange="scToggleCheck(\'' + escapeAttr(v[1]) + '\')">' +
+            '<span class="check-var-name">' + escapeHtml(v[0]) + (isCommon ? ' <span style="font-size:10px;color:#999;font-weight:normal;">(基础)</span>' : '') + '</span>' +
+            '<span class="check-var-tag">' + escapeHtml(v[1]) + '</span>' +
+            '</label>';
+    });
+    el.innerHTML = html;
+    scUpdateFooterCount();
+}
+
+// 勾选/取消勾选
+function scToggleCheck(tag) {
+    const curMap = scGetCurrentMap();
+    if (curMap[tag]) {
+        delete curMap[tag];
+    } else {
+        curMap[tag] = true;
+    }
+    scRenderL3();
+    scRenderL1();
+    scRenderL2();
+    scSyncToTbDataKV();
+}
+
+// 全选/取消全选
+function scToggleAll(select) {
+    const group = scGetCurrentGroup();
+    const curMap = scGetCurrentMap();
+    if (!group) return;
+    const allVars = [...SC_COMMON_FIELDS, ...group.vars];
+    allVars.forEach(v => {
+        if (select) { curMap[v[1]] = true; }
+        else { delete curMap[v[1]]; }
+    });
+    scRenderL3();
+    scRenderL1();
+    scRenderL2();
+    scSyncToTbDataKV();
+}
+
+// 更新底部已选计数
+function scUpdateFooterCount() {
+    const el = document.getElementById('sc-footer-count');
+    if (!el) return;
+    const count = scTotalSelectedCount();
+    el.innerHTML = '已选：<span>' + count + '</span> 个变量';
+    scRenderModelTags();
+}
+
+// 渲染已配置模型标签（底部快速查看/删除）
+function scRenderModelTags() {
+    const el = document.getElementById('sc-model-tags');
+    if (!el) return;
+    // 遍历所有设备类型下的所有模型，收集有勾选字段的模型
+    const configuredModels = [];
+    SINGLE_MACHINE_VARS.forEach(g => {
+        g.models.forEach(m => {
+            const modelMap = scSelectedMap[m.key] || {};
+            const allVars = [...SC_COMMON_FIELDS, ...g.vars];
+            const selCount = allVars.filter(v => modelMap[v[1]]).length;
+            if (selCount > 0) {
+                configuredModels.push({ group: g, model: m, count: selCount });
+            }
+        });
+    });
+    if (configuredModels.length === 0) {
+        el.innerHTML = '<span class="sc-tags-label">已配置模型：</span><span class="sc-tags-empty">暂未选择任何字段</span>';
+        return;
+    }
+    let html = '<span class="sc-tags-label">已配置 <b style="color:#333;">' + configuredModels.length + '</b> 个模型：</span>';
+    configuredModels.forEach(item => {
+        html += '<span class="sc-model-tag" onclick="scScrollToModel(\'' + item.model.key + '\')" title="点击查看 ' + item.group.cat + ' - ' + item.model.name + '">' +
+            '<span class="sc-tag-name">' + escapeHtml(item.group.cat + ' - ' + item.model.name) + '</span>' +
+            '<span class="sc-tag-count">(' + item.count + '列)</span>' +
+            '<span class="sc-tag-del" onclick="event.stopPropagation();scRemoveModel(\'' + item.model.key + '\')" title="清除此模型的所有字段">×</span>' +
+            '</span>';
+    });
+    el.innerHTML = html;
+}
+
+// 清除某个模型的所有勾选字段
+function scRemoveModel(modelKey) {
+    scSelectedMap[modelKey] = {};
+    // 如果当前正在查看这个模型，刷新第三列
+    if (scCurrentModelKey === modelKey) {
+        scRenderL3();
+    }
+    scRenderL1();
+    scRenderL2();
+    scUpdateFooterCount();
+    scSyncToTbDataKV();
+}
+
+// 跳转到指定模型的设备类型并选中该模型
+function scScrollToModel(modelKey) {
+    for (let i = 0; i < SINGLE_MACHINE_VARS.length; i++) {
+        const g = SINGLE_MACHINE_VARS[i];
+        for (let j = 0; j < g.models.length; j++) {
+            if (g.models[j].key === modelKey) {
+                scCurrentGroupIdx = i;
+                scCurrentModelKey = modelKey;
+                scRenderL1();
+                scRenderL2();
+                scRenderL3();
+                scUpdateFooterCount();
+                return;
+            }
+        }
+    }
 }
 
 function tbGenerateHTML() {
-    if (!tbData) return '';
+    if (!tbDataKV || !tbDataKV.length) return '';
     let html = '<table>\n<thead><tr>';
-    for (let c = 0; c < tbData.cols; c++) {
-        html += '<th>' + (tbData.cells[0][c] || '&nbsp;') + '</th>';
-    }
+    tbDataKV.forEach(r => { html += '<th>' + (r[0] || '&nbsp;') + '</th>'; });
     html += '</tr></thead>\n<tbody>\n<tr>';
-    for (let c = 0; c < tbData.cols; c++) {
-        html += '<td>' + (tbData.cells[1][c] || '') + '</td>';
-    }
+    tbDataKV.forEach(r => { html += '<td>' + (r[1] || '') + '</td>'; });
     html += '</tr>\n</tbody>\n</table>';
     return html;
-}
-
-// 从HTML片段解析表格数据（仅提取表头行+第一数据行）
-function tbParseTableHTML(tableHTML) {
-    const parser = new DOMParser();
-    const doc = parser.parseFromString(tableHTML, 'text/html');
-    const table = doc.querySelector('table');
-    if (!table) { tbInit(0, 7); return; }
-
-    const thead = table.querySelector('thead');
-    const tbody = table.querySelector('tbody');
-    const headerRow = thead ? thead.querySelector('tr') : null;
-    const firstBodyRow = tbody ? tbody.querySelector('tr') : null;
-
-    let headerCells = headerRow ? Array.from(headerRow.querySelectorAll('th,td')).map(c => c.textContent.trim()) : [];
-    let bodyCells = firstBodyRow ? Array.from(firstBodyRow.querySelectorAll('td,th')).map(c => c.textContent.trim()) : [];
-
-    const cols = Math.max(headerCells.length, bodyCells.length, 1);
-    while (headerCells.length < cols) headerCells.push('');
-    while (bodyCells.length < cols) bodyCells.push('');
-
-    tbData = { cols, cells: [headerCells, bodyCells] };
-    document.getElementById('tb-cols').value = cols;
-}
-
-function tbSaveAllCells() {
-    document.querySelectorAll('#tb-table .cell-inner').forEach(el => tbSaveCell(el));
 }
 
 // ==================== 预览弹窗 ====================
@@ -1740,8 +2455,8 @@ function renderPreview() {
     const tr = getT(currentPreviewId, currentPreviewLang);
     const sampleLangData = getSampleData();
 
-    // 主题（默认：报告名称 - 报告日期）
-    let previewSubject = '{{报告名称}} - {{报告日期}}';
+    // 主题（默认：模版名称 - 发送日期）
+    let previewSubject = '{{模版名称}} - {{发送日期}}';
     for (const [k, v] of Object.entries(sampleLangData)) {
         previewSubject = previewSubject.replace(new RegExp(k.replace(/[{}]/g, '\\$&'), 'g'), v);
     }
@@ -1760,6 +2475,259 @@ function renderPreview() {
 
 function closePreviewModal() {
     document.getElementById('preview-modal').classList.remove('show');
+}
+
+// ==================== 变量词典 ====================
+const SINGLE_MACHINE_VARS = [
+    {cat:'起重机',models:[
+        {name:'标准版 (Model_10088)',key:'crane_10088'},
+        {name:'新版 (Model_10464)',key:'crane_10464'}
+    ],vars:[['底盘发动机工作时间','{{底盘发动机工作时间}}'],['上车工作时间','{{上车工作时间}}'],['底盘发动机油耗','{{底盘发动机油耗}}'],['上车油耗','{{上车油耗}}'],['吊载次数','{{吊载次数}}'],['平均每小时吊载次数','{{平均每小时吊载次数}}'],['行驶里程','{{行驶里程}}'],['风险预警','{{风险预警}}']]},
+    {cat:'燃油自卸车',models:[
+        {name:'标准版 (Model_10098)',key:'fdump_10098'}
+    ],vars:[['开工率','{{开工率}}'],['开工天数','{{开工天数}}'],['行驶时长','{{行驶时长}}'],['工时','{{工时}}'],['怠速工时','{{怠速工时}}'],['日均行驶时长','{{日均行驶时长}}'],['日均怠速时长','{{日均怠速时长}}'],['里程','{{里程}}'],['日均里程','{{日均里程}}'],['能耗','{{能耗}}'],['百公里平均能耗','{{百公里平均能耗}}'],['日均百公里平均能耗','{{日均百公里平均能耗}}'],['预警','{{预警}}']]},
+    {cat:'电动自卸车',models:[
+        {name:'基础版 (Model_10541)',key:'edump_10541'},
+        {name:'V2版 (Model_10552)',key:'edump_10552'},
+        {name:'氢燃料版',key:'edump_h2'}
+    ],vars:[['开工天数','{{开工天数}}'],['开工率','{{开工率}}'],['行驶时长','{{行驶时长}}'],['怠速工时','{{怠速工时}}'],['里程','{{里程}}'],['能耗','{{能耗}}'],['回收能耗','{{回收能耗}}'],['百公里平均能耗','{{百公里平均能耗}}'],['日均行驶时长','{{日均行驶时长}}'],['日均怠速时长','{{日均怠速时长}}'],['日均里程','{{日均里程}}'],['预警','{{预警}}']]},
+    {cat:'燃油牵引车',models:[
+        {name:'标准版 (Model_10418)',key:'ftrac_10418'}
+    ],vars:[['里程','{{里程}}'],['能耗','{{能耗}}'],['怠速能耗','{{怠速能耗}}'],['工时','{{工时}}'],['怠速工时','{{怠速工时}}'],['行驶时长','{{行驶时长}}'],['百公里平均能耗','{{百公里平均能耗}}'],['平均车速','{{平均车速}}'],['预警','{{预警}}']]},
+    {cat:'电动牵引车',models:[
+        {name:'轻卡版 (Model_10535)',key:'etrac_10535'},
+        {name:'重卡版 (Model_10297)',key:'etrac_10297'}
+    ],vars:[['里程','{{里程}}'],['能耗','{{能耗}}'],['怠速能耗','{{怠速能耗}}'],['百公里平均能耗','{{百公里平均能耗}}'],['回收能耗','{{回收能耗}}'],['工时','{{工时}}'],['怠速工时','{{怠速工时}}'],['行驶时长','{{行驶时长}}'],['平均车速','{{平均车速}}'],['预警','{{预警}}']]},
+    {cat:'燃油伸缩臂叉车',models:[
+        {name:'标准版 (Model_10147)',key:'tele_10147'},
+        {name:'华兴版',key:'tele_hx'}
+    ],vars:[['开工天数','{{开工天数}}'],['里程','{{里程}}'],['能耗','{{能耗}}'],['平均每小时能耗','{{平均每小时能耗}}'],['工时','{{工时}}'],['怠速工时','{{怠速工时}}'],['预警次数','{{预警次数}}']]},
+    {cat:'履带吊',models:[
+        {name:'大吨位混合版',key:'crawl_heavy_mix'},
+        {name:'小吨位版 (Model_10248)',key:'crawl_10248'},
+        {name:'大吨位版 (Model_10250)',key:'crawl_10250'},
+        {name:'三代版 (Model_10314)',key:'crawl_10314'}
+    ],vars:[['发动机工作时间','{{发动机工作时间}}'],['发动机油耗','{{发动机油耗}}'],['吊载次数','{{吊载次数}}'],['平均每小时油耗','{{平均每小时油耗}}'],['预警次数','{{预警次数}}']]},
+    {cat:'燃油堆高机',models:[
+        {name:'标准版 (Model_10145)',key:'stack_10145'},
+        {name:'华兴版',key:'stack_hx'}
+    ],vars:[['里程','{{里程}}'],['能耗','{{能耗}}'],['工时','{{工时}}'],['怠速工时','{{怠速工时}}'],['吊箱数量','{{吊箱数量}}'],['平均能耗','{{平均能耗}}'],['单箱能耗','{{单箱能耗}}'],['预警次数','{{预警次数}}']]},
+    {cat:'电动堆高机',models:[
+        {name:'标准版 (Model_10263)',key:'estack_10263'},
+        {name:'华兴版',key:'estack_hx'}
+    ],vars:[['里程','{{里程}}'],['能耗','{{能耗}}'],['工时','{{工时}}'],['怠速工时','{{怠速工时}}'],['吊箱数量','{{吊箱数量}}'],['平均能耗','{{平均能耗}}'],['单箱能耗','{{单箱能耗}}'],['预警次数','{{预警次数}}']]},
+    {cat:'电动集卡',models:[
+        {name:'标准版 (Model_10525)',key:'etruck_10525'},
+        {name:'港机版',key:'etruck_port'}
+    ],vars:[['开工天数','{{开工天数}}'],['开工率','{{开工率}}'],['里程','{{里程}}'],['能耗','{{能耗}}'],['工时','{{工时}}'],['运行时长','{{运行时长}}'],['怠速时长','{{怠速时长}}'],['怠速占比','{{怠速占比}}'],['日均运行时长','{{日均运行时长}}'],['日均怠速时长','{{日均怠速时长}}'],['日均里程','{{日均里程}}'],['日均能耗','{{日均能耗}}'],['平均能耗','{{平均能耗}}'],['预警','{{预警}}']]},
+    {cat:'电动搅拌车',models:[
+        {name:'基础版',key:'emix_base'},
+        {name:'ISEE3版',key:'emix_isee3'}
+    ],vars:[['里程','{{里程}}'],['能耗','{{能耗}}'],['平均能耗','{{平均能耗}}'],['回收能耗','{{回收能耗}}'],['日均能耗','{{日均能耗}}'],['日均回收能耗','{{日均回收能耗}}'],['工时','{{工时}}'],['怠速工时','{{怠速工时}}']]},
+    {cat:'燃油搅拌车',models:[
+        {name:'4.0版',key:'fmix_40'},
+        {name:'10094版',key:'fmix_10094'}
+    ],vars:[['里程','{{里程}}'],['能耗','{{能耗}}'],['平均能耗','{{平均能耗}}'],['日均能耗','{{日均能耗}}'],['工时','{{工时}}'],['怠速工时','{{怠速工时}}']]},
+    {cat:'电动装载机',models:[
+        {name:'华兴版',key:'eload_hx'},
+        {name:'4.0版 (Model_10539)',key:'eload_10539'}
+    ],vars:[['能耗','{{能耗}}'],['工时','{{工时}}'],['平均能耗','{{平均能耗}}'],['怠速工时','{{怠速工时}}']]},
+    {cat:'挖掘机',models:[
+        {name:'小挖 (Model_10343)',key:'exc_10343'},
+        {name:'中挖 (Model_10338)',key:'exc_10338'},
+        {name:'大挖 (Model_10333)',key:'exc_10333'},
+        {name:'华兴云小挖 (Model_5387)',key:'exc_5387'},
+        {name:'华兴云中挖 (Model_5386)',key:'exc_5386'},
+        {name:'华兴云大挖 (Model_5389)',key:'exc_5389'},
+        {name:'电动挖机',key:'exc_elec'}
+    ],vars:[['开工天数','{{开工天数}}'],['周期工时','{{周期工时}}'],['周期油耗','{{周期油耗}}'],['周期油耗/小时','{{周期油耗/小时}}'],['周期挡位时间分布','{{周期挡位时间分布}}'],['周期预警','{{周期预警}}']]}
+];
+
+const FLEET_VARS = [
+    ['统计周期','{{统计周期}}'],['设备机型','{{设备机型}}'],['设备编号','{{设备编号}}'],
+    ['工时','{{工时}}'],['能耗','{{能耗}}'],['里程','{{里程}}']
+];
+
+let currentDictTab = 'single';
+let dictCurrentGroupIdx = 0;
+let dictCurrentModelKey = SINGLE_MACHINE_VARS[0].models[0].key;
+
+function openVarDict() {
+    document.getElementById('dict-modal').classList.add('show');
+    switchDictTab('single');
+}
+
+function closeVarDict() {
+    document.getElementById('dict-modal').classList.remove('show');
+}
+
+function switchDictTab(tab) {
+    currentDictTab = tab;
+    const tabs = document.querySelectorAll('.dict-tab-item');
+    tabs.forEach((el, i) => { el.classList.toggle('active', (i === 0 && tab === 'single') || (i === 1 && tab === 'fleet')); });
+    const cascadeBody = document.getElementById('dict-cascade-body');
+    const fleetBody = document.getElementById('dict-fleet-body');
+    if (tab === 'single') {
+        cascadeBody.style.display = 'flex';
+        fleetBody.style.display = 'none';
+        document.getElementById('dict-search-input').value = '';
+        dictRenderL1();
+        dictRenderL2();
+        dictRenderL3();
+    } else {
+        cascadeBody.style.display = 'none';
+        fleetBody.style.display = 'block';
+        _dictFleetActiveField = '';
+        document.getElementById('dict-fleet-search-input').value = '';
+        dictRenderFleetSummary();
+        dictRenderFleetTable();
+    }
+}
+
+// ===== 单机：三栏级联 =====
+
+function dictRenderL1() {
+    const el = document.getElementById('dict-l1');
+    if (!el) return;
+    let html = '';
+    SINGLE_MACHINE_VARS.forEach((g, i) => {
+        const isActive = i === dictCurrentGroupIdx;
+        const modelCount = g.models.length;
+        html += '<div class="kv-cascade-item' + (isActive ? ' active' : '') + '" onclick="dictSelectGroup(' + i + ')">' +
+            escapeHtml(g.cat) +
+            '<span class="cascade-badge">' + modelCount + '模型</span>' +
+            '</div>';
+    });
+    el.innerHTML = html;
+}
+
+function dictSelectGroup(idx) {
+    dictCurrentGroupIdx = idx;
+    dictCurrentModelKey = SINGLE_MACHINE_VARS[idx].models[0].key;
+    dictRenderL1();
+    dictRenderL2();
+    dictRenderL3();
+}
+
+function dictRenderL2() {
+    const el = document.getElementById('dict-l2');
+    if (!el) return;
+    const group = SINGLE_MACHINE_VARS[dictCurrentGroupIdx];
+    if (!group) { el.innerHTML = '<div class="kv-cascade-empty">请选择设备类型</div>'; return; }
+    let html = '';
+    group.models.forEach((m) => {
+        const isActive = m.key === dictCurrentModelKey;
+        const allVars = [...SC_COMMON_FIELDS, ...group.vars];
+        html += '<div class="kv-cascade-item' + (isActive ? ' active' : '') + '" onclick="dictSelectModel(\'' + m.key + '\')">' +
+            escapeHtml(m.name) +
+            '<span class="cascade-badge">' + allVars.length + '字段</span>' +
+            '</div>';
+    });
+    el.innerHTML = html;
+}
+
+function dictSelectModel(key) {
+    dictCurrentModelKey = key;
+    for (let i = 0; i < SINGLE_MACHINE_VARS.length; i++) {
+        if (SINGLE_MACHINE_VARS[i].models.some(m => m.key === key)) {
+            dictCurrentGroupIdx = i;
+            break;
+        }
+    }
+    dictRenderL1();
+    dictRenderL2();
+    dictRenderL3();
+}
+
+function dictRenderL3(filter) {
+    const el = document.getElementById('dict-l3');
+    if (!el) return;
+    const group = SINGLE_MACHINE_VARS[dictCurrentGroupIdx];
+    if (!group) { el.innerHTML = '<div class="kv-cascade-empty">请选择设备类型</div>'; return; }
+    const model = group.models.find(m => m.key === dictCurrentModelKey);
+    if (!model) { el.innerHTML = '<div class="kv-cascade-empty">请选择物模型</div>'; return; }
+    const allVars = [...SC_COMMON_FIELDS, ...group.vars];
+    const q = (filter || '').toLowerCase();
+    const matched = allVars.filter(v => !q || v[0].toLowerCase().includes(q));
+    if (matched.length === 0) {
+        el.innerHTML = '<div class="kv-cascade-empty">' + (q ? '无匹配字段' : '暂无限定字段') + '</div>';
+        return;
+    }
+    let html = '';
+    matched.forEach(v => {
+        html += '<div class="dict-field-item">' +
+            '<span class="dict-field-name">' + escapeHtml(v[0]) + '</span>' +
+            '<span class="dict-field-tag">' + escapeHtml(v[1]) + '</span>' +
+            '</div>';
+    });
+    el.innerHTML = html;
+}
+
+function dictFilterL3() {
+    const q = document.getElementById('dict-search-input').value;
+    dictRenderL3(q);
+}
+
+// ===== 机群：统计覆盖 + 简单表格 =====
+
+let _dictFleetActiveField = ''; // 当前激活的字段筛选：'工时' | '能耗' | '里程' | ''
+
+// 机群变量（工时/能耗/里程）在各设备类型中的覆盖统计
+// TODO: 暂时屏蔽
+function dictRenderFleetSummary() { return; }
+
+// 点击字段标签筛选机群表格
+function dictFilterByField(keyword) {
+    // 再次点击同一标签 → 取消筛选
+    if (_dictFleetActiveField === keyword && keyword !== '') {
+        _dictFleetActiveField = '';
+    } else {
+        _dictFleetActiveField = keyword;
+    }
+    // 清空搜索框（筛选和搜索互斥）
+    document.getElementById('dict-fleet-search-input').value = '';
+    dictRenderFleetSummary();
+    // 按变量名包含关键词筛选
+    const q = _dictFleetActiveField ? _dictFleetActiveField : '';
+    dictRenderFleetTable(q);
+}
+
+function dictRenderFleetTable(filter) {
+    const el = document.getElementById('dict-fleet-table-wrap');
+    if (!el) return;
+    const q = (filter || '').toLowerCase();
+    const matched = FLEET_VARS.filter(r => !q || r[0].toLowerCase().includes(q));
+    if (matched.length === 0) {
+        el.innerHTML = '<div class="dict-empty" style="text-align:center;padding:30px;color:#9ca3af;">无匹配变量</div>';
+        return;
+    }
+    el.innerHTML = '<table class="dict-fleet-table">' +
+        '<thead><tr><th style="width:45%;">变量名称</th><th>模板变量</th></tr></thead>' +
+        '<tbody>' + matched.map(r =>
+            '<tr>' +
+            '<td>' + escapeHtml(r[0]) + '</td>' +
+            '<td><code>' + escapeHtml(r[1]) + '</code></td>' +
+            '</tr>'
+        ).join('') + '</tbody></table>';
+}
+
+function dictFilterFleet() {
+    _dictFleetActiveField = '';
+    dictRenderFleetSummary();
+    const q = document.getElementById('dict-fleet-search-input').value;
+    dictRenderFleetTable(q);
+}
+
+// ===== 共用：插入变量 =====
+
+function dictInsertVar(tag) {
+    closeVarDict();
+    if (typeof quill === 'undefined' || !quill) return;
+    const range = quill.getSelection(true);
+    const idx = range ? range.index : quill.getLength();
+    quill.insertText(idx, tag, 'user');
+    quill.setSelection(idx + tag.length);
+    showToast('已插入 ' + tag);
 }
 
 // ==================== 复制模版 ====================
@@ -1787,6 +2755,11 @@ function duplicateTemplate(index) {
                 cols: tr.attachmentTable.cols,
                 cells: [tr.attachmentTable.cells[0].slice(), tr.attachmentTable.cells[1].slice()]
             };
+        }
+        if (tr.attachmentTableKV) {
+            dupTr.attachmentTableKV = Array.isArray(tr.attachmentTableKV)
+                ? tr.attachmentTableKV.map(r => [r[0]||'', r[1]||''])
+                : JSON.parse(JSON.stringify(tr.attachmentTableKV));
         }
         copy.translations[lang] = dupTr;
     }
