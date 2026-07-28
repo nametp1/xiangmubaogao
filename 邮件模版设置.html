@@ -105,6 +105,35 @@
             padding: 16px 20px; border-bottom: 1px solid #f0f0f0;
         }
         .table-card-header h3 { font-size: 15px; font-weight: 600; color: #333; }
+
+        /* 筛选栏 */
+        .filter-bar {
+            display: flex; align-items: flex-end; gap: 12px; padding: 16px 20px;
+            flex-wrap: wrap;
+        }
+        .filter-item { display: flex; flex-direction: column; gap: 4px; }
+        .filter-item label { font-size: 12px; color: #666; font-weight: 500; }
+        .filter-item input, .filter-item select {
+            height: 34px; border: 1px solid #d9d9d9; border-radius: 6px; padding: 0 12px; font-size: 13px; outline: none; transition: border-color 0.2s;
+        }
+        .filter-item input:focus, .filter-item select:focus { border-color: #E60012; box-shadow: 0 0 0 2px rgba(230,0,18,0.08); }
+        .filter-item input { width: 220px; }
+        .filter-item select { width: 180px; cursor: pointer; background: #fff; }
+        .filter-actions { display: flex; align-items: center; gap: 8px; padding-bottom: 1px; }
+        .filter-btn {
+            height: 34px; padding: 0 20px; font-size: 13px; border-radius: 6px;
+            cursor: pointer; transition: all 0.2s; border: 1px solid #d9d9d9; background: #fff; color: #666;
+        }
+        .filter-btn:hover { border-color: #E60012; color: #E60012; }
+        .filter-btn.primary { background: #E60012; color: #fff; border-color: #E60012; }
+        .filter-btn.primary:hover { background: #cc0010; border-color: #cc0010; }
+
+        /* 语言标签组 */
+        .lang-tag-list { display: flex; flex-wrap: wrap; gap: 3px; }
+        .lang-tag {
+            font-size: 11px; padding: 1px 6px; border-radius: 3px;
+            background: #f0f5ff; color: #2f54eb; border: 1px solid #d6e4ff; white-space: nowrap;
+        }
         table { width: 100%; border-collapse: collapse; font-size: 13px; }
         table thead th {
             background: #fafafa; padding: 12px 14px; text-align: left;
@@ -130,21 +159,19 @@
         .form-row-3 { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 12px; }
         .form-hint { font-size: 12px; color: #999; margin-top: 4px; line-height: 1.6; }
 
-        /* 语言Tile平铺 */
-        .lang-tile {
-            display: inline-flex; align-items: center; gap: 5px;
-            padding: 6px 14px; font-size: 13px; border-radius: 6px;
-            cursor: pointer; transition: all 0.2s; user-select: none;
-            border: 2px solid #e8e8e8; background: #fafafa; color: #999;
-        }
-        .lang-tile:hover { border-color: #E60012; color: #E60012; background: #fff5f5; }
-        .lang-tile.active { border-color: #E60012; color: #E60012; background: #fff5f5; font-weight: 600; box-shadow: 0 0 0 2px rgba(230,0,18,0.1); }
-        .lang-tile.configured { border-color: #b7eb8f; background: #f6ffed; color: #389e0d; }
-        .lang-tile.configured.active { border-color: #E60012; color: #E60012; background: #fff5f5; }
-        .lang-tile .tile-dot { width: 6px; height: 6px; border-radius: 50%; background: #d9d9d9; flex-shrink: 0; }
-        .lang-tile.configured .tile-dot { background: #52c41a; }
-        .lang-tile.active .tile-dot { background: #E60012; }
-        .lang-tile .tile-code { font-size: 11px; opacity: 0.6; }
+        /* 图标上传 */
+        .icon-upload-row { display: flex; align-items: center; gap: 10px; }
+        .icon-preview-wrap { width: 44px; height: 44px; border: 1px dashed #d9d9d9; border-radius: 6px; display: flex; align-items: center; justify-content: center; overflow: hidden; background: #fafafa; }
+        .icon-preview-wrap img { width: 100%; height: 100%; object-fit: contain; }
+        .icon-placeholder-text { font-size: 11px; color: #bbb; }
+        .icon-upload-btn { cursor: pointer; }
+        .tpl-icon { width: 32px; height: 32px; border-radius: 4px; object-fit: contain; vertical-align: middle; }
+
+        /* 语言下拉选择框 */
+        .lang-select-wrap { margin-bottom: 20px; }
+        .lang-select-wrap select { width: 100%; height: 34px; border: 1px solid #d9d9d9; border-radius: 6px; padding: 0 10px; font-size: 13px; color: #333; background: #fff; cursor: pointer; }
+        .lang-select-wrap select:focus { border-color: #E60012; outline: none; box-shadow: 0 0 0 2px rgba(230,0,18,0.1); }
+        .lang-select-wrap .lang-hint { font-size: 11px; color: #999; margin-top: 4px; }
 
         /* 变量标签 */
         .var-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
@@ -318,6 +345,11 @@
             cursor: pointer; transition: border-color .2s; overflow: hidden;
         }
         .kv-cascade-trigger:hover { border-color: #1677ff; }
+        .kv-cascade-trigger.disabled { opacity: 0.55; cursor: not-allowed; background: #f5f5f5; }
+        .kv-cascade-trigger.disabled:hover { border-color: #d9d9d9; }
+        .kv-row-disabled td { color: #bbb; }
+        .kv-icon-del.disabled { color: #ddd; cursor: not-allowed; }
+        .kv-icon-del.disabled:hover { color: #ddd; }
         .kv-cascade-trigger .kv-cascade-tags-area {
             display: flex; flex-wrap: wrap; gap: 3px; align-items: center;
             padding: 3px 6px; flex: 1; min-width: 0; max-height: 64px; overflow-y: auto;
@@ -414,7 +446,7 @@
             border: none; background: transparent; width: 100%; text-align: left;
         }
         .kv-cascade-check-item:hover { background: #f0f5ff; }
-        .kv-cascade-check-item input[type="checkbox"] {
+        .kv-cascade-check-item input[type="checkbox"], .kv-cascade-check-item input[type="radio"] {
             width: 15px; height: 15px; accent-color: #1677ff; cursor: pointer; flex-shrink: 0;
         }
         .kv-cascade-check-item .check-var-name { color: #6b7280; font-size: 11px; }
@@ -422,6 +454,9 @@
             font-size: 11px; color: #1677ff; background: #e6f0ff;
             padding: 1px 6px; border-radius: 3px; font-family: monospace;
         }
+        .kv-cascade-check-item.disabled { opacity: 0.5; cursor: not-allowed; }
+        .kv-cascade-check-item.disabled:hover { background: transparent; }
+        .kv-cascade-check-item.disabled input { cursor: not-allowed; }
         .kv-cascade-footer {
             display: flex; align-items: center; justify-content: space-between;
             padding: 12px 20px; border-top: 1px solid #edf0f4; background: #fafbfc;
@@ -534,35 +569,6 @@
         }
         .tb-col-add:hover { color: #0050b3; background: #e6f7ff; }
 
-        /* 邮件预览区 */
-        .email-preview {
-            border: 1px solid #e8e8e8; border-radius: 8px; overflow: hidden; background: #f9f9fb;
-        }
-        .email-preview-header {
-            background: #fafafa; padding: 10px 16px; border-bottom: 1px solid #e8e8e8;
-            font-size: 12px; color: #999; display: flex; flex-direction: column; gap: 4px;
-        }
-        .email-preview-header .ph-row { display: flex; gap: 8px; }
-        .email-preview-header .ph-label { color: #666; min-width: 40px; text-align: right; flex-shrink: 0; }
-        .email-preview-header .ph-value { color: #333; font-weight: 500; }
-        .email-preview-body {
-            padding: 20px 24px; font-size: 13px; color: #333; line-height: 1.8;
-            max-height: 500px; overflow-y: auto; background: #fff;
-        }
-        .email-preview-body table { margin: 12px 0; font-size: 12px; }
-        .email-preview-body table th {
-            background: #f5f5f5; padding: 8px 10px; text-align: center;
-            font-weight: 500; color: #555; border: 1px solid #e8e8e8;
-        }
-        .email-preview-body table td {
-            padding: 7px 10px; text-align: center; border: 1px solid #e8e8e8; color: #333;
-        }
-        .email-preview-body .report-title { font-size: 18px; font-weight: 700; color: #E60012; text-align: center; margin-bottom: 8px; }
-        .email-preview-body .report-subtitle { font-size: 12px; color: #999; text-align: center; margin-bottom: 20px; }
-        .email-preview-body .report-section { margin-bottom: 16px; }
-        .email-preview-body .report-section h4 { font-size: 14px; font-weight: 600; color: #333; margin-bottom: 8px; padding-left: 8px; border-left: 3px solid #E60012; }
-        .status-ok { color: #52c41a; font-weight: 600; }
-        .status-warn { color: #fa8c16; font-weight: 600; }
         .status-error { color: #E60012; font-weight: 600; }
         .section-divider { border: none; border-top: 1px dashed #e8e8e8; margin: 16px 0; }
         .email-footer { text-align: center; font-size: 11px; color: #bbb; margin-top: 24px; padding-top: 16px; border-top: 1px solid #f0f0f0; }
@@ -640,17 +646,7 @@
             font-size: 16px; font-weight: 700; flex-shrink: 0;
         }
         .confirm-box h4 { font-size: 15px; color: #333; font-weight: 600; }
-        .confirm-box .confirm-body { font-size: 13px; color: #666; line-height: 1.7; margin-bottom: 16px; }
-        .confirm-box .confirm-target {
-            display: inline-block; padding: 2px 8px; border-radius: 4px;
-            background: #f5f5f5; color: #333; font-weight: 500; margin: 0 2px;
-        }
-        .confirm-box .confirm-list {
-            background: #fafafa; border: 1px solid #f0f0f0; border-radius: 6px;
-            padding: 10px 14px; font-size: 12px; color: #666; margin-bottom: 16px;
-        }
-        .confirm-box .confirm-list div { line-height: 1.9; }
-        .confirm-box .confirm-list .label { color: #999; display: inline-block; width: 72px; }
+        .confirm-box .confirm-body { font-size: 13px; color: #666; line-height: 1.7; margin-bottom: 20px; }
         .confirm-box .confirm-actions { display: flex; justify-content: flex-end; gap: 12px; }
         .btn-danger { background: #E60012; color: #fff; border: 1px solid #E60012; }
         .btn-danger:hover { background: #cc0010; border-color: #cc0010; }
@@ -752,7 +748,7 @@
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
                             邮件模版设置
                         </a></li>
-                        <li class="sidebar-item"><a class="sidebar-link" href="设备报告触发日志.html">
+                        <li class="sidebar-item"><a class="sidebar-link" href="设备报表触发日志.html">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
                             触发日志
                         </a></li>
@@ -771,15 +767,32 @@
                 <button class="btn btn-primary" onclick="createAndEdit()">+ 新建模版</button>
             </div>
 
-
-
+            <!-- 搜索筛选栏 -->
+            <div class="table-card" style="margin-bottom:12px;">
+                <div class="filter-bar">
+                <div class="filter-item">
+                    <label>模版名称</label>
+                    <input type="text" id="filter-name" placeholder="输入模版名称..." onkeydown="if(event.key==='Enter')filterTemplates()">
+                </div>
+                <div class="filter-item">
+                    <label>语言类型</label>
+                    <select id="filter-lang">
+                        <option value="">全部语言</option>
+                    </select>
+                </div>
+                <div class="filter-actions">
+                    <button class="filter-btn primary" onclick="filterTemplates()">搜索</button>
+                    <button class="filter-btn" onclick="clearFilters()">重置</button>
+                </div>
+            </div>
+            </div>
 
             <!-- 模版列表 -->
             <div class="table-card" id="template-table-card">
                 <div class="table-card-header"><h3>模版列表</h3><span style="font-size:12px;color:#999" id="tpl-count">共 5 个模版</span></div>
                 <div style="overflow-x:auto;">
                     <table>
-                        <thead><tr><th>模版名称</th><th>模版类型</th><th>模版描述</th><th>语言覆盖</th><th>启用</th><th>最近更新</th><th>操作</th></tr></thead>
+                        <thead><tr><th style="width:50px;">图标</th><th>模版名称</th><th>模版类型</th><th>模版描述</th><th>语言</th><th>启用</th><th>最近更新</th><th>操作</th></tr></thead>
                         <tbody id="template-table-body"></tbody>
                     </table>
                 </div>
@@ -796,20 +809,37 @@
             <button class="modal-close" onclick="closeEditModal()">&times;</button>
         </div>
         <div class="modal-body">
-            <!-- 语言平铺选择（与下方模版名称等联动） -->
-            <label style="font-size:13px;color:#666;font-weight:500;display:block;margin-bottom:10px;">编辑语言</label>
-            <div id="edit-lang-tiles" class="lang-tiles" style="display:flex;flex-wrap:wrap;gap:8px;margin-bottom:20px;"></div>
+            <!-- 语言下拉选择（与下方模版名称等联动，每次仅选中一种语言） -->
+            <label style="font-size:13px;color:#666;font-weight:500;display:block;margin-bottom:6px;">编辑语言</label>
+            <div class="lang-select-wrap">
+                <select id="edit-lang-select" onchange="switchEditLang(this.value)"></select>
+                <div class="lang-hint">切换语言后将自动保存当前编辑内容，未配置的语言将从简体中文复制</div>
+            </div>
 
             <!-- 基本信息（随编辑语言联动） -->
             <div class="form-row-3">
                 <div class="form-group"><label>模版名称 <span class="required">*</span></label><input type="text" id="edit-tpl-name" placeholder="如：设备运行日报模版"></div>
-                <div class="form-group"><label>模版描述</label><input type="text" id="edit-tpl-desc" placeholder="如：适用于挖掘机设备每日运行数据汇报"></div>
+                <div class="form-group"><label>模版描述 <span class="required">*</span></label><input type="text" id="edit-tpl-desc" placeholder="如：适用于挖掘机设备每日运行数据汇报"></div>
                 <div class="form-group">
                     <label>模版类型 <span class="required">*</span></label>
                     <select id="edit-tpl-machine-type" onchange="toggleDataColumnConfig()">
                         <option value="单机">单机</option>
                         <option value="机群">机群</option>
                     </select>
+                </div>
+            </div>
+            <div class="form-group" style="margin-top:12px;">
+                <label>模版图标 <span class="required">*</span></label>
+                <div class="icon-upload-row">
+                    <div class="icon-preview-wrap" id="icon-preview-wrap">
+                        <img id="icon-preview-img" src="" alt="" style="display:none;">
+                        <span id="icon-placeholder" class="icon-placeholder-text">未上传</span>
+                    </div>
+                    <label class="btn btn-outline btn-sm icon-upload-btn">
+                        上传图标
+                        <input type="file" id="icon-file-input" accept="image/png,image/jpeg,image/svg+xml" style="display:none;" onchange="handleIconUpload(this)">
+                    </label>
+                    <button class="btn btn-outline btn-sm" id="icon-remove-btn" style="display:none;" onclick="removeIcon()">移除</button>
                 </div>
             </div>
 
@@ -1003,13 +1033,7 @@
             <h4>确认删除此模版？</h4>
         </div>
         <div class="confirm-body">
-            即将删除模版 <span class="confirm-target" id="del-confirm-name">—</span>，
             删除后将无法恢复，相关订阅任务也会同步失效。
-        </div>
-        <div class="confirm-list" id="del-confirm-detail">
-            <div><span class="label">模版类型：</span><span id="del-confirm-type">—</span></div>
-            <div><span class="label">语言版本：</span><span id="del-confirm-langs">—</span></div>
-            <div><span class="label">关联订阅：</span><span id="del-confirm-subs">—</span></div>
         </div>
         <div class="confirm-actions">
             <button class="btn" onclick="closeDeleteConfirm()">取消</button>
@@ -1081,50 +1105,16 @@
             </div>
             <!-- 第三列：字段 -->
             <div class="kv-cascade-col kv-cascade-col-l3">
-                <div class="kv-cascade-col-label">字段（可多选）</div>
+                <div class="kv-cascade-col-label">字段（单选）</div>
                 <div id="kv-cascade-l3"></div>
             </div>
         </div>
         <div class="kv-cascade-footer">
-            <div class="kv-cascade-selected" id="kv-cascade-selected">已选：<span>0</span> 个变量</div>
+            <div class="kv-cascade-selected" id="kv-cascade-selected">已选：<span style="color:#1677ff;font-weight:500;">0</span> 个变量</div>
             <div class="kv-cascade-actions">
                 <button class="kv-cascade-btn" onclick="closeFleetCascade()">取消</button>
                 <button class="kv-cascade-btn primary" onclick="confirmFleetCascade()">确认选择</button>
             </div>
-        </div>
-    </div>
-</div>
-
-<!-- ========== 邮件预览弹窗 ========== -->
-<div class="modal-overlay" id="preview-modal">
-    <div class="modal modal-md">
-        <div class="modal-header">
-            <h3>邮件预览效果</h3>
-            <div style="display:flex;align-items:center;gap:12px;">
-                <select id="preview-lang" onchange="switchPreviewLang()" style="height:28px;border:1px solid #d9d9d9;border-radius:4px;font-size:12px;padding:0 8px;">
-                    <option value="zh-CN">中文</option>
-                    <option value="en">English</option>
-                    <option value="ja">日本語</option>
-                </select>
-                <span style="font-size:12px;color:#999;font-weight:400">变量已替换为示例数据</span>
-            </div>
-            <button class="modal-close" onclick="closePreviewModal()">&times;</button>
-        </div>
-        <div class="modal-body" style="padding:0;">
-            <div class="email-preview" style="border:none;border-radius:0;">
-                <div class="email-preview-header">
-                    <div class="ph-row"><span class="ph-label">发件人：</span><span class="ph-value">三一设备管理平台 &lt;noreply@sany.com.cn&gt;</span></div>
-                    <div class="ph-row"><span class="ph-label">主　题：</span><span class="ph-value" id="preview-modal-subject">—</span></div>
-                    <div class="ph-row"><span class="ph-label">邮　件：</span><span class="ph-value" style="color:#999">zhangwei@sany.com.cn</span></div>
-                </div>
-                <div class="email-preview-body" id="preview-modal-body">
-                    <div style="text-align:center;color:#bbb;padding:60px 0">正在加载预览...</div>
-                </div>
-            </div>
-        </div>
-        <div class="modal-footer">
-            <button class="btn" onclick="closePreviewModal()">关闭</button>
-            <button class="btn btn-primary" onclick="closePreviewModal();openEditModal(currentPreviewId)">去编辑</button>
         </div>
     </div>
 </div>
@@ -1136,42 +1126,22 @@
 <script>
 // ==================== 多语言配置（PRD §3.1.4 15种语言） ====================
 const LANG_CONFIG = [
-    { id: 'zh-CN', label: '简体中文', default: true },
-    { id: 'en',    label: 'English' },
-    { id: 'de',    label: 'Deutsch' },
-    { id: 'id',    label: 'Bahasa Indonesia' },
-    { id: 'es',    label: 'Español' },
-    { id: 'pt',    label: 'Português' },
-    { id: 'fr',    label: 'Français' },
-    { id: 'th',    label: 'ภาษาไทย' },
-    { id: 'ru',    label: 'русский' },
-    { id: 'ar',    label: 'العربية' },
-    { id: 'km',    label: 'ភាសាខ្មែរ' },
-    { id: 'ko',    label: '한국어' },
-    { id: 'it',    label: 'Italiano' },
-    { id: 'ms',    label: 'Bahasa Melayu' },
-    { id: 'vi',    label: 'Tiếng Việt' }
+    { id: 'zh-CN', label: '简体中文', zhLabel: '简体中文', default: true },
+    { id: 'en',    label: 'English',    zhLabel: '英语' },
+    { id: 'de',    label: 'Deutsch',    zhLabel: '德语' },
+    { id: 'id',    label: 'Bahasa Indonesia', zhLabel: '印尼语' },
+    { id: 'es',    label: 'Español',    zhLabel: '西班牙语' },
+    { id: 'pt',    label: 'Português',  zhLabel: '葡萄牙语' },
+    { id: 'fr',    label: 'Français',   zhLabel: '法语' },
+    { id: 'th',    label: 'ภาษาไทย',   zhLabel: '泰语' },
+    { id: 'ru',    label: 'русский',    zhLabel: '俄语' },
+    { id: 'ar',    label: 'العربية',   zhLabel: '阿拉伯语' },
+    { id: 'km',    label: 'ភាសាខ្មែរ', zhLabel: '高棉语' },
+    { id: 'ko',    label: '한국어',     zhLabel: '韩语' },
+    { id: 'it',    label: 'Italiano',   zhLabel: '意大利语' },
+    { id: 'ms',    label: 'Bahasa Melayu', zhLabel: '马来语' },
+    { id: 'vi',    label: 'Tiếng Việt', zhLabel: '越南语' }
 ];
-
-// 示例数据（预览用，仅简体中文）
-const SAMPLE_DATA_ZH = {
-    '{{模版名称}}':    '三一设备运行日报',
-    '{{发送日期}}':    '2026-07-17',
-    '{{收件人姓名}}':  '张伟',
-    '{{生成时间}}':    '2026-07-17 08:00',
-    '{{设备编号}}':    'SY20240512003',
-    '{{异常类型}}':    '发动机高温报警',
-    '{{开工天数}}':      '27天',
-    '{{实际操作时长}}':  '156.5h',
-    '{{发动机运行时长}}':'168.8h',
-    '{{空转时长}}':      '12.3h',
-    '{{能耗油耗}}':      '3,250L',
-    '{{各挡位分布}}':    'P:30% G1:25% G2:20% G3:15% G4:10%',
-    '{{异常预警}}':      '5次'
-};
-function getSampleData() {
-    return { ...SAMPLE_DATA_ZH };
-}
 
 // 构建一个空翻译条目
 function emptyTranslation(name, description, body) {
@@ -1186,7 +1156,7 @@ function defaultBody(rt) {
 }
 function defaultBodyReport() {
     return `<div class="report-title">{{模版名称}}</div>
-<div class="report-subtitle">报告周期：{{发送日期}} ｜ 生成时间：{{生成时间}}</div>
+<div class="report-subtitle">报表周期：{{发送日期}} ｜ 生成时间：{{生成时间}}</div>
 <div class="report-section"><h4>一、总体概况</h4>
 <p>尊敬的{{收件人姓名}}，您好！</p>
 <p>本报表为您汇总近段时间范围内的统计数据，具体请查看相关附件。</p></div>
@@ -1200,7 +1170,7 @@ function defaultBodyReport() {
 </tbody></table>
 <hr class="section-divider">
 <div class="report-section"><h4>三、异常设备明细</h4><p>请查看附件～</p></div>
-<div class="email-footer">本报告由 MySANY 设备管理平台自动生成 ｜ 如有疑问请联系 admin@sany.com.cn<br>如需退订此报告，请登录平台在个人设置中关闭邮件订阅</div>`;
+<div class="email-footer">本报表由 MySANY 设备管理平台自动生成 ｜ 如有疑问请联系 admin@sany.com.cn<br>如需退订此报表，请登录平台在个人设置中关闭邮件订阅</div>`;
 }
 function defaultAttachmentTable() {
     // 默认附件表格结构：表头行 + 变量占位符行
@@ -1280,49 +1250,55 @@ function defaultBodyEnergy() {
 </tbody></table>
 <hr class="section-divider">
 <div class="report-section"><h4>三、异常预警</h4><p>累计异常预警 <strong>{{异常预警}}</strong>，请关注以下异常类型：{{异常类型}}。</p></div>
-<div class="email-footer">本报告由 MySANY 设备管理平台自动生成 ｜ 如有疑问请联系 admin@sany.com.cn</div>`;
+<div class="email-footer">本报表由 MySANY 设备管理平台自动生成 ｜ 如有疑问请联系 admin@sany.com.cn</div>`;
 }
 
 // ==================== 模版数据（多语言结构） ====================
+// 预设图标 SVG（纯色图标）—— 用于 mock 数据及默认图标
+const TPL_ICONS = {
+    daily:   'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><rect width="32" height="32" rx="6" fill="#E8F4FD"/><path d="M9 22V14l3 3 4-6 4 4 3-2v9H9z" fill="#1890FF"/></svg>'),
+    weekly:  'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><rect width="32" height="32" rx="6" fill="#E6F7E9"/><path d="M10 16h4v6h-4zM14 12h4v10h-4zM18 14h4v8h-4z" fill="#52C41A"/></svg>'),
+    monthly: 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><rect width="32" height="32" rx="6" fill="#F3E8FF"/><rect x="7" y="7" width="7" height="7" rx="1.5" fill="#722ED1"/><rect x="17" y="7" width="7" height="7" rx="1.5" fill="#722ED1"/><rect x="7" y="17" width="7" height="7" rx="1.5" fill="#722ED1"/><rect x="17" y="17" width="7" height="7" rx="1.5" fill="#D3ADF7"/></svg>'),
+    alert:   'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><rect width="32" height="32" rx="6" fill="#FFF1F0"/><path d="M16 8l8 14H8l8-14zm0 4.5c-.4 0-.7.3-.7.7v3c0 .4.3.7.7.7s.7-.3.7-.7v-3c0-.4-.3-.7-.7-.7zm0 6c-.4 0-.7.3-.7.7v.3c0 .4.3.7.7.7s.7-.3.7-.7v-.3c0-.4-.3-.7-.7-.7z" fill="#FF4D4F"/></svg>'),
+    offline: 'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><rect width="32" height="32" rx="6" fill="#FAFAFA"/><path d="M1 1L31 31" stroke="#D9D9D9" stroke-width="2.5" stroke-linecap="round"/><circle cx="16" cy="16" r="5" fill="#D9D9D9"/><circle cx="16" cy="16" r="2" fill="#FAFAFA"/></svg>'),
+    energy:  'data:image/svg+xml,' + encodeURIComponent('<svg xmlns="http://www.w3.org/2000/svg" width="32" height="32" viewBox="0 0 32 32"><rect width="32" height="32" rx="6" fill="#FFF7E6"/><path d="M18 4l-8 14h6l-2 10 8-14h-6l2-10z" fill="#FA8C16"/></svg>'),
+};
+
 const templates = [
     {
-        id: 0, machineType: '单机', enabled: true, updatedAt: '2026-07-17 08:00',
+        id: 0, machineType: '单机', enabled: true, updatedAt: '2026-07-17 08:00', icon: TPL_ICONS.daily,
         translations: {
-            'zh-CN': { name: '设备运行日报模版', description: '适用于单台设备每日运行数据汇报', body: defaultBodyReport(), attachmentFileName: '{{模版名称}}_{{发送日期}}' },
-            'en':    { name: 'Daily Equipment Report', description: 'Single machine daily operation report', body: defaultEnBody('日报'), attachmentFileName: '{{模版名称}}_{{发送日期}}' }
+            'zh-CN': { name: '设备运行日报模版', description: '适用于单台设备每日运行数据汇报', body: defaultBodyReport(), attachmentFileName: '{{模版名称}}_{{发送日期}}' }
         }
     },
     {
-        id: 1, machineType: '单机', enabled: true, updatedAt: '2026-07-17 08:30',
+        id: 1, machineType: '单机', enabled: true, updatedAt: '2026-07-17 08:30', icon: TPL_ICONS.weekly,
         translations: {
-            'zh-CN': { name: '设备运行周报模版', description: '适用于单台设备每周运行数据汇总汇报', body: defaultBodyReport(), attachmentFileName: '{{模版名称}}_{{发送日期}}' },
-            'en':    { name: 'Weekly Equipment Report', description: 'Single machine weekly operation report', body: defaultEnBody('周报'), attachmentFileName: '{{模版名称}}_{{发送日期}}' }
+            'zh-CN': { name: '设备运行周报模版', description: '适用于单台设备每周运行数据汇总汇报', body: defaultBodyReport(), attachmentFileName: '{{模版名称}}_{{发送日期}}' }
         }
     },
     {
-        id: 2, machineType: '机群', enabled: true, updatedAt: '2026-07-18 09:00',
+        id: 2, machineType: '机群', enabled: true, updatedAt: '2026-07-18 09:00', icon: TPL_ICONS.monthly,
         translations: {
-            'zh-CN': { name: '设备运行月报模版', description: '适用于机群设备每月运行数据汇总汇报', body: defaultBodyReport(), attachmentFileName: '{{模版名称}}_{{发送日期}}' },
-            'en':    { name: 'Monthly Fleet Report', description: 'Fleet monthly operation report', body: defaultEnBody('月报'), attachmentFileName: '{{模版名称}}_{{发送日期}}' }
+            'zh-CN': { name: '设备运行月报模版', description: '适用于机群设备每月运行数据汇总汇报', body: defaultBodyReport(), attachmentFileName: '{{模版名称}}_{{发送日期}}' }
         }
     },
     {
-        id: 3, machineType: '机群', enabled: true, updatedAt: '2026-07-19 10:15',
+        id: 3, machineType: '机群', enabled: true, updatedAt: '2026-07-19 10:15', icon: TPL_ICONS.alert,
         translations: {
-            'zh-CN': { name: '设备异常告警通知模版', description: '设备发生异常时自动发送告警通知', body: defaultBodyAlert(), attachmentFileName: '异常告警_{{发送日期}}' },
-            'en':    { name: 'Abnormal Alarm Notification', description: 'Auto alarm notification on equipment exception', body: defaultEnAlertBody(), attachmentFileName: 'Alarm_{{发送日期}}' }
+            'zh-CN': { name: '设备异常告警通知模版', description: '设备发生异常时自动发送告警通知', body: defaultBodyAlert(), attachmentFileName: '异常告警_{{发送日期}}' }
         }
     },
     {
-        id: 4, machineType: '机群', enabled: false, updatedAt: '2026-07-20 14:20',
+        id: 4, machineType: '机群', enabled: false, updatedAt: '2026-07-20 14:20', icon: TPL_ICONS.offline,
         translations: {
             'zh-CN': { name: '设备离线提醒模版', description: '设备离线超过阈值时自动发送提醒', body: defaultBodyOffline(), attachmentFileName: '离线提醒_{{发送日期}}' }
         }
     },
     {
-        id: 5, machineType: '单机', enabled: true, updatedAt: '2026-07-21 16:00',
+        id: 5, machineType: '单机', enabled: true, updatedAt: '2026-07-21 16:00', icon: TPL_ICONS.energy,
         translations: {
-            'zh-CN': { name: '能耗分析月报模版', description: '单台设备月度能耗油耗分析报告', body: defaultBodyEnergy(), attachmentFileName: '能耗月报_{{发送日期}}' }
+            'zh-CN': { name: '能耗分析月报模版', description: '单台设备月度能耗油耗分析报表', body: defaultBodyEnergy(), attachmentFileName: '能耗月报_{{发送日期}}' }
         }
     }
 ];
@@ -1330,8 +1306,6 @@ const templates = [
 // ==================== 全局状态 ====================
 let currentTemplateId = 0;
 let currentEditLang = 'zh-CN';
-let currentPreviewId = 0;
-let currentPreviewLang = 'zh-CN';
 
 // ==================== 工具函数 ====================
 function getT(tplId, lang) {
@@ -1350,38 +1324,68 @@ function nowStr() {
 
 // ==================== 渲染模版列表 ====================
 function renderTemplateTable() {
-    const tbody = document.getElementById('template-table-body');
-    const count = templates.length;
-    document.getElementById('tpl-count').textContent = '共 ' + count + ' 个模版';
+    const nameQ = (document.getElementById('filter-name').value || '').trim().toLowerCase();
+    const langQ = document.getElementById('filter-lang').value || '';
 
-    tbody.innerHTML = templates.map((t, i) => {
+    const filtered = templates.filter((t, i) => {
+        const zhTr = t.translations['zh-CN'] || {};
+        const name = (zhTr.name || '').toLowerCase();
+        if (nameQ && !name.includes(nameQ)) return false;
+        if (langQ) {
+            const langs = getConfiguredLangs(i);
+            if (!langs.includes(langQ)) return false;
+        }
+        return true;
+    });
+
+    const tbody = document.getElementById('template-table-body');
+    const totalCount = templates.length;
+    const shownCount = filtered.length;
+    document.getElementById('tpl-count').textContent = '共 ' + totalCount + ' 个模版' + (shownCount < totalCount ? '（筛选后 ' + shownCount + ' 个）' : '');
+
+    if (filtered.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#bbb;padding:40px 0;">无匹配模版</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = filtered.map((t, idx) => {
+        const i = templates.indexOf(t);
         const langs = getConfiguredLangs(i);
         const zhTr = t.translations['zh-CN'] || {};
-        const langBadge = '<span class="tag tag-blue" title="已配置语言：' + langs.map(l => {
-            const cfg = LANG_CONFIG.find(lc => lc.id === l);
-            return cfg ? cfg.label : l;
-        }).join('、') + '">已配置 ' + langs.length + '/' + LANG_CONFIG.length + ' 种</span>';
-        // 至少保留一个模版：最后一个的删除禁用
+        const primaryLang = langs.length > 0 ? langs[0] : '';
+        const langCfg = primaryLang ? LANG_CONFIG.find(lc => lc.id === primaryLang) : null;
+        const langLabel = langCfg ? langCfg.label : (primaryLang || '-');
         const delDisabled = templates.length <= 1 ? 'style="color:#bbb;cursor:not-allowed;" title="至少保留一个模版"' : '';
+        const iconHtml = t.icon ? `<img class="tpl-icon" src="${t.icon}" alt="">` : '<span style="color:#ccc;font-size:18px;">📄</span>';
         return `<tr>
+            <td style="text-align:center;">${iconHtml}</td>
             <td><strong>${zhTr.name || '(未命名)'}</strong></td>
             <td><span class="tag tag-orange">${t.machineType || '单机'}</span></td>
             <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${zhTr.description || ''}</td>
-            <td>${langBadge}</td>
+            <td><span class="tag tag-blue">${langLabel}</span></td>
             <td><span class="tag ${t.enabled ? 'tag-green' : 'tag-gray'}">${t.enabled ? '已启用' : '已停用'}</span></td>
             <td>${t.updatedAt}</td>
             <td><span class="operate-links">
                 <a onclick="openEditModal(${i})">编辑</a>
-                <a onclick="openPreviewModal(${i})">预览</a>
-                <a onclick="duplicateTemplate(${i})">复制</a>
                 <a class="danger" ${delDisabled} onclick="${templates.length <= 1 ? '' : `requestDeleteTemplate(${i})`}">删除</a>
             </span></td>
         </tr>`;
     }).join('');
-
 }
 
-// ==================== 编辑弹窗 ====================
+// 搜索筛选
+function filterTemplates() {
+    renderTemplateTable();
+}
+
+// 清除筛选
+function clearFilters() {
+    document.getElementById('filter-name').value = '';
+    document.getElementById('filter-lang').value = '';
+    renderTemplateTable();
+}
+
+// ==================== 编辑弹窗 ====================// ==================== 编辑弹窗 ====================
 function openEditModal(index, isNew) {
     currentTemplateId = index;
     currentEditLang = 'zh-CN';
@@ -1411,9 +1415,10 @@ function loadEditForm(isNew) {
     document.getElementById('edit-tpl-machine-type').value = t.machineType || '单机';
     toggleDataColumnConfig(true);
     document.getElementById('edit-tpl-enabled').checked = t.enabled;
+    loadIconState(t.icon || '');
 
     // 更新语言选择器
-    updateLangTiles();
+    updateLangSelect();
 
     // 初始化Quill并加载正文内容（延迟确保DOM就绪）
     initQuill();
@@ -1424,29 +1429,35 @@ function loadEditForm(isNew) {
     }, 80);
 }
 
-function updateLangTiles() {
-    const container = document.getElementById('edit-lang-tiles');
+function updateLangSelect() {
+    const sel = document.getElementById('edit-lang-select');
+    if (!sel) return;
     const configuredLangs = getConfiguredLangs(currentTemplateId);
-
-    container.innerHTML = LANG_CONFIG.map(lc => {
+    sel.innerHTML = LANG_CONFIG.map(lc => {
         const configured = configuredLangs.includes(lc.id);
-        const active = lc.id === currentEditLang;
-        return `<span class="lang-tile${configured ? ' configured' : ''}${active ? ' active' : ''}" onclick="switchEditLang('${lc.id}')">
-            <span class="tile-dot"></span>${lc.label}<span class="tile-code">${lc.id}</span>
-        </span>`;
+        const label = configured ? lc.label : lc.label + ' (' + (lc.zhLabel || lc.label) + ')';
+        return `<option value="${lc.id}" ${lc.id === currentEditLang ? 'selected' : ''}>${label}</option>`;
     }).join('');
 }
 
 function switchEditLang(lang) {
-    if (!lang) return;
+    if (!lang || lang === currentEditLang) return;
     // 保存当前编辑内容（含附件表格）
     saveEditToState();
     currentEditLang = lang;
-    // 如果该语言无翻译，自动从中文复制（含附件配置）
-    if (!hasLang(currentTemplateId, lang)) {
-        const zhTr = getT(currentTemplateId, 'zh-CN');
+    const t = templates[currentTemplateId];
+    // 单语言模式：检查当前语言是否有翻译
+    const existingTr = t.translations[lang];
+    if (existingTr && existingTr.name) {
+        // 已有该语言翻译，清除其它语言
+        for (const key of Object.keys(t.translations)) {
+            if (key !== lang) delete t.translations[key];
+        }
+    } else {
+        // 用中文内容初始化当前语言，清空其他所有语言
+        const zhTr = getT(currentTemplateId, 'zh-CN') || {};
         const lc = LANG_CONFIG.find(c => c.id === lang);
-        templates[currentTemplateId].translations[lang] = {
+        const newTr = {
             name: zhTr.name ? zhTr.name + ' (' + (lc ? lc.label : lang) + ')' : '',
             description: zhTr.description || '',
             body: zhTr.body || '',
@@ -1460,6 +1471,9 @@ function switchEditLang(lang) {
                     : JSON.parse(JSON.stringify(zhTr.attachmentTableKV))
             ) : undefined
         };
+        // 清空所有语言，只保留当前一个
+        t.translations = {};
+        t.translations[lang] = newTr;
     }
     // 重置到步骤1并清空表格构建器缓存
     tbDataKV = null;
@@ -1500,6 +1514,7 @@ function saveEditToState() {
     }
     t.machineType = document.getElementById('edit-tpl-machine-type').value;
     t.enabled = document.getElementById('edit-tpl-enabled').checked;
+    t.icon = iconDataUrl || '';
 }
 
 function closeEditModal() {
@@ -1593,7 +1608,9 @@ function saveTemplate() {
     const t = templates[currentTemplateId];
     const zhTr = t.translations['zh-CN'];
     if (!zhTr || !zhTr.name) { showToast('中文模版名称不能为空', 'error'); return; }
+    if (!zhTr || !zhTr.desc) { showToast('中文模版描述不能为空', 'error'); return; }
     if (!t.machineType) { showToast('请选择模版类型', 'error'); return; }
+    if (!t.icon) { showToast('请上传模版图标', 'error'); return; }
     if (!zhTr || !zhTr.body) { showToast('中文正文内容不能为空', 'error'); return; }
     t.updatedAt = nowStr();
     renderTemplateTable();
@@ -1619,27 +1636,9 @@ function requestDeleteTemplate(index) {
     }
     const t = templates[index];
     if (!t) return;
-    const zhTr = t.translations['zh-CN'] || {};
-    const langs = getConfiguredLangs(index);
-    // 模拟查询关联订阅数（演示用，前端 mock）
-    const linkedSubs = (t.id === 0) ? 3 : (t.id === 1) ? 1 : 0;
 
-    document.getElementById('del-confirm-name').textContent = zhTr.name || '(未命名)';
-    document.getElementById('del-confirm-type').textContent = (t.machineType || '单机') + '报告';
-    document.getElementById('del-confirm-langs').textContent = langs.length + ' 种（' + langs.map(l => {
-        const cfg = LANG_CONFIG.find(lc => lc.id === l);
-        return cfg ? cfg.label : l;
-    }).join('、') + '）';
-    document.getElementById('del-confirm-subs').innerHTML = linkedSubs > 0
-        ? '<strong style="color:#E60012">' + linkedSubs + ' 个</strong> 订阅任务正在使用'
-        : '无（可直接删除）';
-    // 关联订阅时按钮文案升级为"删除模版与 N 个订阅"
     const okBtn = document.getElementById('del-confirm-ok');
-    okBtn.textContent = linkedSubs > 0
-        ? '删除模版与 ' + linkedSubs + ' 个订阅'
-        : '确认删除';
-
-    // 把要删除的 index 暂存到 ok 按钮上
+    okBtn.textContent = '确认删除';
     okBtn.dataset.targetIndex = index;
     // 记录来源（列表行 / 编辑弹窗），确认后决定是否关闭编辑弹窗
     okBtn.dataset.fromEdit = (index === currentTemplateId && document.getElementById('edit-modal').classList.contains('show')) ? '1' : '0';
@@ -1776,6 +1775,72 @@ function defaultAttachmentFileName() {
     return '{{模版名称}}_{{发送日期}}';
 }
 
+// ==================== 图标上传处理 ====================
+let iconDataUrl = '';
+
+function handleIconUpload(input) {
+    const file = input.files[0];
+    if (!file) return;
+    const validTypes = ['image/png', 'image/jpeg', 'image/svg+xml'];
+    if (!validTypes.includes(file.type)) {
+        showToast('仅支持 PNG / JPG / SVG 格式的图标文件', 'error');
+        input.value = '';
+        return;
+    }
+    if (file.size > 500 * 1024) {
+        showToast('图标文件不能超过 500KB', 'error');
+        input.value = '';
+        return;
+    }
+    const reader = new FileReader();
+    reader.onload = function(e) {
+        iconDataUrl = e.target.result;
+        const previewImg = document.getElementById('icon-preview-img');
+        const placeholder = document.getElementById('icon-placeholder');
+        const removeBtn = document.getElementById('icon-remove-btn');
+        previewImg.src = iconDataUrl;
+        previewImg.style.display = 'block';
+        placeholder.style.display = 'none';
+        removeBtn.style.display = 'inline-block';
+    };
+    reader.readAsDataURL(file);
+}
+
+function removeIcon() {
+    iconDataUrl = '';
+    const previewImg = document.getElementById('icon-preview-img');
+    const placeholder = document.getElementById('icon-placeholder');
+    const removeBtn = document.getElementById('icon-remove-btn');
+    previewImg.src = '';
+    previewImg.style.display = 'none';
+    placeholder.style.display = '';
+    removeBtn.style.display = 'none';
+    document.getElementById('icon-file-input').value = '';
+}
+
+function resetIconState() {
+    iconDataUrl = '';
+    document.getElementById('icon-preview-img').style.display = 'none';
+    document.getElementById('icon-placeholder').style.display = '';
+    document.getElementById('icon-remove-btn').style.display = 'none';
+    document.getElementById('icon-file-input').value = '';
+}
+
+function loadIconState(dataUrl) {
+    iconDataUrl = dataUrl || '';
+    const previewImg = document.getElementById('icon-preview-img');
+    const placeholder = document.getElementById('icon-placeholder');
+    const removeBtn = document.getElementById('icon-remove-btn');
+    if (iconDataUrl) {
+        previewImg.src = iconDataUrl;
+        previewImg.style.display = 'block';
+        placeholder.style.display = 'none';
+        removeBtn.style.display = 'inline-block';
+    } else {
+        resetIconState();
+    }
+}
+
 // ==================== PDF 模板上传处理 ====================
 let pdfTemplateUploaded = false;
 
@@ -1829,22 +1894,27 @@ function renderPdfKV() {
     if (docBody) {
         docBody.innerHTML = pdfDocKV.map((row, i) => {
             const tags = parseVarTags(row[1]);
+            const isBaseRow = tags.length === 1 && SC_COMMON_FIELDS.some(cf => cf[1] === tags[0]);
             let tagHtml = '';
             if (tags.length) {
-                tagHtml = tags.map(t => `<span class="kv-cascade-tag" title="${escapeAttr(t)}">${escapeHtml(t)}<span class="tag-close" onclick="event.stopPropagation();removeCascadeTag(${i},'${escapeAttr(t)}','pdf')">×</span></span>`).join('');
+                tagHtml = tags.map(t => {
+                    const isBaseTag = SC_COMMON_FIELDS.some(cf => cf[1] === t);
+                    return `<span class="kv-cascade-tag" title="${escapeAttr(t)}">${escapeHtml(t)}${!isBaseTag ? `<span class="tag-close" onclick="event.stopPropagation();removeCascadeTag(${i},'${escapeAttr(t)}','pdf')">×</span>` : ''}</span>`;
+                }).join('');
             } else {
                 tagHtml = '<span class="kv-cascade-placeholder">点击选择映射字段...</span>';
             }
-            return `<tr>
-                <td><input type="text" value="${escapeAttr(row[0])}" placeholder="文档键值/占位符" oninput="pdfKVUpdate('doc',${i},0,this.value)" onblur="saveEditToState()"></td>
+            const baseCls = isBaseRow ? ' disabled' : '';
+            return `<tr class="kv-row${baseCls}">
+                <td><input type="text" value="${escapeAttr(row[0])}" placeholder="文档键值/占位符" ${isBaseRow ? 'readonly' : ''} oninput="pdfKVUpdate('doc',${i},0,this.value)" onblur="saveEditToState()"></td>
                 <td>
-                    <div class="kv-cascade-trigger" onclick="openFleetCascade(${i},'pdf')" title="点击弹出三级联动选择器">
+                    <div class="kv-cascade-trigger${baseCls}" ${isBaseRow ? '' : `onclick="openFleetCascade(${i},'pdf')"`} title="${isBaseRow ? '基础字段不可修改' : '点击弹出三级联动选择器'}">
                         <div class="kv-cascade-tags-area">${tagHtml}</div>
-                        <div class="kv-cascade-btn-trigger">选择字段<span class="trigger-arrow">▼</span></div>
+                        <div class="kv-cascade-btn-trigger">${isBaseRow ? '基础字段' : '选择字段<span class="trigger-arrow">▼</span>'}</div>
                     </div>
                 </td>
                 <td style="width:40px;text-align:center;">
-                    ${pdfDocKV.length > 1 ? `<span class="kv-icon-del" onclick="pdfKVRemoveRow('doc',${i})">×</span>` : ''}
+                    ${!isBaseRow && pdfDocKV.length > 1 ? `<span class="kv-icon-del" onclick="pdfKVRemoveRow('doc',${i})">×</span>` : ''}
                 </td>
             </tr>`;
         }).join('');
@@ -1877,21 +1947,27 @@ function tbKVRender() {
     let html = '';
     tbDataKV.forEach((row, i) => {
         const tags = parseVarTags(row[1]);
+        // 判断是否为不可修改的基础字段
+        const isBaseRow = tags.length === 1 && SC_COMMON_FIELDS.some(cf => cf[1] === tags[0]);
         let tagHtml = '';
         if (tags.length) {
-            tagHtml = tags.map(t => `<span class="kv-cascade-tag" title="${escapeAttr(t)}">${escapeHtml(t)}<span class="tag-close" onclick="event.stopPropagation();removeCascadeTag(${i},'${escapeAttr(t)}','fleet')">×</span></span>`).join('');
+            tagHtml = tags.map(t => {
+                const isBaseTag = SC_COMMON_FIELDS.some(cf => cf[1] === t);
+                return `<span class="kv-cascade-tag" title="${escapeAttr(t)}">${escapeHtml(t)}${!isBaseTag ? `<span class="tag-close" onclick="event.stopPropagation();removeCascadeTag(${i},'${escapeAttr(t)}','fleet')">×</span>` : ''}</span>`;
+            }).join('');
         } else {
             tagHtml = '<span class="kv-cascade-placeholder">点击选择映射字段...</span>';
         }
-        html += `<tr>
-            <td><input type="text" class="kv-input" value="${escapeAttr(row[0])}" placeholder="列名" oninput="tbKVInput(${i},0,this.value)"></td>
+        const baseCls = isBaseRow ? ' disabled' : '';
+        html += `<tr class="kv-row${baseCls}">
+            <td><input type="text" class="kv-input" value="${escapeAttr(row[0])}" placeholder="列名" ${isBaseRow ? 'readonly' : ''} oninput="tbKVInput(${i},0,this.value)"></td>
             <td>
-                <div class="kv-cascade-trigger" onclick="openFleetCascade(${i})" title="点击弹出三级联动选择器">
+                <div class="kv-cascade-trigger${baseCls}" ${isBaseRow ? '' : `onclick="openFleetCascade(${i})"`} title="${isBaseRow ? '基础字段不可修改' : '点击弹出三级联动选择器'}">
                     <div class="kv-cascade-tags-area">${tagHtml}</div>
-                    <div class="kv-cascade-btn-trigger">选择字段<span class="trigger-arrow">▼</span></div>
+                    <div class="kv-cascade-btn-trigger">${isBaseRow ? '基础字段' : '选择字段<span class="trigger-arrow">▼</span>'}</div>
                 </div>
             </td>
-            <td><span class="kv-icon-del" onclick="tbKVRemoveRow(${i})" title="删除此行">×</span></td>
+            <td><span class="kv-icon-del${baseCls}" ${isBaseRow ? '' : `onclick="tbKVRemoveRow(${i})"`} title="${isBaseRow ? '基础字段不可删除' : '删除此行'}">×</span></td>
         </tr>`;
     });
     tbody.innerHTML = html || '<tr><td colspan="3" style="text-align:center;color:#999;padding:12px;">暂无列配置，点击下方按钮添加</td></tr>';
@@ -2052,10 +2128,13 @@ function renderCascadeL3() {
     let html = '';
     model.vars.forEach(v => {
         const name = v[0], tag = v[1];
+        const isCommon = SC_COMMON_FIELDS.some(cf => cf[1] === tag);
         const checked = _fleetCascadeTempChecked[tag] ? ' checked' : '';
-        html += `<label class="kv-cascade-check-item">
-            <input type="checkbox"${checked} onchange="toggleCascadeCheck('${escapeAttr(tag)}')">
-            <span class="check-var-name">${escapeHtml(name)}</span>
+        const disabled = (isCommon || checked) ? ' disabled' : '';
+        const disabledCls = (isCommon || checked) ? ' disabled' : '';
+        html += `<label class="kv-cascade-check-item${disabledCls}">
+            <input type="radio" name="kv-cascade-radio" value="${escapeAttr(tag)}"${checked}${disabled} onchange="toggleCascadeRadio('${escapeAttr(tag)}')">
+            <span class="check-var-name">${escapeHtml(name)}${isCommon ? ' <span style="font-size:10px;color:#999;font-weight:normal;">(基础)</span>' : ''}</span>
             <span class="check-var-tag">${escapeHtml(tag)}</span>
         </label>`;
     });
@@ -2063,13 +2142,14 @@ function renderCascadeL3() {
     updateCascadeSelectedCount();
 }
 
-// 切换字段勾选状态
-function toggleCascadeCheck(tag) {
-    if (_fleetCascadeTempChecked[tag]) {
-        delete _fleetCascadeTempChecked[tag];
-    } else {
-        _fleetCascadeTempChecked[tag] = true;
-    }
+// 切换字段单选状态
+function toggleCascadeRadio(tag) {
+    // 单选：只保留当前选中项
+    _fleetCascadeTempChecked = {};
+    _fleetCascadeTempChecked[tag] = true;
+    // 同步 radio 状态（确保仅选中一个）
+    const radios = document.querySelectorAll('input[name="kv-cascade-radio"]');
+    radios.forEach(r => { r.checked = (r.value === tag); });
     updateCascadeSelectedCount();
 }
 
@@ -2306,8 +2386,10 @@ function scRenderL3() {
     allVars.forEach((v, idx) => {
         const isCommon = idx < SC_COMMON_FIELDS.length;
         const checked = map[v[1]] ? ' checked' : '';
-        html += '<label class="kv-cascade-check-item">' +
-            '<input type="checkbox"' + checked + ' onchange="scToggleCheck(\'' + escapeAttr(v[1]) + '\')">' +
+        const disabled = isCommon ? ' disabled' : '';
+        const disabledCls = isCommon ? ' disabled' : '';
+        html += '<label class="kv-cascade-check-item' + disabledCls + '">' +
+            '<input type="checkbox"' + checked + disabled + ' onchange="scToggleCheck(\'' + escapeAttr(v[1]) + '\')">' +
             '<span class="check-var-name">' + escapeHtml(v[0]) + (isCommon ? ' <span style="font-size:10px;color:#999;font-weight:normal;">(基础)</span>' : '') + '</span>' +
             '<span class="check-var-tag">' + escapeHtml(v[1]) + '</span>' +
             '</label>';
@@ -2337,8 +2419,13 @@ function scToggleAll(select) {
     if (!group) return;
     const allVars = [...SC_COMMON_FIELDS, ...group.vars];
     allVars.forEach(v => {
-        if (select) { curMap[v[1]] = true; }
-        else { delete curMap[v[1]]; }
+        const isCommon = SC_COMMON_FIELDS.some(cf => cf[1] === v[1]);
+        if (isCommon) return; // 基础字段不可操作
+        if (select) {
+            curMap[v[1]] = true;
+        } else {
+            delete curMap[v[1]];
+        }
     });
     scRenderL3();
     scRenderL1();
@@ -2427,99 +2514,49 @@ function tbGenerateHTML() {
     return html;
 }
 
-// ==================== 预览弹窗 ====================
-function openPreviewModal(index) {
-    currentPreviewId = index;
-    // 优先用中文预览
-    const langs = getConfiguredLangs(index);
-    currentPreviewLang = langs.includes('zh-CN') ? 'zh-CN' : langs[0] || 'zh-CN';
-
-    // 设置预览语言下拉
-    const sel = document.getElementById('preview-lang');
-    sel.innerHTML = LANG_CONFIG.map(lc => {
-        const avail = langs.includes(lc.id);
-        return `<option value="${lc.id}" ${lc.id === currentPreviewLang ? 'selected' : ''} ${!avail ? 'disabled' : ''}>${lc.label}${!avail ? ' (未配置)' : ''}</option>`;
-    }).join('');
-
-    renderPreview();
-    document.getElementById('preview-modal').classList.add('show');
-}
-
-function switchPreviewLang() {
-    currentPreviewLang = document.getElementById('preview-lang').value;
-    renderPreview();
-}
-
-function renderPreview() {
-    const t = templates[currentPreviewId];
-    const tr = getT(currentPreviewId, currentPreviewLang);
-    const sampleLangData = getSampleData();
-
-    // 主题（默认：模版名称 - 发送日期）
-    let previewSubject = '{{模版名称}} - {{发送日期}}';
-    for (const [k, v] of Object.entries(sampleLangData)) {
-        previewSubject = previewSubject.replace(new RegExp(k.replace(/[{}]/g, '\\$&'), 'g'), v);
-    }
-    document.getElementById('preview-modal-subject').textContent = previewSubject;
-
-    // 正文
-    let previewBody = tr.body || '';
-    for (const [k, v] of Object.entries(sampleLangData)) {
-        previewBody = previewBody.replace(new RegExp(k.replace(/[{}]/g, '\\$&'), 'g'), `<span class="var-hl">${v}</span>`);
-    }
-    if (!previewBody.trim()) {
-        previewBody = '<div style="text-align:center;color:#bbb;padding:60px 0">正文为空</div>';
-    }
-    document.getElementById('preview-modal-body').innerHTML = previewBody;
-}
-
-function closePreviewModal() {
-    document.getElementById('preview-modal').classList.remove('show');
-}
-
 // ==================== 变量词典 ====================
 const SINGLE_MACHINE_VARS = [
     {cat:'起重机',models:[
         {name:'标准版 (Model_10088)',key:'crane_10088'},
         {name:'新版 (Model_10464)',key:'crane_10464'}
-    ],vars:[['底盘发动机工作时间','{{底盘发动机工作时间}}'],['上车工作时间','{{上车工作时间}}'],['底盘发动机油耗','{{底盘发动机油耗}}'],['上车油耗','{{上车油耗}}'],['吊载次数','{{吊载次数}}'],['平均每小时吊载次数','{{平均每小时吊载次数}}'],['行驶里程','{{行驶里程}}'],['风险预警','{{风险预警}}']]},
+    ],vars:[['底盘发动机工作时间','{{底盘发动机工作时间}}'],['上车工作时间','{{上车工作时间}}'],['底盘发动机油耗','{{底盘发动机油耗}}'],['上车油耗','{{上车油耗}}'],['吊载次数','{{吊载次数}}'],['平均每小时吊载次数','{{平均每小时吊载次数}}'],['行驶里程','{{行驶里程}}']]},
     {cat:'燃油自卸车',models:[
         {name:'标准版 (Model_10098)',key:'fdump_10098'}
-    ],vars:[['开工率','{{开工率}}'],['开工天数','{{开工天数}}'],['行驶时长','{{行驶时长}}'],['工时','{{工时}}'],['怠速工时','{{怠速工时}}'],['日均行驶时长','{{日均行驶时长}}'],['日均怠速时长','{{日均怠速时长}}'],['里程','{{里程}}'],['日均里程','{{日均里程}}'],['能耗','{{能耗}}'],['百公里平均能耗','{{百公里平均能耗}}'],['日均百公里平均能耗','{{日均百公里平均能耗}}'],['预警','{{预警}}']]},
+    ],vars:[['开工率','{{开工率}}'],['开工天数','{{开工天数}}'],['行驶时长','{{行驶时长}}'],['工时','{{工时}}'],['怠速工时','{{怠速工时}}'],['日均行驶时长','{{日均行驶时长}}'],['日均怠速时长','{{日均怠速时长}}'],['里程','{{里程}}'],['日均里程','{{日均里程}}'],['能耗','{{能耗}}'],['百公里平均能耗','{{百公里平均能耗}}'],['日均百公里平均能耗','{{日均百公里平均能耗}}']]},
     {cat:'电动自卸车',models:[
         {name:'基础版 (Model_10541)',key:'edump_10541'},
         {name:'V2版 (Model_10552)',key:'edump_10552'},
         {name:'氢燃料版',key:'edump_h2'}
-    ],vars:[['开工天数','{{开工天数}}'],['开工率','{{开工率}}'],['行驶时长','{{行驶时长}}'],['怠速工时','{{怠速工时}}'],['里程','{{里程}}'],['能耗','{{能耗}}'],['回收能耗','{{回收能耗}}'],['百公里平均能耗','{{百公里平均能耗}}'],['日均行驶时长','{{日均行驶时长}}'],['日均怠速时长','{{日均怠速时长}}'],['日均里程','{{日均里程}}'],['预警','{{预警}}']]},
+    ],vars:[['开工天数','{{开工天数}}'],['开工率','{{开工率}}'],['行驶时长','{{行驶时长}}'],['怠速工时','{{怠速工时}}'],['里程','{{里程}}'],['能耗','{{能耗}}'],['回收能耗','{{回收能耗}}'],['百公里平均能耗','{{百公里平均能耗}}'],['日均行驶时长','{{日均行驶时长}}'],['日均怠速时长','{{日均怠速时长}}'],['日均里程','{{日均里程}}']]},
     {cat:'燃油牵引车',models:[
         {name:'标准版 (Model_10418)',key:'ftrac_10418'}
-    ],vars:[['里程','{{里程}}'],['能耗','{{能耗}}'],['怠速能耗','{{怠速能耗}}'],['工时','{{工时}}'],['怠速工时','{{怠速工时}}'],['行驶时长','{{行驶时长}}'],['百公里平均能耗','{{百公里平均能耗}}'],['平均车速','{{平均车速}}'],['预警','{{预警}}']]},
+    ],vars:[['里程','{{里程}}'],['能耗','{{能耗}}'],['怠速能耗','{{怠速能耗}}'],['工时','{{工时}}'],['怠速工时','{{怠速工时}}'],['行驶时长','{{行驶时长}}'],['百公里平均能耗','{{百公里平均能耗}}'],['平均车速','{{平均车速}}']]},
     {cat:'电动牵引车',models:[
         {name:'轻卡版 (Model_10535)',key:'etrac_10535'},
         {name:'重卡版 (Model_10297)',key:'etrac_10297'}
-    ],vars:[['里程','{{里程}}'],['能耗','{{能耗}}'],['怠速能耗','{{怠速能耗}}'],['百公里平均能耗','{{百公里平均能耗}}'],['回收能耗','{{回收能耗}}'],['工时','{{工时}}'],['怠速工时','{{怠速工时}}'],['行驶时长','{{行驶时长}}'],['平均车速','{{平均车速}}'],['预警','{{预警}}']]},
+    ],vars:[['里程','{{里程}}'],['能耗','{{能耗}}'],['怠速能耗','{{怠速能耗}}'],['百公里平均能耗','{{百公里平均能耗}}'],['回收能耗','{{回收能耗}}'],['工时','{{工时}}'],['怠速工时','{{怠速工时}}'],['行驶时长','{{行驶时长}}'],['平均车速','{{平均车速}}']]},
     {cat:'燃油伸缩臂叉车',models:[
         {name:'标准版 (Model_10147)',key:'tele_10147'},
         {name:'华兴版',key:'tele_hx'}
-    ],vars:[['开工天数','{{开工天数}}'],['里程','{{里程}}'],['能耗','{{能耗}}'],['平均每小时能耗','{{平均每小时能耗}}'],['工时','{{工时}}'],['怠速工时','{{怠速工时}}'],['预警次数','{{预警次数}}']]},
+    ],vars:[['开工天数','{{开工天数}}'],['里程','{{里程}}'],['能耗','{{能耗}}'],['平均每小时能耗','{{平均每小时能耗}}'],['工时','{{工时}}'],['怠速工时','{{怠速工时}}']]},
     {cat:'履带吊',models:[
         {name:'大吨位混合版',key:'crawl_heavy_mix'},
         {name:'小吨位版 (Model_10248)',key:'crawl_10248'},
         {name:'大吨位版 (Model_10250)',key:'crawl_10250'},
         {name:'三代版 (Model_10314)',key:'crawl_10314'}
-    ],vars:[['发动机工作时间','{{发动机工作时间}}'],['发动机油耗','{{发动机油耗}}'],['吊载次数','{{吊载次数}}'],['平均每小时油耗','{{平均每小时油耗}}'],['预警次数','{{预警次数}}']]},
+    ],vars:[['发动机工作时间','{{发动机工作时间}}'],['发动机油耗','{{发动机油耗}}'],['吊载次数','{{吊载次数}}'],['平均每小时油耗','{{平均每小时油耗}}']]},
     {cat:'燃油堆高机',models:[
         {name:'标准版 (Model_10145)',key:'stack_10145'},
         {name:'华兴版',key:'stack_hx'}
-    ],vars:[['里程','{{里程}}'],['能耗','{{能耗}}'],['工时','{{工时}}'],['怠速工时','{{怠速工时}}'],['吊箱数量','{{吊箱数量}}'],['平均能耗','{{平均能耗}}'],['单箱能耗','{{单箱能耗}}'],['预警次数','{{预警次数}}']]},
+    ],vars:[['里程','{{里程}}'],['能耗','{{能耗}}'],['工时','{{工时}}'],['怠速工时','{{怠速工时}}'],['吊箱数量','{{吊箱数量}}'],['平均能耗','{{平均能耗}}'],['单箱能耗','{{单箱能耗}}']]},
     {cat:'电动堆高机',models:[
         {name:'标准版 (Model_10263)',key:'estack_10263'},
         {name:'华兴版',key:'estack_hx'}
-    ],vars:[['里程','{{里程}}'],['能耗','{{能耗}}'],['工时','{{工时}}'],['怠速工时','{{怠速工时}}'],['吊箱数量','{{吊箱数量}}'],['平均能耗','{{平均能耗}}'],['单箱能耗','{{单箱能耗}}'],['预警次数','{{预警次数}}']]},
+    ],vars:[['里程','{{里程}}'],['能耗','{{能耗}}'],['工时','{{工时}}'],['怠速工时','{{怠速工时}}'],['吊箱数量','{{吊箱数量}}'],['平均能耗','{{平均能耗}}'],['单箱能耗','{{单箱能耗}}']]},
     {cat:'电动集卡',models:[
         {name:'标准版 (Model_10525)',key:'etruck_10525'},
         {name:'港机版',key:'etruck_port'}
-    ],vars:[['开工天数','{{开工天数}}'],['开工率','{{开工率}}'],['里程','{{里程}}'],['能耗','{{能耗}}'],['工时','{{工时}}'],['运行时长','{{运行时长}}'],['怠速时长','{{怠速时长}}'],['怠速占比','{{怠速占比}}'],['日均运行时长','{{日均运行时长}}'],['日均怠速时长','{{日均怠速时长}}'],['日均里程','{{日均里程}}'],['日均能耗','{{日均能耗}}'],['平均能耗','{{平均能耗}}'],['预警','{{预警}}']]},
+    ],vars:[['开工天数','{{开工天数}}'],['开工率','{{开工率}}'],['里程','{{里程}}'],['能耗','{{能耗}}'],['工时','{{工时}}'],['运行时长','{{运行时长}}'],['怠速时长','{{怠速时长}}'],['怠速占比','{{怠速占比}}'],['日均运行时长','{{日均运行时长}}'],['日均怠速时长','{{日均怠速时长}}'],['日均里程','{{日均里程}}'],['日均能耗','{{日均能耗}}'],['平均能耗','{{平均能耗}}']]},
     {cat:'电动搅拌车',models:[
         {name:'基础版',key:'emix_base'},
         {name:'ISEE3版',key:'emix_isee3'}
@@ -2540,7 +2577,7 @@ const SINGLE_MACHINE_VARS = [
         {name:'华兴云中挖 (Model_5386)',key:'exc_5386'},
         {name:'华兴云大挖 (Model_5389)',key:'exc_5389'},
         {name:'电动挖机',key:'exc_elec'}
-    ],vars:[['开工天数','{{开工天数}}'],['周期工时','{{周期工时}}'],['周期油耗','{{周期油耗}}'],['周期油耗/小时','{{周期油耗/小时}}'],['周期挡位时间分布','{{周期挡位时间分布}}'],['周期预警','{{周期预警}}']]}
+    ],vars:[['开工天数','{{开工天数}}'],['周期工时','{{周期工时}}'],['周期油耗','{{周期油耗}}'],['周期油耗/小时','{{周期油耗/小时}}'],['周期挡位时间分布','{{周期挡位时间分布}}']]}
 ];
 
 const FLEET_VARS = [
@@ -2730,45 +2767,6 @@ function dictInsertVar(tag) {
     showToast('已插入 ' + tag);
 }
 
-// ==================== 复制模版 ====================
-function duplicateTemplate(index) {
-    const orig = templates[index];
-    const copy = {
-        id: templates.length,
-        machineType: orig.machineType || '单机',
-        enabled: orig.enabled,
-        updatedAt: nowStr(),
-        translations: {}
-    };
-    for (const [lang, tr] of Object.entries(orig.translations)) {
-        const dupTr = {
-            name: tr.name + ' (副本)',
-            description: tr.description || '',
-            body: tr.body,
-            attachmentFileName: tr.attachmentFileName || '',
-            pdfTemplateFile: tr.pdfTemplateFile || '',
-            pdfAttachmentFileName: tr.pdfAttachmentFileName || '',
-            pdfDocKV: tr.pdfDocKV ? tr.pdfDocKV.map(r => [r[0]||'', r[1]||'']) : [['', '']]
-        };
-        if (tr.attachmentTable && tr.attachmentTable.cols) {
-            dupTr.attachmentTable = {
-                cols: tr.attachmentTable.cols,
-                cells: [tr.attachmentTable.cells[0].slice(), tr.attachmentTable.cells[1].slice()]
-            };
-        }
-        if (tr.attachmentTableKV) {
-            dupTr.attachmentTableKV = Array.isArray(tr.attachmentTableKV)
-                ? tr.attachmentTableKV.map(r => [r[0]||'', r[1]||''])
-                : JSON.parse(JSON.stringify(tr.attachmentTableKV));
-        }
-        copy.translations[lang] = dupTr;
-    }
-    templates.push(copy);
-    currentTemplateId = templates.length - 1;
-    renderTemplateTable();
-    showToast('已复制模版', 'success');
-}
-
 // ==================== 新建模版（直接进富文本编辑） ====================
 function createAndEdit() {
     const newTpl = {
@@ -2789,6 +2787,7 @@ function createAndEdit() {
 
     templates.push(newTpl);
     currentTemplateId = templates.length - 1;
+    resetIconState();
     openEditModal(currentTemplateId, true);
     showToast('新建模版，请填写模版信息', 'success');
 }
@@ -2810,7 +2809,15 @@ document.querySelectorAll('.modal-overlay').forEach(overlay => {
 });
 
 // ==================== 初始化 ====================
-renderTemplateTable();
-</script>
+// 填充语言筛选下拉
+(function() {
+    const sel = document.getElementById('filter-lang');
+    if (sel) {
+        sel.innerHTML = '<option value="">全部语言</option>' + LANG_CONFIG.map(lc =>
+            '<option value="' + lc.id + '">' + lc.label + ' (' + (lc.zhLabel || lc.label) + ')</option>'
+        ).join('');
+    }
+})();
+renderTemplateTable();</script>
 </body>
 </html>

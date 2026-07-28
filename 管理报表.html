@@ -168,7 +168,8 @@
             background: #fff;
             border-radius: 8px;
             box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
-            overflow: hidden;
+            overflow: visible;
+            padding-bottom: 32px;
         }
 
         /* 顶部标签页 */
@@ -509,6 +510,80 @@
             border-color: #E60012;
         }
 
+        .help-btn-wrap {
+            position: relative;
+        }
+
+        .help-popover {
+            display: none;
+            position: absolute;
+            top: 40px;
+            right: 0;
+            width: 420px;
+            background: #fff;
+            border: 1px solid #e8e8e8;
+            border-radius: 8px;
+            box-shadow: 0 6px 24px rgba(0,0,0,0.12);
+            z-index: 1000;
+        }
+
+        .help-popover::before {
+            content: '';
+            position: absolute;
+            top: -7px;
+            right: 12px;
+            width: 12px;
+            height: 12px;
+            background: #fff;
+            border: 1px solid #e8e8e8;
+            border-width: 1px 0 0 1px;
+            transform: rotate(45deg);
+        }
+
+        .help-popover.active {
+            display: block;
+        }
+
+        .help-popover-header {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            padding: 16px 20px 12px;
+            font-size: 15px;
+            font-weight: 600;
+            color: #262626;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .help-popover-body {
+            padding: 14px 20px 18px;
+            font-size: 13px;
+            color: #595959;
+            line-height: 1.7;
+        }
+
+        .help-popover-body p {
+            margin: 0 0 10px;
+            color: #666;
+        }
+
+        .help-popover-body ul {
+            margin: 0;
+            padding-left: 18px;
+        }
+
+        .help-popover-body li {
+            margin-bottom: 10px;
+        }
+
+        .help-popover-body li:last-child {
+            margin-bottom: 0;
+        }
+
+        .help-popover-body strong {
+            color: #262626;
+        }
+
         .add-btn {
             background: #E60012;
             border: none;
@@ -768,6 +843,79 @@
             visibility: visible;
         }
 
+        /* ====== 部分失效状态样式 ====== */
+
+        .status-badge.partial {
+            background: #fff7e6;
+            color: #d46b08;
+            border: 1px solid #ffd591;
+            cursor: default;
+        }
+
+        /* 部分失效行样式 */
+        tbody tr.partial {
+            background: #fffbe6;
+        }
+
+        tbody tr.partial:hover {
+            background: #fff7cc;
+        }
+
+        tbody tr.partial td {
+            color: #bbb;
+            border-bottom-color: #eee;
+        }
+
+        tbody tr.partial td.col-name {
+            color: #999;
+            cursor: default;
+        }
+
+        tbody tr.partial td.col-name:hover {
+            text-decoration: none;
+        }
+
+        tbody tr.partial td:last-child {
+            background: #fffbe6;
+        }
+
+        tbody tr.partial:hover td:last-child {
+            background: #fff7cc;
+        }
+
+        tbody tr.partial .operate-links .link-danger {
+            color: #bbb;
+        }
+
+        /* 部分失效悬浮提示气泡 */
+        .partial-tooltip {
+            position: relative;
+            cursor: help;
+        }
+
+        .partial-tooltip::after {
+            content: attr(data-tooltip);
+            position: absolute;
+            bottom: calc(100% + 8px);
+            left: 0;
+            background: #333;
+            color: #fff;
+            padding: 6px 10px;
+            border-radius: 6px;
+            font-size: 12px;
+            white-space: nowrap;
+            opacity: 0;
+            visibility: hidden;
+            transition: opacity 0.2s, visibility 0.2s;
+            z-index: 100;
+            pointer-events: none;
+        }
+
+        .partial-tooltip:hover::after {
+            opacity: 1;
+            visibility: visible;
+        }
+
         .switch-toggle {
             position: relative;
             display: inline-block;
@@ -809,6 +957,30 @@
 
         .switch-toggle input:checked + .switch-slider::before {
             transform: translateX(16px);
+        }
+
+        .switch-toggle input:disabled + .switch-slider {
+            opacity: 0.4;
+            cursor: not-allowed;
+        }
+
+        .switch-cell {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .switch-label {
+            font-size: 12px;
+            color: #666;
+            white-space: nowrap;
+        }
+
+        .status-badge.normal {
+            background: #f0faf5;
+            color: #389e0d;
+            border: 1px solid #b7eb8f;
+            cursor: default;
         }
 
         /* 空状态 */
@@ -1318,6 +1490,51 @@
             background: #f5f5f5;
         }
 
+        .group-select-all {
+            margin-left: auto;
+            font-size: 12px;
+            color: #E60012;
+            cursor: pointer;
+            white-space: nowrap;
+            padding: 2px 6px;
+            border-radius: 3px;
+        }
+
+        .group-select-all:hover {
+            background: #fff1f0;
+            color: #cf1322;
+        }
+
+        .group-count {
+            margin-left: auto;
+            font-size: 11px;
+            color: #999;
+            background: #f5f5f5;
+            padding: 1px 6px;
+            border-radius: 10px;
+        }
+
+        .search-add-all {
+            display: none;
+            margin-left: 8px;
+            font-size: 12px;
+            color: #E60012;
+            cursor: pointer;
+            white-space: nowrap;
+            padding: 2px 8px;
+            border: 1px solid #E60012;
+            border-radius: 4px;
+            background: #fff;
+        }
+
+        .search-add-all:hover {
+            background: #fff1f0;
+        }
+
+        .search-add-all.visible {
+            display: inline-block;
+        }
+
         .transfer-group-header svg {
             color: #999;
             transition: transform 0.2s;
@@ -1507,12 +1724,6 @@
         }
 
         /* 信息图标 */
-        .info-icon {
-            color: #999;
-            cursor: help;
-            font-size: 12px;
-        }
-
         /* 邮箱输入行 */
         .email-input-row {
             display: flex;
@@ -1520,35 +1731,74 @@
             align-items: center;
         }
 
-        .email-input-row input {
-            flex: 1;
-            min-width: 0;
-            height: 38px;
-            padding: 0 12px;
+        /* 收件人下拉选择组件 */
+        .recipient-select-wrap {
+            position: relative;
+        }
+        .recipient-search-box {
+            display: flex;
+            align-items: center;
             border: 1px solid #d9d9d9;
             border-radius: 6px;
-            font-size: 13px;
-            outline: none;
             transition: border-color 0.2s;
+            background: #fff;
         }
-
-        .email-input-row input:focus {
+        .recipient-search-box:focus-within {
             border-color: #E60012;
             box-shadow: 0 0 0 2px rgba(230, 0, 18, 0.1);
         }
-
-        .btn-add-email {
+        .recipient-search-box input {
+            flex: 1;
             height: 38px;
-            padding: 0 18px;
-            background: #E60012;
-            color: #fff;
-            border: 1px solid #E60012;
-            border-radius: 6px;
+            padding: 0 12px;
+            border: none;
+            outline: none;
             font-size: 13px;
+            border-radius: 6px;
+            background: transparent;
+        }
+        .recipient-arrow {
+            padding: 0 10px;
+            font-size: 10px;
+            color: #999;
             cursor: pointer;
-            white-space: nowrap;
-            flex-shrink: 0;
-            transition: background 0.2s;
+            user-select: none;
+        }
+        .recipient-dropdown {
+            position: absolute;
+            top: calc(100% + 4px);
+            left: 0;
+            right: 0;
+            background: #fff;
+            border: 1px solid #d9d9d9;
+            border-radius: 8px;
+            box-shadow: 0 6px 20px rgba(0,0,0,0.1);
+            z-index: 50;
+            display: none;
+            max-height: 220px;
+            overflow-y: auto;
+        }
+        .recipient-dropdown.open { display: block; }
+        .recipient-option {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 10px 14px;
+            cursor: pointer;
+            transition: background 0.15s;
+            border-bottom: 1px solid #f0f0f0;
+        }
+        .recipient-option:last-child { border-bottom: none; }
+        .recipient-option:hover { background: #f0f5ff; }
+        .recipient-option .opt-name { font-size: 13px; color: #333; font-weight: 500; }
+        .recipient-option .opt-email { font-size: 12px; color: #999; }
+        .recipient-option.added { opacity: 0.4; cursor: not-allowed; }
+        .recipient-option.added:hover { background: transparent; }
+        .recipient-no-result {
+            padding: 20px;
+            text-align: center;
+            color: #bbb;
+            font-size: 13px;
         }
 
         .btn-add-email:hover {
@@ -1605,12 +1855,6 @@
         .recipient-item-remove:hover {
             background: #ff4d4f;
             color: #fff;
-        }
-
-        .form-label-with-icon {
-            display: inline-flex;
-            align-items: center;
-            gap: 4px;
         }
 
         .time-picker .form-input,
@@ -1840,10 +2084,10 @@
                     <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
                     简体中文
                 </div>
-                <div class="navbar-item">
-                    <span>童鹏</span>
+                <a class="navbar-item" href="个人中心.html" style="text-decoration:none;color:inherit;">
+                    <span>Schuck</span>
                     <div class="navbar-avatar"></div>
-                </div>
+                </a>
             </div>
         </nav>
         <div class="main-wrapper">
@@ -1900,6 +2144,7 @@
                             维修管理
                         </a>
                     </li>
+
                 </ul>
             </aside>
             <main class="main-content">
@@ -1923,22 +2168,45 @@
                             <circle cx="11" cy="11" r="8"></circle>
                             <path d="M21 21l-4.35-4.35"></path>
                         </svg>
-                        <input type="text" placeholder="查找报告">
+                        <input type="text" placeholder="查找报表">
                     </div>
                 </div>
                 <div class="toolbar-right">
-                    <button class="icon-btn" title="设置">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <circle cx="12" cy="12" r="3"></circle>
-                            <path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06a1.65 1.65 0 0 0 .33-1.82 1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06a1.65 1.65 0 0 0 1.82.33H9a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"></path>
-                        </svg>
-                    </button>
+                    <div class="help-btn-wrap">
+                        <button class="icon-btn help-btn" id="helpBtn" title="功能说明">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                <circle cx="12" cy="12" r="10"></circle>
+                                <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                                <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                            </svg>
+                        </button>
+                        <div class="help-popover" id="helpPopover">
+                            <div class="help-popover-header">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="#E60012" stroke-width="2">
+                                    <circle cx="12" cy="12" r="10"></circle>
+                                    <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                                    <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                                </svg>
+                                <span>推送权限说明</span>
+                            </div>
+                            <div class="help-popover-body">
+                                <p>报表推送遵循以下权限规则，请了解：</p>
+                                <ul>
+                                    <li><strong>设备可见性</strong>：您只能选择租户内<strong>有权限查看</strong>的设备，具体范围取决于管理员分配的角色（全部设备 / 组织+项目 / 个人设备）。</li>
+                                    <li><strong>推送前即时校验</strong>：即便订阅已创建，系统在<strong>每次推送报表前</strong>都会重新校验您的设备权限。若权限在此期间被管理员缩减，无权限的设备数据将被自动跳过，不会出现在报表中。</li>
+                                    <li><strong>权限变更不自动剔除</strong>：历史订阅中的设备在权限缩减后<strong>不会自动从列表移除</strong>，但推送时会静默排除无权限设备，不会发送越权数据。</li>
+                                    <li><strong>编辑时强制同步</strong>：若您主动编辑该订阅并保存，系统会要求只能在<strong>当前权限范围</strong>内重新选择设备。</li>
+                                    <li><strong>收件人限制</strong>：收件人必须是<strong>组织内已绑定邮箱的用户</strong>。未被分配权限的用户无法收到对应设备的报表数据。</li>
+                                </ul>
+                            </div>
+                        </div>
+                    </div>
                     <button class="add-btn" data-onboarding="add-report">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
                             <line x1="12" y1="5" x2="12" y2="19"></line>
                             <line x1="5" y1="12" x2="19" y2="12"></line>
                         </svg>
-                        添加报告
+                        添加报表
                     </button>
                 </div>
             </div>
@@ -1948,19 +2216,20 @@
                 <table>
                     <thead>
                         <tr>
-                            <th>报告名称</th>
-                            <th>报告类型</th>
+                            <th>报表名称</th>
+                            <th>报表类型</th>
                             <th>所有者</th>
                             <th>频率</th>
                             <th>格式</th>
                             <th>收件人</th>
-                            <th>筛选条件</th>
-                            <th>主题</th>
-                            <th>内容</th>
-                            <th>日期和时间</th>
-                            <th>结束日期</th>
-                            <th>状态</th>
+                            <th>资产数量</th>
                             <th>资产</th>
+                            <th>主题</th>
+                            <th>开始日期</th>
+                            <th>结束日期</th>
+                            <th>时区</th>
+                            <th>开关</th>
+                            <th>状态</th>
                             <th style="text-align:center;">操作</th>
                         </tr>
                     </thead>
@@ -1985,11 +2254,11 @@
         </div>
     </div>
 
-    <!-- 添加报告弹窗 -->
+    <!-- 添加报表弹窗 -->
     <div class="modal-overlay" id="addReportModal">
         <div class="modal">
             <div class="modal-header">
-                <div class="modal-title">添加报告</div>
+                <div class="modal-title">添加报表</div>
                 <button class="modal-close" id="modalClose">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -2006,7 +2275,7 @@
                     <div class="step-line"></div>
                     <div class="step" data-step="2">
                         <div class="step-num"><span>2</span></div>
-                        <div class="step-label">制定报告计划</div>
+                        <div class="step-label">制定报表计划</div>
                     </div>
                 </div>
 
@@ -2014,11 +2283,18 @@
                 <!-- 步骤 1：资产选择 -->
                 <div class="step-content active" data-step="1">
                     <div class="form-group">
-                        <label class="form-label">定期报告类型</label>
+                        <label class="form-label">定期报表类型</label>
                         <select class="form-select" id="reportTypeSelect">
-                            <option value="" disabled selected>选择报告类型</option>
-                            <option value="资产运行 - 单个资产">资产运行 - 单个资产</option>
-                            <option value="资产运行 - 设备机群">资产运行 - 设备机群</option>
+                            <option value="" disabled selected>选择报表类型</option>
+                            <option value="设备运行日报（单个资产）">设备运行日报（单个资产）</option>
+                            <option value="设备运行周报（单个资产）">设备运行周报（单个资产）</option>
+                            <option value="设备运行月报（单个资产）">设备运行月报（单个资产）</option>
+                            <option value="设备能耗月报（单个资产）">设备能耗月报（单个资产）</option>
+                            <option value="异常告警通知（单个资产）">异常告警通知（单个资产）</option>
+                            <option value="机群运行日报（设备机群）">机群运行日报（设备机群）</option>
+                            <option value="机群运行周报（设备机群）">机群运行周报（设备机群）</option>
+                            <option value="机群能耗分析（设备机群）">机群能耗分析（设备机群）</option>
+                            <option value="开工率统计报表（设备机群）">开工率统计报表（设备机群）</option>
                         </select>
                     </div>
 
@@ -2028,15 +2304,16 @@
                             <line x1="12" y1="16" x2="12" y2="12"></line>
                             <line x1="12" y1="8" x2="12.01" y2="8"></line>
                         </svg>
-                        <span>此报告仅为一个资产提供数据。选择一个资产以生成报告。</span>
+                        <span>此报表仅为一个资产提供数据。选择一个资产以生成报表。</span>
                     </div>
 
-                    <div class="transfer-hint" id="transferHint">搜索并选择要添加到报告中的资产。</div>
+                    <div class="transfer-hint" id="transferHint">搜索并选择要添加到报表中的资产（最多选择 100 个资产）。</div>
 
                     <div class="transfer-box" id="assetTransferBox">
                         <div class="transfer-panel">
                             <div class="transfer-panel-header">
                                 <input type="text" id="leftSearch" placeholder="查找资产">
+                                <span class="search-add-all" id="searchAddAll">全部添加</span>
                                 <button class="filter-btn" title="筛选">
                                     <svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                                         <polygon points="22 3 2 3 10 12.46 10 19 14 21 14 12.46 22 3"></polygon>
@@ -2063,13 +2340,13 @@
                 </div>
 
 
-                <!-- 步骤 2：制定报告计划 -->
+                <!-- 步骤 2：制定报表计划 -->
                 <div class="step-content" data-step="2">
                     <div class="form-row" style="grid-template-columns: 2fr 1fr 1fr;">
                         <div class="form-group">
-                            <label class="form-label">报告名称</label>
+                            <label class="form-label">报表名称</label>
                             <div class="form-input-wrap">
-                                <input type="text" class="form-input" id="reportName" maxlength="100" placeholder="请输入报告名称">
+                                <input type="text" class="form-input" id="reportName" maxlength="100" placeholder="请输入报表名称">
                                 <div class="char-counter"><span id="nameCount">0</span> / 100</div>
                             </div>
                         </div>
@@ -2104,14 +2381,6 @@
                         </label>
                     </div>
 
-                    <div class="form-group" id="languageGroup" style="max-width: 220px;">
-                        <label class="form-label">语言</label>
-                        <select class="form-select" id="reportLanguage">
-                            <option value="English">English</option>
-                            <option value="简体中文">简体中文</option>
-                            <option value="繁體中文">繁體中文</option>
-                        </select>
-                    </div>
 
                     <div id="emailSection">
                         <div class="form-section-title">电子邮件信息</div>
@@ -2123,13 +2392,19 @@
                             </div>
                         </div>
                         <div class="form-group">
-                            <label class="form-label">
-                                <span class="form-label-with-icon">添加收件人（同意 <span class="info-icon" title="需要收件人同意才能接收报告">ⓘ</span>）</span>
-                            </label>
-                            <div class="email-input-row">
-                                <input type="email" id="recipientEmail" placeholder="请输入邮箱地址" autocomplete="off">
-                                <input type="text" id="recipientName" placeholder="请输入邮箱名称" autocomplete="off">
-                                <button class="btn btn-sm btn-add-email" id="addEmailBtn">添加</button>
+                            <label class="form-label">添加收件人</label>
+                            <div style="font-size:12px;color:#999;margin-bottom:6px;line-height:1.5;">
+                                仅支持添加组织内已绑定邮箱的用户，未绑定邮箱的用户不会出现在可选列表。如需绑定，
+                                <a href="个人中心.html" style="color:#E60012;text-decoration:none;">前往绑定 →</a>
+                            </div>
+                            <div class="recipient-select-wrap">
+                                <div class="recipient-search-box" id="recipientSearchBox">
+                                    <input type="text" id="recipientSearch" placeholder="搜索邮箱地址或昵称..." autocomplete="off">
+                                    <span class="recipient-arrow">▼</span>
+                                </div>
+                                <div class="recipient-dropdown" id="recipientDropdown">
+                                    <!-- 由JS动态生成 -->
+                                </div>
                             </div>
                             <div class="recipient-list" id="recipientList"></div>
                         </div>
@@ -2167,11 +2442,11 @@
         </div>
     </div>
 
-    <!-- 报告详情弹窗 -->
+    <!-- 报表详情弹窗 -->
     <div class="modal-overlay" id="reportDetailModal">
         <div class="modal modal-detail">
             <div class="modal-header">
-                <div class="modal-title" id="detailModalTitle">报告详情</div>
+                <div class="modal-title" id="detailModalTitle">报表详情</div>
                 <button class="modal-close" onclick="closeDetailModal()">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <line x1="18" y1="6" x2="6" y2="18"></line>
@@ -2180,8 +2455,8 @@
                 </button>
             </div>
             <div class="modal-body">
-                <!-- 报告基本信息 -->
-                <div class="detail-section-title">报告信息</div>
+                <!-- 报表基本信息 -->
+                <div class="detail-section-title">报表信息</div>
                 <div class="detail-info-grid" id="detailInfoGrid"></div>
 
                 <!-- 收件人信息 -->
@@ -2236,25 +2511,21 @@
             const nameCount = document.getElementById('nameCount');
             const reportFormat = document.getElementById('reportFormat');
             const reportFrequency = document.getElementById('reportFrequency');
-            const reportLanguage = document.getElementById('reportLanguage');
             const emailSubject = document.getElementById('emailSubject');
             const emailCount = document.getElementById('emailCount');
             const dynamicStep2Fields = document.getElementById('dynamicStep2Fields');
             const step2Hint = document.getElementById('step2Hint');
             const includeWeekendGroup = document.getElementById('includeWeekendGroup');
             const includeWeekend = document.getElementById('includeWeekend');
-            const languageGroup = document.getElementById('languageGroup');
+
             const emailSection = document.getElementById('emailSection');
-            const recipientEmail = document.getElementById('recipientEmail');
-            const recipientName = document.getElementById('recipientName');
-            const addEmailBtn = document.getElementById('addEmailBtn');
             const recipientList = document.getElementById('recipientList');
             const leaveConfirmModal = document.getElementById('leaveConfirmModal');
             const leaveConfirmClose = document.getElementById('leaveConfirmClose');
             const leaveConfirmBack = document.getElementById('leaveConfirmBack');
             const leaveConfirmLeave = document.getElementById('leaveConfirmLeave');
 
-            const SINGLE_ASSET_TYPE = '资产运行 - 单个资产';
+
             let currentStep = 1;
             let selectedType = '';
             let selectedAssets = [];
@@ -2262,25 +2533,139 @@
             let pendingCloseAction = null;
             let selectedRecipients = [];
 
-            const assets = [
-                { id: 'F3S01395', title: '930-14 - CAT - F3S01395', desc: 'Caterpillar 轮式装载机', group: '工程机械', vendor: 'third' },
-                { id: '000036', title: '000036', desc: 'SY35 - SANY AMERICA - SY0039CC81288', group: '工程机械', vendor: 'sany' },
-                { id: '000048', title: '000048', desc: 'SY365 HH - SANY AMERICA - SY0361CD...', group: '工程机械', vendor: 'sany' },
-                { id: '000049', title: '000049', desc: 'SY365 - SANY AMERICA - SY0361CD00608', group: '工程机械', vendor: 'sany' },
-                { id: '000101', title: '000101', desc: 'ZX200 - HITACHI - H2021A001', group: '工程机械', vendor: 'third' },
-                { id: '000215', title: '000215', desc: 'PC360 - KOMATSU - KP883922', group: '工程机械', vendor: 'third' },
-                { id: 'T001', title: 'T001 - 福特 - F450', desc: '轻型运输卡车', group: '运输车辆', vendor: 'third' },
-                { id: 'T002', title: 'T002 - 依维柯 - Daily 50C', desc: '厢式货车', group: '运输车辆', vendor: 'third' },
-                { id: 'G001', title: 'G001 - 卡特 - C15', desc: '柴油发电机组', group: '动力设备', vendor: 'third' },
-                { id: 'G002', title: 'G002 - 康明斯 - QSK60', desc: '大功率发电机组', group: '动力设备', vendor: 'third' }
+            // 组织内已绑定邮箱的用户列表
+            const ORG_USERS = [
+                { name: 'Alice Chen', email: 'alice.chen@sany.com.cn' },
+                { name: 'Bob Li', email: 'bob.li@sany.com.cn' },
+                { name: 'Charlie Wang', email: 'charlie.wang@sany.com.cn' },
+                { name: 'Diana Zhao', email: 'diana.zhao@sany.com.cn' },
+                { name: 'Edward Chen', email: 'edward.chen@sany.com.cn' }
             ];
 
-            // 报告列表数据
+            const assets = [
+                // ===== 工程机械（挖机/装载机/推土机/起重机等）=====
+                { id: 'EX001', title: 'EX001 - SY75 - SANY', desc: '小型挖掘机 SY75C9', group: '工程机械', vendor: 'sany' },
+                { id: 'EX002', title: 'EX002 - SY135 - SANY', desc: '中型挖掘机 SY135C10', group: '工程机械', vendor: 'sany' },
+                { id: 'EX003', title: 'EX003 - SY215 - SANY', desc: '中型挖掘机 SY215C10', group: '工程机械', vendor: 'sany' },
+                { id: 'EX004', title: 'EX004 - SY245 - SANY', desc: '中型挖掘机 SY245H', group: '工程机械', vendor: 'sany' },
+                { id: 'EX005', title: 'EX005 - SY305 - SANY', desc: '大型挖掘机 SY305H', group: '工程机械', vendor: 'sany' },
+                { id: 'EX006', title: 'EX006 - SY335 - SANY', desc: '大型挖掘机 SY335C9', group: '工程机械', vendor: 'sany' },
+                { id: 'EX007', title: 'EX007 - SY365 - SANY', desc: '大型挖掘机 SY365H', group: '工程机械', vendor: 'sany' },
+                { id: 'EX008', title: 'EX008 - SY485 - SANY', desc: '超大型挖掘机 SY485H', group: '工程机械', vendor: 'sany' },
+                { id: 'EX009', title: 'EX009 - SY550 - SANY', desc: '矿用挖掘机 SY550H', group: '工程机械', vendor: 'sany' },
+                { id: 'EX010', title: 'EX010 - SY750 - SANY', desc: '矿用挖掘机 SY750H', group: '工程机械', vendor: 'sany' },
+                { id: 'EX011', title: 'EX011 - EC210 - Volvo', desc: '中型挖掘机 EC210D', group: '工程机械', vendor: 'third' },
+                { id: 'EX012', title: 'EX012 - EC300 - Volvo', desc: '大型挖掘机 EC300D', group: '工程机械', vendor: 'third' },
+                { id: 'EX013', title: 'EX013 - EC480 - Volvo', desc: '大型挖掘机 EC480D', group: '工程机械', vendor: 'third' },
+                { id: 'EX014', title: 'EX014 - 320GC - CAT', desc: '中型挖掘机 Cat 320GC', group: '工程机械', vendor: 'third' },
+                { id: 'EX015', title: 'EX015 - 336 - CAT', desc: '大型挖掘机 Cat 336D2', group: '工程机械', vendor: 'third' },
+                { id: 'EX016', title: 'EX016 - 349 - CAT', desc: '大型挖掘机 Cat 349D', group: '工程机械', vendor: 'third' },
+                { id: 'EX017', title: 'EX017 - ZX200 - HITACHI', desc: '中型挖掘机 ZX200-5', group: '工程机械', vendor: 'third' },
+                { id: 'EX018', title: 'EX018 - ZX330 - HITACHI', desc: '大型挖掘机 ZX330-5', group: '工程机械', vendor: 'third' },
+                { id: 'EX019', title: 'EX019 - ZX470 - HITACHI', desc: '大型挖掘机 ZX470LCH', group: '工程机械', vendor: 'third' },
+                { id: 'EX020', title: 'EX020 - PC200 - KOMATSU', desc: '中型挖掘机 PC200-8', group: '工程机械', vendor: 'third' },
+                { id: 'EX021', title: 'EX021 - PC360 - KOMATSU', desc: '大型挖掘机 PC360-7', group: '工程机械', vendor: 'third' },
+                { id: 'EX022', title: 'EX022 - PC450 - KOMATSU', desc: '大型挖掘机 PC450LC-8', group: '工程机械', vendor: 'third' },
+                { id: 'EX023', title: 'EX023 - DX300 - DOOSAN', desc: '大型挖掘机 DX300LC', group: '工程机械', vendor: 'third' },
+                { id: 'EX024', title: 'EX024 - DX420 - DOOSAN', desc: '大型挖掘机 DX420LC', group: '工程机械', vendor: 'third' },
+                { id: 'EX025', title: 'EX025 - R210 - HYUNDAI', desc: '中型挖掘机 R210LC-9', group: '工程机械', vendor: 'third' },
+                // 装载机
+                { id: 'LD001', title: 'LD001 - SW405K - SANY', desc: '轮式装载机 SW405K', group: '工程机械', vendor: 'sany' },
+                { id: 'LD002', title: 'LD002 - SW955K - SANY', desc: '轮式装载机 SW955K', group: '工程机械', vendor: 'sany' },
+                { id: 'LD003', title: 'LD003 - 930M - CAT', desc: '轮式装载机 Cat 930M', group: '工程机械', vendor: 'third' },
+                { id: 'LD004', title: 'LD004 - 950GC - CAT', desc: '轮式装载机 Cat 950GC', group: '工程机械', vendor: 'third' },
+                { id: 'LD005', title: 'LD005 - 966M - CAT', desc: '轮式装载机 Cat 966M', group: '工程机械', vendor: 'third' },
+                { id: 'LD006', title: 'LD006 - L150H - Volvo', desc: '轮式装载机 Volvo L150H', group: '工程机械', vendor: 'third' },
+                { id: 'LD007', title: 'LD007 - L220H - Volvo', desc: '轮式装载机 Volvo L220H', group: '工程机械', vendor: 'third' },
+                { id: 'LD008', title: 'LD008 - WA470 - KOMATSU', desc: '轮式装载机 WA470-6', group: '工程机械', vendor: 'third' },
+                { id: 'LD009', title: 'LD009 - WA600 - KOMATSU', desc: '轮式装载机 WA600-8', group: '工程机械', vendor: 'third' },
+                { id: 'LD010', title: 'LD010 - ZL50CN - LIUGONG', desc: '轮式装载机 ZL50CN', group: '工程机械', vendor: 'third' },
+                // 推土机
+                { id: 'BZ001', title: 'BZ001 - SD16 - SHANTUI', desc: '推土机 SD16TL', group: '工程机械', vendor: 'third' },
+                { id: 'BZ002', title: 'BZ002 - SD22 - SHANTUI', desc: '推土机 SD22', group: '工程机械', vendor: 'third' },
+                { id: 'BZ003', title: 'BZ003 - SD32 - SHANTUI', desc: '推土机 SD32', group: '工程机械', vendor: 'third' },
+                { id: 'BZ004', title: 'BZ004 - D6T - CAT', desc: '推土机 Cat D6T', group: '工程机械', vendor: 'third' },
+                { id: 'BZ005', title: 'BZ005 - D8T - CAT', desc: '推土机 Cat D8T', group: '工程机械', vendor: 'third' },
+                { id: 'BZ006', title: 'BZ006 - D155A - KOMATSU', desc: '推土机 D155AX-5', group: '工程机械', vendor: 'third' },
+                // 起重机
+                { id: 'CR001', title: 'CR001 - STC250 - SANY', desc: '汽车起重机 STC250', group: '工程机械', vendor: 'sany' },
+                { id: 'CR002', title: 'CR002 - STC500 - SANY', desc: '汽车起重机 STC500', group: '工程机械', vendor: 'sany' },
+                { id: 'CR003', title: 'CR003 - STC800 - SANY', desc: '汽车起重机 STC800', group: '工程机械', vendor: 'sany' },
+                { id: 'CR004', title: 'CR004 - SCC2800 - SANY', desc: '履带起重机 SCC2800WE', group: '工程机械', vendor: 'sany' },
+                { id: 'CR005', title: 'CR005 - QY25K - XCMG', desc: '汽车起重机 QY25K5-I', group: '工程机械', vendor: 'third' },
+                { id: 'CR006', title: 'CR006 - QY50K - XCMG', desc: '汽车起重机 QY50K-II', group: '工程机械', vendor: 'third' },
+                // 压路机
+                { id: 'RL001', title: 'RL001 - SSR220 - SANY', desc: '单钢轮压路机 SSR220AC-8', group: '工程机械', vendor: 'sany' },
+                { id: 'RL002', title: 'RL002 - SSR260 - SANY', desc: '单钢轮压路机 SSR260C-8', group: '工程机械', vendor: 'sany' },
+                { id: 'RL003', title: 'RL003 - CS56B - CAT', desc: '单钢轮压路机 Cat CS56B', group: '工程机械', vendor: 'third' },
+                { id: 'RL004', title: 'RL004 - XS223J - XCMG', desc: '单钢轮压路机 XS223J', group: '工程机械', vendor: 'third' },
+                // 泵车
+                { id: 'PM001', title: 'PM001 - SYG5230 - SANY', desc: '混凝土泵车 37m', group: '工程机械', vendor: 'sany' },
+                { id: 'PM002', title: 'PM002 - SYG5260 - SANY', desc: '混凝土泵车 49m', group: '工程机械', vendor: 'sany' },
+                { id: 'PM003', title: 'PM003 - SYG5500 - SANY', desc: '混凝土泵车 62m', group: '工程机械', vendor: 'sany' },
+
+                // ===== 运输车辆（自卸/搅拌/平板等）=====
+                { id: 'TK001', title: 'TK001 - 豪沃 - HOWO A7', desc: '自卸车 ZZ3257N3847', group: '运输车辆', vendor: 'third' },
+                { id: 'TK002', title: 'TK002 - 豪沃 - HOWO T7H', desc: '牵引车 ZZ4257V324', group: '运输车辆', vendor: 'third' },
+                { id: 'TK003', title: 'TK003 - 德龙 - SHACMAN M3000', desc: '自卸车 SX3256DR384', group: '运输车辆', vendor: 'third' },
+                { id: 'TK004', title: 'TK004 - 德龙 - SHACMAN X3000', desc: '牵引车 SX4256GR279', group: '运输车辆', vendor: 'third' },
+                { id: 'TK005', title: 'TK005 - 解放 - FAW J6P', desc: '自卸车 CA3310P66K2', group: '运输车辆', vendor: 'third' },
+                { id: 'TK006', title: 'TK006 - 解放 - FAW JH6', desc: '牵引车 CA4250P26K2', group: '运输车辆', vendor: 'third' },
+                { id: 'TK007', title: 'TK007 - 东风 - DONGFENG KL', desc: '自卸车 EQ3250GD5N', group: '运输车辆', vendor: 'third' },
+                { id: 'TK008', title: 'TK008 - 东风 - DONGFENG KX', desc: '牵引车 EQ4250GX5N', group: '运输车辆', vendor: 'third' },
+                { id: 'TK009', title: 'TK009 - 欧曼 - AUMAN EST', desc: '自卸车 BJ3259DLPKE', group: '运输车辆', vendor: 'third' },
+                { id: 'TK010', title: 'TK010 - 欧曼 - AUMAN GTL', desc: '牵引车 BJ4259SNFKB', group: '运输车辆', vendor: 'third' },
+                { id: 'TK011', title: 'TK011 - 红岩 - HONGYAN J6', desc: '自卸车 CQ3256HTG384', group: '运输车辆', vendor: 'third' },
+                { id: 'TK012', title: 'TK012 - 北奔 - BEIBEN V3', desc: '牵引车 ND4250BD5J7', group: '运输车辆', vendor: 'third' },
+                { id: 'TK013', title: 'TK013 - SANY SY412C-8', desc: '搅拌车 SY412C-8W', group: '运输车辆', vendor: 'sany' },
+                { id: 'TK014', title: 'TK014 - SANY SY408C-8', desc: '搅拌车 SY408C-8W', group: '运输车辆', vendor: 'sany' },
+                { id: 'TK015', title: 'TK015 - SANY SY312C-6', desc: '搅拌车 SY312C-6W', group: '运输车辆', vendor: 'sany' },
+                { id: 'TK016', title: 'TK016 - CIMC ZJV9400', desc: '平板半挂车 13m', group: '运输车辆', vendor: 'third' },
+                { id: 'TK017', title: 'TK017 - CIMC ZJV9350', desc: '集装箱骨架车 40ft', group: '运输车辆', vendor: 'third' },
+                { id: 'TK018', title: 'TK018 - SINO ZTQ5250', desc: '随车吊运输车', group: '运输车辆', vendor: 'third' },
+                { id: 'TK019', title: 'TK019 - FORD F-550', desc: '重型皮卡运输车', group: '运输车辆', vendor: 'third' },
+                { id: 'TK020', title: 'TK020 - ISUZU FVR', desc: '中型厢式货车 9.6m', group: '运输车辆', vendor: 'third' },
+
+                // ===== 动力设备（发电机/空压机/泵站等）=====
+                { id: 'GN001', title: 'GN001 - C15 - CAT', desc: '柴油发电机组 500kW', group: '动力设备', vendor: 'third' },
+                { id: 'GN002', title: 'GN002 - C18 - CAT', desc: '柴油发电机组 600kW', group: '动力设备', vendor: 'third' },
+                { id: 'GN003', title: 'GN003 - C32 - CAT', desc: '柴油发电机组 1000kW', group: '动力设备', vendor: 'third' },
+                { id: 'GN004', title: 'GN004 - 3516B - CAT', desc: '柴油发电机组 2000kW', group: '动力设备', vendor: 'third' },
+                { id: 'GN005', title: 'GN005 - QSK60 - CUMMINS', desc: '柴油发电机组 2200kW', group: '动力设备', vendor: 'third' },
+                { id: 'GN006', title: 'GN006 - QSK95 - CUMMINS', desc: '柴油发电机组 3500kW', group: '动力设备', vendor: 'third' },
+                { id: 'GN007', title: 'GN007 - KTA38 - CUMMINS', desc: '柴油发电机组 1200kW', group: '动力设备', vendor: 'third' },
+                { id: 'GN008', title: 'GN008 - NTA855 - CUMMINS', desc: '柴油发电机组 400kW', group: '动力设备', vendor: 'third' },
+                { id: 'GN009', title: 'GN009 - 6BT5.9 - CUMMINS', desc: '柴油发电机组 100kW', group: '动力设备', vendor: 'third' },
+                { id: 'GN010', title: 'GN010 - 1104A - PERKINS', desc: '柴油发电机组 80kW', group: '动力设备', vendor: 'third' },
+                { id: 'GN011', title: 'GN011 - 4006-23 - PERKINS', desc: '柴油发电机组 600kW', group: '动力设备', vendor: 'third' },
+                { id: 'GN012', title: 'GN012 - 4012-46 - PERKINS', desc: '柴油发电机组 1000kW', group: '动力设备', vendor: 'third' },
+                { id: 'GN013', title: 'GN013 - LSA 50.2 - LEROY', desc: '交流发电机 1500kVA', group: '动力设备', vendor: 'third' },
+                { id: 'GN014', title: 'GN014 - S16R - MITSUBISHI', desc: '柴油发电机组 500kW', group: '动力设备', vendor: 'third' },
+                { id: 'GN015', title: 'GN015 - S12R - MITSUBISHI', desc: '柴油发电机组 350kW', group: '动力设备', vendor: 'third' },
+                // 空压机
+                { id: 'AC001', title: 'AC001 - XAS 97 - ATLAS', desc: '移动式空压机 7bar', group: '动力设备', vendor: 'third' },
+                { id: 'AC002', title: 'AC002 - XAHS 186 - ATLAS', desc: '移动式空压机 12bar', group: '动力设备', vendor: 'third' },
+                { id: 'AC003', title: 'AC003 - XAVS 900 - ATLAS', desc: '移动式空压机 25bar', group: '动力设备', vendor: 'third' },
+                { id: 'AC004', title: 'AC004 - VHP750 - SULLAIR', desc: '移动式空压机 10bar', group: '动力设备', vendor: 'third' },
+                { id: 'AC005', title: 'AC005 - 1100RH - SULLAIR', desc: '移动式空压机 14bar', group: '动力设备', vendor: 'third' },
+                // 泵站
+                { id: 'PP001', title: 'PP001 - HBT8018 - SANY', desc: '混凝土拖泵 80m³/h', group: '动力设备', vendor: 'sany' },
+                { id: 'PP002', title: 'PP002 - HBT6013 - SANY', desc: '混凝土拖泵 60m³/h', group: '动力设备', vendor: 'sany' },
+                { id: 'PP003', title: 'PP003 - HBT90C - SANY', desc: '混凝土拖泵 90m³/h', group: '动力设备', vendor: 'sany' },
+                { id: 'PP004', title: 'PP004 - CHIMP 140G - PUTZMEISTER', desc: '车载泵 140m³/h', group: '动力设备', vendor: 'third' },
+                // 更多运输车辆
+                { id: 'TK021', title: 'TK021 - SANY SY5310GJB', desc: '搅拌车 10m³', group: '运输车辆', vendor: 'sany' },
+                { id: 'TK022', title: 'TK022 - LONKING LG853', desc: '矿用自卸车', group: '运输车辆', vendor: 'third' },
+                { id: 'TK023', title: 'TK023 - TONLY TLD65', desc: '非公路宽体自卸车', group: '运输车辆', vendor: 'third' },
+                { id: 'TK024', title: 'TK024 - XCMG XGA4250', desc: '牵引车 6x4', group: '运输车辆', vendor: 'third' },
+            ];
+
+            // 报表列表数据
             let reportList = [
                 {
                     id: 1,
-                    name: '设备燃油监控报告',
-                    type: '资产运行 - 单个资产',
+                    name: '设备燃油监控报表',
+                    type: '设备能耗月报（单个资产）',
                     owner: 'Admin',
                     frequency: '一次',
                     format: 'XLSX',
@@ -2296,32 +2681,34 @@
                 {
                     id: 2,
                     name: '设备机群运行日报',
-                    type: '资产运行 - 设备机群',
+                    type: '机群运行日报（设备机群）',
                     owner: 'Admin',
                     frequency: '每日',
                     format: 'XLSX',
                     recipients: 'brian@centralatlantatractor.com',
                     filters: '全部',
-                    subject: '资产运行 - 设备机群 每日 报告',
-                    content: '每日设备运行状态报告',
+                    subject: '机群运行日报 每日 报表',
+                    content: '每日设备运行状态报表',
                     datetime: '2026-07-16 08:30',
                     endDate: '-',
+                    timezone: 'UTC+8',
                     enabled: true,
                     assets: 'F3S01395, 000036, 000048, 000049, 000101, 000215'
                 },
                 {
                     id: 3,
                     name: 'G002发电机状态监控',
-                    type: '资产运行 - 单个资产',
+                    type: '异常告警通知（单个资产）',
                     owner: 'Admin',
                     frequency: '每日',
                     format: 'XLSX',
                     recipients: 'david.johnson@example.com',
                     filters: '动力设备',
-                    subject: 'G002 每日运行报告',
+                    subject: 'G002 每日运行报表',
                     content: 'G002发电机每日运行数据汇总',
                     datetime: '2026-07-10 08:00',
                     endDate: '-',
+                    timezone: 'UTC+8',
                     enabled: true,
                     assets: 'G002',
                     expired: true
@@ -2329,7 +2716,7 @@
                 {
                     id: 4,
                     name: '挖掘机月度能耗统计',
-                    type: '资产运行 - 设备机群',
+                    type: '机群能耗分析（设备机群）',
                     owner: 'Admin',
                     frequency: '每月',
                     format: 'XLSX',
@@ -2339,9 +2726,28 @@
                     content: '所有挖掘机设备月度油耗与电耗汇总',
                     datetime: '2026-05-01 09:00',
                     endDate: '2026-06-30',
+                    timezone: 'UTC+8',
                     enabled: false,
                     assets: 'F3S01395, 000036, 000048',
                     overdue: true
+                },
+                {
+                    id: 5,
+                    name: '装载机车队日报',
+                    type: '机群运行日报（设备机群）',
+                    owner: 'Admin',
+                    frequency: '每日',
+                    format: 'XLSX',
+                    recipients: 'alex@example.com',
+                    filters: '轮式装载机',
+                    subject: '装载机车队每日运行报表',
+                    content: '所有轮式装载机每日运行数据',
+                    datetime: '2026-07-20 08:00',
+                    endDate: '-',
+                    timezone: 'UTC+8',
+                    enabled: true,
+                    assets: 'F3S01395, 000036, 000048, 000101',
+                    partial: true
                 }
             ];
 
@@ -2383,7 +2789,7 @@
                 const pageData = filtered.slice(start, start + pageSize);
 
                 if (total === 0) {
-                    reportTableBody.innerHTML = `<tr><td colspan="14">
+                    reportTableBody.innerHTML = `<tr><td colspan="15">
                         <div class="empty-state">
                             <div class="empty-illustration">
                                 <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -2401,23 +2807,36 @@
                                     <path d="M86 42c12 8 12 30 0 40" stroke="#999" stroke-width="1.5" stroke-linecap="round" fill="none"/>
                                 </svg>
                             </div>
-                            <div class="empty-text">未找到匹配的报告</div>
+                            <div class="empty-text">未找到匹配的报表</div>
                         </div>
                     </td></tr>`;
                 } else {
                     reportTableBody.innerHTML = pageData.map(r => {
-                        const rowClass = r.overdue ? 'overdue' : (r.expired ? 'expired' : '');
-                        let switchContent = '';
+                        const rowClass = r.overdue ? 'overdue' : (r.expired ? 'expired' : (r.partial ? 'partial' : ''));
+
+                        // 开关列：始终显示切换开关 + 文字标签
+                        const toggleText = r.enabled ? '开启' : '关闭';
+                        const disabledAttr = (r.overdue || r.expired) ? 'disabled' : '';
+                        const toggleContent = `<div class="switch-cell">
+                            <label class="switch-toggle" title="${toggleText}">
+                                <input type="checkbox" ${r.enabled ? 'checked' : ''} data-id="${r.id}" ${disabledAttr}>
+                                <span class="switch-slider"></span>
+                            </label>
+                            <span class="switch-label">${toggleText}</span>
+                        </div>`;
+
+                        // 状态列：异常状态标签或"正常"
+                        let statusContent = '';
                         if (r.overdue) {
-                            switchContent = `<span class="overdue-tooltip" data-tooltip="订阅的报告已超过截止日期，推送已停止。请重新设置有效期后恢复。"><span class="status-badge overdue">已过期</span></span>`;
+                            statusContent = `<span class="overdue-tooltip" data-tooltip="订阅的报表已超过截止日期，推送已停止。请重新设置有效期后恢复。"><span class="status-badge overdue">已过期</span></span>`;
                         } else if (r.expired) {
-                            switchContent = `<span class="expired-tooltip" data-tooltip="订阅中的设备已被解绑或权限已变更，报告推送已失效。请重新选择设备后恢复。"><span class="status-badge expired">已失效</span></span>`;
+                            statusContent = `<span class="expired-tooltip" data-tooltip="订阅中的设备已被解绑或权限已变更，报表推送已失效。请重新选择设备后恢复。"><span class="status-badge expired">已失效</span></span>`;
+                        } else if (r.partial) {
+                            statusContent = `<span class="partial-tooltip" data-tooltip="部分设备已被解绑或权限已变更，报表数据可能不完整。"><span class="status-badge partial">部分失效</span></span>`;
                         } else {
-                            switchContent = `<label class="switch-toggle" title="${r.enabled ? '关闭' : '开启'}">
-                                    <input type="checkbox" ${r.enabled ? 'checked' : ''} data-id="${r.id}">
-                                    <span class="switch-slider"></span>
-                                </label>`;
+                            statusContent = `<span class="status-badge normal">正常</span>`;
                         }
+
                         return `
                         <tr data-id="${r.id}" class="${rowClass}">
                             <td class="col-name" title="${escapeHtml(r.name)}">${escapeHtml(r.name)}</td>
@@ -2426,15 +2845,14 @@
                             <td><span class="status-badge enabled">${escapeHtml(r.frequency)}</span></td>
                             <td>${escapeHtml(r.format)}</td>
                             <td title="${escapeHtml(r.recipients)}">${escapeHtml(r.recipients)}</td>
-                            <td>${escapeHtml(r.filters)}</td>
-                            <td title="${escapeHtml(r.subject)}">${escapeHtml(r.subject)}</td>
-                            <td title="${escapeHtml(r.content)}">${escapeHtml(r.content)}</td>
-                            <td>${escapeHtml(r.datetime)}</td>
-                            <td>${escapeHtml(r.endDate)}</td>
-                            <td>
-                                ${switchContent}
-                            </td>
+                            <td>${(r.assets || '').split(',').filter(Boolean).length}</td>
                             <td class="col-assets" title="${escapeHtml(r.assets)}">${escapeHtml(r.assets)}</td>
+                            <td title="${escapeHtml(r.subject)}">${escapeHtml(r.subject)}</td>
+                            <td>${escapeHtml(r.datetime ? r.datetime.split(' ')[0] : '')}</td>
+                            <td>${escapeHtml(r.endDate)}</td>
+                            <td>${r.timezone ? escapeHtml(r.timezone) : '-'}</td>
+                            <td>${toggleContent}</td>
+                            <td>${statusContent}</td>
                             <td style="text-align:center;">
                                 <span class="operate-links">
                                     <a onclick="openDetailModal(${r.id})">详情</a>
@@ -2503,6 +2921,34 @@
 
             const monthlyDateOptions = Array.from({ length: 28 }, (_, i) => String(i + 1)).concat(['最后一天', '第一天']);
 
+            const timezoneOptions = [
+                { value: 'UTC-12', label: 'UTC-12（国际日期变更线西）' },
+                { value: 'UTC-11', label: 'UTC-11（美属萨摩亚）' },
+                { value: 'UTC-10', label: 'UTC-10（夏威夷）' },
+                { value: 'UTC-9',  label: 'UTC-9（阿拉斯加）' },
+                { value: 'UTC-8',  label: 'UTC-8（太平洋时间）' },
+                { value: 'UTC-7',  label: 'UTC-7（山地时间）' },
+                { value: 'UTC-6',  label: 'UTC-6（中部时间）' },
+                { value: 'UTC-5',  label: 'UTC-5（东部时间）' },
+                { value: 'UTC-4',  label: 'UTC-4（大西洋时间）' },
+                { value: 'UTC-3',  label: 'UTC-3（巴西/阿根廷）' },
+                { value: 'UTC-2',  label: 'UTC-2（中大西洋）' },
+                { value: 'UTC-1',  label: 'UTC-1（亚速尔群岛）' },
+                { value: 'UTC+0',  label: 'UTC+0（伦敦/格林威治）' },
+                { value: 'UTC+1',  label: 'UTC+1（巴黎/柏林）' },
+                { value: 'UTC+2',  label: 'UTC+2（开罗/雅典）' },
+                { value: 'UTC+3',  label: 'UTC+3（莫斯科/利雅得）' },
+                { value: 'UTC+4',  label: 'UTC+4（迪拜）' },
+                { value: 'UTC+5',  label: 'UTC+5（卡拉奇）' },
+                { value: 'UTC+6',  label: 'UTC+6（达卡）' },
+                { value: 'UTC+7',  label: 'UTC+7（曼谷/雅加达）' },
+                { value: 'UTC+8',  label: 'UTC+8（北京/上海/香港）' },
+                { value: 'UTC+9',  label: 'UTC+9（东京/首尔）' },
+                { value: 'UTC+10', label: 'UTC+10（悉尼）' },
+                { value: 'UTC+11', label: 'UTC+11（所罗门群岛）' },
+                { value: 'UTC+12', label: 'UTC+12（奥克兰/惠灵顿）' }
+            ];
+
             const frequencyConfig = {
                 '下载': {
                     columns: 2,
@@ -2510,10 +2956,12 @@
                         { id: 'startDate', label: '开始日期', type: 'date', className: 'date-picker' },
                         { id: 'endDate', label: '结束日期', type: 'date', className: 'date-picker' }
                     ],
-                    hint: '报告将立即下载。日期范围限定为 31 天',
+                    extraFields: [
+                        { id: 'timezone', label: '时区', type: 'select', options: timezoneOptions, className: 'timezone-picker' }
+                    ],
+                    hintTemplate: '报表将立即下载。日期范围限定为 31 天（时区：{timezone}）',
                     showEmail: false,
                     nextBtnText: '下载',
-                    languageAfter: 'hint'
                 },
                 '一次': {
                     columns: 2,
@@ -2521,57 +2969,62 @@
                         { id: 'startDate', label: '开始日期', type: 'date', className: 'date-picker' },
                         { id: 'endDate', label: '结束日期', type: 'date', className: 'date-picker' }
                     ],
-                    hint: '报告将立即递送。日期范围限定为 31 天',
+                    extraFields: [
+                        { id: 'timezone', label: '时区', type: 'select', options: timezoneOptions, className: 'timezone-picker' }
+                    ],
+                    hintTemplate: '报表将立即递送。日期范围限定为 31 天（时区：{timezone}）',
                     showEmail: true,
                     nextBtnText: '添加',
-                    languageAfter: 'hint'
                 },
                 '每日': {
                     columns: 3,
                     fields: [
-                        { id: 'duration', label: '持续时间', type: 'select', options: ['前一天', '当天'], className: 'date-select' },
+                        { id: 'duration', label: '持续时间', type: 'select', options: ['前一天'], className: 'date-select' },
                         { id: 'deliveryTime', label: '递送时间', type: 'select', options: timeOptions, className: 'time-picker' },
                         { id: 'endDate', label: '结束日期（选填）', type: 'date', className: 'date-picker' }
                     ],
-                    hintTemplate: '报告将于每天 {deliveryTime} EDT 递送，显示 {duration} 的数据',
+                    extraFields: [
+                        { id: 'timezone', label: '时区', type: 'select', options: timezoneOptions, className: 'timezone-picker' }
+                    ],
+                    hintTemplate: '报表将于每天 {deliveryTime} 递送，显示 {duration} 的数据（时区：{timezone}）',
                     showEmail: true,
                     nextBtnText: '添加',
-                    languageAfter: 'includeWeekend',
                     includeWeekend: true
                 },
                 '每周': {
                     columns: 3,
                     fields: [
-                        { id: 'duration', label: '持续时间', type: 'select', options: ['上周', '本周'], className: 'date-select' },
+                        { id: 'duration', label: '持续时间', type: 'select', options: ['上周'], className: 'date-select' },
                         { id: 'deliveryDate', label: '递送日期', type: 'select', options: ['星期一', '星期二', '星期三', '星期四', '星期五', '星期六', '星期日'], className: 'date-select' },
                         { id: 'deliveryTime', label: '递送时间', type: 'select', options: timeOptions, className: 'time-picker' }
                     ],
                     extraFields: [
-                        { id: 'endDate', label: '结束日期（选填）', type: 'date', className: 'date-picker' }
+                        { id: 'endDate', label: '结束日期（选填）', type: 'date', className: 'date-picker' },
+                        { id: 'timezone', label: '时区', type: 'select', options: timezoneOptions, className: 'timezone-picker' }
                     ],
-                    hintTemplate: '报告将于每 {deliveryDate} 的 {deliveryTime} EDT 递送，显示 {duration} 的数据',
+                    hintTemplate: '报表将于每 {deliveryDate} 的 {deliveryTime} 递送，显示 {duration} 的数据（时区：{timezone}）',
                     showEmail: true,
                     nextBtnText: '添加',
-                    languageAfter: 'hint'
                 },
                 '每月': {
                     columns: 3,
                     fields: [
-                        { id: 'duration', label: '持续时间', type: 'select', options: ['上个月', '本月'], className: 'date-select' },
+                        { id: 'duration', label: '持续时间', type: 'select', options: ['上个月'], className: 'date-select' },
                         { id: 'deliveryDate', label: '递送日期', type: 'select', options: monthlyDateOptions, className: 'date-select' },
                         { id: 'deliveryTime', label: '递送时间', type: 'select', options: timeOptions, className: 'time-picker' }
                     ],
                     extraFields: [
-                        { id: 'endDate', label: '结束日期（选填）', type: 'date', className: 'date-picker' }
+                        { id: 'endDate', label: '结束日期（选填）', type: 'date', className: 'date-picker' },
+                        { id: 'timezone', label: '时区', type: 'select', options: timezoneOptions, className: 'timezone-picker' }
                     ],
-                    hintTemplate: '报告将于每个月 {deliveryDate} {deliveryTime} EDT 递送，显示 {duration} 的数据',
+                    hintTemplate: '报表将于每个月 {deliveryDate} {deliveryTime} 递送，显示 {duration} 的数据（时区：{timezone}）',
                     showEmail: true,
                     nextBtnText: '添加',
                     languageAfter: 'hint'
                 }
             };
 
-            // 刷新报告类型下拉
+            // 刷新报表类型下拉
             function refreshTypeOptions() {
                 const allOpts = reportTypeSelect.querySelectorAll('option');
                 allOpts.forEach(opt => {
@@ -2625,11 +3078,10 @@
                 nameCount.textContent = '0';
                 reportFormat.value = 'CSV';
                 reportFrequency.value = '一次';
-                reportLanguage.value = 'English';
+
                 emailSubject.value = '';
                 emailCount.textContent = '0';
-                recipientEmail.value = '';
-                recipientName.value = '';
+                document.getElementById('recipientSearch').value = '';
                 renderRecipientList();
                 renderFrequencyFields();
                 updateSteps();
@@ -2660,11 +3112,11 @@
 
             function fillStep2Defaults() {
                 if (!reportName.value.trim()) {
-                    reportName.value = selectedType + ' 报告';
+                    reportName.value = selectedType + ' 报表';
                     nameCount.textContent = reportName.value.length;
                 }
                 if (!emailSubject.value.trim()) {
-                    emailSubject.value = selectedType + ' ' + reportFrequency.value + ' 报告';
+                    emailSubject.value = selectedType + ' ' + reportFrequency.value + ' 报表';
                     emailCount.textContent = emailSubject.value.length;
                 }
             }
@@ -2675,14 +3127,14 @@
 
             function updateTypeRelatedUI() {
                 const hasType = !!selectedType;
-                singleAssetAlert.classList.toggle('active', selectedType === SINGLE_ASSET_TYPE);
+                singleAssetAlert.classList.toggle('active', selectedType.includes('单个资产'));
                 transferHint.style.display = hasType ? 'block' : 'none';
 
                 assetTransferBox.style.display = hasType ? 'grid' : 'none';
             }
 
             function isSingleAsset() {
-                return selectedType === SINGLE_ASSET_TYPE;
+                return selectedType.includes('单个资产');
             }
 
             function getThumbSvg() {
@@ -2728,6 +3180,7 @@
                                     <polyline points="6 9 12 15 18 9"></polyline>
                                 </svg>
                                 <span>${group}</span>
+                                <span class="group-select-all" data-group="${group}">全选</span>
                             </div>
                             <div class="transfer-group-items">
                                 ${items.map(item => `
@@ -2758,11 +3211,36 @@
                     });
                 });
 
+                // 分组全选
+                leftPanelBody.querySelectorAll('.group-select-all').forEach(btn => {
+                    btn.addEventListener('click', (e) => {
+                        e.stopPropagation();
+                        const groupName = btn.dataset.group;
+                        const groupItems = grouped[groupName] || [];
+                        const ids = groupItems.map(item => item.id);
+                        batchAddAssets(ids);
+                    });
+                });
+
                 leftPanelBody.querySelectorAll('.transfer-item:not(.disabled)').forEach(item => {
                     item.addEventListener('click', () => {
                         addAsset(item.dataset.id);
                     });
                 });
+
+                // 搜索"全部添加"按钮显隐
+                const searchAddAllBtn = document.getElementById('searchAddAll');
+                if (searchAddAllBtn) {
+                    if (keyword && filtered.length > 0) {
+                        searchAddAllBtn.classList.add('visible');
+                        searchAddAllBtn.onclick = () => {
+                            const ids = filtered.map(item => item.id);
+                            batchAddAssets(ids);
+                        };
+                    } else {
+                        searchAddAllBtn.classList.remove('visible');
+                    }
+                }
             }
 
             function renderRightPanel() {
@@ -2779,23 +3257,48 @@
                     return;
                 }
 
-                rightPanelBody.innerHTML = filtered.map(item => `
-                    <div class="transfer-item selected" data-id="${item.id}">
-                        <div class="transfer-item-info">
-                            <div class="transfer-item-thumb">${getThumbSvg()}</div>
-                            <div class="transfer-item-text">
-                                <span class="transfer-item-title">${item.title}</span>
-                                <span class="transfer-item-desc">${item.desc}</span>
+                const grouped = groupAssets(filtered);
+                const groupNames = Object.keys(grouped);
+
+                rightPanelBody.innerHTML = groupNames.map(group => {
+                    const items = grouped[group];
+                    return `
+                        <div class="transfer-group" data-group="${group}">
+                            <div class="transfer-group-header">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                    <polyline points="6 9 12 15 18 9"></polyline>
+                                </svg>
+                                <span>${group}</span>
+                                <span class="group-count">${items.length}</span>
+                            </div>
+                            <div class="transfer-group-items">
+                                ${items.map(item => `
+                                    <div class="transfer-item selected" data-id="${item.id}">
+                                        <div class="transfer-item-info">
+                                            <div class="transfer-item-thumb">${getThumbSvg()}</div>
+                                            <div class="transfer-item-text">
+                                                <span class="transfer-item-title">${item.title}</span>
+                                                <span class="transfer-item-desc">${item.desc}</span>
+                                            </div>
+                                        </div>
+                                        <button class="transfer-item-action remove" title="移除">
+                                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
+                                                <line x1="18" y1="6" x2="6" y2="18"></line>
+                                                <line x1="6" y1="6" x2="18" y2="18"></line>
+                                            </svg>
+                                        </button>
+                                    </div>
+                                `).join('')}
                             </div>
                         </div>
-                        <button class="transfer-item-action remove" title="移除">
-                            <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5">
-                                <line x1="18" y1="6" x2="6" y2="18"></line>
-                                <line x1="6" y1="6" x2="18" y2="18"></line>
-                            </svg>
-                        </button>
-                    </div>
-                `).join('');
+                    `;
+                }).join('');
+
+                rightPanelBody.querySelectorAll('.transfer-group-header').forEach(header => {
+                    header.addEventListener('click', () => {
+                        header.parentElement.classList.toggle('collapsed');
+                    });
+                });
 
                 rightPanelBody.querySelectorAll('.transfer-item').forEach(item => {
                     item.addEventListener('click', () => {
@@ -2806,7 +3309,11 @@
 
             function addAsset(id) {
                 if (isSingleAsset() && selectedAssets.length > 0) {
-                    alert('此报告类型仅支持选择一个资产');
+                    alert('此报表类型仅支持选择一个资产');
+                    return;
+                }
+                if (selectedAssets.length >= 100) {
+                    alert('最多只能选择 100 个资产');
                     return;
                 }
                 const asset = assets.find(a => a.id === id);
@@ -2815,6 +3322,36 @@
                     markDirty();
                     renderLeftPanel();
                     renderRightPanel();
+                }
+            }
+
+            function batchAddAssets(ids) {
+                if (isSingleAsset()) {
+                    alert('此报表类型仅支持选择一个资产');
+                    return;
+                }
+                const remaining = 100 - selectedAssets.length;
+                if (remaining <= 0) {
+                    alert('最多只能选择 100 个资产');
+                    return;
+                }
+                let added = 0;
+                for (const id of ids) {
+                    if (selectedAssets.length >= 100) break;
+                    const asset = assets.find(a => a.id === id);
+                    if (asset && !selectedAssets.some(s => s.id === id)) {
+                        selectedAssets.push(asset);
+                        added++;
+                    }
+                }
+                if (added > 0) {
+                    markDirty();
+                    renderLeftPanel();
+                    renderRightPanel();
+                }
+                if (added < ids.length) {
+                    const skipped = ids.length - added;
+                    alert(`已添加 ${added} 个资产${skipped > 0 ? `，${skipped} 个资产因已达上限未添加` : ''}`);
                 }
             }
 
@@ -2828,7 +3365,11 @@
             function buildFieldHtml(field, value) {
                 let inputHtml = '';
                 if (field.type === 'select') {
-                    const options = field.options.map(opt => `<option value="${opt}" ${opt === value ? 'selected' : ''}>${opt}</option>`).join('');
+                    const options = field.options.map(opt => {
+                        const optValue = typeof opt === 'string' ? opt : opt.value;
+                        const optLabel = typeof opt === 'string' ? opt : opt.label;
+                        return `<option value="${optValue}" ${optValue === value ? 'selected' : ''}>${optLabel}</option>`;
+                    }).join('');
                     inputHtml = `<select class="form-select" id="${field.id}">${options}</select>`;
                 } else if (field.type === 'date') {
                     inputHtml = `<input type="date" class="form-input" id="${field.id}" value="${value}" placeholder="选择日期">`;
@@ -2843,6 +3384,7 @@
 
             function getFieldDefault(field) {
                 if (field.id === 'deliveryTime') return '08:00';
+                if (field.id === 'timezone') return 'UTC+8';
                 if (field.id === 'deliveryDate') {
                     const freq = reportFrequency.value;
                     if (freq === '每周') return '星期三';
@@ -2879,11 +3421,7 @@
                 includeWeekendGroup.style.display = config.includeWeekend ? 'flex' : 'none';
                 emailSection.style.display = config.showEmail ? 'block' : 'none';
 
-                if (config.languageAfter === 'includeWeekend') {
-                    includeWeekendGroup.parentNode.insertBefore(languageGroup, includeWeekendGroup.nextSibling);
-                } else {
-                    step2Hint.parentNode.insertBefore(languageGroup, step2Hint.nextSibling);
-                }
+
 
                 updateStep2Hint();
                 bindDynamicFieldEvents();
@@ -2906,6 +3444,7 @@
                     hint = hint.replace('{deliveryTime}', getDynamicValue('deliveryTime') || '08:00');
                     hint = hint.replace('{duration}', getDynamicValue('duration') || '');
                     hint = hint.replace('{deliveryDate}', getDynamicValue('deliveryDate') || '');
+                    hint = hint.replace('{timezone}', getDynamicValue('timezone') || 'UTC+8');
                     step2Hint.textContent = hint;
                 }
             }
@@ -2945,29 +3484,68 @@
                 renderRecipientList();
             }
 
-            function handleAddEmail() {
-                const email = recipientEmail.value.trim();
-                const name = recipientName.value.trim();
-
-                if (!email) {
-                    alert('请输入邮箱地址');
+            function renderRecipientDropdown(filter) {
+                const dropdown = document.getElementById('recipientDropdown');
+                const q = (filter || '').toLowerCase().trim();
+                const filtered = ORG_USERS.filter(u =>
+                    u.name.toLowerCase().includes(q) || u.email.toLowerCase().includes(q)
+                );
+                if (filtered.length === 0) {
+                    dropdown.innerHTML = '<div class="recipient-no-result">未找到匹配的用户</div>';
                     return;
                 }
+                dropdown.innerHTML = filtered.map(u => {
+                    const alreadyAdded = selectedRecipients.some(r => r.email === u.email);
+                    return `<div class="recipient-option${alreadyAdded ? ' added' : ''}" data-email="${u.email}" data-name="${u.name}">
+                        <div>
+                            <div class="opt-name">${u.name}</div>
+                            <div class="opt-email">${u.email}</div>
+                        </div>
+                        ${alreadyAdded ? '<span style="font-size:11px;color:#bbb;">已添加</span>' : ''}
+                    </div>`;
+                }).join('');
 
-                if (!isValidEmail(email)) {
-                    alert('请输入有效的邮箱地址');
-                    return;
-                }
-
-                if (selectedRecipients.some(r => r.email.toLowerCase() === email.toLowerCase())) {
-                    alert('该邮箱地址已添加');
-                    return;
-                }
-
-                addRecipient({ name: name || email, email: email });
-                recipientEmail.value = '';
-                recipientName.value = '';
+                dropdown.querySelectorAll('.recipient-option:not(.added)').forEach(el => {
+                    el.addEventListener('click', () => {
+                        const email = el.dataset.email;
+                        const name = el.dataset.name;
+                        if (!selectedRecipients.some(r => r.email === email)) {
+                            selectedRecipients.push({ name, email });
+                            markDirty();
+                            renderRecipientList();
+                            renderRecipientDropdown(document.getElementById('recipientSearch').value);
+                            document.getElementById('recipientSearch').value = '';
+                            document.getElementById('recipientDropdown').classList.remove('open');
+                        }
+                    });
+                });
             }
+
+            // 搜索框事件
+            document.getElementById('recipientSearch').addEventListener('input', function() {
+                renderRecipientDropdown(this.value);
+                document.getElementById('recipientDropdown').classList.add('open');
+            });
+            document.getElementById('recipientSearch').addEventListener('focus', function() {
+                renderRecipientDropdown(this.value);
+                document.getElementById('recipientDropdown').classList.add('open');
+            });
+            document.getElementById('recipientSearch').addEventListener('blur', function() {
+                setTimeout(() => {
+                    document.getElementById('recipientDropdown').classList.remove('open');
+                }, 200);
+            });
+            // 点击箭头切换下拉
+            document.querySelector('.recipient-arrow').addEventListener('click', function(e) {
+                e.stopPropagation();
+                const dd = document.getElementById('recipientDropdown');
+                if (dd.classList.contains('open')) {
+                    dd.classList.remove('open');
+                } else {
+                    renderRecipientDropdown(document.getElementById('recipientSearch').value);
+                    dd.classList.add('open');
+                }
+            });
 
             function renderRecipientList() {
                 if (selectedRecipients.length === 0) {
@@ -3000,7 +3578,7 @@
 
             function validateStep1() {
                 if (!selectedType) {
-                    alert('请先选择报告类型');
+                    alert('请先选择报表类型');
                     return false;
                 }
                 if (selectedAssets.length === 0) {
@@ -3008,7 +3586,7 @@
                     return false;
                 }
                 if (isSingleAsset() && selectedAssets.length > 1) {
-                    alert('此报告类型仅支持选择一个资产');
+                    alert('此报表类型仅支持选择一个资产');
                     return false;
                 }
                 return true;
@@ -3038,7 +3616,7 @@
             function validateStep2() {
                 const name = reportName.value.trim();
                 if (!name) {
-                    alert('请输入报告名称');
+                    alert('请输入报表名称');
                     return false;
                 }
 
@@ -3080,7 +3658,7 @@
                     assets: selectedAssets.map(a => ({ id: a.id, title: a.title, desc: a.desc })),
                     format: reportFormat.value,
                     frequency: freq,
-                    language: reportLanguage.value
+
                 };
 
                 if (freq === '下载' || freq === '一次') {
@@ -3089,6 +3667,7 @@
                 } else {
                     data.duration = getDynamicValue('duration');
                     data.deliveryTime = getDynamicValue('deliveryTime');
+                    data.timezone = getDynamicValue('timezone') || 'UTC+8';
                     data.endDate = getDynamicValue('endDate') || null;
                     if (freq === '每周' || freq === '每月') {
                         data.deliveryDate = getDynamicValue('deliveryDate');
@@ -3136,6 +3715,19 @@
             leftSearch.addEventListener('input', renderLeftPanel);
             rightSearch.addEventListener('input', renderRightPanel);
 
+            // 帮助说明弹窗
+            const helpBtn = document.getElementById('helpBtn');
+            const helpPopover = document.getElementById('helpPopover');
+            helpBtn.addEventListener('click', (e) => {
+                e.stopPropagation();
+                helpPopover.classList.toggle('active');
+            });
+            document.addEventListener('click', (e) => {
+                if (helpPopover.classList.contains('active') && !helpBtn.contains(e.target) && !helpPopover.contains(e.target)) {
+                    helpPopover.classList.remove('active');
+                }
+            });
+
 
 
             clearAllBtn.addEventListener('click', () => {
@@ -3159,30 +3751,14 @@
                 renderFrequencyFields();
                 updateSteps();
                 markDirty();
-                if (emailSubject.value.includes(' 报告')) {
-                    emailSubject.value = selectedType + ' ' + reportFrequency.value + ' 报告';
+                if (emailSubject.value.includes(' 报表')) {
+                    emailSubject.value = selectedType + ' ' + reportFrequency.value + ' 报表';
                     emailCount.textContent = emailSubject.value.length;
                 }
             });
 
-            reportLanguage.addEventListener('change', markDirty);
+
             includeWeekend.addEventListener('change', markDirty);
-
-            addEmailBtn.addEventListener('click', handleAddEmail);
-            recipientEmail.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    handleAddEmail();
-                }
-            });
-            recipientName.addEventListener('keydown', (e) => {
-                if (e.key === 'Enter') {
-                    e.preventDefault();
-                    handleAddEmail();
-                }
-            });
-
-            
 
             nextBtn.addEventListener('click', () => {
                 if (currentStep === 1) {
@@ -3202,14 +3778,13 @@
                         targetReport.recipients = recipientsStr || '-';
                         targetReport.datetime = report.startDate ? report.startDate + (report.deliveryTime ? ' ' + report.deliveryTime : '') : targetReport.datetime;
                         targetReport.endDate = report.endDate || '-';
-                        targetReport.language = report.language;
                         if (report.frequencyConfig) {
                             targetReport.frequency = report.frequency;
                         }
                     }
                     closeModal();
                     renderReportTable();
-                    showToast('报告已更新', 'success');
+                    showToast('报表已更新', 'success');
                 } else {
                     if (!validateStep2()) return;
                     const report = collectReportData();
@@ -3263,17 +3838,18 @@
 
                 document.getElementById('detailModalTitle').textContent = report.name;
 
-                // 报告基本信息
+                // 报表基本信息
                 detailInfoGrid.innerHTML = [
-                    { label: '报告类型', value: report.type },
+                    { label: '报表类型', value: report.type },
                     { label: '所有者', value: report.owner },
                     { label: '频率', value: report.frequency },
                     { label: '格式', value: report.format },
                     { label: '电子邮件主题', value: report.subject },
-                    { label: '日期和时间', value: report.datetime },
+                    { label: '开始日期', value: report.datetime },
                     { label: '结束日期', value: report.endDate },
-                    { label: '筛选条件', value: report.filters },
-                    { label: '状态', value: report.enabled ? '已开启' : '已关闭' },
+                    { label: '资产数量', value: String((report.assets || '').split(',').filter(Boolean).length) },
+                    { label: '开关', value: report.enabled ? '开启' : '关闭' },
+                    { label: '状态', value: report.overdue ? '已过期' : (report.expired ? '已失效' : (report.partial ? '部分失效' : '正常')) },
                     { label: '涉及资产', value: report.assets },
                 ].map(({ label, value }) => `
                     <div class="detail-info-item">
@@ -3320,7 +3896,7 @@
                 if (!report) return;
                 pendingDeleteId = reportId;
                 document.getElementById('deleteConfirmDesc').textContent =
-                    '确定要删除报告「' + report.name + '」（' + report.type + '）吗？删除后不可恢复。';
+                    '确定要删除报表「' + report.name + '」（' + report.type + '）吗？删除后不可恢复。';
                 document.getElementById('deleteConfirmOverlay').classList.add('show');
             };
 
@@ -3331,7 +3907,7 @@
                 currentPage = 1;
                 refreshTypeOptions();
                 renderReportTable();
-                showToast('报告已删除', 'success');
+                showToast('报表已删除', 'success');
             };
 
             window.cancelDelete = function() {
@@ -3339,7 +3915,7 @@
                 pendingDeleteId = null;
             };
 
-            // 编辑模式：打开现有报告并跳到步骤2，所有字段可自由修改
+            // 编辑模式：打开现有报表并跳到步骤2，所有字段可自由修改
             let isEditMode = false;
             let editingReportId = null;
 
@@ -3368,7 +3944,6 @@
                 nameCount.textContent = report.name.length;
                 reportFormat.value = report.format;
                 reportFrequency.value = report.frequency;
-                reportLanguage.value = report.language || 'English';
                 renderFrequencyFields(); // 根据频率渲染动态字段
                 // 编辑模式下确保邮件区域可见
                 emailSection.style.display = 'block';
@@ -3385,12 +3960,17 @@
                     safelySetValue('startDate', report.startDate || '');
                     safelySetValue('endDate', report.endDate || '');
                 }
+                safelySetValue('timezone', report.timezone || 'UTC+8');
 
                 // 加载邮件信息
                 emailSubject.value = report.subject || report.name;
                 emailCount.textContent = (report.subject || report.name).length;
                 const emails = (report.recipients || '-').split(';').map(s => s.trim()).filter(Boolean);
-                selectedRecipients = emails.map(email => ({ name: '', email: email }));
+                selectedRecipients = emails.map(email => {
+                    // 尝试匹配组织内用户
+                    const matched = ORG_USERS.find(u => u.email.toLowerCase() === email.toLowerCase());
+                    return { name: matched ? matched.name : email, email: email };
+                });
                 renderRecipientList();
 
                 // 打开弹窗并跳到步骤2
@@ -3431,8 +4011,8 @@
                 steps: [
                     {
                         selector: '[data-onboarding="nav-device-report"]',
-                        title: '设备报告，全新上线',
-                        desc: '为您带来全新的<strong>设备报告</strong>体验！<br>入口位于左侧菜单「项目管理」下方，助您随时全盘掌握设备运行状况。',
+                        title: '设备报表，全新上线',
+                        desc: '为您带来全新的<strong>设备报表</strong>体验！<br>入口位于左侧菜单「项目管理」下方，助您随时全盘掌握设备运行状况。',
                         placement: 'right',
                         offsetX: 24,
                         offsetY: 0
@@ -3440,7 +4020,7 @@
                     {
                         selector: '[data-onboarding="add-report"]',
                         title: '便捷创建，自动推送',
-                        desc: '点击<strong>"添加报告"</strong>即可配置——选设备、定频率、设收件人，简单三步开启定时推送，让核心数据主动找您。',
+                        desc: '点击<strong>"添加报表"</strong>即可配置——选设备、定频率、设收件人，简单三步开启定时推送，让核心数据主动找您。',
                         placement: 'bottom',
                         offsetX: 0,
                         offsetY: 14
@@ -3664,6 +4244,8 @@
                 setTimeout(function() { Onboarding.init(); }, 600);
             });
         })();
+
+
     </script>
 
 

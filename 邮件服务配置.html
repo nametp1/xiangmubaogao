@@ -1097,7 +1097,7 @@
                             </a>
                         </li>
                         <li class="sidebar-item">
-                            <a class="sidebar-link" href="设备报告触发日志.html">
+                            <a class="sidebar-link" href="设备报表触发日志.html">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
                                 触发日志
                             </a>
@@ -1299,7 +1299,7 @@
                             <input type="radio" name="acc-mail-type" value="验证码" checked onchange="document.getElementById('acc-mail-type').value=this.value"> 验证码
                         </label>
                         <label style="display:flex;align-items:center;gap:6px;font-weight:400;cursor:pointer;">
-                            <input type="radio" name="acc-mail-type" value="报告推送" onchange="document.getElementById('acc-mail-type').value=this.value"> 报告推送
+                            <input type="radio" name="acc-mail-type" value="报表推送" onchange="document.getElementById('acc-mail-type').value=this.value"> 报表推送
                         </label>
                     </div>
                     <input type="hidden" id="acc-mail-type" value="验证码">
@@ -1359,14 +1359,14 @@
             </div>
 
             <!-- 邮件预览 -->
-            <div style="font-size:13px;font-weight:500;color:#666;margin-bottom:8px;">邮件正文预览 - 以下为发送时实际包含的报告内容：</div>
+            <div style="font-size:13px;font-weight:500;color:#666;margin-bottom:8px;">邮件正文预览 - 以下为发送时实际包含的报表内容：</div>
             <div class="email-preview">
                 <div class="email-preview-header">
                     <span><span class="ph-label">发件人：</span><span class="ph-value" id="ph-from">三一设备管理平台 &lt;noreply@sany.com.cn&gt;</span></span>
                     <span><span class="ph-label">主　题：</span><span class="ph-value" id="ph-subject">三一设备运行日报 - 2026-07-17</span></span>
                 </div>
                 <div class="email-preview-body" id="email-body-preview">
-                    <!-- 报告内容由 JS 渲染 -->
+                    <!-- 报表内容由 JS 渲染 -->
                 </div>
             </div>
         </div>
@@ -1429,7 +1429,7 @@ let accountData = [
         sender: 'receiver@sany.com.cn',
         enabled: true,
         policy: '无',
-        mailType: '报告推送',
+        mailType: '报表推送',
         remark: '设备报表专用邮箱',
         source: '预定义',
         props: []
@@ -1731,7 +1731,7 @@ function doTestSend() {
     showToast('测试邮件（主题：' + subject + '）已发送至 ' + email + '，请查收', 'success');
 }
 
-// ==================== 测试邮件正文 - 报告内容定义 ====================
+// ==================== 测试邮件正文 - 报表内容定义 ====================
 function renderEmailPreview() {
     const subject = document.getElementById('test-subject').value || '三一设备运行日报 - 2026-07-17';
     document.getElementById('ph-subject').textContent = subject;
@@ -1743,7 +1743,7 @@ function renderEmailPreview() {
     const today = new Date().toISOString().slice(0, 10);
     const reportHTML = `
     <div class="report-title">三一设备运行日报</div>
-    <div class="report-subtitle">报告周期：${today} 00:00 - 23:59 ｜ 生成时间：${today} 08:00</div>
+    <div class="report-subtitle">报表周期：${today} 00:00 - 23:59 ｜ 生成时间：${today} 08:00</div>
 
     <div class="report-section">
         <h4>一、总体概况</h4>
@@ -1825,8 +1825,8 @@ function renderEmailPreview() {
     </div>
 
     <div style="text-align:center;font-size:11px;color:#bbb;margin-top:24px;padding-top:16px;border-top:1px solid #f0f0f0;">
-        本报告由 MySANY 设备管理平台自动生成 ｜ 如有疑问请联系 admin@sany.com.cn<br>
-        如需退订此报告，请登录平台在个人设置中关闭邮件订阅
+        本报表由 MySANY 设备管理平台自动生成 ｜ 如有疑问请联系 admin@sany.com.cn<br>
+        如需退订此报表，请登录平台在个人设置中关闭邮件订阅
     </div>`;
 
     document.getElementById('email-body-preview').innerHTML = reportHTML;
