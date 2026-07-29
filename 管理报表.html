@@ -2308,7 +2308,7 @@
                         <span>此报表仅为一个资产提供数据。选择一个资产以生成报表。</span>
                     </div>
 
-                    <div class="transfer-hint" id="transferHint">搜索并选择要添加到报表中的资产（最多选择 100 个资产）。</div>
+                    <div class="transfer-hint" id="transferHint">搜索并选择要添加到报表中的资产（最多选择 50 个资产）。</div>
 
                     <div class="transfer-box" id="assetTransferBox">
                         <div class="transfer-panel">
@@ -3319,8 +3319,8 @@
                     alert('此报表类型仅支持选择一个资产');
                     return;
                 }
-                if (selectedAssets.length >= 100) {
-                    alert('最多只能选择 100 个资产');
+                if (selectedAssets.length >= 50) {
+                    alert('最多只能选择 50 个资产');
                     return;
                 }
                 const asset = assets.find(a => a.id === id);
@@ -3855,6 +3855,8 @@
                     { label: '电子邮件主题', value: report.subject },
                     { label: '开始日期', value: report.datetime },
                     { label: '结束日期', value: report.endDate },
+                    { label: '时区', value: report.timezone || '-' },
+                    { label: '创建时间', value: report.createTime || '-' },
                     { label: '资产数量', value: String((report.assets || '').split(',').filter(Boolean).length) },
                     { label: '开关', value: report.enabled ? '开启' : '关闭' },
                     { label: '状态', value: report.overdue ? '已过期' : (report.expired ? '已失效' : (report.partial ? '部分失效' : '正常')) },
