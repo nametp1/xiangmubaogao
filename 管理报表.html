@@ -2160,8 +2160,8 @@
             <div class="toolbar">
                 <div class="toolbar-left">
                     <div class="toggle-group">
-                        <button class="toggle-btn">仅显示我的</button>
-                        <button class="toggle-btn active">全部显示</button>
+                        <button class="toggle-btn active">仅显示我的</button>
+                        <button class="toggle-btn">全部显示</button>
                     </div>
                     <div class="search-box">
                         <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
@@ -2228,6 +2228,7 @@
                             <th>开始日期</th>
                             <th>结束日期</th>
                             <th>时区</th>
+                            <th>创建时间</th>
                             <th>开关</th>
                             <th>状态</th>
                             <th style="text-align:center;">操作</th>
@@ -2676,7 +2677,8 @@
                     datetime: '2026-07-15 14:00',
                     endDate: '2026-07-15',
                     enabled: false,
-                    assets: 'G001'
+                    assets: 'G001',
+                    createTime: '2026-07-15 14:00'
                 },
                 {
                     id: 2,
@@ -2693,7 +2695,8 @@
                     endDate: '-',
                     timezone: 'UTC+8',
                     enabled: true,
-                    assets: 'F3S01395, 000036, 000048, 000049, 000101, 000215'
+                    assets: 'F3S01395, 000036, 000048, 000049, 000101, 000215',
+                    createTime: '2026-07-16 08:30'
                 },
                 {
                     id: 3,
@@ -2711,7 +2714,8 @@
                     timezone: 'UTC+8',
                     enabled: true,
                     assets: 'G002',
-                    expired: true
+                    expired: true,
+                    createTime: '2026-07-10 08:00'
                 },
                 {
                     id: 4,
@@ -2729,7 +2733,8 @@
                     timezone: 'UTC+8',
                     enabled: false,
                     assets: 'F3S01395, 000036, 000048',
-                    overdue: true
+                    overdue: true,
+                    createTime: '2026-05-01 09:00'
                 },
                 {
                     id: 5,
@@ -2747,7 +2752,8 @@
                     timezone: 'UTC+8',
                     enabled: true,
                     assets: 'F3S01395, 000036, 000048, 000101',
-                    partial: true
+                    partial: true,
+                    createTime: '2026-07-20 08:00'
                 }
             ];
 
@@ -2760,7 +2766,7 @@
 
             let currentPage = 1;
             const pageSize = 10;
-            let showAll = true;
+            let showAll = false;
 
             function escapeHtml(str) {
                 const div = document.createElement('div');
@@ -2851,6 +2857,7 @@
                             <td>${escapeHtml(r.datetime ? r.datetime.split(' ')[0] : '')}</td>
                             <td>${escapeHtml(r.endDate)}</td>
                             <td>${r.timezone ? escapeHtml(r.timezone) : '-'}</td>
+                            <td>${escapeHtml(r.createTime || '-')}</td>
                             <td>${toggleContent}</td>
                             <td>${statusContent}</td>
                             <td style="text-align:center;">
@@ -2959,7 +2966,7 @@
                     extraFields: [
                         { id: 'timezone', label: '时区', type: 'select', options: timezoneOptions, className: 'timezone-picker' }
                     ],
-                    hintTemplate: '报表将立即下载。日期范围限定为 31 天（时区：{timezone}）',
+                    hintTemplate: '报表将立即下载。日期范围限定为一年（时区：{timezone}）',
                     showEmail: false,
                     nextBtnText: '下载',
                 },
@@ -2972,7 +2979,7 @@
                     extraFields: [
                         { id: 'timezone', label: '时区', type: 'select', options: timezoneOptions, className: 'timezone-picker' }
                     ],
-                    hintTemplate: '报表将立即递送。日期范围限定为 31 天（时区：{timezone}）',
+                    hintTemplate: '报表将立即递送。日期范围限定为一年（时区：{timezone}）',
                     showEmail: true,
                     nextBtnText: '添加',
                 },
@@ -3606,8 +3613,8 @@
                     return false;
                 }
                 const diffDays = (end - start) / (1000 * 60 * 60 * 24);
-                if (diffDays > 31) {
-                    alert('日期范围不能超过 31 天');
+                if (diffDays > 365) {
+                    alert('日期范围不能超过一年');
                     return false;
                 }
                 return true;
@@ -3804,6 +3811,7 @@
                         datetime: report.startDate ? report.startDate + (report.deliveryTime ? ' ' + report.deliveryTime : '') : '-',
                         endDate: report.endDate || '-',
                         enabled: true,
+                        createTime: new Date().toISOString().slice(0, 16).replace('T', ' '),
                         assets: assetsStr || '-'
                     });
                     currentPage = 1;
