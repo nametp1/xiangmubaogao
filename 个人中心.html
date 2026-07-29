@@ -511,8 +511,9 @@
                         <div>
                             <div class="info-item-label">邮箱</div>
                             <div class="info-item-value">
-                                <span>–</span>
-                                <a class="bind-link" onclick="openBindEmailModal()">绑定</a>
+                                <span id="emailText">–</span>
+                                <a class="bind-link" id="bindLink" onclick="openBindEmailModal()">绑定</a>
+                                <a class="bind-link" id="rebindLink" onclick="openRebindEmailModal()" style="display:none;">换绑</a>
                             </div>
                         </div>
                         <div>
@@ -623,9 +624,57 @@
         </div>
     </div>
 
+    <!-- 换绑邮箱弹窗 -->
+    <div class="modal-overlay" id="rebindEmailModal">
+        <div class="modal-box" style="width:440px;">
+            <div class="modal-header">
+                <span>换绑邮箱</span>
+                <span class="modal-close" onclick="closeRebindEmailModal()">&times;</span>
+            </div>
+            <div class="modal-body">
+                <div class="form-item">
+                    <label>当前邮箱</label>
+                    <div class="input-wrap">
+                        <input type="text" id="oldEmailDisplay" disabled style="background:#f5f5f5;color:#999;">
+                    </div>
+                </div>
+                <div class="form-item">
+                    <label>当前邮箱验证码</label>
+                    <div class="input-row">
+                        <div class="input-wrap" style="flex:1;">
+                            <input type="text" id="oldVerifyCodeInput" placeholder="请输入当前邮箱的验证码" maxlength="6" autocomplete="off">
+                        </div>
+                        <button class="code-btn" id="oldSendCodeBtn" onclick="sendOldVerifyCode()">发送验证码</button>
+                    </div>
+                </div>
+                <div class="form-item">
+                    <label>新邮箱地址</label>
+                    <div class="input-wrap">
+                        <input type="email" id="newEmailInput" placeholder="请输入新的邮箱地址" autocomplete="off">
+                    </div>
+                </div>
+                <div class="form-item">
+                    <label>新邮箱验证码</label>
+                    <div class="input-row">
+                        <div class="input-wrap" style="flex:1;">
+                            <input type="text" id="newVerifyCodeInput" placeholder="请输入新邮箱的验证码" maxlength="6" autocomplete="off">
+                        </div>
+                        <button class="code-btn" id="newSendCodeBtn" onclick="sendNewVerifyCode()">发送验证码</button>
+                    </div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn" onclick="closeRebindEmailModal()">取消</button>
+                <button class="btn primary" id="confirmRebindBtn" onclick="confirmRebindEmail()" disabled>确认换绑</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         let codeTimer = null;
         let codeCountdown = 0;
+        let rebindCodeTimer = null;
+        let rebindCodeCountdown = 0;
 
         // 打开弹窗
         function openBindEmailModal() {
@@ -713,13 +762,101 @@
             if (!email) { showToast('请输入邮箱地址', 'warning'); return; }
             if (code.length < 4) { showToast('请输入有效的验证码', 'warning'); return; }
             showToast('邮箱绑定成功', 'success');
-            const emailValue = document.querySelector('.info-item-value span:first-child');
+            const emailValue = document.getElementById('emailText');
             if (emailValue) {
                 emailValue.textContent = email;
-                const bindLink = document.querySelector('.bind-link');
-                if (bindLink) bindLink.style.display = 'none';
+                document.getElementById('bindLink').style.display = 'none';
+                document.getElementById('rebindLink').style.display = 'inline';
             }
             closeBindEmailModal();
+        }
+
+        // 打开换绑弹窗
+        function openRebindEmailModal() {
+            const currentEmail = document.getElementById('emailText').textContent.trim();
+            if (currentEmail === '–') { openBindEmailModal(); return; }
+            document.getElementById('oldEmailDisplay').value = currentEmail;
+            document.getElementById('oldVerifyCodeInput').value = '';
+            document.getElementById('newEmailInput').value = '';
+            document.getElementById('newVerifyCodeInput').value = '';
+            document.getElementById('confirmRebindBtn').disabled = true;
+            document.getElementById('rebindEmailModal').classList.add('show');
+        }
+
+        // 关闭换绑弹窗
+        function closeRebindEmailModal() {
+            document.getElementById('rebindEmailModal').classList.remove('show');
+            clearRebindTimer();
+        }
+
+        // 清除换绑倒计时
+        function clearRebindTimer() {
+            if (rebindCodeTimer) {
+                clearInterval(rebindCodeTimer);
+                rebindCodeTimer = null;
+                document.getElementById('oldSendCodeBtn').disabled = false;
+                document.getElementById('oldSendCodeBtn').textContent = '发送验证码';
+            }
+        }
+
+        // 发送旧邮箱验证码
+        function sendOldVerifyCode() {
+            const btn = document.getElementById('oldSendCodeBtn');
+            btn.disabled = true;
+            rebindCodeCountdown = 60;
+            btn.textContent = rebindCodeCountdown + 's 后重发';
+            rebindCodeTimer = setInterval(function() {
+                rebindCodeCountdown--;
+                if (rebindCodeCountdown <= 0) {
+                    clearInterval(rebindCodeTimer);
+                    rebindCodeTimer = null;
+                    btn.disabled = false;
+                    btn.textContent = '发送验证码';
+                } else {
+                    btn.textContent = rebindCodeCountdown + 's 后重发';
+                }
+            }, 1000);
+        }
+
+        // 发送新邮箱验证码
+        function sendNewVerifyCode() {
+            const email = document.getElementById('newEmailInput').value.trim();
+            if (!email) { showToast('请先输入新邮箱地址', 'warning'); return; }
+            const btn = document.getElementById('newSendCodeBtn');
+            btn.disabled = true;
+            let countdown = 60;
+            btn.textContent = countdown + 's 后重发';
+            const timer = setInterval(function() {
+                countdown--;
+                if (countdown <= 0) {
+                    clearInterval(timer);
+                    btn.disabled = false;
+                    btn.textContent = '发送验证码';
+                } else {
+                    btn.textContent = countdown + 's 后重发';
+                }
+            }, 1000);
+        }
+
+        // 换绑验证码输入监听
+        document.getElementById('oldVerifyCodeInput').addEventListener('input', checkRebindBtn);
+        document.getElementById('newVerifyCodeInput').addEventListener('input', checkRebindBtn);
+        function checkRebindBtn() {
+            const oldCode = document.getElementById('oldVerifyCodeInput').value.trim();
+            const newCode = document.getElementById('newVerifyCodeInput').value.trim();
+            document.getElementById('confirmRebindBtn').disabled = oldCode.length < 4 || newCode.length < 4;
+        }
+
+        // 确认换绑
+        function confirmRebindEmail() {
+            const oldCode = document.getElementById('oldVerifyCodeInput').value.trim();
+            const newEmail = document.getElementById('newEmailInput').value.trim();
+            const newCode = document.getElementById('newVerifyCodeInput').value.trim();
+            if (!newEmail) { showToast('请输入新邮箱地址', 'warning'); return; }
+            if (oldCode.length < 4 || newCode.length < 4) { showToast('请输入有效的验证码', 'warning'); return; }
+            showToast('邮箱换绑成功', 'success');
+            document.getElementById('emailText').textContent = newEmail;
+            closeRebindEmailModal();
         }
     </script>
 </body>
