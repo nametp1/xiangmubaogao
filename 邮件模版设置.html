@@ -858,7 +858,7 @@
                         <strong>可用变量：</strong>
                     </div>
                     <span style="font-size:12px;color:#8c6d00;">点击下方变量即可插入到正文光标处，发送时将自动替换</span><br>
-                    <strong>基础信息：</strong><span class="clickable-var" onclick="insertVarEdit('{{模版名称}}')">{{模版名称}}</span> <span class="clickable-var" onclick="insertVarEdit('{{发送日期}}')">{{发送日期}}</span> <span class="clickable-var" onclick="insertVarEdit('{{收件人姓名}}')">{{收件人姓名}}</span> <span class="clickable-var" onclick="insertVarEdit('{{生成时间}}')">{{生成时间}}</span>
+                    <strong>基础信息：</strong><span class="clickable-var" onclick="insertVarEdit('{{模版名称}}')">{{模版名称}}</span> <span class="clickable-var" onclick="insertVarEdit('{{发送日期}}')">{{发送日期}}</span> <span class="clickable-var" onclick="insertVarEdit('{{收件人姓名}}')">{{收件人姓名}}</span> <span class="clickable-var" onclick="insertVarEdit('{{生成时间}}')">{{生成时间}}</span> <span class="clickable-var" onclick="insertVarEdit('{{一键订阅}}')">{{一键订阅}}</span> <span class="clickable-var" onclick="insertVarEdit('{{查看报告}}')">{{查看报告}}</span>
                 </div>
 
                 <!-- 富文本编辑器（全宽） -->
@@ -1155,22 +1155,23 @@ function defaultBody(rt) {
     return defaultBodyOffline();
 }
 function defaultBodyReport() {
-    return `<div class="report-title">{{模版名称}}</div>
-<div class="report-subtitle">报表周期：{{发送日期}} ｜ 生成时间：{{生成时间}}</div>
-<div class="report-section"><h4>一、总体概况</h4>
-<p>尊敬的{{收件人姓名}}，您好！</p>
-<p>本报表为您汇总近段时间范围内的统计数据，具体请查看相关附件。</p></div>
-<hr class="section-divider">
-<div class="report-section"><h4>二、设备运行监控</h4></div>
-<table><thead><tr><th>指标项</th><th>本期值</th><th>指标项</th><th>本期值</th></tr></thead>
-<tbody>
-<tr><td>发动机运行时长</td><td>{{发动机运行时长}}</td><td>空转时长</td><td>{{空转时长}}</td></tr>
-<tr><td>能耗油耗</td><td>{{能耗油耗}}</td><td>各挡位分布</td><td>{{各挡位分布}}</td></tr>
-<tr style="background:#fafafa;font-weight:600;"><td>异常预警</td><td>{{异常预警}}</td><td></td><td></td></tr>
-</tbody></table>
-<hr class="section-divider">
-<div class="report-section"><h4>三、异常设备明细</h4><p>请查看附件～</p></div>
-<div class="email-footer">本报表由 MySANY 设备管理平台自动生成 ｜ 如有疑问请联系 admin@sany.com.cn<br>如需退订此报表，请登录平台在个人设置中关闭邮件订阅</div>`;
+    return `<p>尊敬的 {{收件人姓名}}:</p>
+<p>您好!</p>
+<p>您订阅的《{{模版名称}}》已生成完毕,生成时间为 {{生成时间}}。请点击下方按钮查看并下载完整报告。</p>
+<p style="text-align:center;margin:20px 0;">
+  <a href="javascript:void(0)" style="display:inline-block;padding:12px 32px;background:#e60012;color:#fff;border-radius:6px;text-decoration:none;font-size:15px;font-weight:600;">查看设备工况报告</a>
+</p>
+<p style="font-weight:600;">温馨提示:</p>
+<ol style="padding-left:18px;">
+  <li>出于数据安全考虑,本次报告未直接以附件形式发送,请通过上方链接登录您的账号后查看;</li>
+  <li>该链接自生成之日起3天内有效,过期后如需查看,请联系您的客户经理协助获取;</li>
+  <li>下载报告前需确认知悉以下条款。</li>
+</ol>
+<p style="font-weight:600;">数据使用与保密声明:</p>
+<p>本报告包含贵司专属设备运营数据,仅供贵司内部授权人员查阅使用。贵司应自行负责后续访问权限管理及内部分发控制,因贵司内部传播、转发或权限管理不当导致的信息扩散,Mysany不承担相应责任。</p>
+<p>如您对本次报告内容有任何疑问,或希望调整订阅设置,请重新在Mysany进行订阅。</p>
+<p>此邮件为系统自动发送,请勿直接回复。</p>
+<p>—— Mysany 服务团队</p>`;
 }
 function defaultAttachmentTable() {
     // 默认附件表格结构：表头行 + 变量占位符行

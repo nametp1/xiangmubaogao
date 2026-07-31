@@ -408,6 +408,13 @@
         .modal-footer .btn.primary:disabled:hover {
             background: #f0f0f0; color: #bbb; border-color: #e8e8e8;
         }
+
+        .email-hint {
+            font-size: 12px;
+            color: #E60012;
+            margin-top: 4px;
+            line-height: 1.5;
+        }
     </style>
 </head>
 <body>
@@ -603,6 +610,7 @@
                     <div class="input-wrap">
                         <input type="email" id="bindEmailInput" placeholder="请输入需要绑定的邮箱地址" autocomplete="off">
                     </div>
+                    <div class="email-hint">请输入正确的邮箱地址</div>
                 </div>
                 <div class="form-item">
                     <label>
@@ -652,6 +660,7 @@
                     <div class="input-wrap">
                         <input type="email" id="newEmailInput" placeholder="请输入新的邮箱地址" autocomplete="off">
                     </div>
+                    <div class="email-hint">请输入正确的邮箱地址</div>
                 </div>
                 <div class="form-item">
                     <label>新邮箱验证码</label>
@@ -675,6 +684,16 @@
         let codeCountdown = 0;
         let rebindCodeTimer = null;
         let rebindCodeCountdown = 0;
+
+        // 邮箱脱敏
+        function maskEmail(email) {
+            const atIndex = email.indexOf('@');
+            if (atIndex <= 0) return email;
+            const name = email.substring(0, atIndex);
+            const domain = email.substring(atIndex);
+            if (name.length <= 4) return name.charAt(0) + '***' + domain;
+            return name.substring(0, 3) + '***' + name.substring(name.length - 2) + domain;
+        }
 
         // 打开弹窗
         function openBindEmailModal() {
@@ -764,7 +783,7 @@
             showToast('邮箱绑定成功', 'success');
             const emailValue = document.getElementById('emailText');
             if (emailValue) {
-                emailValue.textContent = email;
+                emailValue.textContent = maskEmail(email);
                 document.getElementById('bindLink').style.display = 'none';
                 document.getElementById('rebindLink').style.display = 'inline';
             }
@@ -775,7 +794,7 @@
         function openRebindEmailModal() {
             const currentEmail = document.getElementById('emailText').textContent.trim();
             if (currentEmail === '–') { openBindEmailModal(); return; }
-            document.getElementById('oldEmailDisplay').value = currentEmail;
+            document.getElementById('oldEmailDisplay').value = maskEmail(currentEmail);
             document.getElementById('oldVerifyCodeInput').value = '';
             document.getElementById('newEmailInput').value = '';
             document.getElementById('newVerifyCodeInput').value = '';
@@ -855,7 +874,7 @@
             if (!newEmail) { showToast('请输入新邮箱地址', 'warning'); return; }
             if (oldCode.length < 4 || newCode.length < 4) { showToast('请输入有效的验证码', 'warning'); return; }
             showToast('邮箱换绑成功', 'success');
-            document.getElementById('emailText').textContent = newEmail;
+            document.getElementById('emailText').textContent = maskEmail(newEmail);
             closeRebindEmailModal();
         }
     </script>
