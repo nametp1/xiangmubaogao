@@ -1097,7 +1097,7 @@
                             </a>
                         </li>
                         <li class="sidebar-item">
-                            <a class="sidebar-link" href="设备报表触发日志.html">
+                            <a class="sidebar-link" href="设备报告触发日志.html">
                                 <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
                                 触发日志
                             </a>
@@ -1142,7 +1142,6 @@
                                     <th>邮件服务器</th>
                                     <th>端口</th>
                                     <th>安全策略</th>
-                                    <th style="color:red;">邮箱类型</th>
                                     <th style="color:red;">备注</th>
                                     <th>来源</th>
                                     <th>状态</th>
@@ -1293,18 +1292,6 @@
                     </select>
                 </div>
                 <div class="form-group full-width">
-                    <label style="color:red;">邮箱类型</label>
-                    <div style="display:flex;gap:24px;padding-top:4px;">
-                        <label style="display:flex;align-items:center;gap:6px;font-weight:400;cursor:pointer;">
-                            <input type="radio" name="acc-mail-type" value="验证码" checked onchange="document.getElementById('acc-mail-type').value=this.value"> 验证码
-                        </label>
-                        <label style="display:flex;align-items:center;gap:6px;font-weight:400;cursor:pointer;">
-                            <input type="radio" name="acc-mail-type" value="报表推送" onchange="document.getElementById('acc-mail-type').value=this.value"> 报表推送
-                        </label>
-                    </div>
-                    <input type="hidden" id="acc-mail-type" value="验证码">
-                </div>
-                <div class="form-group full-width">
                     <label style="color:red;">备注</label>
                     <textarea id="acc-remark" rows="2" placeholder="请输入备注信息"></textarea>
                 </div>
@@ -1429,7 +1416,6 @@ let accountData = [
         sender: 'receiver@sany.com.cn',
         enabled: true,
         policy: '无',
-        mailType: '报表推送',
         remark: '设备报表专用邮箱',
         source: '预定义',
         props: []
@@ -1446,7 +1432,6 @@ let accountData = [
         sender: 'noreply@sany.com.cn',
         enabled: true,
         policy: 'TLS',
-        mailType: '验证码',
         remark: '系统通知专用邮箱',
         source: '预定义',
         props: []
@@ -1506,7 +1491,6 @@ function renderAccountList() {
         const policyHtml = item.policy ? '<span class="policy-tag">' + item.policy + '</span>' : '—';
         const sourceHtml = '<span class="source-tag">' + (item.source || '自定义') + '</span>';
 
-        const mailTypeText = item.mailType || '验证码';
         const remarkText = item.remark || '—';
         tbody.innerHTML += '<tr>' +
             '<td>' + item.code + '</td>' +
@@ -1514,7 +1498,6 @@ function renderAccountList() {
             '<td>' + item.server + '</td>' +
             '<td>' + item.port + '</td>' +
             '<td>' + policyHtml + '</td>' +
-            '<td style="color:red;">' + mailTypeText + '</td>' +
             '<td style="color:red;">' + remarkText + '</td>' +
             '<td>' + sourceHtml + '</td>' +
             '<td>' + statusHtml + '</td>' +
@@ -1557,7 +1540,7 @@ function openAccountModal(mode, code) {
     let data = {
         code: '', name: '', username: '', password: '',
         server: '', port: '', protocol: 'SMTP', retry: 3,
-        sender: '', enabled: true, policy: '', mailType: '验证码', remark: '', source: '自定义', props: []
+        sender: '', enabled: true, policy: '', remark: '', source: '自定义', props: []
     };
 
     if (mode === 'edit' && code) {
@@ -1578,9 +1561,6 @@ function openAccountModal(mode, code) {
     document.getElementById('acc-sender').value = data.sender;
     document.getElementById('acc-enabled').checked = data.enabled;
     document.getElementById('acc-policy').value = data.policy;
-    document.getElementById('acc-mail-type').value = data.mailType || '验证码';
-    const mailTypeRadios = document.getElementsByName('acc-mail-type');
-    mailTypeRadios.forEach(r => { r.checked = (r.value === (data.mailType || '验证码')); });
     document.getElementById('acc-remark').value = data.remark || '';
 
     currentSSLProps = data.props && data.props.length ? JSON.parse(JSON.stringify(data.props)) : [];
@@ -1620,7 +1600,6 @@ function saveAccount() {
         server, port: parseInt(port, 10), protocol, retry: parseInt(retry, 10),
         sender, enabled: document.getElementById('acc-enabled').checked,
         policy: document.getElementById('acc-policy').value,
-        mailType: document.getElementById('acc-mail-type').value,
         remark: document.getElementById('acc-remark').value,
         source: (accountEditingCode && exists) ? exists.source : '自定义',
         props: JSON.parse(JSON.stringify(currentSSLProps))
