@@ -355,10 +355,10 @@
             padding: 3px 6px; flex: 1; min-width: 0; max-height: 64px; overflow-y: auto;
         }
         .kv-cascade-trigger .kv-cascade-tag {
-            display: inline-flex; align-items: center; gap: 2px; padding: 1px 2px 1px 6px;
+            display: inline-flex; align-items: center; gap: 2px; padding: 1px 4px 1px 6px;
             background: #e6f0ff; color: #1677ff; border-radius: 3px;
-            font-size: 11px; max-width: 150px; overflow: hidden;
-            text-overflow: ellipsis; white-space: nowrap;
+            font-size: 11px; max-width: 320px; /* 增大最大宽度 */
+            overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
         }
         .kv-cascade-trigger .kv-cascade-tag .tag-close {
             display: inline-flex; align-items: center; justify-content: center;
@@ -654,44 +654,6 @@
         .operate-links a.danger { color: #E60012; }
         .operate-links a.danger:hover { color: #cc0010; }
 
-        /* 变量词典模态框 */
-        .dict-modal-overlay {position:fixed;top:0;left:0;width:100%;height:100%;background:rgba(0,0,0,0.45);z-index:10002;display:none;align-items:center;justify-content:center;}
-        .dict-modal-overlay.show {display:flex;}
-        .dict-modal {width:900px;max-height:680px;background:#fff;border-radius:10px;box-shadow:0 20px 60px rgba(0,0,0,0.2);display:flex;flex-direction:column;overflow:hidden;}
-        .dict-modal-header {display:flex;align-items:center;justify-content:space-between;padding:16px 22px;border-bottom:1px solid #edf0f4;}
-        .dict-modal-header h5 {font-size:16px;font-weight:600;color:#1a1f36;margin:0;}
-        .dict-close-btn {width:32px;height:32px;border:none;background:#f3f4f6;border-radius:6px;cursor:pointer;display:flex;align-items:center;justify-content:center;color:#666;font-size:18px;transition:.2s;}
-        .dict-close-btn:hover {background:#e5e7eb;color:#1a1f36;}
-        .dict-tab-bar {display:flex;gap:0;padding:0 22px;border-bottom:1px solid #edf0f4;background:#fafbfc;}
-        .dict-tab-item {padding:10px 20px;font-size:13px;font-weight:500;color:#6b7280;cursor:pointer;border-bottom:2px solid transparent;transition:.2s;background:transparent;border-top:none;border-left:none;border-right:none;}
-        .dict-tab-item:hover {color:#1a1f36;background:#f0f2f5;}
-        .dict-tab-item.active {color:#1677ff;border-bottom-color:#1677ff;background:#fff;}
-
-        /* 词典级联字段行（仅查看） */
-        .dict-field-item {display:flex;align-items:center;padding:7px 14px;font-size:12px;color:#374151;gap:8px;border:none;background:transparent;width:100%;text-align:left;}
-        .dict-field-item .dict-field-name {color:#374151;flex:1;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
-        .dict-field-item .dict-field-tag {font-size:11px;color:#1677ff;background:#e6f0ff;padding:1px 6px;border-radius:3px;font-family:monospace;flex-shrink:0;}
-        .dict-field-search {padding:0 0 6px 0;margin:0 14px;border-bottom:1px solid #f0f0f0;}
-        .dict-field-search input {width:100%;padding:6px 10px;border:1px solid #e5e7eb;border-radius:6px;font-size:12px;outline:none;box-sizing:border-box;}
-        .dict-field-search input:focus {border-color:#1677ff;box-shadow:0 0 0 2px rgba(22,119,255,0.1);}
-
-        /* 机群变量-简单表格 */
-        .dict-fleet-summary {background:#f6f9fc;border:1px solid #dce6f0;border-radius:6px;padding:10px 14px;margin-bottom:10px;font-size:12px;color:#4b5563;line-height:1.8;}
-        .dict-fleet-summary .fs-head {font-weight:600;color:#1a1f36;margin-bottom:2px;}
-        .dict-fleet-summary .fs-tags {display:flex;flex-wrap:wrap;gap:4px 6px;margin-top:4px;}
-        .dict-fleet-summary .fs-tag {display:inline-flex;align-items:center;gap:2px;font-size:11px;padding:1px 6px;border-radius:3px;background:#fff;border:1px solid #dce6f0;color:#6b7280;cursor:pointer;transition:all .15s;user-select:none;}
-        .dict-fleet-summary .fs-tag:hover {border-color:#91d5ff;background:#f0f9ff;}
-        .dict-fleet-summary .fs-tag.active {background:#1677ff;border-color:#1677ff;color:#fff;font-weight:500;}
-        .dict-fleet-summary .fs-tag.all {background:#e6f7ff;border-color:#91d5ff;color:#1890ff;}
-        .dict-fleet-summary .fs-tag .fs-icon {font-size:10px;}
-        .dict-fleet-summary .fs-tag .fs-filter-hint {font-size:9px;opacity:0.7;margin-left:1px;}
-        .dict-fleet-table {width:100%;border-collapse:collapse;font-size:13px;}
-        .dict-fleet-table th {background:#fafbfc;padding:9px 14px;text-align:left;font-weight:600;color:#4b5563;border-bottom:2px solid #e5e7eb;font-size:12px;}
-        .dict-fleet-table td {padding:8px 14px;border-bottom:1px solid #f3f4f6;color:#374151;}
-        .dict-fleet-table tbody tr {border-bottom:1px solid #f3f4f6;color:#374151;}
-        .dict-fleet-table code {background:#f0f2f5;color:#1677ff;padding:2px 7px;border-radius:4px;font-size:12px;font-family:inherit;}
-        .dict-modal-footer {padding:10px 22px;border-top:1px solid #edf0f4;text-align:left;font-size:12px;color:#9ca3af;}
-
         /* 单机数据列配置（三栏级联） */
         .single-col-body {display:flex;overflow:hidden;min-height:0;height:420px;border:1px solid #e8e8e8;border-radius:8px 8px 0 0;background:#fff;}
 
@@ -705,6 +667,68 @@
         .sc-model-tag .sc-tag-del {cursor:pointer;color:#91d5ff;font-size:15px;line-height:1;margin-left:2px;flex-shrink:0;transition:color .15s;}
         .sc-model-tag .sc-tag-del:hover {color:#E60012;}
         .sc-model-tags-wrap .sc-tags-empty {font-size:12px;color:#bbb;line-height:26px;}
+        /* 模板变量回显标签区（单机数据列配置） */
+        /* ===== 模板变量回显区（美化版） ===== */
+        .sc-var-tags-wrap {
+            margin-top: 8px; border: 1px solid #e8edf5; border-radius: 10px; background: #fff;
+            padding: 0; overflow: hidden; box-shadow: 0 1px 4px rgba(22,119,255,0.05);
+            transition: box-shadow .2s;
+        }
+        .sc-var-tags-wrap:hover { box-shadow: 0 2px 10px rgba(22,119,255,0.1); }
+        .sc-var-tags-header {
+            display: flex; align-items: center; gap: 8px;
+            padding: 9px 14px; background: linear-gradient(90deg, #f0f6ff 0%, #f8fbff 100%);
+            border-bottom: 1px solid #e8edf5; cursor: default;
+        }
+        .sc-var-tags-header .svt-icon {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 22px; height: 22px; border-radius: 6px;
+            background: linear-gradient(135deg, #1677ff, #69b1ff); color: #fff; flex-shrink: 0;
+        }
+        .sc-var-tags-header .svt-title { font-size: 12px; font-weight: 600; color: #1f2d3d; line-height: 1; }
+        .sc-var-tags-header .svt-badge {
+            display: inline-flex; align-items: center; justify-content: center;
+            min-width: 18px; height: 18px; padding: 0 6px; border-radius: 9px;
+            background: #1677ff; color: #fff; font-size: 11px; font-weight: 600; line-height: 1;
+        }
+        .sc-var-tags-header .svt-hint { margin-left: auto; font-size: 11px; color: #8c9bb0; }
+        .sc-var-tags-body {
+            display: flex; align-items: flex-start; flex-wrap: wrap; gap: 7px;
+            padding: 10px 14px; min-height: 40px; background: #fff;
+        }
+        .sc-var-tags-body .sc-tags-empty {
+            display: inline-flex; align-items: center; gap: 6px;
+            font-size: 12px; color: #b0bac9; line-height: 20px; padding: 0 4px;
+        }
+        /* 卡片式变量标签 */
+        .sc-var-tag {
+            display: inline-flex; align-items: center; gap: 6px;
+            padding: 4px 6px 4px 10px; max-width: 520px;
+            background: linear-gradient(135deg, #f0f7ff 0%, #e8f2ff 100%);
+            border: 1px solid #c9e0ff; border-radius: 8px;
+            font-size: 11px; color: #1d5fa8;
+            transition: all .18s; cursor: default; box-shadow: 0 1px 2px rgba(22,119,255,0.06);
+        }
+        .sc-var-tag:hover {
+            border-color: #69b1ff; transform: translateY(-1px);
+            box-shadow: 0 3px 8px rgba(22,119,255,0.16);
+        }
+        .sc-var-tag .sc-var-name {
+            overflow: hidden; text-overflow: ellipsis; white-space: nowrap; flex-shrink: 1;
+            color: #1f3a63; font-weight: 500;
+        }
+        .sc-var-tag .sc-var-code {
+            font-family: 'SF Mono', Menlo, Consolas, monospace; color: #0958d9;
+            flex-shrink: 0; background: rgba(22,119,255,0.08);
+            padding: 1px 6px; border-radius: 5px; font-size: 10px;
+        }
+        .sc-var-tag .sc-var-del {
+            display: inline-flex; align-items: center; justify-content: center;
+            width: 15px; height: 15px; border-radius: 50%;
+            cursor: pointer; color: #7fb2ff; font-size: 13px; line-height: 1; flex-shrink: 0;
+            transition: all .15s; background: rgba(255,255,255,0.6);
+        }
+        .sc-var-tag .sc-var-del:hover { background: #ff4d4f; color: #fff; transform: scale(1.1); }
     </style>
     <link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">
 </head>
@@ -938,6 +962,20 @@
                             <span class="sc-tags-label">已配置模型：</span>
                             <span class="sc-tags-empty">暂未选择任何字段</span>
                         </div>
+                        <!-- 模板变量回显区：展示三级联动所有已勾选的变量 -->
+                        <div class="sc-var-tags-wrap" id="sc-var-tags">
+                            <div class="sc-var-tags-header">
+                                <span class="svt-icon">
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                                </span>
+                                <span class="svt-title">模板变量</span>
+                                <span class="svt-badge" id="sc-var-count">0</span>
+                                <span class="svt-hint">点击标签 × 可移除对应变量</span>
+                            </div>
+                            <div class="sc-var-tags-body">
+                                <span class="sc-tags-empty">暂未勾选任何变量</span>
+                            </div>
+                        </div>
                     </div>
 
             </div>
@@ -999,6 +1037,56 @@
                     </div>
                 </div>
 
+                <!-- 数据列配置（PDF 单机模版） -->
+                <div class="attachment-section" id="pdf-single-column-config" style="margin-top:12px;display:none;">
+                    <div class="attach-config" style="padding-bottom:0;">
+                        <div class="section-title">数据列配置</div>
+                        <p style="font-size:11px;color:#999;margin:0 0 8px 0;">选择设备类型 → 物模型 → 勾选需在附件表格中展示的字段</p>
+                    </div>
+                    <div class="single-col-body">
+                        <!-- 第一列：设备类型 -->
+                        <div class="kv-cascade-col kv-cascade-col-l1">
+                            <div class="kv-cascade-col-label">设备类型</div>
+                            <div id="pdf-sc-l1"></div>
+                        </div>
+                        <!-- 第二列：物模型 -->
+                        <div class="kv-cascade-col kv-cascade-col-l2">
+                            <div class="kv-cascade-col-label">物模型</div>
+                            <div id="pdf-sc-l2"></div>
+                        </div>
+                        <!-- 第三列：字段 -->
+                        <div class="kv-cascade-col kv-cascade-col-l3">
+                            <div class="kv-cascade-col-label">字段（可多选）</div>
+                            <div id="pdf-sc-l3"></div>
+                        </div>
+                    </div>
+                    <div class="kv-cascade-footer" style="border-radius:0;border:1px solid #e8e8e8;border-top:none;">
+                        <div class="kv-cascade-selected" id="pdf-sc-footer-count">已选：<span>0</span> 个变量</div>
+                        <div class="kv-cascade-actions">
+                            <button class="kv-cascade-btn" onclick="pdfScToggleAll(false)">取消全选</button>
+                            <button class="kv-cascade-btn primary" onclick="pdfScToggleAll(true)">全选当前模型</button>
+                        </div>
+                    </div>
+                    <div class="sc-model-tags-wrap" id="pdf-sc-model-tags" style="border-radius:0 0 8px 8px;border:1px solid #e8e8e8;border-top:1px dotted #e0e0e0;">
+                        <span class="sc-tags-label">已配置模型：</span>
+                        <span class="sc-tags-empty">暂未选择任何字段</span>
+                    </div>
+                    <!-- 模板变量回显区：展示三级联动所有已勾选的变量 -->
+                    <div class="sc-var-tags-wrap" id="pdf-sc-var-tags">
+                        <div class="sc-var-tags-header">
+                            <span class="svt-icon">
+                                <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3L22 4"/><path d="M21 12v7a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11"/></svg>
+                            </span>
+                            <span class="svt-title">模板变量</span>
+                            <span class="svt-badge" id="pdf-sc-var-count">0</span>
+                            <span class="svt-hint">点击标签 × 可移除对应变量</span>
+                        </div>
+                        <div class="sc-var-tags-body">
+                            <span class="sc-tags-empty">暂未勾选任何变量</span>
+                        </div>
+                    </div>
+                </div>
+
             </div>
 
             <!-- 启用开关 -->
@@ -1010,15 +1098,6 @@
             </div>
         </div>
         <div class="modal-footer">
-            <div style="display:flex;align-items:center;gap:12px;margin-right:auto;">
-                <button class="btn btn-text" style="color:#999" onclick="deleteCurrentTemplate()">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><polyline points="3 6 5 6 21 6"/><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"/></svg>
-                    删除此模版
-                </button>
-                <button class="btn btn-sm" onclick="openVarDict()" style="font-size:11px;padding:3px 10px;background:#fff;color:#1677ff;border:1px solid #1677ff;">
-                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" style="vertical-align:-2px;margin-right:2px;"><path d="M4 19.5A2.5 2.5 0 0 1 6.5 17H20"/><path d="M6.5 2H20v20H6.5A2.5 2.5 0 0 1 4 19.5v-15A2.5 2.5 0 0 1 6.5 2z"/></svg>变量词典
-                </button>
-            </div>
             <button class="btn" onclick="resetTemplate()">重置</button>
             <button class="btn btn-primary" onclick="saveTemplate()">保存模版</button>
         </div>
@@ -1039,46 +1118,6 @@
             <button class="btn" onclick="closeDeleteConfirm()">取消</button>
             <button class="btn btn-danger" id="del-confirm-ok" onclick="confirmDeleteTemplate()">确认删除</button>
         </div>
-    </div>
-</div>
-
-<!-- ========== 变量词典弹窗 ========== -->
-<div class="dict-modal-overlay" id="dict-modal" onclick="if(event.target===this)closeVarDict()">
-    <div class="dict-modal">
-        <div class="dict-modal-header">
-            <h5>变量词典</h5>
-            <button class="dict-close-btn" onclick="closeVarDict()" title="关闭">&times;</button>
-        </div>
-        <div class="dict-tab-bar">
-            <button class="dict-tab-item active" onclick="switchDictTab('single')">单机变量</button>
-            <button class="dict-tab-item" onclick="switchDictTab('fleet')">机群变量</button>
-        </div>
-
-        <!-- 单机：三栏级联 -->
-        <div class="kv-cascade-body" id="dict-cascade-body" style="height:420px;">
-            <div class="kv-cascade-col kv-cascade-col-l1">
-                <div class="kv-cascade-col-label">设备类型</div>
-                <div id="dict-l1"></div>
-            </div>
-            <div class="kv-cascade-col kv-cascade-col-l2">
-                <div class="kv-cascade-col-label">物模型</div>
-                <div id="dict-l2"></div>
-            </div>
-            <div class="kv-cascade-col kv-cascade-col-l3">
-                <div class="kv-cascade-col-label">字段</div>
-                <div class="dict-field-search"><input type="text" placeholder="搜索字段..." id="dict-search-input" oninput="dictFilterL3()"></div>
-                <div id="dict-l3"></div>
-            </div>
-        </div>
-
-        <!-- 机群：简单表格 -->
-        <div id="dict-fleet-body" style="display:none;overflow-y:auto;max-height:420px;padding:12px 16px;">
-            <div class="dict-fleet-summary" id="dict-fleet-summary" style="display:none;"></div>
-            <div class="dict-field-search" style="margin:0 0 8px 0;"><input type="text" placeholder="搜索变量..." id="dict-fleet-search-input" oninput="dictFilterFleet()"></div>
-            <div id="dict-fleet-table-wrap"></div>
-        </div>
-
-        <div class="dict-modal-footer">仅查看变量列表</div>
     </div>
 </div>
 
@@ -1105,7 +1144,7 @@
             </div>
             <!-- 第三列：字段 -->
             <div class="kv-cascade-col kv-cascade-col-l3">
-                <div class="kv-cascade-col-label">字段（单选）</div>
+                <div class="kv-cascade-col-label">字段（可多选）</div>
                 <div id="kv-cascade-l3"></div>
             </div>
         </div>
@@ -1398,6 +1437,7 @@ function openEditModal(index, isNew) {
     // 清空表格构建器缓存并重置到步骤1
     tbDataKV = null;
     window._scModelKV = null;
+    window._pdfScModelKV = null;
     switchStep(1);
 
     document.getElementById('edit-modal').classList.add('show');
@@ -1470,7 +1510,8 @@ function switchEditLang(lang) {
                 Array.isArray(zhTr.attachmentTableKV)
                     ? zhTr.attachmentTableKV.map(r => [r[0]||'', r[1]||''])
                     : JSON.parse(JSON.stringify(zhTr.attachmentTableKV))
-            ) : undefined
+            ) : undefined,
+            pdfAttachmentTableKV: zhTr.pdfAttachmentTableKV ? JSON.parse(JSON.stringify(zhTr.pdfAttachmentTableKV)) : undefined
         };
         // 清空所有语言，只保留当前一个
         t.translations = {};
@@ -1479,6 +1520,7 @@ function switchEditLang(lang) {
     // 重置到步骤1并清空表格构建器缓存
     tbDataKV = null;
     window._scModelKV = null;
+    window._pdfScModelKV = null;
     switchStep(1);
     loadEditForm();
 }
@@ -1505,13 +1547,21 @@ function saveEditToState() {
     // PDF 附件文件名模板
     const pdfFilenameEl = document.getElementById('pdf-attach-filename');
     t.translations[currentEditLang].pdfAttachmentFileName = pdfFilenameEl ? pdfFilenameEl.value.trim() : '';
-    // PDF 键值数据
+    // PDF 键值数据（机群）
     t.translations[currentEditLang].pdfDocKV = pdfDocKV.map(r => [r[0]||'', r[1]||'']);
     const mt = document.getElementById('edit-tpl-machine-type').value;
     if (mt === '单机' && window._scModelKV && Object.keys(window._scModelKV).length > 0) {
         t.translations[currentEditLang].attachmentTableKV = JSON.parse(JSON.stringify(window._scModelKV));
     } else if (tbDataKV && tbDataKV.length) {
         t.translations[currentEditLang].attachmentTableKV = tbDataKV.map(r => [r[0]||'', r[1]||'']);
+    }
+    // PDF 单机数据列配置（三栏级联 per-model 格式）
+    if (mt === '单机') {
+        if (window._pdfScModelKV && Object.keys(window._pdfScModelKV).length > 0) {
+            t.translations[currentEditLang].pdfAttachmentTableKV = JSON.parse(JSON.stringify(window._pdfScModelKV));
+        } else {
+            delete t.translations[currentEditLang].pdfAttachmentTableKV;
+        }
     }
     t.machineType = document.getElementById('edit-tpl-machine-type').value;
     t.enabled = document.getElementById('edit-tpl-enabled').checked;
@@ -1624,12 +1674,7 @@ function resetTemplate() {
     showToast('已重置为上次保存的内容', 'success');
 }
 
-function deleteCurrentTemplate() {
-    // 编辑弹窗左下角「删除」入口：先走二次确认
-    requestDeleteTemplate(currentTemplateId);
-}
-
-// 列表行 / 编辑弹窗 共用的删除二次确认流程
+// 列表行 删除二次确认流程
 function requestDeleteTemplate(index) {
     if (templates.length <= 1) {
         showToast('至少保留一个模版', 'error');
@@ -1767,9 +1812,16 @@ function initPdfSection() {
         pdfTemplateUploaded = false;
     }
 
-    // 恢复 PDF 键值数据
+    // 数据列配置切换：机群=文档键值表格，单机=三栏级联
+    togglePdfDataColumnConfig(true);
+    // 恢复 PDF 键值数据（机群）
     pdfDocKV = tr.pdfDocKV && tr.pdfDocKV.length ? tr.pdfDocKV.map(r => [r[0]||'', r[1]||'']) : [['', '']];
     renderPdfKV();
+    // 恢复 PDF 单机数据列配置
+    const mt = document.getElementById('edit-tpl-machine-type').value;
+    if (mt !== '机群') {
+        pdfScInit(tr.pdfAttachmentTableKV || null);
+    }
 }
 
 function defaultAttachmentFileName() {
@@ -1894,13 +1946,14 @@ function renderPdfKV() {
     const docBody = document.getElementById('pdf-doc-kv-body');
     if (docBody) {
         docBody.innerHTML = pdfDocKV.map((row, i) => {
-            const tags = parseVarTags(row[1]);
-            const isBaseRow = tags.length === 1 && SC_COMMON_FIELDS.some(cf => cf[1] === tags[0]);
+            const tagInfos = parseCascadeTagInfo(row[1]);
+            const isBaseRow = tagInfos.length === 1 && SC_COMMON_FIELDS.some(cf => cf[1] === tagInfos[0].tag);
             let tagHtml = '';
-            if (tags.length) {
-                tagHtml = tags.map(t => {
-                    const isBaseTag = SC_COMMON_FIELDS.some(cf => cf[1] === t);
-                    return `<span class="kv-cascade-tag" title="${escapeAttr(t)}">${escapeHtml(t)}${!isBaseTag ? `<span class="tag-close" onclick="event.stopPropagation();removeCascadeTag(${i},'${escapeAttr(t)}','pdf')">×</span>` : ''}</span>`;
+            if (tagInfos.length) {
+                tagHtml = tagInfos.map(info => {
+                    const isBaseTag = SC_COMMON_FIELDS.some(cf => cf[1] === info.tag);
+                    const displayText = info.label !== info.tag ? `${info.label} ${info.tag}` : info.tag;
+                    return `<span class="kv-cascade-tag" title="${escapeAttr(displayText)}">${escapeHtml(displayText)}${!isBaseTag ? `<span class="tag-close" onclick="event.stopPropagation();removeCascadeTag(${i},'${escapeAttr(info.tag)}','pdf')">×</span>` : ''}</span>`;
                 }).join('');
             } else {
                 tagHtml = '<span class="kv-cascade-placeholder">点击选择映射字段...</span>';
@@ -1947,14 +2000,15 @@ function tbKVRender() {
     if (!tbody) return;
     let html = '';
     tbDataKV.forEach((row, i) => {
-        const tags = parseVarTags(row[1]);
+        const tagInfos = parseCascadeTagInfo(row[1]);
         // 判断是否为不可修改的基础字段
-        const isBaseRow = tags.length === 1 && SC_COMMON_FIELDS.some(cf => cf[1] === tags[0]);
+        const isBaseRow = tagInfos.length === 1 && SC_COMMON_FIELDS.some(cf => cf[1] === tagInfos[0].tag);
         let tagHtml = '';
-        if (tags.length) {
-            tagHtml = tags.map(t => {
-                const isBaseTag = SC_COMMON_FIELDS.some(cf => cf[1] === t);
-                return `<span class="kv-cascade-tag" title="${escapeAttr(t)}">${escapeHtml(t)}${!isBaseTag ? `<span class="tag-close" onclick="event.stopPropagation();removeCascadeTag(${i},'${escapeAttr(t)}','fleet')">×</span>` : ''}</span>`;
+        if (tagInfos.length) {
+            tagHtml = tagInfos.map(info => {
+                const isBaseTag = SC_COMMON_FIELDS.some(cf => cf[1] === info.tag);
+                const displayText = info.label !== info.tag ? `${info.label} ${info.tag}` : info.tag;
+                return `<span class="kv-cascade-tag" title="${escapeAttr(displayText)}">${escapeHtml(displayText)}${!isBaseTag ? `<span class="tag-close" onclick="event.stopPropagation();removeCascadeTag(${i},'${escapeAttr(info.tag)}','fleet')">×</span>` : ''}</span>`;
             }).join('');
         } else {
             tagHtml = '<span class="kv-cascade-placeholder">点击选择映射字段...</span>';
@@ -1990,17 +2044,18 @@ function tbKVRemoveRow(i) {
     tbKVRender();
 }
 
-// 移除某行里的单个模板变量标签
+// 移除某行里的单个模板变量标签（按 tag 过滤，保留 label|tag 完整层级）
 function removeCascadeTag(rowIdx, tag, mode) {
+    const rebuild = arr => arr.map(info => info.label !== info.tag ? (info.label + '|' + info.tag) : info.tag).join(',');
     if (mode === 'pdf') {
         if (!pdfDocKV || !pdfDocKV[rowIdx]) return;
-        const tags = parseVarTags(pdfDocKV[rowIdx][1]);
-        pdfDocKV[rowIdx][1] = tags.filter(t => t !== tag).join(',');
+        const tagInfos = parseCascadeTagInfo(pdfDocKV[rowIdx][1]);
+        pdfDocKV[rowIdx][1] = rebuild(tagInfos.filter(info => info.tag !== tag));
         renderPdfKV();
     } else {
         if (!tbDataKV || !tbDataKV[rowIdx]) return;
-        const tags = parseVarTags(tbDataKV[rowIdx][1]);
-        tbDataKV[rowIdx][1] = tags.filter(t => t !== tag).join(',');
+        const tagInfos = parseCascadeTagInfo(tbDataKV[rowIdx][1]);
+        tbDataKV[rowIdx][1] = rebuild(tagInfos.filter(info => info.tag !== tag));
         tbKVRender();
     }
 }
@@ -2017,6 +2072,18 @@ function parseVarTags(str) {
     if (!str) return [];
     const matches = String(str).match(/\{\{[^}]+\}\}/g);
     return matches || [];
+}
+
+// 解析带分类信息的变量标签格式，例如: "设备类型 - 物模型 - 字段|{{变量}}" 或 "基础字段|{{变量}}"
+function parseCascadeTagInfo(tagString) {
+    if (!tagString) return [];
+    return tagString.split(',').filter(Boolean).map(item => {
+        if (item.includes('|')) {
+            const parts = item.split('|');
+            return { label: parts[0], tag: parts[1] };
+        }
+        return { label: item, tag: item };
+    });
 }
 
 // HTML 转义
@@ -2046,9 +2113,9 @@ function openFleetCascade(rowIdx, mode) {
     // 根据模式读取当前行的变量值
     const dataArr = _fleetCascadeMode === 'pdf' ? pdfDocKV : tbDataKV;
     const currentVal = dataArr && dataArr[rowIdx] ? (dataArr[rowIdx][1] || '') : '';
-    const tags = parseVarTags(currentVal);
+    const tagInfos = parseCascadeTagInfo(currentVal);
     _fleetCascadeTempChecked = {};
-    tags.forEach(t => { _fleetCascadeTempChecked[t] = true; });
+    tagInfos.forEach(info => { _fleetCascadeTempChecked[info.tag] = true; });
     _fleetCascadeL1Idx = -1;
     _fleetCascadeL2Idx = -1;
     renderCascadeL1();
@@ -2131,10 +2198,12 @@ function renderCascadeL3() {
         const name = v[0], tag = v[1];
         const isCommon = SC_COMMON_FIELDS.some(cf => cf[1] === tag);
         const checked = _fleetCascadeTempChecked[tag] ? ' checked' : '';
-        const disabled = (isCommon || checked) ? ' disabled' : '';
-        const disabledCls = (isCommon || checked) ? ' disabled' : '';
+        const disabled = isCommon ? ' disabled' : '';
+        const disabledCls = isCommon ? ' disabled' : '';
+
+        // 【关键改动】将 radio 替换为 checkbox，并触发 toggleCascadeCheck
         html += `<label class="kv-cascade-check-item${disabledCls}">
-            <input type="radio" name="kv-cascade-radio" value="${escapeAttr(tag)}"${checked}${disabled} onchange="toggleCascadeRadio('${escapeAttr(tag)}')">
+            <input type="checkbox" value="${escapeAttr(tag)}"${checked}${disabled} onchange="toggleCascadeCheck('${escapeAttr(tag)}')">
             <span class="check-var-name">${escapeHtml(name)}${isCommon ? ' <span style="font-size:10px;color:#999;font-weight:normal;">(基础)</span>' : ''}</span>
             <span class="check-var-tag">${escapeHtml(tag)}</span>
         </label>`;
@@ -2143,15 +2212,14 @@ function renderCascadeL3() {
     updateCascadeSelectedCount();
 }
 
-// 切换字段单选状态
-function toggleCascadeRadio(tag) {
-    // 单选：只保留当前选中项
-    _fleetCascadeTempChecked = {};
-    _fleetCascadeTempChecked[tag] = true;
-    // 同步 radio 状态（确保仅选中一个）
-    const radios = document.querySelectorAll('input[name="kv-cascade-radio"]');
-    radios.forEach(r => { r.checked = (r.value === tag); });
-    updateCascadeSelectedCount();
+// 支持多选：切换勾选/取消状态，不再清空历史已选项
+function toggleCascadeCheck(tag) {
+    if (_fleetCascadeTempChecked[tag]) {
+        delete _fleetCascadeTempChecked[tag]; // 再次点击则取消勾选
+    } else {
+        _fleetCascadeTempChecked[tag] = true; // 勾选新字段
+    }
+    updateCascadeSelectedCount(); // 更新底部已选计数
 }
 
 // 更新已选计数
@@ -2164,15 +2232,34 @@ function updateCascadeSelectedCount() {
 // 确认选择，写入目标数据源并刷新表格
 function confirmFleetCascade() {
     if (_fleetCascadeActiveRow < 0) return;
-    const selected = Object.keys(_fleetCascadeTempChecked).sort();
+
+    // 收集所有打勾的项信息（打包「设备类型 - 物模型 - 字段|{{变量}}」完整层级）
+    const selectedItems = [];
+    SINGLE_MACHINE_VARS.forEach(g => {
+        g.models.forEach(m => {
+            const allVars = [...SC_COMMON_FIELDS, ...g.vars];
+            allVars.forEach(v => {
+                const name = v[0];
+                const tag = v[1];
+                if (_fleetCascadeTempChecked[tag]) {
+                    const isCommon = SC_COMMON_FIELDS.some(cf => cf[1] === tag);
+                    const label = isCommon ? name : `${g.cat} - ${m.name} - ${name}`;
+                    selectedItems.push(`${label}|${tag}`);
+                }
+            });
+        });
+    });
+
+    const valueStr = selectedItems.join(',');
+
     if (_fleetCascadeMode === 'pdf') {
         if (!pdfDocKV || !pdfDocKV[_fleetCascadeActiveRow]) return;
-        pdfDocKV[_fleetCascadeActiveRow][1] = selected.join(',');
+        pdfDocKV[_fleetCascadeActiveRow][1] = valueStr;
         closeFleetCascade();
         renderPdfKV();
     } else {
         if (!tbDataKV || !tbDataKV[_fleetCascadeActiveRow]) return;
-        tbDataKV[_fleetCascadeActiveRow][1] = selected.join(',');
+        tbDataKV[_fleetCascadeActiveRow][1] = valueStr;
         closeFleetCascade();
         tbKVRender();
     }
@@ -2441,6 +2528,87 @@ function scUpdateFooterCount() {
     const count = scTotalSelectedCount();
     el.innerHTML = '已选：<span>' + count + '</span> 个变量';
     scRenderModelTags();
+    scRenderVarTags();
+}
+
+// 渲染「模板变量」回显标签区（展示所有已勾选的变量，可点击 × 删除）
+// 【新增】准确获取所有已勾选的字段（支持跨模型多选，按变量 Tag 去重）
+// ==================== 单机 XLSX/CSV 模板变量回显 ====================
+function scGetAllSelectedVars() {
+    const result = [];
+    SINGLE_MACHINE_VARS.forEach(g => {
+        g.models.forEach(m => {
+            const map = scSelectedMap[m.key] || {};
+            const allVars = [...SC_COMMON_FIELDS, ...g.vars];
+
+            allVars.forEach(v => {
+                const name = v[0];
+                const tag = v[1];
+                if (map[tag]) {
+                    // 拼接完整的「设备类型 - 物模型 - 字段」全名
+                    const isCommon = SC_COMMON_FIELDS.some(cf => cf[1] === tag);
+                    const fullName = isCommon ? name : `${g.cat} - ${m.name} - ${name}`;
+                    result.push({
+                        fullName: fullName,
+                        name: name,
+                        tag: tag,
+                        cat: g.cat,
+                        modelName: m.name,
+                        modelKey: m.key
+                    });
+                }
+            });
+        });
+    });
+    return result;
+}
+
+function scRenderVarTags() {
+    const el = document.getElementById('sc-var-tags');
+    if (!el) return;
+
+    const selected = scGetAllSelectedVars();
+    // 更新计数徽章
+    const badge = document.getElementById('sc-var-count');
+    if (badge) badge.textContent = selected.length;
+
+    const body = el.querySelector('.sc-var-tags-body') || el;
+    if (selected.length === 0) {
+        body.innerHTML = '<span class="sc-tags-empty">暂未勾选任何变量</span>';
+        return;
+    }
+
+    let html = '';
+    selected.forEach(item => {
+        html += '<span class="sc-var-tag" title="' + escapeAttr(item.fullName + ' ' + item.tag) + '">' +
+            '<span class="sc-var-name">' + escapeHtml(item.fullName) + '</span>' +
+            '<span class="sc-var-code">' + escapeHtml(item.tag) + '</span>' +
+            '<span class="sc-var-del" onclick="event.stopPropagation();scRemoveVarTag(\'' + escapeAttr(item.tag) + '\',\'' + escapeAttr(item.modelKey) + '\')" title="移除该变量">×</span>' +
+            '</span>';
+    });
+    body.innerHTML = html;
+}
+
+// 【更新】点击回显标签上的 × 删除变量（精确到「设备类型-物模型」的该字段）
+function scRemoveVarTag(tag, modelKey) {
+    // 基础字段不允许直接通过标签删除
+    const isCommon = SC_COMMON_FIELDS.some(cf => cf[1] === tag);
+    if (isCommon) {
+        showToast('基础字段不能删除', 'error');
+        return;
+    }
+
+    // 仅清除该模型下该变量的勾选状态
+    if (modelKey && scSelectedMap[modelKey]) {
+        delete scSelectedMap[modelKey][tag];
+    }
+
+    // 重新渲染各个视图与更新数据存储
+    scRenderL3();
+    scRenderL1();
+    scRenderL2();
+    scUpdateFooterCount();
+    scSyncToTbDataKV();
 }
 
 // 渲染已配置模型标签（底部快速查看/删除）
@@ -2515,7 +2683,384 @@ function tbGenerateHTML() {
     return html;
 }
 
-// ==================== 变量词典 ====================
+// ==================== PDF附件-单机数据列配置（三栏级联：设备类型 → 物模型 → 字段，与 XLSX 单机配置相互独立） ====================
+let pdfScCurrentGroupIdx = 0;   // 当前选中的设备类型索引
+let pdfScCurrentModelKey = '';  // 当前选中的模型 key
+let pdfScSelectedMap = {};      // 按模型存储：{ modelKey: { '{{变量}}': true } }
+
+function pdfScGetCurrentGroup() {
+    return SINGLE_MACHINE_VARS[pdfScCurrentGroupIdx] || null;
+}
+
+function pdfScGetCurrentModel() {
+    const group = pdfScGetCurrentGroup();
+    if (!group) return null;
+    return group.models.find(m => m.key === pdfScCurrentModelKey) || null;
+}
+
+function pdfScGetCurrentMap() {
+    if (!pdfScSelectedMap[pdfScCurrentModelKey]) pdfScSelectedMap[pdfScCurrentModelKey] = {};
+    return pdfScSelectedMap[pdfScCurrentModelKey];
+}
+
+// 从保存的 per-model 数据恢复
+function pdfScSyncFromSaved(saved) {
+    pdfScSelectedMap = {};
+    if (saved && typeof saved === 'object' && !Array.isArray(saved)) {
+        for (const [mk, cols] of Object.entries(saved)) {
+            pdfScSelectedMap[mk] = {};
+            if (Array.isArray(cols)) {
+                cols.forEach(r => { if (r[1]) pdfScSelectedMap[mk][r[1]] = true; });
+            }
+        }
+    }
+}
+
+// 保存为 per-model 格式到全局 _pdfScModelKV
+function pdfScSaveToState() {
+    const result = {};
+    let hasAny = false;
+    for (const [mk, map] of Object.entries(pdfScSelectedMap)) {
+        const all = scAllIndicators();
+        const cols = all.filter(item => map[item.tag]).map(item => [item.name, item.tag]);
+        if (cols.length > 0) { result[mk] = cols; hasAny = true; }
+    }
+    window._pdfScModelKV = hasAny ? result : {};
+}
+
+// 计算所有模型下的总已选字段数
+function pdfScTotalSelectedCount() {
+    let total = 0;
+    SINGLE_MACHINE_VARS.forEach(g => {
+        g.models.forEach(m => {
+            const map = pdfScSelectedMap[m.key] || {};
+            const allVars = [...SC_COMMON_FIELDS, ...g.vars];
+            total += allVars.filter(v => map[v[1]]).length;
+        });
+    });
+    return total;
+}
+
+// 初始化（无已保存数据时默认勾选第一个模型全部字段）
+function pdfScInit(savedData) {
+    pdfScSyncFromSaved(savedData);
+    pdfScCurrentGroupIdx = 0;
+    pdfScCurrentModelKey = SINGLE_MACHINE_VARS[0].models[0].key;
+    let hasAnySelection = false;
+    for (const mk of Object.keys(pdfScSelectedMap)) {
+        if (Object.keys(pdfScSelectedMap[mk]).length > 0) { hasAnySelection = true; break; }
+    }
+    if (!hasAnySelection) {
+        const firstGroup = SINGLE_MACHINE_VARS[0];
+        pdfScSelectedMap[firstGroup.models[0].key] = {};
+        const allVars = [...SC_COMMON_FIELDS, ...firstGroup.vars];
+        allVars.forEach(v => { pdfScSelectedMap[firstGroup.models[0].key][v[1]] = true; });
+    }
+    pdfScRenderL1();
+    pdfScRenderL2();
+    pdfScRenderL3();
+    pdfScUpdateFooterCount();
+    pdfScSaveToState();
+}
+
+// 渲染第一列：设备类型
+function pdfScRenderL1() {
+    const el = document.getElementById('pdf-sc-l1');
+    if (!el) return;
+    let html = '';
+    SINGLE_MACHINE_VARS.forEach((g, i) => {
+        const isActive = i === pdfScCurrentGroupIdx;
+        const modelCount = g.models.length;
+        let hasSelected = false;
+        g.models.forEach(m => {
+            const map = pdfScSelectedMap[m.key] || {};
+            if (Object.keys(map).length > 0) hasSelected = true;
+        });
+        html += '<div class="kv-cascade-item' + (isActive ? ' active' : '') + '" onclick="pdfScSelectGroup(' + i + ')">' +
+            '<span class="cascade-dot" style="opacity:' + (hasSelected ? 1 : 0) + '"></span>' + escapeHtml(g.cat) +
+            '<span class="cascade-badge">' + modelCount + '模型</span>' +
+            '</div>';
+    });
+    el.innerHTML = html;
+}
+
+// 选择设备类型
+function pdfScSelectGroup(idx) {
+    pdfScCurrentGroupIdx = idx;
+    const group = SINGLE_MACHINE_VARS[idx];
+    if (!group) return;
+    pdfScCurrentModelKey = group.models[0].key;
+    pdfScRenderL1();
+    pdfScRenderL2();
+    pdfScRenderL3();
+    pdfScUpdateFooterCount();
+}
+
+// 渲染第二列：物模型
+function pdfScRenderL2() {
+    const el = document.getElementById('pdf-sc-l2');
+    if (!el) return;
+    const group = SINGLE_MACHINE_VARS[pdfScCurrentGroupIdx];
+    if (!group) {
+        el.innerHTML = '<div class="kv-cascade-empty">请选择设备类型</div>';
+        return;
+    }
+    let html = '';
+    group.models.forEach(m => {
+        const isActive = m.key === pdfScCurrentModelKey;
+        const allVars = [...SC_COMMON_FIELDS, ...group.vars];
+        html += '<div class="kv-cascade-item' + (isActive ? ' active' : '') + '" onclick="pdfScSelectModel(\'' + m.key + '\')">' +
+            escapeHtml(m.name) +
+            '<span class="cascade-badge">' + allVars.length + '字段</span>' +
+            '</div>';
+    });
+    el.innerHTML = html;
+}
+
+// 选择物模型
+function pdfScSelectModel(key) {
+    pdfScCurrentModelKey = key;
+    for (let i = 0; i < SINGLE_MACHINE_VARS.length; i++) {
+        if (SINGLE_MACHINE_VARS[i].models.some(m => m.key === key)) {
+            pdfScCurrentGroupIdx = i;
+            break;
+        }
+    }
+    pdfScRenderL1();
+    pdfScRenderL2();
+    pdfScRenderL3();
+    pdfScUpdateFooterCount();
+}
+
+// 渲染第三列：字段
+function pdfScRenderL3() {
+    const el = document.getElementById('pdf-sc-l3');
+    if (!el) return;
+    const group = SINGLE_MACHINE_VARS[pdfScCurrentGroupIdx];
+    if (!group) {
+        el.innerHTML = '<div class="kv-cascade-empty">请选择设备类型</div>';
+        return;
+    }
+    const model = group.models.find(m => m.key === pdfScCurrentModelKey);
+    if (!model) {
+        el.innerHTML = '<div class="kv-cascade-empty">请选择物模型</div>';
+        return;
+    }
+    const allVars = [...SC_COMMON_FIELDS, ...group.vars];
+    const map = pdfScSelectedMap[pdfScCurrentModelKey] || {};
+    let html = '';
+    allVars.forEach((v, idx) => {
+        const isCommon = idx < SC_COMMON_FIELDS.length;
+        const checked = map[v[1]] ? ' checked' : '';
+        const disabled = isCommon ? ' disabled' : '';
+        const disabledCls = isCommon ? ' disabled' : '';
+        html += '<label class="kv-cascade-check-item' + disabledCls + '">' +
+            '<input type="checkbox"' + checked + disabled + ' onchange="pdfScToggleCheck(\'' + escapeAttr(v[1]) + '\')">' +
+            '<span class="check-var-name">' + escapeHtml(v[0]) + (isCommon ? ' <span style="font-size:10px;color:#999;font-weight:normal;">(基础)</span>' : '') + '</span>' +
+            '<span class="check-var-tag">' + escapeHtml(v[1]) + '</span>' +
+            '</label>';
+    });
+    el.innerHTML = html;
+    pdfScUpdateFooterCount();
+}
+
+// 勾选/取消勾选
+function pdfScToggleCheck(tag) {
+    const curMap = pdfScGetCurrentMap();
+    if (curMap[tag]) {
+        delete curMap[tag];
+    } else {
+        curMap[tag] = true;
+    }
+    pdfScRenderL3();
+    pdfScRenderL1();
+    pdfScRenderL2();
+    pdfScUpdateFooterCount();
+    pdfScSaveToState();
+}
+
+// 全选/取消全选
+function pdfScToggleAll(select) {
+    const group = pdfScGetCurrentGroup();
+    const curMap = pdfScGetCurrentMap();
+    if (!group) return;
+    const allVars = [...SC_COMMON_FIELDS, ...group.vars];
+    allVars.forEach(v => {
+        const isCommon = SC_COMMON_FIELDS.some(cf => cf[1] === v[1]);
+        if (isCommon) return; // 基础字段不可操作
+        if (select) {
+            curMap[v[1]] = true;
+        } else {
+            delete curMap[v[1]];
+        }
+    });
+    pdfScRenderL3();
+    pdfScRenderL1();
+    pdfScRenderL2();
+    pdfScUpdateFooterCount();
+    pdfScSaveToState();
+}
+
+// 更新底部已选计数
+function pdfScUpdateFooterCount() {
+    const el = document.getElementById('pdf-sc-footer-count');
+    if (!el) return;
+    const count = pdfScTotalSelectedCount();
+    el.innerHTML = '已选：<span>' + count + '</span> 个变量';
+    pdfScRenderModelTags();
+    pdfScRenderVarTags();
+}
+
+// 渲染已配置模型标签
+function pdfScRenderModelTags() {
+    const el = document.getElementById('pdf-sc-model-tags');
+    if (!el) return;
+    const configuredModels = [];
+    SINGLE_MACHINE_VARS.forEach(g => {
+        g.models.forEach(m => {
+            const modelMap = pdfScSelectedMap[m.key] || {};
+            const allVars = [...SC_COMMON_FIELDS, ...g.vars];
+            const selCount = allVars.filter(v => modelMap[v[1]]).length;
+            if (selCount > 0) {
+                configuredModels.push({ group: g, model: m, count: selCount });
+            }
+        });
+    });
+    if (configuredModels.length === 0) {
+        el.innerHTML = '<span class="sc-tags-label">已配置模型：</span><span class="sc-tags-empty">暂未选择任何字段</span>';
+        return;
+    }
+    let html = '<span class="sc-tags-label">已配置 <b style="color:#333;">' + configuredModels.length + '</b> 个模型：</span>';
+    configuredModels.forEach(item => {
+        html += '<span class="sc-model-tag" onclick="pdfScScrollToModel(\'' + item.model.key + '\')" title="点击查看 ' + item.group.cat + ' - ' + item.model.name + '">' +
+            '<span class="sc-tag-name">' + escapeHtml(item.group.cat + ' - ' + item.model.name) + '</span>' +
+            '<span class="sc-tag-count">(' + item.count + '列)</span>' +
+            '<span class="sc-tag-del" onclick="event.stopPropagation();pdfScRemoveModel(\'' + item.model.key + '\')" title="清除此模型的所有字段">×</span>' +
+            '</span>';
+    });
+    el.innerHTML = html;
+}
+
+// 清除某个模型的所有勾选字段
+function pdfScRemoveModel(modelKey) {
+    pdfScSelectedMap[modelKey] = {};
+    if (pdfScCurrentModelKey === modelKey) {
+        pdfScRenderL3();
+    }
+    pdfScRenderL1();
+    pdfScRenderL2();
+    pdfScUpdateFooterCount();
+    pdfScSaveToState();
+}
+
+// 跳转到指定模型的设备类型并选中该模型
+function pdfScScrollToModel(modelKey) {
+    for (let i = 0; i < SINGLE_MACHINE_VARS.length; i++) {
+        const g = SINGLE_MACHINE_VARS[i];
+        for (let j = 0; j < g.models.length; j++) {
+            if (g.models[j].key === modelKey) {
+                pdfScCurrentGroupIdx = i;
+                pdfScCurrentModelKey = modelKey;
+                pdfScRenderL1();
+                pdfScRenderL2();
+                pdfScRenderL3();
+                pdfScUpdateFooterCount();
+                return;
+            }
+        }
+    }
+}
+
+// 渲染「模板变量」回显标签区（展示所有已勾选的变量，可点击 × 删除）
+// 【新增】准确获取 PDF 单机已勾选的字段（支持跨模型多选，按变量 Tag 去重）
+// ==================== 单机 PDF 模板变量回显 ====================
+function pdfScGetAllSelectedVars() {
+    const result = [];
+    SINGLE_MACHINE_VARS.forEach(g => {
+        g.models.forEach(m => {
+            const map = pdfScSelectedMap[m.key] || {};
+            const allVars = [...SC_COMMON_FIELDS, ...g.vars];
+
+            allVars.forEach(v => {
+                const name = v[0];
+                const tag = v[1];
+                if (map[tag]) {
+                    const isCommon = SC_COMMON_FIELDS.some(cf => cf[1] === tag);
+                    const fullName = isCommon ? name : `${g.cat} - ${m.name} - ${name}`;
+                    result.push({
+                        fullName: fullName,
+                        name: name,
+                        tag: tag,
+                        cat: g.cat,
+                        modelName: m.name,
+                        modelKey: m.key
+                    });
+                }
+            });
+        });
+    });
+    return result;
+}
+
+function pdfScRenderVarTags() {
+    const el = document.getElementById('pdf-sc-var-tags');
+    if (!el) return;
+
+    const selected = pdfScGetAllSelectedVars();
+    // 更新计数徽章
+    const badge = document.getElementById('pdf-sc-var-count');
+    if (badge) badge.textContent = selected.length;
+
+    const body = el.querySelector('.sc-var-tags-body') || el;
+    if (selected.length === 0) {
+        body.innerHTML = '<span class="sc-tags-empty">暂未勾选任何变量</span>';
+        return;
+    }
+
+    let html = '';
+    selected.forEach(item => {
+        html += '<span class="sc-var-tag" title="' + escapeAttr(item.fullName + ' ' + item.tag) + '">' +
+            '<span class="sc-var-name">' + escapeHtml(item.fullName) + '</span>' +
+            '<span class="sc-var-code">' + escapeHtml(item.tag) + '</span>' +
+            '<span class="sc-var-del" onclick="event.stopPropagation();pdfScRemoveVarTag(\'' + escapeAttr(item.tag) + '\',\'' + escapeAttr(item.modelKey) + '\')" title="移除该变量">×</span>' +
+            '</span>';
+    });
+    body.innerHTML = html;
+}
+
+// 【更新】PDF 删除回显变量（精确到「设备类型-物模型」的该字段）
+function pdfScRemoveVarTag(tag, modelKey) {
+    const isCommon = SC_COMMON_FIELDS.some(cf => cf[1] === tag);
+    if (isCommon) {
+        showToast('基础字段不能删除', 'error');
+        return;
+    }
+
+    // 仅清除该模型下该变量的勾选状态
+    if (modelKey && pdfScSelectedMap[modelKey]) {
+        delete pdfScSelectedMap[modelKey][tag];
+    }
+
+    pdfScRenderL3();
+    pdfScRenderL1();
+    pdfScRenderL2();
+    pdfScUpdateFooterCount();
+    pdfScSaveToState();
+}
+
+// PDF 附件数据列配置切换：机群=文档键值表格，单机=三栏级联
+function togglePdfDataColumnConfig(skipInit) {
+    const mt = document.getElementById('edit-tpl-machine-type').value;
+    const kvEl = document.getElementById('pdf-kv-section');
+    const singleEl = document.getElementById('pdf-single-column-config');
+    if (kvEl) kvEl.style.display = mt === '机群' ? '' : 'none';
+    if (singleEl) {
+        singleEl.style.display = mt !== '机群' ? '' : 'none';
+        if (mt !== '机群' && !skipInit) pdfScInit(null);
+    }
+}
+
+// ==================== 设备变量数据源 ====================
 const SINGLE_MACHINE_VARS = [
     {cat:'起重机',models:[
         {name:'标准版 (Model_10088)',key:'crane_10088'},
@@ -2580,193 +3125,6 @@ const SINGLE_MACHINE_VARS = [
         {name:'电动挖机',key:'exc_elec'}
     ],vars:[['开工天数','{{开工天数}}'],['周期工时','{{周期工时}}'],['周期油耗','{{周期油耗}}'],['周期油耗/小时','{{周期油耗/小时}}'],['周期挡位时间分布','{{周期挡位时间分布}}']]}
 ];
-
-const FLEET_VARS = [
-    ['统计周期','{{统计周期}}'],['设备机型','{{设备机型}}'],['设备编号','{{设备编号}}'],
-    ['工时','{{工时}}'],['能耗','{{能耗}}'],['里程','{{里程}}']
-];
-
-let currentDictTab = 'single';
-let dictCurrentGroupIdx = 0;
-let dictCurrentModelKey = SINGLE_MACHINE_VARS[0].models[0].key;
-
-function openVarDict() {
-    document.getElementById('dict-modal').classList.add('show');
-    switchDictTab('single');
-}
-
-function closeVarDict() {
-    document.getElementById('dict-modal').classList.remove('show');
-}
-
-function switchDictTab(tab) {
-    currentDictTab = tab;
-    const tabs = document.querySelectorAll('.dict-tab-item');
-    tabs.forEach((el, i) => { el.classList.toggle('active', (i === 0 && tab === 'single') || (i === 1 && tab === 'fleet')); });
-    const cascadeBody = document.getElementById('dict-cascade-body');
-    const fleetBody = document.getElementById('dict-fleet-body');
-    if (tab === 'single') {
-        cascadeBody.style.display = 'flex';
-        fleetBody.style.display = 'none';
-        document.getElementById('dict-search-input').value = '';
-        dictRenderL1();
-        dictRenderL2();
-        dictRenderL3();
-    } else {
-        cascadeBody.style.display = 'none';
-        fleetBody.style.display = 'block';
-        _dictFleetActiveField = '';
-        document.getElementById('dict-fleet-search-input').value = '';
-        dictRenderFleetSummary();
-        dictRenderFleetTable();
-    }
-}
-
-// ===== 单机：三栏级联 =====
-
-function dictRenderL1() {
-    const el = document.getElementById('dict-l1');
-    if (!el) return;
-    let html = '';
-    SINGLE_MACHINE_VARS.forEach((g, i) => {
-        const isActive = i === dictCurrentGroupIdx;
-        const modelCount = g.models.length;
-        html += '<div class="kv-cascade-item' + (isActive ? ' active' : '') + '" onclick="dictSelectGroup(' + i + ')">' +
-            escapeHtml(g.cat) +
-            '<span class="cascade-badge">' + modelCount + '模型</span>' +
-            '</div>';
-    });
-    el.innerHTML = html;
-}
-
-function dictSelectGroup(idx) {
-    dictCurrentGroupIdx = idx;
-    dictCurrentModelKey = SINGLE_MACHINE_VARS[idx].models[0].key;
-    dictRenderL1();
-    dictRenderL2();
-    dictRenderL3();
-}
-
-function dictRenderL2() {
-    const el = document.getElementById('dict-l2');
-    if (!el) return;
-    const group = SINGLE_MACHINE_VARS[dictCurrentGroupIdx];
-    if (!group) { el.innerHTML = '<div class="kv-cascade-empty">请选择设备类型</div>'; return; }
-    let html = '';
-    group.models.forEach((m) => {
-        const isActive = m.key === dictCurrentModelKey;
-        const allVars = [...SC_COMMON_FIELDS, ...group.vars];
-        html += '<div class="kv-cascade-item' + (isActive ? ' active' : '') + '" onclick="dictSelectModel(\'' + m.key + '\')">' +
-            escapeHtml(m.name) +
-            '<span class="cascade-badge">' + allVars.length + '字段</span>' +
-            '</div>';
-    });
-    el.innerHTML = html;
-}
-
-function dictSelectModel(key) {
-    dictCurrentModelKey = key;
-    for (let i = 0; i < SINGLE_MACHINE_VARS.length; i++) {
-        if (SINGLE_MACHINE_VARS[i].models.some(m => m.key === key)) {
-            dictCurrentGroupIdx = i;
-            break;
-        }
-    }
-    dictRenderL1();
-    dictRenderL2();
-    dictRenderL3();
-}
-
-function dictRenderL3(filter) {
-    const el = document.getElementById('dict-l3');
-    if (!el) return;
-    const group = SINGLE_MACHINE_VARS[dictCurrentGroupIdx];
-    if (!group) { el.innerHTML = '<div class="kv-cascade-empty">请选择设备类型</div>'; return; }
-    const model = group.models.find(m => m.key === dictCurrentModelKey);
-    if (!model) { el.innerHTML = '<div class="kv-cascade-empty">请选择物模型</div>'; return; }
-    const allVars = [...SC_COMMON_FIELDS, ...group.vars];
-    const q = (filter || '').toLowerCase();
-    const matched = allVars.filter(v => !q || v[0].toLowerCase().includes(q));
-    if (matched.length === 0) {
-        el.innerHTML = '<div class="kv-cascade-empty">' + (q ? '无匹配字段' : '暂无限定字段') + '</div>';
-        return;
-    }
-    let html = '';
-    matched.forEach(v => {
-        html += '<div class="dict-field-item">' +
-            '<span class="dict-field-name">' + escapeHtml(v[0]) + '</span>' +
-            '<span class="dict-field-tag">' + escapeHtml(v[1]) + '</span>' +
-            '</div>';
-    });
-    el.innerHTML = html;
-}
-
-function dictFilterL3() {
-    const q = document.getElementById('dict-search-input').value;
-    dictRenderL3(q);
-}
-
-// ===== 机群：统计覆盖 + 简单表格 =====
-
-let _dictFleetActiveField = ''; // 当前激活的字段筛选：'工时' | '能耗' | '里程' | ''
-
-// 机群变量（工时/能耗/里程）在各设备类型中的覆盖统计
-// TODO: 暂时屏蔽
-function dictRenderFleetSummary() { return; }
-
-// 点击字段标签筛选机群表格
-function dictFilterByField(keyword) {
-    // 再次点击同一标签 → 取消筛选
-    if (_dictFleetActiveField === keyword && keyword !== '') {
-        _dictFleetActiveField = '';
-    } else {
-        _dictFleetActiveField = keyword;
-    }
-    // 清空搜索框（筛选和搜索互斥）
-    document.getElementById('dict-fleet-search-input').value = '';
-    dictRenderFleetSummary();
-    // 按变量名包含关键词筛选
-    const q = _dictFleetActiveField ? _dictFleetActiveField : '';
-    dictRenderFleetTable(q);
-}
-
-function dictRenderFleetTable(filter) {
-    const el = document.getElementById('dict-fleet-table-wrap');
-    if (!el) return;
-    const q = (filter || '').toLowerCase();
-    const matched = FLEET_VARS.filter(r => !q || r[0].toLowerCase().includes(q));
-    if (matched.length === 0) {
-        el.innerHTML = '<div class="dict-empty" style="text-align:center;padding:30px;color:#9ca3af;">无匹配变量</div>';
-        return;
-    }
-    el.innerHTML = '<table class="dict-fleet-table">' +
-        '<thead><tr><th style="width:45%;">变量名称</th><th>模板变量</th></tr></thead>' +
-        '<tbody>' + matched.map(r =>
-            '<tr>' +
-            '<td>' + escapeHtml(r[0]) + '</td>' +
-            '<td><code>' + escapeHtml(r[1]) + '</code></td>' +
-            '</tr>'
-        ).join('') + '</tbody></table>';
-}
-
-function dictFilterFleet() {
-    _dictFleetActiveField = '';
-    dictRenderFleetSummary();
-    const q = document.getElementById('dict-fleet-search-input').value;
-    dictRenderFleetTable(q);
-}
-
-// ===== 共用：插入变量 =====
-
-function dictInsertVar(tag) {
-    closeVarDict();
-    if (typeof quill === 'undefined' || !quill) return;
-    const range = quill.getSelection(true);
-    const idx = range ? range.index : quill.getLength();
-    quill.insertText(idx, tag, 'user');
-    quill.setSelection(idx + tag.length);
-    showToast('已插入 ' + tag);
-}
 
 // ==================== 新建模版（直接进富文本编辑） ====================
 function createAndEdit() {
