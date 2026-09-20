@@ -1,0 +1,1103 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MySANY 管理后台 - 报表需求反馈（v2.0）</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+            background-color: #f5f6f8;
+            color: #333;
+        }
+
+        .app-wrapper {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .main-wrapper {
+            display: flex;
+            flex: 1;
+        }
+
+        /* 顶部导航栏 */
+        .navbar {
+            height: 50px;
+            background: #fff;
+            border-bottom: 1px solid #e8e8e8;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            flex-shrink: 0;
+        }
+
+        .navbar-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logo {
+            font-size: 20px;
+            font-weight: 700;
+            color: #E60012;
+            letter-spacing: -0.5px;
+        }
+
+        .navbar-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .navbar-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .navbar-item:hover {
+            color: #E60012;
+        }
+
+        .navbar-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #f0f0f0;
+            overflow: hidden;
+        }
+
+        /* 侧边栏 */
+        .sidebar {
+            width: 210px;
+            background: #fff;
+            border-right: 1px solid #e8e8e8;
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            overflow-y: auto;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 8px 0;
+        }
+
+        .sidebar-item {
+            position: relative;
+        }
+
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 16px;
+            font-size: 14px;
+            color: #666;
+            text-decoration: none;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .sidebar-link:hover {
+            color: #E60012;
+            background: #fff5f5;
+        }
+
+        .sidebar-item.active > .sidebar-link,
+        .sidebar-link.active {
+            background: #E60012;
+            color: #fff;
+            font-weight: 500;
+        }
+
+        .sidebar-item.active > .sidebar-link:hover,
+        .sidebar-link.active:hover {
+            background: #cc0010;
+            color: #fff;
+        }
+
+        .sidebar-submenu {
+            list-style: none;
+            padding: 0;
+        }
+
+        .sidebar-submenu .sidebar-link {
+            padding-left: 42px;
+            font-size: 13px;
+        }
+
+        .sidebar-icon {
+            width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        /* 主内容区 */
+        .main-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px;
+            background: #f5f6f8;
+        }
+
+        /* 筛选区：每个条件为一组「标签 + 控件」，操作按钮右对齐 */
+        .filter-bar {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px 20px;
+            padding: 18px 20px;
+            background: #fff;
+            border: 1px solid #f0f0f0;
+            border-radius: 10px;
+            box-shadow: 0 1px 3px rgba(0,0,0,0.03);
+            margin-bottom: 16px;
+        }
+
+        .filter-field {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .filter-field > label {
+            font-size: 13px;
+            color: #666;
+            white-space: nowrap;
+            margin: 0;
+        }
+
+        .filter-bar select, .filter-bar input {
+            height: 34px;
+            border: 1px solid #e5e5e5;
+            border-radius: 6px;
+            padding: 0 10px;
+            font-size: 13px;
+            color: #333;
+            background: #fff;
+            outline: none;
+            transition: border-color 0.2s, box-shadow 0.2s;
+        }
+
+        .filter-bar select:hover, .filter-bar input:hover {
+            border-color: #cfcfcf;
+        }
+
+        .filter-bar select:focus, .filter-bar input:focus {
+            border-color: #E60012;
+            box-shadow: 0 0 0 2px rgba(230,0,18,0.08);
+        }
+
+        .filter-bar input[type="text"] {
+            width: 130px;
+        }
+
+        .filter-bar input::placeholder {
+            color: #bfbfbf;
+        }
+
+        /* 国家：可选可输入的组合框（输入时前端匹配选项） */
+        .combo-select {
+            position: relative;
+            display: inline-flex;
+            align-items: center;
+        }
+
+        .combo-select input {
+            width: 130px;
+            padding-right: 24px;
+        }
+
+        .combo-select .combo-arrow {
+            position: absolute;
+            right: 9px;
+            font-size: 10px;
+            color: #999;
+            pointer-events: none;
+        }
+
+        .combo-panel {
+            display: none;
+            position: absolute;
+            top: calc(100% + 4px);
+            left: 0;
+            min-width: 100%;
+            max-height: 220px;
+            overflow-y: auto;
+            padding: 4px;
+            background: #fff;
+            border: 1px solid #e5e5e5;
+            border-radius: 6px;
+            box-shadow: 0 4px 14px rgba(0,0,0,0.08);
+            z-index: 1200;
+        }
+
+        .combo-panel.show { display: block; }
+
+        .combo-panel .combo-option {
+            padding: 6px 10px;
+            font-size: 13px;
+            color: #333;
+            border-radius: 4px;
+            cursor: pointer;
+            white-space: nowrap;
+        }
+
+        .combo-panel .combo-option:hover,
+        .combo-panel .combo-option.active {
+            background: #f5f5f5;
+            color: #E60012;
+        }
+
+        .combo-panel .combo-empty {
+            padding: 8px 10px;
+            font-size: 12px;
+            color: #bbb;
+        }
+
+        /* 按钮组：与条件区同一行、靠右 */
+        .filter-actions {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-left: auto;
+            padding-left: 8px;
+        }
+
+        .filter-actions .btn {
+            min-width: 84px;
+        }
+
+        .btn {
+            height: 34px;
+            padding: 0 16px;
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+            border: 1px solid #d9d9d9;
+            background: #fff;
+            color: #666;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;   /* 按钮内文字水平居中（配合 min-width 时尤其必要） */
+            gap: 6px;
+        }
+
+        .btn:hover {
+            border-color: #E60012;
+            color: #E60012;
+        }
+
+        .btn-primary {
+            background: #E60012;
+            color: #fff;
+            border-color: #E60012;
+        }
+
+        .btn-primary:hover {
+            background: #cc0010;
+            border-color: #cc0010;
+            color: #fff;
+        }
+
+        .btn-danger {
+            background: #fff;
+            color: #E60012;
+            border-color: #E60012;
+        }
+
+        .btn-danger:hover {
+            background: #E60012;
+            color: #fff;
+        }
+
+        /* 表格 */
+        .table-wrapper {
+            overflow-x: auto;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        table thead th {
+            background: #fafafa;
+            padding: 12px 14px;
+            text-align: left;
+            font-weight: 500;
+            color: #666;
+            border-bottom: 1px solid #e8e8e8;
+            white-space: nowrap;
+        }
+
+        table tbody td {
+            padding: 12px 14px;
+            border-bottom: 1px solid #f0f0f0;
+            color: #333;
+        }
+
+        table tbody tr:hover {
+            background: #fff5f5;
+        }
+
+        /* Tag 标签 */
+        .tag {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            line-height: 20px;
+        }
+
+        .tag-green { background: #f6ffed; color: #52c41a; border: 1px solid #b7eb8f; }
+        .tag-orange { background: #fff7e6; color: #fa8c16; border: 1px solid #ffd591; }
+        .tag-red { background: #fff1f0; color: #E60012; border: 1px solid #ffa39e; }
+        .tag-blue { background: #e6f7ff; color: #1890ff; border: 1px solid #91d5ff; }
+        .tag-purple { background: #f9f0ff; color: #722ed1; border: 1px solid #d3adf7; }
+        .tag-gray { background: #fafafa; color: #999; border: 1px solid #d9d9d9; }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            top: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 10px 24px;
+            border-radius: 6px;
+            font-size: 14px;
+            z-index: 2000;
+            animation: fadeInDown 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .toast-success { background: #f6ffed; color: #52c41a; border: 1px solid #b7eb8f; }
+        .toast-error { background: #fff1f0; color: #E60012; border: 1px solid #ffa39e; }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateX(-50%) translateY(-10px); }
+            to { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
+
+        /* 状态变更二次确认弹窗 */
+        .confirm-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.45);
+            z-index: 1100;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .confirm-overlay.show { display: flex; }
+
+        .confirm-dialog {
+            width: 420px;
+            max-width: calc(100vw - 40px);
+            background: #fff;
+            border-radius: 10px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+            overflow: hidden;
+        }
+
+        .confirm-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: #333;
+            padding: 18px 20px 0;
+        }
+
+        .confirm-body {
+            padding: 12px 20px 20px;
+            font-size: 13px;
+            line-height: 1.7;
+            color: #666;
+        }
+
+        .confirm-body b { color: #333; }
+
+        .confirm-footer {
+            display: flex;
+            justify-content: flex-end;
+            gap: 10px;
+            padding: 14px 20px;
+            background: #fafafa;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        /* 抽屉 */
+        .drawer-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.45);
+            z-index: 1000;
+        }
+
+        .drawer-overlay.show {
+            display: block;
+        }
+
+        .drawer {
+            position: fixed;
+            top: 0;
+            right: 0;
+            bottom: 0;
+            width: 720px;
+            background: #fff;
+            box-shadow: -4px 0 16px rgba(0,0,0,0.12);
+            z-index: 1001;
+            transform: translateX(100%);
+            transition: transform 0.3s ease;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .drawer.show {
+            transform: translateX(0);
+        }
+
+        .drawer-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 24px;
+            border-bottom: 1px solid #e8e8e8;
+            flex-shrink: 0;
+        }
+
+        .drawer-header h3 {
+            font-size: 16px;
+            color: #333;
+        }
+
+        .drawer-close {
+            width: 32px;
+            height: 32px;
+            border-radius: 50%;
+            border: none;
+            background: #f5f5f5;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 16px;
+            color: #999;
+            transition: all 0.2s;
+        }
+
+        .drawer-close:hover {
+            background: #E60012;
+            color: #fff;
+        }
+
+        .drawer-body {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px;
+        }
+
+        .drawer-section {
+            margin-bottom: 24px;
+        }
+
+        .drawer-section h4 {
+            font-size: 14px;
+            color: #666;
+            margin-bottom: 12px;
+            padding-left: 10px;
+            border-left: 3px solid #E60012;
+        }
+
+        .info-grid {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 12px;
+        }
+
+        .info-item {
+            font-size: 13px;
+        }
+
+        .info-item .info-label {
+            color: #999;
+            margin-bottom: 2px;
+        }
+
+        .info-item .info-value {
+            color: #333;
+            font-weight: 500;
+        }
+
+        .mini-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        .mini-table th, .mini-table td {
+            padding: 8px 12px;
+            text-align: left;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .mini-table th {
+            background: #fafafa;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .pagination {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            gap: 8px;
+            padding: 16px 0 0;
+        }
+
+        .pagination span {
+            font-size: 13px;
+            color: #666;
+        }
+
+        .operate-links a {
+            color: #E60012;
+            cursor: pointer;
+            margin-right: 12px;
+            font-size: 13px;
+            text-decoration: none;
+        }
+
+        .operate-links a:hover {
+            color: #cc0010;
+            text-decoration: underline;
+        }
+
+        .batch-id {
+            font-family: monospace;
+            cursor: pointer;
+            color: #E60012;
+        }
+
+        .batch-id.failed {
+            color: #E60012;
+        }
+
+        /* 统计卡片 */
+        .stat-cards {
+            display: grid;
+            grid-template-columns: repeat(5, 1fr);
+            gap: 16px;
+            margin-bottom: 24px;
+        }
+
+        .stat-card {
+            background: #fff;
+            border-radius: 8px;
+            padding: 20px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+
+        .stat-card .stat-label {
+            font-size: 13px;
+            color: #999;
+            margin-bottom: 8px;
+        }
+
+        .stat-card .stat-value {
+            font-size: 28px;
+            font-weight: 700;
+            color: #333;
+        }
+
+    </style>
+</head>
+<body>
+<div class="app-wrapper">
+    <!-- 顶部导航栏 -->
+    <nav class="navbar">
+        <div class="navbar-left">
+            <span class="logo">MySANY</span>
+            <span style="font-size:12px;color:#999;margin-left:4px;">管理后台</span>
+        </div>
+        <div class="navbar-right">
+            <span class="navbar-item">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                中文
+            </span>
+            <span class="navbar-item">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                admin@sany.com.cn
+            </span>
+        </div>
+    </nav>
+
+    <div class="main-wrapper">
+        <!-- 侧边栏 -->
+        <aside class="sidebar">
+            <ul class="sidebar-menu">
+                <li class="sidebar-item active">
+                    <a class="sidebar-link">
+                        <span class="sidebar-icon">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                        </span>
+                        系统设置
+                    </a>
+                    <ul class="sidebar-submenu">
+                        <li class="sidebar-item">
+                            <a class="sidebar-link" href="邮件服务配置.html">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                                邮件服务配置
+                            </a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a class="sidebar-link" href="邮件模版设置.html">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                                邮件模版设置
+                            </a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a class="sidebar-link" href="设备报告触发日志.html">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                                触发日志
+                            </a>
+                        </li>
+                        <li class="sidebar-item active">
+                            <a class="sidebar-link active">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6v6H9z"/><path d="M5 9h14a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2z"/><line x1="7" y1="14" x2="17" y2="14"/><line x1="7" y1="17" x2="13" y2="17"/></svg>
+                                报表需求反馈
+                            </a>
+                        </li>
+                    </ul>
+                </li>
+            </ul>
+        </aside>
+
+        <!-- 主内容 -->
+        <main class="main-content">
+            <!-- 筛选区 -->
+            <div class="filter-bar">
+                <div class="filter-field">
+                    <label for="f-status">状态</label>
+                    <select id="f-status">
+                        <option value="">全部</option>
+                        <option value="待评估">待评估</option>
+                        <option value="已排期">已排期</option>
+                        <option value="已上线">已上线</option>
+                        <option value="暂不实现">暂不实现</option>
+                    </select>
+                </div>
+                <!-- 搜索条件：3 个独立输入框，标签在前、输入框统一宽度 -->
+                <div class="filter-field">
+                    <label for="f-user">提交人</label>
+                    <input type="text" id="f-user" placeholder="请输入">
+                </div>
+                <div class="filter-field">
+                    <label for="f-userid">用户ID</label>
+                    <input type="text" id="f-userid" placeholder="请输入">
+                </div>
+                <div class="filter-field">
+                    <label for="f-country">国家</label>
+                    <!-- 可输入的下拉选择：点击展开、输入时前端匹配（选项来自现有数据的国家） -->
+                    <div class="combo-select" id="countryCombo">
+                        <input type="text" id="f-country" placeholder="请选择" autocomplete="off">
+                        <span class="combo-arrow">▼</span>
+                        <div class="combo-panel" id="countryPanel"></div>
+                    </div>
+                </div>
+                <div class="filter-field">
+                    <label for="f-report">报表名称</label>
+                    <input type="text" id="f-report" placeholder="请输入">
+                </div>
+                <div class="filter-actions">
+                    <button class="btn btn-primary" onclick="applyFilter()">搜索</button>
+                    <button class="btn" onclick="resetFilter()">重置筛选</button>
+                </div>
+            </div>
+
+            <!-- 统计卡片 -->
+            <div class="stat-cards" style="grid-template-columns: repeat(4, 1fr);">
+                <div class="stat-card">
+                    <div class="stat-label">累计提交</div>
+                    <div class="stat-value" id="s-total">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">待评估</div>
+                    <div class="stat-value" style="color:#fa8c16;" id="s-pending">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">已排期</div>
+                    <div class="stat-value" style="color:#1890ff;" id="s-planned">0</div>
+                </div>
+                <div class="stat-card">
+                    <div class="stat-label">已上线</div>
+                    <div class="stat-value" style="color:#52c41a;" id="s-live">0</div>
+                </div>
+            </div>
+
+            <!-- 需求列表 -->
+            <div class="table-wrapper">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>提交人</th>
+                            <th>用户ID</th>
+                            <th>用户国家</th>
+                            <th>申请的报表</th>
+                            <th>自定义诉求</th>
+                            <th>状态</th>
+                            <th>提交时间</th>
+                            <th>操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="req-table-body">
+                    </tbody>
+                </table>
+            </div>
+
+            <div class="pagination">
+                <span id="req-count">共 0 条</span>
+            </div>
+
+        </main>
+    </div>
+</div>
+
+<!-- 状态变更二次确认弹窗（操作列下拉切换时弹出） -->
+<div class="confirm-overlay" id="statusConfirm">
+    <div class="confirm-dialog">
+        <div class="confirm-title">确认变更状态</div>
+        <div class="confirm-body" id="statusConfirmText">确定要变更该需求的状态吗？</div>
+        <div class="confirm-footer">
+            <button class="btn" onclick="closeStatusConfirm(true)">取消</button>
+            <button class="btn btn-primary" onclick="confirmStatusChange()">确认变更</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// ====================================================================
+// 报表需求反馈：展示前端（报表模版.html / 管理报表.html）「我需要更多报表」提交的诉求
+// 数据来源：localStorage['mysany_report_requests']（静态原型，无真实后端）
+// ====================================================================
+const REQ_KEY = 'mysany_report_requests';
+// 示例数据版本：改动 SEED_REQUESTS 后把版本号调大，已打开过页面的浏览器会自动刷新本地缓存（保证演示数据与代码一致）
+const REQ_SEED_VERSION = 'v3';
+const REQ_VERSION_KEY = 'mysany_report_requests_seed_ver';
+const STATUS_LIST = ['待评估', '已排期', '已上线', '暂不实现'];
+// 原型环境固定用户（全局约定用户名 Schuck），前端提交的数据缺 用户ID / 用户国家 时用它补齐
+const MOCK_USER_ID = 'SANY10086';
+const MOCK_COUNTRY = '中国';
+
+// 预置示例：首次打开后台即可看到数据（与前端提交的数据同列展示，按提交时间倒序）
+// 覆盖全部 4 种状态，每种状态各一条示例
+const SEED_REQUESTS = [
+    { id: 'REQ-260916-01', time: '2026-09-16 17:42', user: 'Schuck', userId: 'SANY10086', country: '中国', source: '报表模版',
+      reports: ['超时工作报表', '电池电量报表'],
+      note: '希望超时工作报表能按项目维度统计，方便和项目部对账。', status: '已排期' },
+    { id: 'REQ-260915-02', time: '2026-09-15 10:08', user: 'Schuck', userId: 'SANY10086', country: '中国', source: '管理报表',
+      reports: [],
+      note: '需要一份按周汇总的设备保养提醒报表：下次保养时间、剩余小时数、所属项目。', status: '待评估' },
+    { id: 'REQ-260910-03', time: '2026-09-10 09:15', user: 'Schuck', userId: 'SANY10086', country: '中国', source: '报表模版',
+      reports: ['驾驶员行为评分报表'], note: '', status: '已上线' },
+    { id: 'REQ-260908-04', time: '2026-09-08 15:30', user: 'Schuck', userId: 'SANY10086', country: '中国', source: '管理报表',
+      reports: ['设备离线时长统计报表'],
+      note: '希望增加设备离线时长统计报表，能按天汇总每台设备的离线时长。', status: '暂不实现' }
+];
+
+let REQUESTS = [];
+
+function esc(v) {
+    const d = document.createElement('div');
+    d.textContent = (v == null ? '' : String(v));
+    return d.innerHTML;
+}
+
+function readLocal() {
+    try {
+        const raw = localStorage.getItem(REQ_KEY);
+        const arr = raw ? JSON.parse(raw) : [];
+        return Array.isArray(arr) ? arr : [];
+    } catch (e) { return []; }
+}
+
+function saveLocal(list) {
+    try { localStorage.setItem(REQ_KEY, JSON.stringify(list)); } catch (e) { /* 原型环境忽略 */ }
+}
+
+function init() {
+    REQUESTS = readLocal();
+    let seededVer = null;
+    try { seededVer = localStorage.getItem(REQ_VERSION_KEY); } catch (e) { /* 原型环境忽略 */ }
+
+    // 首次打开，或示例数据版本已升级：用最新示例覆盖本地缓存（原型：保证演示数据与代码一致）
+    if (!REQUESTS.length || seededVer !== REQ_SEED_VERSION) {
+        REQUESTS = JSON.parse(JSON.stringify(SEED_REQUESTS));   // 深拷贝，避免改动污染 SEED_REQUESTS
+        saveLocal(REQUESTS);
+        try { localStorage.setItem(REQ_VERSION_KEY, REQ_SEED_VERSION); } catch (e) { /* 原型环境忽略 */ }
+    } else {
+        // 兼容早期本地数据：前端提交的旧记录没有 用户ID / 用户国家，按固定用户补齐后再回写
+        let filled = false;
+        REQUESTS.forEach(function (r) {
+            if (!r.userId) { r.userId = MOCK_USER_ID; filled = true; }
+            if (!r.country) { r.country = MOCK_COUNTRY; filled = true; }
+        });
+        if (filled) saveLocal(REQUESTS);
+    }
+    render();
+}
+
+// 筛选后的列表
+// 按 id 取值（元素不存在时返回空串）
+function fval(id) {
+    const el = document.getElementById(id);
+    return el ? el.value.trim().toLowerCase() : '';
+}
+
+function filtered() {
+    const st = document.getElementById('f-status').value;
+    // 搜索条件为独立输入框：提交人 / 用户ID / 国家 / 报表名称
+    // 每个只匹配自己的字段；同时填写多个时取交集（AND）
+    const fUser = fval('f-user');
+    const fUserId = fval('f-userid');
+    const fCountry = fval('f-country');
+    const fReport = fval('f-report');
+    return REQUESTS.filter(function (r) {
+        if (st && r.status !== st) return false;
+        if (fUser && String(r.user || '').toLowerCase().indexOf(fUser) < 0) return false;
+        if (fUserId && String(r.userId || '').toLowerCase().indexOf(fUserId) < 0) return false;
+        if (fCountry && String(r.country || '').toLowerCase().indexOf(fCountry) < 0) return false;
+        if (fReport && (r.reports || []).join(' ').toLowerCase().indexOf(fReport) < 0) return false;
+        return true;
+    }).sort(function (a, b) { return (b.time || '').localeCompare(a.time || ''); });
+}
+
+function statusTag(st) {
+    const map = { '待评估': 'tag-orange', '已排期': 'tag-blue', '已上线': 'tag-green', '暂不实现': 'tag-gray' };
+    return '<span class="tag ' + (map[st] || 'tag-gray') + '">● ' + esc(st || '待评估') + '</span>';
+}
+
+function renderStats() {
+    const c = { '待评估': 0, '已排期': 0, '已上线': 0 };
+    REQUESTS.forEach(function (r) { if (c[r.status] != null) c[r.status]++; });
+    document.getElementById('s-total').textContent = REQUESTS.length;
+    document.getElementById('s-pending').textContent = c['待评估'];
+    document.getElementById('s-planned').textContent = c['已排期'];
+    document.getElementById('s-live').textContent = c['已上线'];
+}
+
+function render() {
+    const tbody = document.getElementById('req-table-body');
+    const list = filtered();
+    renderStats();
+    document.getElementById('req-count').textContent = '共 ' + list.length + ' 条';
+
+    if (!list.length) {
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#bbb;padding:40px 0;">暂无提交的需求</td></tr>';
+        return;
+    }
+
+    tbody.innerHTML = list.map(function (r) {
+        // 调整：「申请的报表」以纯文本展示（不再用标签），多个报表用顿号分隔
+        const reportsText = (r.reports && r.reports.length)
+            ? '<span>' + esc(r.reports.join('、')) + '</span>'
+            : '<span style="color:#bbb;">—</span>';
+        const note = r.note
+            ? '<span title="' + esc(r.note) + '">' + esc(r.note.length > 34 ? r.note.slice(0, 34) + '…' : r.note) + '</span>'
+            : '<span style="color:#bbb;">—</span>';
+        const opts = STATUS_LIST.map(function (x) {
+            return '<option' + (x === r.status ? ' selected' : '') + '>' + x + '</option>';
+        }).join('');
+        // 「已上线」为终态：不允许再次变更（下拉禁用 + 置灰）
+        const locked = r.status === '已上线';
+        return '<tr>'
+            + '<td>' + esc(r.user || '-') + '</td>'
+            + '<td style="white-space:nowrap;color:#666;">' + esc(r.userId || '-') + '</td>'
+            + '<td style="white-space:nowrap;color:#666;">' + esc(r.country || '-') + '</td>'
+            + '<td style="max-width:300px;color:#333;">' + reportsText + '</td>'
+            + '<td style="max-width:300px;color:#666;">' + note + '</td>'
+            + '<td>' + statusTag(r.status) + '</td>'
+            + '<td style="white-space:nowrap;color:#666;">' + esc(r.time || '-') + '</td>'
+            + '<td><select class="req-status" data-id="' + esc(r.id) + '" data-prev="' + esc(r.status || '') + '"'
+            + (locked ? ' disabled title="已上线为终态，不可再变更"' : '')
+            + ' style="height:32px;border:1px solid #d9d9d9;border-radius:6px;font-size:12px;padding:0 6px;'
+            + (locked ? 'background:#f5f5f5;color:#999;cursor:not-allowed;' : '') + '">' + opts + '</select></td>'
+            + '</tr>';
+    }).join('');
+
+    Array.prototype.slice.call(tbody.querySelectorAll('.req-status')).forEach(function (sel) {
+        sel.addEventListener('change', function () {
+            if (sel.disabled) return;   // 已上线（终态）不允许变更
+            // 变更状态前先二次确认；取消时把下拉回退到原状态
+            openStatusConfirm(sel.dataset.id, sel.value, sel.dataset.prev || '');
+        });
+    });
+}
+
+function setStatus(id, status) {
+    const r = REQUESTS.filter(function (x) { return x.id === id; })[0];
+    if (!r) return;
+    // 「已上线」为终态：任何路径都不允许再变更（下拉已禁用，这里再兜一层）
+    if (r.status === '已上线') { showToast('已上线的需求不可再变更状态', 'error'); return; }
+    r.status = status;
+    saveLocal(REQUESTS);
+    render();
+    showToast('已更新状态：' + status, 'success');
+}
+
+function applyFilter() { render(); }
+
+function resetFilter() {
+    document.getElementById('f-status').value = '';
+    document.getElementById('f-user').value = '';
+    document.getElementById('f-userid').value = '';
+    document.getElementById('f-country').value = '';
+    document.getElementById('f-report').value = '';
+    render();
+}
+
+// Toast
+function showToast(msg, type) {
+    const toast = document.createElement('div');
+    toast.className = 'toast toast-' + type;
+    toast.textContent = msg;
+    document.body.appendChild(toast);
+    setTimeout(function () { toast.remove(); }, 2500);
+}
+
+// ==================== 状态变更二次确认 ====================
+let pendingStatus = null;   // { id, prev, next }
+
+function openStatusConfirm(id, next, prev) {
+    const r = REQUESTS.filter(function (x) { return x.id === id; })[0];
+    const what = (r && (r.reports || []).length) ? (r.reports || []).join('、') : '自定义诉求';
+    document.getElementById('statusConfirmText').innerHTML =
+        '确定将「' + esc(r ? r.user : '') + '」提交的需求（' + esc(what) + '）状态<br>由 <b>' + esc(prev) +
+        '</b> 变更为 <b style="color:#E60012;">' + esc(next) + '</b> 吗？';
+    pendingStatus = { id: id, prev: prev, next: next };
+    document.getElementById('statusConfirm').classList.add('show');
+}
+
+// revert=true 表示取消：把下拉框回退到变更前的状态
+function closeStatusConfirm(revert) {
+    document.getElementById('statusConfirm').classList.remove('show');
+    if (revert && pendingStatus) {
+        const sel = document.querySelector('.req-status[data-id="' + pendingStatus.id + '"]');
+        if (sel) sel.value = pendingStatus.prev;
+    }
+    pendingStatus = null;
+}
+
+function confirmStatusChange() {
+    if (!pendingStatus) return;
+    const p = pendingStatus;
+    document.getElementById('statusConfirm').classList.remove('show');
+    pendingStatus = null;
+    setStatus(p.id, p.next);   // 真正应用变更（内部会重渲染 + 提示）
+}
+
+// ==================== 国家：可输入的下拉选择（前端匹配） ====================
+// 选项来自现有数据里出现过的国家（去重 + 排序），新国家自动出现在列表里
+function countryOptions() {
+    const seen = {};
+    REQUESTS.forEach(function (r) { if (r.country) seen[r.country] = true; });
+    return Object.keys(seen).sort();
+}
+
+function openCountryPanel(keyword) {
+    const panel = document.getElementById('countryPanel');
+    if (!panel) return;
+    const kw = (keyword || '').trim().toLowerCase();
+    const list = countryOptions().filter(function (c) { return !kw || c.toLowerCase().indexOf(kw) >= 0; });
+    panel.innerHTML = list.length
+        ? list.map(function (c) {
+            return '<div class="combo-option" data-value="' + esc(c) + '">' + esc(c) + '</div>';
+        }).join('')
+        : '<div class="combo-empty">无匹配的国家</div>';
+    panel.classList.add('show');
+}
+
+function closeCountryPanel() {
+    const panel = document.getElementById('countryPanel');
+    if (panel) panel.classList.remove('show');
+}
+
+function pickCountry(value) {
+    const input = document.getElementById('f-country');
+    if (input) input.value = value;
+    closeCountryPanel();
+    render();          // 选中即生效（等同点了「搜索」）
+}
+
+(function bindCountryCombo() {
+    const combo = document.getElementById('countryCombo');
+    const input = document.getElementById('f-country');
+    const panel = document.getElementById('countryPanel');
+    if (!combo || !input || !panel) return;
+
+    input.addEventListener('focus', function () { openCountryPanel(input.value); });
+    input.addEventListener('input', function () { openCountryPanel(input.value); });   // 边输入边匹配选项
+    input.addEventListener('keydown', function (e) {
+        if (e.key === 'Escape') { closeCountryPanel(); return; }
+        if (e.key === 'Enter') {
+            e.preventDefault();
+            const first = panel.querySelector('.combo-option');
+            if (first) pickCountry(first.dataset.value);
+            else closeCountryPanel();
+        }
+    });
+    // mousedown 先于 input 的 blur 触发，避免选不中
+    panel.addEventListener('mousedown', function (e) {
+        const opt = e.target && e.target.closest ? e.target.closest('.combo-option') : null;
+        if (!opt) return;
+        e.preventDefault();
+        pickCountry(opt.dataset.value);
+    });
+    document.addEventListener('click', function (e) {
+        if (!combo.contains(e.target)) closeCountryPanel();
+    });
+})();
+
+// 点遮罩 / 按 Esc 等同取消
+document.getElementById('statusConfirm').addEventListener('click', function (e) {
+    if (e.target === this) closeStatusConfirm(true);
+});
+document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && pendingStatus) closeStatusConfirm(true);
+});
+
+init();
+</script>
+
+</body>
+</html>

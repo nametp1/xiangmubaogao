@@ -1,0 +1,2320 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>报表模版（v2.0）</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+            background-color: #f5f6f8;
+            color: #333;
+        }
+
+        .app-wrapper {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .main-wrapper {
+            display: flex;
+            flex: 1;
+        }
+
+        /* 顶部导航栏 */
+        .navbar {
+            height: 50px;
+            background: #fff;
+            border-bottom: 1px solid #e8e8e8;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            flex-shrink: 0;
+        }
+
+        .navbar-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logo {
+            font-size: 20px;
+            font-weight: 700;
+            color: #E60012;
+            letter-spacing: -0.5px;
+        }
+
+        .navbar-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .navbar-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .navbar-item:hover {
+            color: #E60012;
+        }
+
+        .navbar-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #f0f0f0;
+            overflow: hidden;
+        }
+
+        /* 侧边栏 */
+        .sidebar {
+            width: 210px;
+            background: #fff;
+            border-right: 1px solid #e8e8e8;
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            overflow-y: auto;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 8px 0;
+        }
+
+        .sidebar-item {
+            position: relative;
+        }
+
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 16px;
+            font-size: 14px;
+            color: #666;
+            text-decoration: none;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .sidebar-link:hover {
+            color: #E60012;
+            background: #fff5f5;
+        }
+
+        .sidebar-item.active > .sidebar-link,
+        .sidebar-link.active {
+            background: #E60012;
+            color: #fff;
+            font-weight: 500;
+        }
+
+        .sidebar-item.active > .sidebar-link:hover,
+        .sidebar-link.active:hover {
+            background: #cc0010;
+            color: #fff;
+        }
+
+        .sidebar-submenu {
+            list-style: none;
+            padding: 0;
+        }
+
+        .sidebar-submenu .sidebar-link {
+            padding-left: 42px;
+            font-size: 13px;
+        }
+
+        .sidebar-icon {
+            width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        /* 主内容区 */
+        .main-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px;
+            background: #f5f6f8;
+        }
+
+        .container {
+            max-width: 100%;
+            margin: 0;
+            padding: 0;
+        }
+
+        .page-card {
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 2px 8px rgba(0, 0, 0, 0.06);
+            overflow: hidden;
+        }
+
+        /* 顶部标签页 */
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid #e8e8e8;
+        }
+
+        .tab {
+            padding: 16px 24px;
+            font-size: 15px;
+            color: #666;
+            cursor: pointer;
+            position: relative;
+            transition: color 0.2s;
+            text-decoration: none;
+        }
+
+        .tab:hover {
+            color: #E60012;
+        }
+
+        .tab.active {
+            color: #333;
+            font-weight: 500;
+        }
+
+        .tab.active::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            height: 2px;
+            background-color: #E60012;
+        }
+
+        /* 顶部标签页右侧的「我需要更多报表」入口 */
+        .tabs-right {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            padding-right: 24px;
+        }
+
+        .more-reports-entry {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            height: 32px;
+            padding: 0 14px;
+            font-size: 13px;
+            font-family: inherit;
+            color: #E60012;
+            background: #fff;
+            border: 1px solid #E60012;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .more-reports-entry:hover {
+            background: #E60012;
+            color: #fff;
+        }
+
+        .more-reports-entry svg { flex-shrink: 0; }
+
+        /* 工具栏 */
+        .toolbar {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 16px 24px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .toolbar-left {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .search-box {
+            display: flex;
+            align-items: center;
+            border: 1px solid #d9d9d9;
+            border-radius: 4px;
+            padding: 0 12px;
+            height: 32px;
+            width: 280px;
+            transition: border-color 0.2s;
+        }
+
+        .search-box:focus-within {
+            border-color: #E60012;
+        }
+
+        .search-box svg {
+            color: #999;
+            margin-right: 8px;
+            flex-shrink: 0;
+        }
+
+        .search-box input {
+            border: none;
+            outline: none;
+            font-size: 13px;
+            width: 100%;
+            color: #333;
+        }
+
+        .search-box input::placeholder {
+            color: #bfbfbf;
+        }
+
+        .toolbar-right {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+        }
+
+        .view-toggle {
+            display: flex;
+            border: 1px solid #d9d9d9;
+            border-radius: 4px;
+            overflow: hidden;
+        }
+
+        .view-toggle button {
+            padding: 6px 12px;
+            font-size: 13px;
+            border: none;
+            background: #fff;
+            color: #666;
+            cursor: pointer;
+            transition: all 0.2s;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .view-toggle button.active {
+            background: #595959;
+            color: #fff;
+        }
+
+        .view-toggle button:not(.active):hover {
+            color: #E60012;
+        }
+
+        /* ====== 列表视图 ====== */
+        .dim-list-view {
+            display: flex;
+            flex-direction: column;
+            gap: 0;
+            padding: 24px;
+        }
+
+        .dim-list-item {
+            display: flex;
+            align-items: center;
+            padding: 16px 20px;
+            background: #fff;
+            border-bottom: 1px solid #f0f0f0;
+            transition: background 0.15s;
+            gap: 16px;
+        }
+
+        .dim-list-item:hover {
+            background: #fafafa;
+        }
+
+        .dim-list-item .list-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 8px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .dim-list-item .list-icon svg {
+            width: 20px;
+            height: 20px;
+        }
+
+        .dim-list-item .list-info {
+            flex: 1;
+            min-width: 0;
+        }
+
+        .dim-list-item .list-name {
+            font-size: 14px;
+            font-weight: 600;
+            color: #1a1a1a;
+            margin-bottom: 2px;
+        }
+
+        .dim-list-item .list-desc {
+            font-size: 12px;
+            color: #999;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+        }
+
+        .dim-list-item .list-fields {
+            display: flex;
+            gap: 6px;
+            flex-wrap: wrap;
+            flex: 1;
+            min-width: 0;
+            justify-content: center;
+        }
+
+        .dim-list-item .list-actions {
+            display: flex;
+            gap: 8px;
+            flex-shrink: 0;
+        }
+
+        /* 模板网格 */
+        .template-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 24px;
+            padding: 24px;
+        }
+
+
+
+        .template-card {
+            background: #fff;
+            border: 1px solid #e8e8e8;
+            border-radius: 8px;
+            padding: 24px;
+            display: flex;
+            flex-direction: column;
+            transition: box-shadow 0.2s, border-color 0.2s;
+        }
+
+        .template-card:hover {
+            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
+            border-color: #d9d9d9;
+        }
+
+        .template-card-header {
+            margin-bottom: 12px;
+        }
+
+        .template-card-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 12px;
+            line-height: 1.4;
+        }
+
+        .template-card-desc {
+            font-size: 13px;
+            color: #999;
+            line-height: 1.6;
+            display: -webkit-box;
+            -webkit-line-clamp: 4;
+            -webkit-box-orient: vertical;
+            overflow: hidden;
+        }
+
+        .template-card-footer {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 24px;
+        }
+
+        .btn-link {
+            font-size: 13px;
+            color: #E60012;
+            background: none;
+            border: none;
+            cursor: pointer;
+            padding: 0;
+            transition: opacity 0.2s;
+        }
+
+        .btn-link:hover {
+            opacity: 0.8;
+            text-decoration: underline;
+        }
+
+        .btn-primary {
+            background: #E60012;
+            border: none;
+            border-radius: 4px;
+            padding: 0 16px;
+            height: 32px;
+            font-size: 13px;
+            font-weight: 500;
+            color: #fff;
+            cursor: pointer;
+            transition: background 0.2s;
+        }
+
+        .btn-primary:hover {
+            background: #cc0010;
+        }
+
+        /* 空状态 */
+        .empty-state {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            padding: 80px 24px;
+            color: #999;
+        }
+
+        .empty-illustration {
+            width: 120px;
+            height: 120px;
+            margin-bottom: 16px;
+            opacity: 0.6;
+        }
+
+        .empty-text {
+            font-size: 14px;
+            color: #999;
+        }
+
+        /* 预览弹窗 */
+        .modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.65);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 1000;
+            padding: 40px 24px;
+        }
+
+        .modal-overlay.active {
+            display: flex;
+        }
+
+        .modal {
+            background: #fff;
+            border-radius: 8px;
+            width: 100%;
+            max-width: 1100px;
+            max-height: 92vh;
+            display: flex;
+            flex-direction: column;
+            overflow: hidden;
+            box-shadow: 0 12px 48px rgba(0, 0, 0, 0.3);
+        }
+
+        .modal-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 20px 28px;
+            border-bottom: 1px solid #e8e8e8;
+            flex-shrink: 0;
+        }
+
+        .modal-title {
+            font-size: 18px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .modal-close {
+            width: 36px;
+            height: 36px;
+            border: none;
+            background: transparent;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #999;
+            border-radius: 4px;
+            transition: all 0.2s;
+        }
+
+        .modal-close:hover {
+            color: #333;
+            background: #f5f5f5;
+        }
+
+        .modal-body {
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .modal-footer {
+            padding: 12px 24px;
+            border-top: 1px solid #f0f0f0;
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            flex-shrink: 0;
+        }
+        .btn {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            height: 32px;
+            padding: 0 16px;
+            font-size: 13px;
+            border-radius: 4px;
+            border: 1px solid #d9d9d9;
+            background: #fff;
+            color: #333;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .btn:hover { border-color: #E60012; color: #E60012; }
+        .btn-primary {
+            background: #E60012;
+            border-color: #E60012;
+            color: #fff;
+        }
+        .btn-primary:hover { background: #cc0010; border-color: #cc0010; color: #fff; }
+
+        /* ====== 「我需要更多报表」诉求弹窗 ====== */
+        .more-section-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .more-option {
+            display: flex;
+            gap: 10px;
+            padding: 12px 14px;
+            border: 1px solid #f0f0f0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .more-option + .more-option { margin-top: 10px; }
+        .more-option:hover { border-color: #E60012; background: #fffafa; }
+        .more-option input {
+            margin: 3px 0 0;
+            flex-shrink: 0;
+            accent-color: #E60012;
+            cursor: pointer;
+        }
+        .more-option-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 3px;
+        }
+        .more-option-desc {
+            font-size: 12px;
+            color: #888;
+            line-height: 1.5;
+        }
+        .more-option-tag {
+            display: inline-block;
+            margin-left: 6px;
+            font-size: 10px;
+            font-weight: 400;
+            padding: 1px 6px;
+            border-radius: 3px;
+            vertical-align: middle;
+        }
+        .more-option-tag.planned { color: #1890ff; background: #e6f4ff; }
+        .more-option-tag.apply   { color: #fa8c16; background: #fff7e6; }
+        .more-note-input {
+            width: 100%;
+            min-height: 96px;
+            padding: 10px 12px;
+            font-size: 13px;
+            font-family: inherit;
+            line-height: 1.6;
+            color: #333;
+            border: 1px solid #d9d9d9;
+            border-radius: 8px;
+            resize: vertical;
+            box-sizing: border-box;
+        }
+        .more-note-input:focus { outline: none; border-color: #E60012; }
+        .more-form-tip {
+            font-size: 12px;
+            margin-top: 10px;
+            display: none;
+        }
+        .more-form-tip.error   { display: block; color: #E60012; }
+        .more-form-tip.success { display: block; color: #52c41a; }
+
+        /* 邮件预览区 */
+        .email-preview {
+            border: none;
+            background: #f9f9fb;
+        }
+        .email-preview-header {
+            background: #f5f5f5;
+            padding: 12px 20px;
+            font-size: 12px;
+            color: #999;
+            display: flex;
+            flex-direction: column;
+            gap: 4px;
+            border-bottom: 1px solid #e8e8e8;
+        }
+        .email-preview-header .ph-row {
+            display: flex;
+            gap: 8px;
+        }
+        .email-preview-header .ph-label {
+            color: #666;
+            min-width: 48px;
+            text-align: right;
+            flex-shrink: 0;
+        }
+        .email-preview-header .ph-value {
+            color: #333;
+            font-weight: 500;
+        }
+        .email-preview-body {
+            padding: 24px 28px;
+            font-size: 13px;
+            color: #333;
+            line-height: 1.8;
+            max-height: 480px;
+            overflow-y: auto;
+            background: #fff;
+        }
+        .email-preview-body .report-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #E60012;
+            text-align: center;
+            margin-bottom: 6px;
+        }
+        .email-preview-body .report-subtitle {
+            font-size: 12px;
+            color: #999;
+            text-align: center;
+            margin-bottom: 20px;
+        }
+        .email-preview-body .report-section {
+            margin-bottom: 16px;
+        }
+        .email-preview-body .report-section h4 {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            padding-left: 8px;
+            border-left: 3px solid #E60012;
+        }
+        .email-preview-body table {
+            width: 100%;
+            margin: 12px 0;
+            font-size: 12px;
+            border-collapse: collapse;
+        }
+        .email-preview-body table th {
+            background: #f5f5f5;
+            padding: 8px 10px;
+            text-align: center;
+            font-weight: 500;
+            color: #555;
+            border: 1px solid #e8e8e8;
+        }
+        .email-preview-body table td {
+            padding: 7px 10px;
+            text-align: center;
+            border: 1px solid #e8e8e8;
+            color: #333;
+        }
+        .email-footer {
+            margin-top: 20px;
+            padding-top: 12px;
+            border-top: 1px solid #f0f0f0;
+            font-size: 11px;
+            color: #bbb;
+            text-align: center;
+            line-height: 1.8;
+        }
+
+        /* 报告头部信息 */
+        .report-header {
+            background: #fafafa;
+            padding: 20px 28px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .report-header-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 12px;
+        }
+
+        .report-header-meta {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 8px 32px;
+        }
+
+        .report-meta-item {
+            display: flex;
+            gap: 8px;
+            font-size: 13px;
+        }
+
+        .report-meta-label {
+            color: #999;
+            white-space: nowrap;
+        }
+
+        .report-meta-value {
+            color: #333;
+        }
+
+        /* 预览表格区域 */
+        .preview-table-wrap {
+            padding: 0;
+            overflow-x: auto;
+        }
+
+        .preview-table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+            min-width: 800px;
+        }
+
+        .preview-table thead th {
+            background: #fafafa;
+            color: #666;
+            text-align: left;
+            padding: 14px 16px;
+            border-bottom: 1px solid #e8e8e8;
+            font-weight: 500;
+            white-space: nowrap;
+            position: sticky;
+            top: 0;
+            z-index: 1;
+        }
+
+        .preview-table tbody td {
+            padding: 12px 16px;
+            border-bottom: 1px solid #f0f0f0;
+            color: #333;
+        }
+
+        .preview-table tbody tr:hover {
+            background: #fafafa;
+        }
+
+        .preview-table .group-header-row th.group-header {
+            background: #e6f0ff;
+            color: #1a6de0;
+            font-size: 12px;
+            font-weight: 600;
+            text-align: center;
+            padding: 8px 4px;
+            border-bottom: 2px solid #bdd7f5;
+            letter-spacing: 1px;
+        }
+
+        .preview-table .summary-row {
+            background: #f9fafb;
+        }
+
+        .preview-table .summary-row td {
+            padding: 8px 16px;
+            border-bottom: 2px solid #e8e8e8;
+            font-size: 12px;
+        }
+
+        .preview-table .summary-row td strong {
+            color: #333;
+        }
+
+        .preview-table .col-name {
+            color: #E60012;
+            font-weight: 500;
+        }
+
+        .preview-table .col-asset {
+            color: #E60012;
+            font-weight: 500;
+        }
+
+        .preview-table .cell-tag {
+            display: inline-block;
+            padding: 0 6px;
+            border-radius: 8px;
+            font-size: 11px;
+            font-weight: 500;
+        }
+
+        .preview-table .cell-tag.good { background: #f6ffed; color: #52c41a; }
+        .preview-table .cell-tag.warn { background: #fff7e6; color: #fa8c16; }
+        .preview-table .cell-tag.bad  { background: #fff2f0; color: #ff4d4f; }
+
+        .tag {
+            display: inline-block;
+            padding: 1px 8px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .tag-green {
+            background: #f6ffed;
+            color: #52c41a;
+            border: 1px solid #b7eb8f;
+        }
+
+        .tag-red {
+            background: #fff2f0;
+            color: #ff4d4f;
+            border: 1px solid #ffccc7;
+        }
+
+        .tag-blue {
+            background: #e6f7ff;
+            color: #E60012;
+            border: 1px solid #91d5ff;
+        }
+
+        .tag-orange {
+            background: #fff7e6;
+            color: #fa8c16;
+            border: 1px solid #ffd591;
+        }
+
+        /* 模板分类区块 */
+        .template-section {
+            padding: 24px 24px 0;
+        }
+
+        .template-section:last-child {
+            padding-bottom: 24px;
+        }
+
+        .section-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .section-badge {
+            display: inline-block;
+            padding: 2px 12px;
+            border-radius: 10px;
+            font-size: 12px;
+            font-weight: 500;
+        }
+
+        .badge-single {
+            background: #e6f7ff;
+            color: #E60012;
+            border: 1px solid #91d5ff;
+        }
+
+        .badge-fleet {
+            background: #fff7e6;
+            color: #fa8c16;
+            border: 1px solid #ffd591;
+        }
+
+        .section-desc {
+            font-size: 13px;
+            color: #999;
+            margin-bottom: 16px;
+        }
+
+        .template-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 24px;
+        }
+
+        .type-tag {
+            display: inline-block;
+            padding: 1px 8px;
+            border-radius: 10px;
+            font-size: 11px;
+            font-weight: 500;
+            margin-left: 8px;
+            vertical-align: middle;
+        }
+
+        .type-tag.single {
+            background: #e6f7ff;
+            color: #E60012;
+            border: 1px solid #91d5ff;
+        }
+
+        .type-tag.fleet {
+            background: #fff7e6;
+            color: #fa8c16;
+            border: 1px solid #ffd591;
+        }
+
+        .unified-fields {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px 8px;
+            margin-top: 10px;
+        }
+
+        .field-chip {
+            font-size: 11px;
+            color: #8c8c8c;
+            background: #fafafa;
+            border: 1px solid #f0f0f0;
+            border-radius: 3px;
+            padding: 1px 6px;
+        }
+
+        /* 卡片右上角类型标签 */
+        .card-type-badge {
+            position: absolute;
+            top: 12px;
+            right: 12px;
+            font-size: 11px;
+            padding: 2px 10px;
+            border-radius: 3px;
+            font-weight: 500;
+            z-index: 2;
+        }
+
+        /* 维度分组区块 */
+        .dimension-section {
+            padding: 24px 24px 0;
+        }
+
+        .dimension-section:last-child {
+            padding-bottom: 24px;
+        }
+
+        .dimension-header {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 12px;
+        }
+
+        .dimension-icon {
+            width: 32px;
+            height: 32px;
+            border-radius: 6px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .dim-icon-run    { background: #e6f7ff; color: #1890ff; }
+        .dim-icon-energy { background: #fff7e6; color: #fa8c16; }
+        .dim-icon-alarm  { background: #fff2f0; color: #ff4d4f; }
+        .dim-icon-idle   { background: #f6ffed; color: #52c41a; }
+        .dim-icon-gear   { background: #f9f0ff; color: #722ed1; }
+        .dim-icon-summary{ background: #fff0f6; color: #eb2f96; }
+
+        .dimension-name {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .dimension-desc {
+            font-size: 12px;
+            color: #999;
+        }
+
+        .dimension-fields {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 4px 6px;
+            margin-left: auto;
+        }
+
+        .dimension-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+            gap: 20px;
+        }
+
+        .template-card.dim-card {
+            padding: 20px;
+        }
+
+        .template-card.dim-card .template-card-title {
+            font-size: 15px;
+            margin-bottom: 8px;
+        }
+
+        .template-card.dim-card .template-card-desc {
+            font-size: 12px;
+            -webkit-line-clamp: 3;
+        }
+
+        .template-card.dim-card .unified-fields {
+            margin-top: 8px;
+        }
+
+        .template-card.dim-card .template-card-footer {
+            margin-top: 16px;
+        }
+
+        /* ====== 新手引导 - 聚光灯 + 红框高亮 ====== */
+        .tour-backdrop {
+            position: fixed;
+            inset: 0;
+            z-index: 9998;
+            background: rgba(0,0,0,0.55);
+            pointer-events: all;
+            animation: onFadeIn 0.3s ease;
+        }
+        @keyframes onFadeIn { from { opacity: 0; } to { opacity: 1; } }
+
+        /* 红框高亮 - 静态呼吸微动 */
+        .tour-highlight {
+            position: relative;
+            z-index: 9999 !important;
+            box-shadow: 0 0 0 3px #E60012, 0 0 12px rgba(230,0,18,0.25) !important;
+            border-radius: 6px !important;
+            animation: tourBreathe 2.5s ease-in-out infinite;
+        }
+        @keyframes tourBreathe {
+            0%, 100% { box-shadow: 0 0 0 3px #E60012, 0 0 12px rgba(230,0,18,0.25); }
+            50%      { box-shadow: 0 0 0 3px #E60012, 0 0 18px rgba(230,0,18,0.35); }
+        }
+
+        /* 浮动提示卡片 */
+        .tour-tooltip {
+            position: fixed;
+            z-index: 10000;
+            background: #fff;
+            border-radius: 12px;
+            box-shadow: 0 8px 32px rgba(0,0,0,0.18);
+            padding: 24px;
+            width: 360px;
+            max-width: 90vw;
+            animation: tourSlideIn 0.35s cubic-bezier(0.16, 1, 0.3, 1);
+            pointer-events: all;
+        }
+        @keyframes tourSlideIn {
+            from { opacity: 0; transform: translateY(10px); }
+            to   { opacity: 1; transform: translateY(0); }
+        }
+        .tour-tooltip-arrow {
+            position: absolute;
+            width: 14px;
+            height: 14px;
+            background: #fff;
+            transform: rotate(45deg);
+        }
+        /* 箭头在弹窗上方（目标在弹窗下方） */
+        .tour-tooltip.arrow-below .tour-tooltip-arrow {
+            top: -7px;
+            box-shadow: -2px -2px 4px rgba(0,0,0,0.06);
+        }
+        /* 箭头在弹窗下方（目标在弹窗上方） */
+        .tour-tooltip.arrow-above .tour-tooltip-arrow {
+            bottom: -7px;
+            box-shadow: 2px 2px 4px rgba(0,0,0,0.06);
+        }
+        /* 箭头在弹窗左侧（目标在弹窗右侧） */
+        .tour-tooltip.arrow-right .tour-tooltip-arrow {
+            left: -7px;
+            box-shadow: -2px 2px 4px rgba(0,0,0,0.06);
+        }
+        /* 箭头在弹窗右侧（目标在弹窗左侧） */
+        .tour-tooltip.arrow-left .tour-tooltip-arrow {
+            right: -7px;
+            box-shadow: 2px -2px 4px rgba(0,0,0,0.06);
+        }
+
+        .tour-step-badge {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 4px 12px;
+            border-radius: 12px;
+            font-size: 12px;
+            font-weight: 600;
+            background: #fff0f1;
+            color: #E60012;
+            margin-bottom: 12px;
+            border: 1px solid #ffd6d9;
+        }
+        .tour-step-title {
+            font-size: 18px;
+            font-weight: 700;
+            color: #1a1a1a;
+            margin-bottom: 10px;
+        }
+        .tour-step-desc {
+            font-size: 13px;
+            color: #666;
+            line-height: 1.7;
+        }
+        .tour-step-desc .hl { color: #E60012; font-weight: 600; }
+
+        .tour-dots {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 18px;
+        }
+        .tour-dot {
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            background: #ddd;
+            transition: all 0.3s;
+        }
+        .tour-dot.active {
+            width: 18px;
+            border-radius: 3px;
+            background: #E60012;
+        }
+
+        .tour-actions {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 20px;
+            gap: 8px;
+        }
+        .tour-skip {
+            font-size: 13px;
+            color: #999;
+            cursor: pointer;
+            border: none;
+            background: none;
+            padding: 6px 0;
+            transition: color 0.2s;
+        }
+        .tour-skip:hover { color: #E60012; }
+        .tour-nav { display: flex; gap: 10px; }
+        .tour-btn {
+            padding: 8px 20px;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 500;
+            cursor: pointer;
+            border: 1px solid #e0e0e0;
+            background: #fff;
+            color: #666;
+            transition: all 0.2s;
+        }
+        .tour-btn:hover { border-color: #ccc; color: #333; }
+        .tour-btn.primary {
+            background: #E60012;
+            border-color: #E60012;
+            color: #fff;
+        }
+        .tour-btn.primary:hover { background: #c40011; border-color: #c40011; }
+
+        /* ====== 统一网格卡片（无分组标题） ====== */
+        .dim-cards-grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+            gap: 20px;
+            padding: 24px;
+        }
+
+        .dim-card-unified {
+            position: relative;
+            background: #fff;
+            border-radius: 12px;
+            overflow: visible;
+            transition: box-shadow 0.25s, transform 0.25s;
+            box-shadow: 0 1px 4px rgba(0,0,0,0.06);
+            border: 1px solid #f0f0f0;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .dim-card-unified:hover {
+            box-shadow: 0 6px 24px rgba(0,0,0,0.10);
+            transform: translateY(-2px);
+        }
+
+        /* 2026-09-17 新增：数据源未接入（本期不实现）的卡片 / 列表项整体置灰，且不参与 hover 抬升 */
+        .dim-card-unified.is-disabled,
+        .dim-list-item.is-disabled {
+            background: #fafafa;
+            border-color: #ededed;
+            box-shadow: none;
+        }
+        .dim-card-unified.is-disabled:hover {
+            box-shadow: none;
+            transform: none;
+        }
+        .dim-card-unified.is-disabled .card-title,
+        .dim-list-item.is-disabled .list-name {
+            color: #b8b8b8;
+        }
+        .dim-card-unified.is-disabled .card-subtitle,
+        .dim-list-item.is-disabled .list-desc {
+            color: #c8c8c8;
+        }
+        .dim-card-unified.is-disabled .card-icon,
+        .dim-list-item.is-disabled .list-icon {
+            filter: grayscale(100%);
+            opacity: 0.55;
+        }
+        .dim-card-unified.is-disabled .btn-link {
+            color: #b8b8b8;
+        }
+        .dim-card-unified.is-disabled .btn-link:hover {
+            color: #999;
+        }
+        .dim-list-item.is-disabled:hover {
+            background: #fafafa;
+        }
+
+        .dim-card-unified .card-accent {
+            height: 4px;
+            border-radius: 0;
+        }
+
+        .accent-run     { background: linear-gradient(90deg, #1890ff, #69c0ff); }
+        .accent-energy  { background: linear-gradient(90deg, #fa8c16, #ffc069); }
+        .accent-alarm   { background: linear-gradient(90deg, #ff4d4f, #ff7875); }
+        .accent-idle    { background: linear-gradient(90deg, #52c41a, #95de64); }
+        .accent-gear    { background: linear-gradient(90deg, #722ed1, #b37feb); }
+        .accent-summary { background: linear-gradient(90deg, #eb2f96, #ff85c0); }
+
+        .dim-card-unified .card-body {
+            padding: 20px 20px 16px;
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+        }
+
+        .dim-card-unified .card-head-row {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            margin-bottom: 10px;
+        }
+
+        .dim-card-unified .card-icon {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        .dim-card-unified .card-title {
+            font-size: 15px;
+            font-weight: 600;
+            color: #222;
+        }
+
+        .dim-card-unified .card-subtitle {
+            font-size: 11px;
+            color: #999;
+            margin-top: 1px;
+        }
+
+        .dim-card-unified .card-desc {
+            font-size: 12px;
+            color: #777;
+            line-height: 1.6;
+            margin-bottom: 10px;
+        }
+
+        .dim-card-unified .fields-row {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 6px;
+            margin-bottom: auto;
+        }
+
+        .dim-card-unified .field-chip {
+            display: inline-block;
+            padding: 3px 8px;
+            font-size: 11px;
+            border-radius: 4px;
+            background: #f5f5f5;
+            color: #666;
+        }
+
+        .dim-card-unified .card-footer {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 12px 20px;
+            border-top: 1px solid #f5f5f5;
+            background: #fafafa;
+        }
+
+        .badge-single { background: #e6f7ff; color: #1890ff; }
+        .badge-fleet  { background: #fff7e6; color: #fa8c16; }
+    </style>
+
+</head>
+<body>
+    <div class="app-wrapper">
+        <nav class="navbar">
+            <div class="navbar-left">
+                <span class="logo">MySANY</span>
+            </div>
+            <div class="navbar-right">
+                <div class="navbar-item">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+                    简体中文
+                </div>
+                <a class="navbar-item" href="个人中心.html" style="text-decoration:none;color:inherit;">
+                    <span>Schuck</span>
+                    <div class="navbar-avatar"></div>
+                </a>
+            </div>
+        </nav>
+        <div class="main-wrapper">
+            <aside class="sidebar">
+                <ul class="sidebar-menu">
+                    <li class="sidebar-item">
+                        <a class="sidebar-link">
+                            <span class="sidebar-icon">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect></svg>
+                            </span>
+                            设备管理
+                        </a>
+                    </li>
+                    <li class="sidebar-item">
+                        <a class="sidebar-link">
+                            <span class="sidebar-icon">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"></path><path d="M18 17V9"></path><path d="M13 17V5"></path><path d="M8 17v-3"></path></svg>
+                            </span>
+                            数据大屏
+                        </a>
+                    </li>
+                    <li class="sidebar-item active">
+                        <a class="sidebar-link active" href="报表模版.html">
+                            <span class="sidebar-icon">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><path d="M3 9h18"></path><path d="M9 21V9"></path></svg>
+                            </span>
+                            机群报表
+                        </a>
+                    </li>
+                    <li class="sidebar-item">
+                        <a class="sidebar-link">
+                            <span class="sidebar-icon">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+                            </span>
+                            项目管理
+                        </a>
+                        <ul class="sidebar-submenu">
+                            <li class="sidebar-item"><a class="sidebar-link" href="javascript:;">项目管理</a></li>
+                        </ul>
+                    </li>
+                    <li class="sidebar-item">
+                        <a class="sidebar-link">
+                            <span class="sidebar-icon">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                            </span>
+                            设备保养
+                        </a>
+                    </li>
+                    <li class="sidebar-item">
+                        <a class="sidebar-link">
+                            <span class="sidebar-icon">
+                                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
+                            </span>
+                            维修管理
+                        </a>
+                    </li>
+                </ul>
+            </aside>
+            <main class="main-content">
+                <div class="container">
+                    <div class="page-card">
+            <!-- 顶部标签页 -->
+            <div class="tabs">
+                <a href="报表模版.html" class="tab active">报表模版</a>
+                <a href="管理报表.html" class="tab">管理报表</a>
+                <div class="tabs-right">
+                    <button class="more-reports-entry" id="moreReportsEntry" type="button">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                        我需要更多报表
+                    </button>
+                </div>
+            </div>
+
+            <!-- 工具栏 -->
+            <div class="toolbar">
+                <div class="toolbar-left">
+                    <div class="search-box">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                            <circle cx="11" cy="11" r="8"></circle>
+                            <path d="m21 21-4.35-4.35"></path>
+                        </svg>
+                        <input type="text" placeholder="搜索报表" id="templateSearch">
+                    </div>
+                </div>
+                <div class="toolbar-right">
+                    <div class="view-toggle">
+                        <button class="active" title="网格视图">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <rect x="3" y="3" width="7" height="7"></rect>
+                                <rect x="14" y="3" width="7" height="7"></rect>
+                                <rect x="3" y="14" width="7" height="7"></rect>
+                                <rect x="14" y="14" width="7" height="7"></rect>
+                            </svg>
+                        </button>
+                        <button title="列表视图">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                                <line x1="3" y1="6" x2="21" y2="6"></line>
+                                <line x1="3" y1="12" x2="21" y2="12"></line>
+                                <line x1="3" y1="18" x2="21" y2="18"></line>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+            </div>
+
+            <div id="templateContent">
+                <div class="empty-state"><div class="empty-text">加载中...</div></div>
+            </div>
+        </div>
+    </div>
+
+
+    <!-- 预览弹窗 -->
+    <div class="modal-overlay" id="previewModal">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">报表预览</div>
+                <button class="modal-close" id="previewClose" title="关闭">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body" style="padding:0;">
+                <div class="preview-table-wrap" id="previewTableContainer" style="padding:16px 24px 20px;">
+                    <div style="text-align:center;color:#bbb;padding:60px 0">正在加载预览...</div>
+                </div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn" onclick="closePreviewModal()">关闭</button>
+                <button class="btn btn-primary" id="useReportBtn" onclick="closePreviewModal();window.location.href='管理报表.html'">使用该报表</button>
+            </div>
+        </div>
+    </div>
+
+    <!-- 「我需要更多报表」诉求弹窗 -->
+    <div class="modal-overlay" id="moreReportsModal">
+        <div class="modal" style="max-width:640px;">
+            <div class="modal-header">
+                <div class="modal-title">我需要更多报表</div>
+                <button class="modal-close" id="moreReportsClose" title="关闭">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body" style="padding:20px 28px;">
+                <div style="font-size:12px;color:#888;line-height:1.7;margin-bottom:18px;">勾选你希望上线的报表，或直接描述你的诉求。提交后我们会评估排期，并将结果通知给你。</div>
+                <div class="more-section-title">候选报表（可多选）</div>
+                <div id="moreReportOptions"></div>
+                <div class="more-section-title" style="margin-top:20px;">自定义诉求说明</div>
+                <textarea class="more-note-input" id="moreReportNote" placeholder="例如：我希望有一份按周统计的「设备保养提醒报表」，需要包含下次保养时间、剩余小时数、所属项目…"></textarea>
+                <div class="more-form-tip" id="moreReportTip"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn" type="button" onclick="closeMoreReportsModal()">取消</button>
+                <button class="btn btn-primary" type="button" onclick="submitMoreReports()">提交</button>
+            </div>
+        </div>
+    </div>
+
+    <script>
+        // ====================================================================
+        // ====================================================================
+        // 报表清单：18 张可添加报表（设备维度 13 + 项目维度 5）
+        // 页面不再区分单机 / 机群：同一套字段，按所选资产范围取数（弹窗内可切换查看）
+        // ====================================================================
+        const ICONS = {
+            summary: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>',
+            clock: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><polyline points="12 7 12 12 16 14"/></svg>',
+            fuel: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h8a2 2 0 0 0 2-2V4"/><line x1="8" y1="7" x2="13" y2="7"/><path d="M18 8v8a2 2 0 0 0 2 2"/></svg>',
+            idle: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="9"/><line x1="9" y1="9" x2="15" y2="15"/><line x1="15" y1="9" x2="9" y2="15"/></svg>',
+            event: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 3l9 16H3z"/><line x1="12" y1="9" x2="12" y2="14"/><circle cx="12" cy="17" r="0.6" fill="currentColor"/></svg>',
+            fleet: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="8" width="7" height="10"/><rect x="14" y="8" width="7" height="10"/><line x1="3" y1="4" x2="21" y2="4"/></svg>',
+            move: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M12 21s-7-6-7-11a7 7 0 0 1 14 0c0 5-7 11-7 11z"/><circle cx="12" cy="10" r="2.5"/></svg>',
+            full: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M4 19V5"/><path d="M4 19h16"/><polyline points="7 15 11 10 14 13 19 6"/></svg>'
+        };
+
+        const reports = [
+            // ============ 已上线（红底图标突出，置顶 3 张）============
+            { key:'rpt_energy', name:'设备能耗报表', en:'Energy Consumption Report', group:'设备维度', nature:'能耗与成本', icon:'fuel',
+              state:'live',
+              desc:'统计指定周期内设备的能耗（燃油 / 电能）与能效水平，含怠速、工作、运行三段消耗与单位时间消耗。',
+              metrics:['怠速油耗(L)','工作油耗(L)','运行油耗(L)','燃烧率(L/h)'], vals:[358.0, 3120.5, 2190.5, 19.9] },
+            { key:'rpt_workmode', name:'设备工作模式报表', en:'Working Mode Report', group:'设备维度', nature:'作业与效率', icon:'clock',
+              state:'live',
+              desc:'按运行 / 工作 / 怠速等工作模式拆解设备作业时长与占比，反映设备实际使用结构。',
+              metrics:['运行时长(h)','工作时长(h)','怠速时长(h)','利用率(%)'], vals:[284.4, 251.5, 2.3, 99.2] },
+            { key:'rpt_move', name:'设备移动报表', en:'Movement Report', group:'设备维度', nature:'位置与维保', icon:'move',
+              state:'live',
+              desc:'统计设备行驶里程、行驶时长与平均车速等移动类指标，反映转场与行驶情况。',
+              metrics:['行驶里程(km)','行驶时长(h)','平均车速(km/h)','最高车速(km/h)'], vals:[128.6, 12.4, 10.4, 38.2] },
+
+            // ============ 已计划未实现（蓝底图标，置顶第 4-6 张）============
+            { key:'rpt_overtime', name:'超时工作报表', en:'Overtime Work Report', group:'设备维度', nature:'作业与效率', icon:'clock',
+              state:'planned',
+              desc:'统计设备超时作业情况：超过设定工时阈值的时长、次数与占比，用于识别加班与合规风险。',
+              metrics:['超时工作次数','超时时长(h)','超时占比(%)'], vals:[12, 18.6, 6.5], intCols:[0] },
+            { key:'rpt_abnormal', name:'设备异常通知报表', en:'Abnormal Notification Report', group:'设备维度', nature:'安全与事件', icon:'event',
+              state:'planned',
+              desc:'汇总设备异常事件的即时通知记录与处理情况：异常类型、发生时间、通知对象与处理状态。',
+              metrics:['异常类型','发生时间','通知对象','处理状态'], vals:['燃油液位突然下降', '2026-09-13 14:30', '张工（项目经理）', '已处理'] },
+            { key:'rpt_battery', name:'电池电量报表', en:'Battery Level Report', group:'设备维度', nature:'能耗与成本', icon:'fuel',
+              state:'planned',
+              desc:'统计设备 / 机群的电池荷电状态（SOC）与充电情况：期末 SOC、最低 SOC、充电次数与充电时长。',
+              metrics:['期末SOC(%)','最低SOC(%)','充电次数','充电时长(h)'], vals:[78, 22, 4, 6.5], intCols:[0,1,2] },
+
+            // ================= 平台报表库（25 张）=================
+            { key:'asset360', name:'资产 360° 报表', en:'Asset 360', group:'设备维度', nature:'设备概览', icon:'full',
+              desc:'单台设备的月度 360° 视图，覆盖利用、健康、维护、作业与成本、可持续性五大板块，帮助客户做出有依据的经营决策。',
+              metrics:['开工天数(天)','运行时长(h)','怠速时长(h)','油耗(L)'], vals:[13, 284.4, 2.3, 5669.0], intCols:[0] },
+            { key:'event_count', name:'设备事件统计报表', en:'Asset Event Count', group:'设备维度', nature:'安全与事件', icon:'event',
+              desc:'汇总单台设备的全部事件及各类事件次数。',
+              metrics:['告警次数','故障次数','其他事件次数'], vals:[6, 2, 1], intCols:[0,1,2] },
+            { key:'fuel_single', name:'单台设备燃油效率报表', en:'Asset Fuel Single Asset', group:'设备维度', nature:'能耗与成本', icon:'fuel',
+              desc:'统计指定报表周期内怠速、工作、运行三种状态下的燃油消耗量，反映设备用油效率；燃烧率可相对反映设备实际作业效能。',
+              metrics:['怠速油耗(L)','工作油耗(L)','运行油耗(L)','燃烧率(L/h)'], vals:[358.0, 3120.5, 2190.5, 19.9] },
+            { key:'event_history', name:'设备事件历史报表', en:'Asset History', group:'设备维度', nature:'安全与事件', icon:'event',
+              desc:'列出单台设备的事件明细清单。',
+              metrics:['事件时间','事件类型','事件详情'], vals:['2026-09-13 14:30', '燃油液位突然下降', '液位 5 分钟内下降 12%'] },
+            { key:'idle', name:'设备怠速分析报表', en:'Asset Idle', group:'设备维度', nature:'作业与效率', icon:'idle',
+              desc:'拆解每台设备的怠速情况：指定周期内的怠速事件总数、怠速总时长，以及超过指定阈值时的平均怠速时长。',
+              metrics:['怠速事件数','怠速总时长(h)','平均怠速时长(min)'], vals:[128, 2.3, 1.1], intCols:[0] },
+            { key:'op_fleet', name:'机群作业状态报表', en:'Asset Operation - Fleet', group:'设备维度', nature:'作业与效率', icon:'fleet',
+              desc:'汇总一个周期内各设备的作业状态，按「运行 / 工作 / 怠速」三段呈现（与设备作业页口径一致）。',
+              metrics:['运行台数','工作台数','怠速台数','停机台数'], vals:[18, 12, 5, 1], intCols:[0,1,2,3] },
+            { key:'security_activity', name:'设备安全-用户操作报表', en:'Asset Security - User Activity', group:'设备维度', nature:'安全与事件', icon:'event',
+              desc:'汇总单台设备上由用户执行的全部安全相关操作。', metrics:[] },
+            { key:'usage_single', name:'单台设备利用率报表', en:'Asset Usage - Single Asset', group:'设备维度', nature:'作业与效率', icon:'clock',
+              desc:'反映指定周期内单台设备在怠速、工作、运行三种状态下的使用效率，并相对「预期使用小时」给出偏差。',
+              metrics:['运行时长(h)','工作时长(h)','怠速时长(h)','利用率(%)'], vals:[284.4, 251.5, 2.3, 99.2] },
+            { key:'snapshot', name:'设备运行快照报表', en:'Asset Usage Summary', group:'设备维度', nature:'设备概览', icon:'full',
+              desc:'给出所选设备在指定周期内的运行小时快照，并附最后已知位置。',
+              metrics:['运行小时(h)','最后位置','仪表读数(h)'], vals:[284.4, '长沙市岳麓区', 1284.4] },
+            { key:'cost_fleet', name:'机群成本分析报表', en:'Cost Analysis - Fleet', group:'设备维度', nature:'能耗与成本', icon:'fuel',
+              desc:'针对所选每台设备，按运行小时与怠速小时计算花费，量化「过度怠速」带来的成本。', metrics:[] },
+            { key:'cost_single', name:'单台设备成本分析报表', en:'Cost Analysis - Single Asset', group:'设备维度', nature:'能耗与成本', icon:'fuel',
+              desc:'针对单台设备，按运行小时与怠速小时计算花费，量化「过度怠速」带来的成本。', metrics:[] },
+            { key:'fault_code', name:'故障码报表', en:'Fault Code', group:'设备维度', nature:'安全与事件', icon:'event',
+              desc:'列出一台或多台设备的故障码事件与诊断结论。', metrics:[] },
+            { key:'fleet_fuel', name:'机群燃油效率报表', en:'Fleet Fuel', group:'设备维度', nature:'能耗与成本', icon:'fuel',
+              desc:'统计指定周期内怠速、工作、运行三种状态下的燃油消耗量，反映机群整体用油效率；燃烧率可相对反映机群作业效能。',
+              metrics:['怠速油耗(L)','工作油耗(L)','运行油耗(L)','燃烧率(L/h)'], vals:[358.0, 3120.5, 2190.5, 19.9] },
+            { key:'fleet_status', name:'机群状态清单报表', en:'Fleet Status', group:'设备维度', nature:'设备概览', icon:'fleet',
+              desc:'给出每台设备的基础信息概览：品牌型号等识别信息、最后已知位置与仪表读数。',
+              metrics:['机型','最后位置','仪表读数(h)','状态'], vals:['挖掘机 SY215', '长沙市岳麓区', 1284.4, '在线'] },
+            { key:'fleet_usage', name:'机群使用情况报表', en:'Fleet Usage', group:'设备维度', nature:'作业与效率', icon:'clock',
+              desc:'反映指定周期内机群在怠速、工作、运行三种状态下的使用效率，并相对预期使用小时给出偏差。',
+              metrics:['运行时长(h)','利用率(%)','开工天数(天)'], vals:[284.4, 99.2, 13], intCols:[2] },
+            { key:'fleet_utilization', name:'机群怠速与利用率报表', en:'Fleet Utilization', group:'设备维度', nature:'作业与效率', icon:'idle',
+              desc:'给出所选设备的怠速时长、燃油消耗，以及怠速时长占运行时间的比例。',
+              metrics:['怠速时长(h)','油耗(L)','怠速占比(%)','运行时长(h)'], vals:[2.3, 5669.0, 0.8, 284.4] },
+            { key:'fluid_config', name:'油液分析-资产配置报表', en:'Fluid Analysis - Asset Configuration', group:'设备维度', nature:'位置与维保', icon:'fuel',
+              desc:'按排序列出所选设备的资产、部件与油液信息，帮助用户识别资产配置。', metrics:[] },
+            { key:'fluid_history', name:'油液分析-取样历史报表', en:'Fluid Analysis - Sample History', group:'设备维度', nature:'位置与维保', icon:'fuel',
+              desc:'按排序列出所选设备的取样记录，帮助用户识别取样历史与趋势。', metrics:[] },
+            { key:'fluid_summary', name:'油液分析-取样汇总报表', en:'Fluid Analysis - Sample Summary', group:'设备维度', nature:'位置与维保', icon:'fuel',
+              desc:'按排序汇总所选设备的油液取样结果，帮助用户判断是否需要针对某台设备采取措施。', metrics:[] },
+            { key:'gen_standby', name:'发电机关键备用性能报表', en:'Generator Critical Standby Performance', group:'设备维度', nature:'发电机', icon:'full',
+              desc:'单台发电机的月度报表，给出备用性能表现，如发动机参数与当月总发电量。', metrics:[] },
+            { key:'gen_fleet', name:'发电机机群运营报表', en:'Generator Fleet Operations', group:'设备维度', nature:'发电机', icon:'fleet',
+              desc:'按月给出机群发电机的运营 KPI 概览：负载、效率、燃油消耗与日利用率。', metrics:[] },
+            { key:'gen_health', name:'发电机健康汇总报表', en:'Generator Health Summary', group:'设备维度', nature:'发电机', icon:'full',
+              desc:'单台发电机的月度报表，给出健康表现：日耗油量、日发电量、负载表现、发动机参数以及油液（SOS）数据。', metrics:[] },
+            { key:'location', name:'位置历史报表', en:'Generator Location Tracking', group:'设备维度', nature:'位置与维保', icon:'move',
+              desc:'单台设备的位置历史轨迹报表（机型无关）。',
+              metrics:['时间','位置','里程(km)','状态'], vals:['2026-09-13 08:00', '长沙市岳麓区 梅溪湖', 128.6, '行驶中'] },
+            { key:'shared_view', name:'共享资产视图报表', en:'Shared Asset View', group:'设备维度', nature:'设备概览', icon:'fleet',
+              desc:'展示面向不同组织创建的共享资产视图、已共享的资产以及共享视图的起止日期，帮助用户跟踪与管理跨组织的共享视图。', metrics:[] },
+            { key:'site_runtime', name:'工地停留报表', en:'Site Runtime', group:'设备维度', nature:'位置与维保', icon:'move',
+              desc:'列出设备已完成或部分完成的工地访问记录：已完成 = 有对应的入场与出场事件；部分完成 = 已有入场事件但尚未产生出场事件。', metrics:[] },
+
+            // ================= 项目维度（v2.0 新增 5 张）=================
+            { key:'proj_production', name:'项目生产报表（按行程）', en:'Project Production by Trip', group:'项目维度', nature:'项目维度', icon:'summary',
+              desc:'按一次装载任务（Trip）计算项目产出与循环效率。',
+              metrics:['行程数','平均循环时间(min)','总运距(km)','利用率(%)'], vals:[186, 18.4, 2412.6, 99.2], intCols:[0] },
+            { key:'proj_efficiency', name:'项目效率报表', en:'Project Efficiency', group:'项目维度', nature:'项目维度', icon:'clock',
+              desc:'哪个设备、哪个环节拖慢项目，做设备间对比。',
+              metrics:['运行时长(h)','行程数','单行程耗时(min)','利用率(%)'], vals:[284.4, 186, 18.4, 99.2], intCols:[1] },
+            { key:'proj_energy', name:'项目能耗报表', en:'Project Energy', group:'项目维度', nature:'项目维度', icon:'fuel',
+              desc:'项目整体能耗与单位运输能耗。',
+              metrics:['总能耗(L)','单行程能耗(L)','百公里能耗(L/100km)'], vals:[5669.0, 30.5, 26.4] },
+            { key:'proj_safety', name:'项目安全报表', en:'Project Safety', group:'项目维度', nature:'项目维度', icon:'event',
+              desc:'超速、急刹、告警按项目汇总。',
+              metrics:['超速时长(h)','超速占比(%)','急刹次数','告警次数'], vals:[1.8, 0.6, 4, 6], intCols:[2,3] },
+            { key:'proj_assets', name:'项目设备清单报表', en:'Project Asset List', group:'项目维度', nature:'项目维度', icon:'fleet',
+              desc:'项目在册设备一览与状态。',
+              metrics:['机型','状态','工时(h)','里程(km)'], vals:['挖掘机 SY215', '在线', 284.4, 128.6] }
+        ];
+
+        // ====================================================================
+        // 状态与 DOM 引用
+        // ====================================================================
+        let currentViewMode = 'grid'; // 'grid' | 'list'
+        let previewState = { key: reports[0].key, view: 'single' };
+        const searchInput = document.getElementById('templateSearch');
+        const templateContent = document.getElementById('templateContent');
+
+        // ====================================================================
+        // 示例数据：同一套字段，按取数范围生成单机 / 机群两种视图
+        // ====================================================================
+        const PERIOD = '2026-09-01 ~ 2026-09-30';
+        const FLEET_DEVICES = ['F3S01395', 'F3S01402', 'F3S01418'];
+        const FLEET_FACTORS = [1, 0.88, 0.71];
+
+        function cellText(rep, ci, v, factor) {
+            if (typeof v !== 'number') return v;
+            const x = v * factor;
+            return (rep.intCols || []).indexOf(ci) >= 0 ? String(Math.round(x)) : x.toFixed(1);
+        }
+
+        function buildTable(rep, view) {
+            const cols = view === 'single'
+                ? ['统计周期', '设备机型', '设备编号'].concat(rep.metrics)
+                : ['统计周期', '设备编号'].concat(rep.metrics);
+            const rows = view === 'single'
+                ? [[PERIOD, '挖掘机 SY215', 'F3S01395'].concat(rep.vals.map(function (v, i) { return cellText(rep, i, v, 1); }))]
+                : FLEET_DEVICES.map(function (id, k) {
+                      return [PERIOD, id].concat(rep.vals.map(function (v, i) { return cellText(rep, i, v, FLEET_FACTORS[k]); }));
+                  });
+            return { cols: cols, rows: rows };
+        }
+
+        // 状态样式：live = 已上线（红），planned = 已计划未实现（蓝）
+        function iconStyle(rep) {
+            if (rep.state === 'live') return 'style="background:#E60012;color:#fff;"';
+            if (rep.state === 'planned') return 'style="background:#1890ff;color:#fff;"';
+            return '';
+        }
+
+        function stateTag(rep) {
+            if (rep.state === 'live') {
+                return '<span style="display:inline-block;margin-left:6px;font-size:10px;font-weight:400;color:#E60012;background:#fdecee;border-radius:3px;padding:1px 6px;vertical-align:middle;">已上线</span>';
+            }
+            if (rep.state === 'planned') {
+                return '<span style="display:inline-block;margin-left:6px;font-size:10px;font-weight:400;color:#1890ff;background:#e6f4ff;border-radius:3px;padding:1px 6px;vertical-align:middle;">已计划</span>';
+            }
+            return '';
+        }
+
+        // ====================================================================
+        // 渲染：卡片（网格） / 行（列表）—— 页面只有报表卡片，不区分单机 / 机群
+        // ====================================================================
+        function renderCard(rep) {
+            return `
+                <div class="dim-card-unified${rep.metrics.length ? '' : ' is-disabled'}" data-key="${rep.key}">
+                    <div class="card-body">
+                        <div class="card-head-row">
+                            <div class="card-icon dim-icon-summary" ${iconStyle(rep)}>${ICONS[rep.icon] || ICONS.summary}</div>
+                            <div style="flex:1;min-width:0;">
+                                <div class="card-title">${rep.name}${stateTag(rep)}</div>
+                                <div class="card-subtitle">${rep.group} · ${rep.desc}</div>
+                            </div>
+                        </div>
+                        ${rep.metrics.length ? '' : '<div class="fields-row"><span class="field-chip" style="color:#b8b8b8;background:#f2f2f2;">数据源未接入 · 本期不实现</span></div>'}
+                    </div>
+                    <div class="card-footer">
+                        <div style="display:flex;gap:8px;margin-left:auto;">
+                            <button class="btn-link" data-action="preview" data-key="${rep.key}">预览</button>
+                            ${rep.metrics.length ? '<button class="btn-primary" data-action="add" data-key="' + rep.key + '">添加</button>' : ''}
+                        </div>
+                    </div>
+                </div>
+            `;
+        }
+
+        function renderListItem(rep) {
+            return `
+                <div class="dim-list-item${rep.metrics.length ? '' : ' is-disabled'}" data-key="${rep.key}">
+                    <div class="list-icon dim-icon-summary" ${iconStyle(rep)}>${ICONS[rep.icon] || ICONS.summary}</div>
+                    <div class="list-info">
+                        <div class="list-name">${rep.name}${stateTag(rep)}</div>
+                        <div class="list-desc">${rep.group} · ${rep.desc}</div>
+                    </div>
+                    <div class="list-fields">
+                        ${rep.metrics.length ? '' : '<span class="field-chip" style="color:#b8b8b8;background:#f2f2f2;">数据源未接入 · 本期不实现</span>'}
+                    </div>
+                    <div class="list-actions">
+                        <button class="btn-link" data-action="preview" data-key="${rep.key}">预览</button>
+                        ${rep.metrics.length ? '<button class="btn-primary" data-action="add" data-key="' + rep.key + '">添加</button>' : ''}
+                    </div>
+                </div>
+            `;
+        }
+
+        function rep2match(r, kw) {
+            return r.metrics.some(function (m) { return m.toLowerCase().indexOf(kw) >= 0; });
+        }
+
+        // 报表性质分组顺序
+        const NATURE_ORDER = ['设备概览', '能耗与成本', '作业与效率', '安全与事件', '位置与维保', '发电机', '项目维度'];
+
+        function renderAll() {
+            const kw = searchInput.value.trim().toLowerCase();
+            const list = reports.filter(function (r) {
+                return !kw
+                    || r.name.toLowerCase().indexOf(kw) >= 0
+                    || r.en.toLowerCase().indexOf(kw) >= 0
+                    || r.desc.toLowerCase().indexOf(kw) >= 0
+                    || rep2match(r, kw);
+            });
+
+            if (list.length === 0) {
+                templateContent.innerHTML = '<div class="empty-state"><div class="empty-text">未找到匹配的报表</div></div>';
+                return;
+            }
+
+            const groups = NATURE_ORDER
+                .map(function (nat) {
+                    return { name: nat, items: list.filter(function (r) { return r.nature === nat; }) };
+                })
+                .filter(function (g) { return g.items.length > 0; });
+            const rest = list.filter(function (r) { return NATURE_ORDER.indexOf(r.nature) < 0; });
+            if (rest.length) groups.push({ name: '其他', items: rest });
+
+            templateContent.innerHTML = groups.map(function (g) {
+                const inner = currentViewMode === 'list'
+                    ? '<div class="dim-list-view">' + g.items.map(renderListItem).join('') + '</div>'
+                    : '<div class="dim-cards-grid" style="padding:0;">' + g.items.map(renderCard).join('') + '</div>';
+                return '<section class="dimension-section">'
+                    + '<div class="dimension-header">'
+                    + '<div class="dimension-name">' + g.name + '</div>'
+                    + '<div class="dimension-desc">' + g.items.length + ' 张报表</div>'
+                    + '</div>'
+                    + inner
+                    + '</section>';
+            }).join('');
+        }
+
+        // ====================================================================
+        // 视图切换：网格 / 列表
+        // ====================================================================
+        document.querySelector('.view-toggle').addEventListener('click', function (e) {
+            const btn = e.target.closest('button');
+            if (!btn) return;
+            const btns = Array.prototype.slice.call(document.querySelectorAll('.view-toggle button'));
+            const newMode = btns.indexOf(btn) === 0 ? 'grid' : 'list';
+            if (newMode === currentViewMode) return;
+            currentViewMode = newMode;
+            btns.forEach(function (b) { b.classList.remove('active'); });
+            btn.classList.add('active');
+            renderAll();
+        });
+
+        // ====================================================================
+        // 搜索
+        // ====================================================================
+        searchInput.addEventListener('input', renderAll);
+
+        // ====================================================================
+        // 卡片按钮事件委托
+        // ====================================================================
+        templateContent.addEventListener('click', function (e) {
+            const btn = e.target.closest('button[data-action]');
+            if (!btn) return;
+            const rep = reports.filter(function (r) { return r.key === btn.dataset.key; })[0];
+            if (!rep) return;
+            if (btn.dataset.action === 'preview') {
+                openPreviewModal(rep.key, 'single');
+            } else if (btn.dataset.action === 'add') {
+                if (confirm('已选择报表：' + rep.name + '\n\n将在「管理报表」页面中配置报表信息（单机 / 机群 由所选资产数量决定）。\n是否立即前往？')) {
+                    window.location.href = '管理报表.html';
+                }
+            }
+        });
+
+        // ====================================================================
+        // 预览弹窗：单机 / 机群 的差异放在这里切换
+        // ====================================================================
+        const previewModal = document.getElementById('previewModal');
+        const previewTableContainer = document.getElementById('previewTableContainer');
+        const previewCloseBtn = document.getElementById('previewClose');
+        const previewTitle = document.querySelector('#previewModal .modal-title');
+
+        function openPreviewModal(key, view) {
+            const rep = reports.filter(function (r) { return r.key === key; })[0];
+            if (!rep) return;
+            previewState = { key: key, view: view || 'single' };
+            renderPreviewContent();
+            previewModal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function renderPreviewContent() {
+            const rep = reports.filter(function (r) { return r.key === previewState.key; })[0];
+            if (previewTitle) previewTitle.textContent = rep.name;
+
+            // 数据源未接入的报表：只展示说明
+            if (!rep.metrics.length) {
+                // 2026-09-17 调整：同样不再展示 副标题（分组 · 英文名）与报表说明段
+                previewTableContainer.innerHTML =
+                    '<div style="border:1px dashed #e0e0e0;border-radius:8px;padding:28px;text-align:center;color:#bbb;font-size:12px;">'
+                    + '该报表所需数据源尚未接入，本期不实现，暂无示例数据'
+                    + '</div>';
+                var useBtn = document.getElementById('useReportBtn');
+                if (useBtn) useBtn.style.display = 'none';
+                return;
+            }
+
+            var useBtn2 = document.getElementById('useReportBtn');
+            if (useBtn2) useBtn2.style.display = '';
+
+            const t = buildTable(rep, previewState.view);
+
+            let tableHTML = '<table class="preview-table"><thead><tr>';
+            t.cols.forEach(function (c) { tableHTML += '<th>' + c + '</th>'; });
+            tableHTML += '</tr></thead><tbody>';
+            t.rows.forEach(function (row) {
+                tableHTML += '<tr>';
+                row.forEach(function (cell, ci) {
+                    tableHTML += ci <= 2 ? '<td><span class="col-asset">' + cell + '</span></td>' : '<td>' + cell + '</td>';
+                });
+                tableHTML += '</tr>';
+            });
+            tableHTML += '</tbody></table>';
+
+            function seg(v, label) {
+                const on = previewState.view === v;
+                return '<button data-view="' + v + '" style="padding:6px 14px;border:none;background:' + (on ? '#fff' : 'transparent')
+                    + ';color:' + (on ? '#E60012' : '#666') + ';font-weight:' + (on ? '600' : '400')
+                    + ';border-radius:5px;cursor:pointer;font-family:inherit;font-size:12px;">' + label + '</button>';
+            }
+
+            // 2026-09-17 调整：预览弹窗只保留「视图切换 + 示例数据标 + 表格」
+            // 不再展示 报表副标题（分组 · 英文名）/ 报表说明段 /「同一套字段」说明块
+            previewTableContainer.innerHTML =
+                '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px;">'
+                + '<div style="display:inline-flex;padding:3px;background:#f2f2f2;border-radius:7px;">' + seg('single', '单机视图') + seg('fleet', '机群视图') + '</div>'
+                + '<span style="font-size:12px;color:#bbb;margin-left:auto;">示例数据，仅示意展示效果</span>'
+                + '</div>'
+                + tableHTML;
+
+            Array.prototype.slice.call(previewTableContainer.querySelectorAll('button[data-view]')).forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    previewState.view = btn.dataset.view;
+                    renderPreviewContent();
+                });
+            });
+        }
+
+        function closePreviewModal() {
+            previewModal.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        previewCloseBtn.addEventListener('click', closePreviewModal);
+        previewModal.addEventListener('click', (e) => {
+            if (e.target === previewModal) closePreviewModal();
+        });
+        document.addEventListener('keydown', (e) => {
+            if (e.key === 'Escape' && previewModal.classList.contains('active')) {
+                closePreviewModal();
+            }
+        });
+
+        // ====================================================================
+        // 「我需要更多报表」诉求弹窗
+        // ====================================================================
+        const MORE_REPORT_OPTIONS = [
+            { name: '超时工作报表', tag: '已规划', tagType: 'planned',
+              desc: '统计设备超过设定工时阈值的时长、次数与占比，用于识别加班与合规风险。' },
+            { name: '设备异常通知报表', tag: '已规划', tagType: 'planned',
+              desc: '汇总异常事件的即时通知记录与处理情况：异常类型、发生时间、通知对象与处理状态。' },
+            { name: '电池电量报表', tag: '已规划', tagType: 'planned',
+              desc: '统计设备 / 机群的电池荷电状态（SOC）与充电情况：期末 SOC、最低 SOC、充电次数与充电时长。' },
+            { name: '碳排放报表', tag: '可申请', tagType: 'apply',
+              desc: '把燃油 / 电能消耗折算为碳排放量，支持按项目、机型、周期统计，用于 ESG 与绿色施工汇报。' },
+            { name: '驾驶员行为评分报表', tag: '可申请', tagType: 'apply',
+              desc: '按急加速、急刹车、超速、怠速等事件给出机手的行为评分与排名，便于考核与培训。' },
+            { name: '备件与保养消耗报表', tag: '可申请', tagType: 'apply',
+              desc: '统计保养、维修产生的备件消耗与费用，按设备、项目与周期汇总。' }
+        ];
+
+        const moreReportsModal = document.getElementById('moreReportsModal');
+        const moreReportsOptionsBox = document.getElementById('moreReportOptions');
+        const moreReportsNote = document.getElementById('moreReportNote');
+        const moreReportsTip = document.getElementById('moreReportTip');
+
+        function renderMoreReportOptions() {
+            moreReportsOptionsBox.innerHTML = MORE_REPORT_OPTIONS.map(function (o) {
+                return '<label class="more-option">'
+                    + '<input type="checkbox" value="' + o.name + '">'
+                    + '<div style="flex:1;min-width:0;">'
+                    + '<div class="more-option-name">' + o.name
+                    + '<span class="more-option-tag ' + o.tagType + '">' + o.tag + '</span></div>'
+                    + '<div class="more-option-desc">' + o.desc + '</div>'
+                    + '</div></label>';
+            }).join('');
+        }
+
+        function openMoreReportsModal() {
+            moreReportsTip.className = 'more-form-tip';
+            moreReportsTip.textContent = '';
+            moreReportsNote.value = '';
+            renderMoreReportOptions();
+            moreReportsModal.classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeMoreReportsModal() {
+            moreReportsModal.classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        function submitMoreReports() {
+            const checked = Array.prototype.slice
+                .call(moreReportsOptionsBox.querySelectorAll('input:checked'))
+                .map(function (c) { return c.value; });
+            const note = moreReportsNote.value.trim();
+
+            if (!checked.length && !note) {
+                moreReportsTip.className = 'more-form-tip error';
+                moreReportsTip.textContent = '请至少勾选一张候选报表，或填写自定义诉求说明';
+                return;
+            }
+
+            // 2026-09-17 调整：诉求写入 localStorage，供后台「报表需求反馈」页展示
+            saveReportRequest('报表模版', checked, note);
+
+            moreReportsTip.className = 'more-form-tip success';
+            moreReportsTip.textContent = '已提交诉求'
+                + (checked.length ? '（勾选 ' + checked.length + ' 张：' + checked.join('、') + '）' : '（自定义 1 条）')
+                + '，可在后台「报表需求反馈」查看处理进度。';
+            setTimeout(closeMoreReportsModal, 1400);
+        }
+
+        // 写入诉求（后台 V2/mysany后台V2/报表需求反馈.html 读取同一个 localStorage key）
+        function saveReportRequest(source, reports, note) {
+            try {
+                const KEY = 'mysany_report_requests';
+                const now = new Date();
+                const p2 = function (n) { return String(n).padStart(2, '0'); };
+                const time = now.getFullYear() + '-' + p2(now.getMonth() + 1) + '-' + p2(now.getDate())
+                    + ' ' + p2(now.getHours()) + ':' + p2(now.getMinutes());
+                const list = JSON.parse(localStorage.getItem(KEY) || '[]');
+                list.unshift({
+                    id: 'REQ-' + now.getTime(),
+                    time: time,
+                    user: 'Schuck',
+                    source: source,
+                    reports: reports,
+                    note: note,
+                    status: '待评估'
+                });
+                localStorage.setItem(KEY, JSON.stringify(list));
+            } catch (e) { /* 演示环境忽略存储异常 */ }
+        }
+
+        document.getElementById('moreReportsClose').addEventListener('click', closeMoreReportsModal);
+        moreReportsModal.addEventListener('click', function (e) {
+            if (e.target === moreReportsModal) closeMoreReportsModal();
+        });
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && moreReportsModal.classList.contains('active')) closeMoreReportsModal();
+        });
+
+        // 顶部标签页右侧的入口按钮
+        document.getElementById('moreReportsEntry').addEventListener('click', openMoreReportsModal);
+
+        // ====================================================================
+        // 初始化
+        // ====================================================================
+        renderAll();
+
+        // ======== 新手引导 - 红框高亮真实按钮 ========
+        (function initOnboarding() {
+            const steps = [
+                {
+                    selector: '.sidebar-link.active',
+                    badge: '步骤 1/4',
+                    title: '机群报表，内测上线',
+                    desc: '当前为内测阶段，全量免费开放使用，助您随时全盘掌握设备运行状况。',
+                    placement: 'right'
+                },
+                {
+                    selector: '#templateContent [data-action="preview"]',
+                    badge: '步骤 2/4',
+                    title: '浏览并预览模板',
+                    desc: '点击卡片上的<span class="hl">"预览"</span>按钮，即可查看该报表模板包含的字段与数据展示效果。',
+                    placement: 'below'
+                },
+                {
+                    selector: '#templateContent [data-action="add"]',
+                    badge: '步骤 3/4',
+                    title: '选择需要的模板',
+                    desc: '确定模板后，点击卡片上的<span class="hl">"添加"</span>按钮，选择您所需的报表模板进行设置。',
+                    placement: 'below'
+                },
+                {
+                    selector: '.tabs a[href*="管理报表"]',
+                    badge: '步骤 4/4',
+                    title: '管理已有报表',
+                    desc: '点击顶部<span class="hl">"管理报表"</span>标签页，即可查看、编辑或删除您已添加的所有报表配置。',
+                    placement: 'below'
+                }
+            ];
+
+            let currentIdx = 0;
+            let backdropEl, tooltipEl, prevHighlightEl = null;
+
+            function getTarget() {
+                const sel = steps[currentIdx].selector;
+                const sels = sel.split(',').map(s => s.trim());
+                for (const s of sels) {
+                    const el = document.querySelector(s);
+                    if (el) return el;
+                }
+                return null;
+            }
+
+            function highlightTarget(target) {
+                if (!target) return;
+                if (prevHighlightEl && prevHighlightEl !== target) {
+                    prevHighlightEl.classList.remove('tour-highlight');
+                }
+                target.classList.add('tour-highlight');
+                prevHighlightEl = target;
+                target.scrollIntoView({ behavior: 'smooth', block: 'center' });
+            }
+
+            function positionTooltip(target) {
+                if (!target || !tooltipEl) return;
+                const tr = target.getBoundingClientRect();
+                const tpEl = tooltipEl;
+                const placement = steps[currentIdx].placement || 'below';
+                const gap = 18;
+
+                const tw = tpEl.offsetWidth;
+                const th = tpEl.offsetHeight;
+                const vw = window.innerWidth;
+                const vh = window.innerHeight;
+
+                let left, top;
+                let arrowClass = '';
+
+                const tcx = tr.left + tr.width / 2;
+                const tcy = tr.top + tr.height / 2;
+
+                if (placement === 'right') {
+                    left = tr.right + gap;
+                    top = tcy - th / 2;
+                    top = Math.max(12, Math.min(top, vh - th - 12));
+                    if (left + tw > vw - 12) {
+                        left = tr.left - tw - gap;
+                        arrowClass = 'left';
+                    } else {
+                        arrowClass = 'right';
+                    }
+                } else if (placement === 'left') {
+                    left = tr.left - tw - gap;
+                    top = tcy - th / 2;
+                    top = Math.max(12, Math.min(top, vh - th - 12));
+                    if (left < 12) {
+                        left = tr.right + gap;
+                        arrowClass = 'right';
+                    } else {
+                        arrowClass = 'left';
+                    }
+                } else if (placement === 'below') {
+                    left = tcx - tw / 2;
+                    top = tr.bottom + gap;
+                    left = Math.max(12, Math.min(left, vw - tw - 12));
+                    if (top + th > vh - 12) {
+                        top = tr.top - th - gap;
+                        arrowClass = 'above';
+                    } else {
+                        arrowClass = 'below';
+                    }
+                } else { // above
+                    left = tcx - tw / 2;
+                    top = tr.top - th - gap;
+                    left = Math.max(12, Math.min(left, vw - tw - 12));
+                    if (top < 12) {
+                        top = tr.bottom + gap;
+                        arrowClass = 'below';
+                    } else {
+                        arrowClass = 'above';
+                    }
+                }
+
+                const arrowEl = tpEl.querySelector('.tour-tooltip-arrow');
+                if (arrowEl) {
+                    arrowEl.style.cssText = '';
+                    if (arrowClass === 'right') {
+                        arrowEl.style.left = '-7px';
+                        arrowEl.style.top = Math.max(14, Math.min(th - 14, tcy - top)) + 'px';
+                        arrowEl.style.boxShadow = '-2px 2px 4px rgba(0,0,0,0.06)';
+                    } else if (arrowClass === 'left') {
+                        arrowEl.style.right = '-7px';
+                        arrowEl.style.top = Math.max(14, Math.min(th - 14, tcy - top)) + 'px';
+                        arrowEl.style.boxShadow = '2px -2px 4px rgba(0,0,0,0.06)';
+                    } else if (arrowClass === 'below') {
+                        arrowEl.style.top = '-7px';
+                        arrowEl.style.left = Math.max(16, Math.min(tw - 16, tcx - left)) + 'px';
+                        arrowEl.style.boxShadow = '-2px -2px 4px rgba(0,0,0,0.06)';
+                    } else { // above
+                        arrowEl.style.bottom = '-7px';
+                        arrowEl.style.left = Math.max(16, Math.min(tw - 16, tcx - left)) + 'px';
+                        arrowEl.style.boxShadow = '2px 2px 4px rgba(0,0,0,0.06)';
+                    }
+                }
+
+                tpEl.className = 'tour-tooltip arrow-' + arrowClass;
+                tpEl.style.left = left + 'px';
+                tpEl.style.top = top + 'px';
+            }
+
+            function render() {
+                const s = steps[currentIdx];
+                const target = getTarget();
+
+                if (prevHighlightEl) {
+                    prevHighlightEl.classList.remove('tour-highlight');
+                    prevHighlightEl = null;
+                }
+
+                if (target) {
+                    highlightTarget(target);
+                    setTimeout(() => positionTooltip(target), 300);
+                    setTimeout(() => { const t = getTarget(); if (t) positionTooltip(t); }, 900);
+                }
+
+                const badgeEl = tooltipEl.querySelector('.tour-step-badge');
+                const titleEl = tooltipEl.querySelector('.tour-step-title');
+                const descEl = tooltipEl.querySelector('.tour-step-desc');
+                const prevBtn = tooltipEl.querySelector('.tour-prev');
+                const nextBtn = tooltipEl.querySelector('.tour-next');
+                const dots = tooltipEl.querySelectorAll('.tour-dot');
+
+                if (badgeEl) badgeEl.textContent = s.badge;
+                if (titleEl) titleEl.textContent = s.title;
+                if (descEl) descEl.innerHTML = s.desc;
+                if (prevBtn) prevBtn.style.visibility = currentIdx === 0 ? 'hidden' : 'visible';
+                if (nextBtn) nextBtn.textContent = currentIdx === steps.length - 1 ? '开始使用' : '下一步';
+
+                dots.forEach((d, i) => d.classList.toggle('active', i === currentIdx));
+            }
+
+            function next() {
+                if (currentIdx >= steps.length - 1) { close(); return; }
+                currentIdx++;
+                render();
+            }
+
+            function prev() {
+                if (currentIdx <= 0) return;
+                currentIdx--;
+                render();
+            }
+
+            function close() {
+                if (prevHighlightEl) {
+                    prevHighlightEl.classList.remove('tour-highlight');
+                    prevHighlightEl = null;
+                }
+                if (tooltipEl) { tooltipEl.remove(); tooltipEl = null; }
+                if (backdropEl) { backdropEl.remove(); backdropEl = null; }
+            }
+
+            // ---- 构建 DOM ----
+            backdropEl = document.createElement('div');
+            backdropEl.className = 'tour-backdrop';
+            backdropEl.addEventListener('click', function(e) { e.stopPropagation(); });
+            document.body.appendChild(backdropEl);
+
+            tooltipEl = document.createElement('div');
+            tooltipEl.className = 'tour-tooltip arrow-below';
+            tooltipEl.innerHTML = `
+                <div class="tour-tooltip-arrow"></div>
+                <div class="tour-step-badge"></div>
+                <div class="tour-step-title"></div>
+                <div class="tour-step-desc"></div>
+                <div class="tour-dots">
+                    ${steps.map(() => '<span class="tour-dot"></span>').join('')}
+                </div>
+                <div class="tour-actions">
+                    <button class="tour-skip">跳过指引</button>
+                    <div class="tour-nav">
+                        <button class="tour-btn tour-prev">上一步</button>
+                        <button class="tour-btn primary tour-next">下一步</button>
+                    </div>
+                </div>
+            `;
+            document.body.appendChild(tooltipEl);
+
+            tooltipEl.querySelector('.tour-skip').addEventListener('click', close);
+            tooltipEl.querySelector('.tour-prev').addEventListener('click', prev);
+            tooltipEl.querySelector('.tour-next').addEventListener('click', next);
+
+            function onEsc(e) {
+                if (e.key === 'Escape') { close(); document.removeEventListener('keydown', onEsc); }
+            }
+            document.addEventListener('keydown', onEsc);
+
+            let resizeTimer;
+            window.addEventListener('resize', () => {
+                clearTimeout(resizeTimer);
+                resizeTimer = setTimeout(() => {
+                    const target = getTarget();
+                    if (target) positionTooltip(target);
+                }, 200);
+            });
+
+            setTimeout(() => render(), 100);
+        })();
+    </script>
+            </main>
+        </div>
+    </div>
+</body>
+</html>
+
+

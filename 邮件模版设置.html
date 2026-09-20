@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MySANY 管理后台 - 邮件模版设置</title>
+    <title>MySANY 管理后台 - 邮件模版设置（v2.0）</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -172,6 +172,29 @@
         .lang-select-wrap select { width: 100%; height: 34px; border: 1px solid #d9d9d9; border-radius: 6px; padding: 0 10px; font-size: 13px; color: #333; background: #fff; cursor: pointer; }
         .lang-select-wrap select:focus { border-color: #E60012; outline: none; box-shadow: 0 0 0 2px rgba(230,0,18,0.1); }
         .lang-select-wrap .lang-hint { font-size: 11px; color: #999; margin-top: 4px; }
+        /* 编辑已有模版时，语言与模版类型锁定不可修改 */
+        #edit-lang-select:disabled,
+        /* v2.0 合并：适用范围多选（单机 / 机群），一条模版可同时服务两种口径 */
+        /* v2.0 优化：适用范围为「多选」，改用勾选卡片，避免与单选 Tab（发送方式 / 数据列配置子 Tab）混淆 */
+        .scope-checks { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
+        .scope-check {
+            display: inline-flex; align-items: center; gap: 6px; margin: 0;
+            padding: 6px 14px 6px 10px; background: #fff;
+            border: 1px solid #e5e5e5; border-radius: 6px;
+            font-size: 13px; color: #333; cursor: pointer;
+            transition: border-color .2s, background .2s;
+        }
+        .scope-check:hover { border-color: #cfcfcf; }
+        .scope-check input[type="checkbox"] {
+            width: 14px; height: 14px; margin: 0; cursor: pointer; accent-color: #E60012;
+        }
+        .scope-check:has(input:checked) { border-color: #E60012; background: #fff5f5; }
+        .scope-check:has(input:checked) span { color: #E60012; font-weight: 600; }
+        .scope-check-text { font-size: 11px; color: #999; margin-top: 6px; }
+
+        /* v2.0 合并：数据列配置子 Tab（单机配置 / 机群配置） */
+        .col-subswitch-wrap { display: flex; align-items: center; gap: 10px; margin-top: 12px; }
+        .col-subswitch-hint { font-size: 11px; color: #999; }
 
         /* 变量标签 */
         .var-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
@@ -488,6 +511,25 @@
         .ql-toolbar { border: none !important; border-bottom: 1px solid #e8e8e8 !important; background: #fafafa; }
         .ql-editor { min-height: 280px; line-height: 1.8; }
         .ql-editor p { line-height: 1.8; }
+
+        /* v2.0 调整：正文内容支持「HTML 源码」模式（代码输入） */
+        .body-editor-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; }
+        .body-editor-head label { margin-bottom: 0 !important; }
+        .body-editor-modes { display: inline-flex; padding: 2px; background: #f2f2f2; border-radius: 6px; }
+        .body-editor-modes .be-mode-btn {
+            border: none; background: transparent; cursor: pointer; font-family: inherit;
+            font-size: 12px; color: #666; padding: 4px 12px; border-radius: 4px; line-height: 18px;
+        }
+        .body-editor-modes .be-mode-btn.active { background: #fff; color: #E60012; font-weight: 600; box-shadow: 0 1px 3px rgba(0,0,0,0.08); }
+        .code-textarea {
+            width: 100%; min-height: 280px; box-sizing: border-box;
+            border: 1px solid #d9d9d9; border-radius: 6px; padding: 12px;
+            font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Courier New", monospace;
+            font-size: 12.5px; line-height: 1.6; color: #333; background: #fcfcfc;
+            resize: vertical; outline: none; tab-size: 2;
+        }
+        .code-textarea:focus { border-color: #E60012; background: #fff; }
+        .code-hint { margin-top: 8px; font-size: 12px; color: #8c8c8c; line-height: 1.6; }
         /* Quill 变量样式 */
         .ql-variable {
             background: #e6f7ff; border: 1px solid #91d5ff; color: #1890ff;
@@ -729,6 +771,176 @@
             transition: all .15s; background: rgba(255,255,255,0.6);
         }
         .sc-var-tag .sc-var-del:hover { background: #ff4d4f; color: #fff; transform: scale(1.1); }
+
+        /* ==================== v2.0 新增样式 ==================== */
+        /* 模式切换（版式设计器 / Word 模板） */
+        .mode-switch {
+            display: inline-flex; padding: 3px; background: #f2f2f2; border-radius: 8px; margin-bottom: 14px;
+        }
+        .mode-switch button {
+            min-width: 150px; padding: 9px 18px; border: none; background: transparent; border-radius: 6px;
+            font-size: 13px; font-weight: 600; color: #666; cursor: pointer; font-family: inherit; transition: all .18s;
+        }
+        .mode-switch button.active { background: #fff; color: #E60012; box-shadow: 0 1px 4px rgba(0,0,0,.1); }
+        .mode-switch button:hover:not(.active) { color: #333; }
+
+        /* 设计器三栏 */
+        .designer-toolbar {
+            display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
+            padding: 10px 12px; background: #fafafa; border: 1px solid #eee; border-radius: 8px 8px 0 0;
+        }
+        .designer-toolbar .tb-item { display: flex; align-items: center; gap: 6px; font-size: 12px; color: #666; }
+        .designer-toolbar select {
+            height: 32px; border: 1px solid #d9d9d9; border-radius: 5px; padding: 0 8px;
+            font-size: 12px; font-family: inherit; color: #333; background: #fff;
+        }
+        .designer-toolbar .tb-spacer { flex: 1; }
+        .designer-toolbar .tb-btn {
+            height: 32px; padding: 0 12px; border: 1px solid #d9d9d9; background: #fff; border-radius: 5px;
+            font-size: 12px; color: #333; cursor: pointer; font-family: inherit;
+        }
+        .designer-toolbar .tb-btn:hover { border-color: #E60012; color: #E60012; }
+        .designer-toolbar .tb-btn.primary { background: #E60012; border-color: #E60012; color: #fff; }
+        .designer-toolbar .tb-btn.primary:hover { background: #cc0010; }
+
+        .designer-body {
+            display: grid; grid-template-columns: 176px 1fr 268px;
+            border: 1px solid #eee; border-top: none; border-radius: 0 0 8px 8px;
+            background: #fff; min-height: 520px;
+        }
+        .designer-col { border-right: 1px solid #f0f0f0; }
+        .designer-col:last-child { border-right: none; border-left: 1px solid #f0f0f0; }
+        .designer-col-title {
+            padding: 10px 12px; font-size: 12px; font-weight: 600; color: #333;
+            border-bottom: 1px solid #f0f0f0; background: #fcfcfc;
+        }
+        .block-lib { padding: 8px; display: flex; flex-direction: column; gap: 6px; }
+        .block-lib-item {
+            display: flex; align-items: center; gap: 8px; padding: 8px 10px;
+            border: 1px dashed #d9d9d9; border-radius: 6px; font-size: 12px; color: #444; cursor: pointer;
+            transition: all .15s; background: #fff;
+        }
+        .block-lib-item:hover { border-color: #E60012; color: #E60012; background: #fffafa; }
+        .block-lib-item .bli-icon { width: 16px; text-align: center; color: #bbb; }
+
+        /* 画布（A4 横向等比） */
+        .canvas-wrap { padding: 14px; background: #f4f4f4; overflow: auto; }
+        .canvas-scale { transform-origin: top left; }
+        .canvas-page {
+            width: 297mm; min-height: 210mm; padding: 14mm 16mm; background: #fff;
+            box-shadow: 0 2px 10px rgba(0,0,0,.12); font-family: "PingFang SC","Microsoft YaHei",Arial,sans-serif; color: #1a1a1a;
+        }
+        .canvas-block { position: relative; border: 1px dashed transparent; border-radius: 3px; }
+        .canvas-block:hover { border-color: #69b1ff; }
+        .canvas-block.selected { border-color: #E60012; box-shadow: 0 0 0 2px rgba(230,0,18,.12); }
+        .canvas-block .blk-tag {
+            position: absolute; top: -10px; left: 0; display: none;
+            background: #E60012; color: #fff; font-size: 10px; padding: 1px 6px; border-radius: 3px; white-space: nowrap;
+        }
+        .canvas-block.selected .blk-tag, .canvas-block:hover .blk-tag { display: block; }
+        .blk-doc-header { display: flex; justify-content: space-between; align-items: flex-start; border-bottom: 4px solid #E60012; padding-bottom: 10px; }
+        .blk-brand { background: #E60012; color: #fff; font-weight: 900; font-size: 22px; padding: 4px 12px; letter-spacing: 2px; border-radius: 2px; }
+        .blk-brand-sub { font-size: 11px; color: #666; line-height: 1.5; margin-left: 10px; }
+        .blk-doc-title { text-align: right; }
+        .blk-doc-title h1 { margin: 0; font-size: 20px; }
+        .blk-doc-title p { margin: 4px 0 0; font-size: 11px; color: #666; }
+        .blk-period { display: inline-block; margin-top: 5px; background: #E60012; color: #fff; font-size: 10px; padding: 2px 10px; border-radius: 10px; }
+        .blk-metrics { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; margin-top: 14px; }
+        .blk-metric { padding: 10px 12px; border-top: 4px solid #E60012; box-shadow: 0 1px 4px rgba(0,0,0,.06); }
+        .blk-metric .l { font-size: 11px; color: #888; }
+        .blk-metric .n { font-size: 22px; font-weight: 800; color: #E60012; margin-top: 4px; }
+        .blk-metric .u { font-size: 11px; color: #999; }
+        .blk-cols { display: grid; grid-template-columns: 1fr 1fr; gap: 18px; margin-top: 18px; }
+        .blk-sec-title { margin-bottom: 10px; padding-left: 8px; border-left: 4px solid #E60012; font-size: 14px; font-weight: 700; }
+        .blk-ring-row { display: flex; align-items: center; gap: 16px; }
+        .blk-ring { width: 110px; height: 110px; border-radius: 50%; background: conic-gradient(#E60012 0 99.2%, #eee 99.2% 100%); position: relative; flex-shrink: 0; }
+        .blk-ring::after { content: ""; position: absolute; inset: 18px; background: #fff; border-radius: 50%; }
+        .blk-ring b { position: absolute; inset: 0; display: flex; align-items: center; justify-content: center; z-index: 1; font-size: 19px; color: #E60012; }
+        .blk-legend { flex: 1; }
+        .blk-legend .item { display: flex; justify-content: space-between; padding: 5px 0; border-bottom: 1px solid #f0f0f0; font-size: 12px; }
+        .blk-legend .dot { display: inline-block; width: 9px; height: 9px; border-radius: 2px; margin-right: 7px; }
+        .blk-bar { margin: 8px 0; }
+        .blk-bar .h { display: flex; justify-content: space-between; font-size: 11px; color: #555; margin-bottom: 3px; }
+        .canvas-page table { width: 100%; border-collapse: collapse; font-size: 11px; }
+        .canvas-page th { background: #E60012; color: #fff; padding: 6px; text-align: left; font-weight: 600; }
+        .canvas-page td { padding: 6px; border-bottom: 1px solid #f0f0f0; }
+        .canvas-page tr:nth-child(even) td { background: #faf7f7; }
+        .canvas-page td.num, .canvas-page th.num { text-align: right; }
+        .blk-bar-track { height: 12px; background: #f2f2f2; border-radius: 6px; overflow: hidden; }
+        .blk-bar-fill { height: 100%; background: #E60012; border-radius: 6px; }
+        .blk-footer { margin-top: 20px; padding-top: 8px; border-top: 2px solid #E60012; display: flex; justify-content: space-between; font-size: 10px; color: #888; }
+
+        /* 属性面板 */
+        .prop-panel { padding: 12px; }
+        .prop-panel .prop-group { margin-bottom: 14px; }
+        .prop-panel label { display: block; font-size: 12px; color: #666; margin-bottom: 5px; }
+        .prop-panel input[type="text"], .prop-panel select {
+            width: 100%; height: 32px; border: 1px solid #d9d9d9; border-radius: 5px;
+            padding: 0 8px; font-size: 12px; font-family: inherit; color: #333;
+        }
+        .prop-panel .var-chip {
+            display: inline-flex; align-items: center; gap: 5px; margin-top: 6px;
+            background: #f0f7ff; border: 1px solid #c9e0ff; color: #1d5fa8;
+            border-radius: 5px; padding: 3px 8px; font-size: 11px; font-family: monospace;
+        }
+        .prop-empty { padding: 26px 14px; text-align: center; color: #bbb; font-size: 12px; line-height: 1.7; }
+        .prop-danger {
+            width: 100%; height: 32px; border: 1px solid #ffccc7; background: #fff; color: #E60012;
+            border-radius: 5px; font-size: 12px; cursor: pointer; font-family: inherit;
+        }
+        .prop-danger:hover { background: #fff1f0; }
+        .prop-actions { display: flex; gap: 8px; margin-top: 10px; }
+
+        .designer-validate {
+            margin-top: 10px; padding: 8px 12px; border-radius: 6px; font-size: 12px; line-height: 1.6; display: none;
+        }
+        .designer-validate.active { display: block; }
+        .designer-validate.ok { background: #f6ffed; border: 1px solid #b7eb8f; color: #389e0d; }
+        .designer-validate.warn { background: #fffbe6; border: 1px solid #ffe58f; color: #d48806; }
+
+        /* 预览与测试 */
+        .preview-toolbar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
+        .view-switch { display: inline-flex; padding: 3px; background: #f2f2f2; border-radius: 7px; }
+        .view-switch button {
+            padding: 6px 14px; border: none; background: transparent; border-radius: 5px;
+            font-size: 12px; color: #666; cursor: pointer; font-family: inherit;
+        }
+        .view-switch button.active { background: #fff; color: #E60012; font-weight: 600; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+        .preview-stage { background: #eef1f5; border: 1px solid #e8e8e8; border-radius: 8px; padding: 18px; display: flex; justify-content: center; }
+        .email-frame {
+            width: 600px; background: #fff; border-radius: 4px; overflow: hidden;
+            box-shadow: 0 3px 14px rgba(0,0,0,.1); transition: width .2s;
+        }
+        .email-frame.mobile { width: 375px; }
+        .email-frame.dark { background: #1f1f1f; color: #e8e8e8; }
+        .email-frame.strip { border: 2px dashed #E60012; }
+        .email-brand-bar { background: #E60012; color: #fff; padding: 12px 16px; font-size: 14px; font-weight: 700; }
+        .email-frame.dark .email-brand-bar { background: #7a0009; }
+        .email-body { padding: 16px; font-size: 13px; line-height: 1.8; color: #333; }
+        .email-frame.dark .email-body { color: #ddd; }
+        .email-metrics { display: grid; grid-template-columns: 1fr 1fr; gap: 8px; margin: 12px 0; }
+        .email-metric { background: #f5f7fa; border-radius: 8px; padding: 10px 12px; }
+        .email-frame.dark .email-metric { background: #2a2a2a; }
+        .email-metric .l { font-size: 11px; color: #888; }
+        .email-metric .n { font-size: 18px; font-weight: 700; color: #E60012; margin-top: 2px; }
+        .email-btn {
+            display: inline-block; padding: 11px 28px; background: #E60012; color: #fff;
+            border-radius: 6px; font-size: 13px; font-weight: 600; text-decoration: none;
+        }
+        .email-frame.strip .email-btn { background: #999; }
+        .email-mini-table { width: 100%; border-collapse: collapse; font-size: 11px; margin: 10px 0; }
+        .email-mini-table th { background: #f5f7fa; color: #555; padding: 6px; text-align: left; }
+        .email-mini-table td { padding: 6px; border-bottom: 1px solid #f0f0f0; }
+        .email-foot { padding: 12px 16px; border-top: 1px solid #f0f0f0; color: #999; font-size: 11px; }
+        .preview-strip-note { margin-top: 10px; font-size: 11px; color: #E60012; display: none; }
+        .email-frame.strip + .preview-strip-note { display: block; }
+
+        .pdf-preview-stage { background: #eef1f5; border: 1px solid #e8e8e8; border-radius: 8px; padding: 18px; overflow: auto; }
+        .compat-table { width: 100%; border-collapse: collapse; font-size: 12px; margin-top: 8px; }
+        .compat-table th { background: #fafafa; color: #555; padding: 8px; text-align: left; border-bottom: 1px solid #eee; }
+        .compat-table td { padding: 8px; border-bottom: 1px solid #f5f5f5; color: #555; }
+        .ok-mark { color: #389e0d; }
+        .warn-mark { color: #d48806; }
     </style>
     <link href="https://cdn.quilljs.com/1.3.7/quill.snow.css" rel="stylesheet">
 </head>
@@ -776,6 +988,7 @@
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
                             触发日志
                         </a></li>
+                        <li class="sidebar-item"><a class="sidebar-link" href="报表需求反馈.html"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6v6H9z"/><path d="M5 9h14a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2z"/><line x1="7" y1="14" x2="17" y2="14"/><line x1="7" y1="17" x2="13" y2="17"/></svg>报表需求反馈</a></li>
                     </ul>
                 </li>
             </ul>
@@ -816,7 +1029,7 @@
                 <div class="table-card-header"><h3>模版列表</h3><span style="font-size:12px;color:#999" id="tpl-count">共 5 个模版</span></div>
                 <div style="overflow-x:auto;">
                     <table>
-                        <thead><tr><th style="width:50px;">图标</th><th>模版名称</th><th>模版类型</th><th>模版描述</th><th>语言</th><th>启用</th><th>最近更新</th><th>操作</th></tr></thead>
+                        <thead><tr><th style="width:50px;">图标</th><th>模版名称</th><th>适用范围</th><th>报告维度</th><th>PDF 版式</th><th>模版描述</th><th>语言</th><th>启用</th><th>最近更新</th><th>操作</th></tr></thead>
                         <tbody id="template-table-body"></tbody>
                     </table>
                 </div>
@@ -845,11 +1058,19 @@
                 <div class="form-group"><label>模版名称 <span class="required">*</span></label><input type="text" id="edit-tpl-name" placeholder="如：设备运行日报模版"></div>
                 <div class="form-group"><label>模版描述 <span class="required">*</span></label><input type="text" id="edit-tpl-desc" placeholder="如：适用于挖掘机设备每日运行数据汇报"></div>
                 <div class="form-group">
-                    <label>模版类型 <span class="required">*</span></label>
-                    <select id="edit-tpl-machine-type" onchange="toggleDataColumnConfig()">
-                        <option value="单机">单机</option>
-                        <option value="机群">机群</option>
-                    </select>
+                    <label>适用范围 <span class="required">*</span></label>
+                    <!-- v2.0 优化：多选（勾选框形式），至少保留一个；两种都适用时数据列配置分两套 -->
+                    <div class="scope-checks" id="edit-tpl-scope">
+                        <label class="scope-check">
+                            <input type="checkbox" data-type="单机" checked onchange="toggleEditType('单机')">
+                            <span>单机</span>
+                        </label>
+                        <label class="scope-check">
+                            <input type="checkbox" data-type="机群" checked onchange="toggleEditType('机群')">
+                            <span>机群</span>
+                        </label>
+                    </div>
+                    <div class="scope-check-text">可多选，至少选一个；两种都适用时，「数据列配置」分「单机 / 机群」两套分别配置</div>
                 </div>
             </div>
             <div class="form-group" style="margin-top:12px;">
@@ -869,13 +1090,14 @@
 
             <!-- 步骤切换Tab -->
             <div class="step-tabs">
-                <button class="step-tab active" data-step="1" onclick="switchStep(1)">正文配置</button>
+                <button class="step-tab active" data-step="1" onclick="switchStep(1)">邮件正文</button>
                 <button class="step-tab" data-step="2" onclick="switchStep(2)">XLSX/CSV附件</button>
                 <button class="step-tab" data-step="3" onclick="switchStep(3)">PDF附件</button>
             </div>
 
-            <!-- 步骤1：正文配置 -->
+            <!-- 步骤1：邮件正文 -->
             <div class="step-panel" id="step-body">
+
                 <!-- 变量提示 -->
                 <div class="var-hint-box" id="edit-var-hint">
                     <div style="display:flex;align-items:center;justify-content:space-between;margin-bottom:4px;">
@@ -885,13 +1107,24 @@
                     <strong>基础信息：</strong><span class="clickable-var" onclick="insertVarEdit('{{模版名称}}')">{{模版名称}}</span> <span class="clickable-var" onclick="insertVarEdit('{{发送日期}}')">{{发送日期}}</span> <span class="clickable-var" onclick="insertVarEdit('{{收件人姓名}}')">{{收件人姓名}}</span> <span class="clickable-var" onclick="insertVarEdit('{{生成时间}}')">{{生成时间}}</span> <span class="clickable-var" onclick="insertVarEdit('{{一键订阅}}')">{{一键订阅}}</span> <span class="clickable-var" onclick="insertVarEdit('{{查看报告}}')">{{查看报告}}</span>
                 </div>
 
-                <!-- 富文本编辑器（全宽） -->
+                <!-- 富文本编辑器（全宽）｜v2.0 调整：支持切到「HTML 源码」直接输入代码 -->
                 <div class="body-editor-full">
-                    <label>正文内容 <span class="required">*</span></label>
-                    <div class="form-hint" style="margin-bottom:8px;">点击上方黄色区域中的变量标签即可插入到光标位置，也可直接输入 <code>{{变量名}}</code>。</div>
+                    <div class="body-editor-head">
+                        <label>正文内容 <span class="required">*</span></label>
+                        <div class="body-editor-modes" id="body-editor-modes">
+                            <button type="button" class="be-mode-btn active" data-mode="rich" onclick="switchBodyMode('rich')">富文本</button>
+                            <button type="button" class="be-mode-btn" data-mode="code" onclick="switchBodyMode('code')">&lt;/&gt; HTML 源码</button>
+                        </div>
+                    </div>
+                    <div class="form-hint" style="margin-bottom:8px;">点击上方黄色区域中的变量标签即可插入到光标位置，也可直接输入 <code>{{变量名}}</code>；需要用代码排版（内联样式、表格结构等）时切到「HTML 源码」。</div>
                     <div id="editor-container">
                         <div id="editor-toolbar"></div>
                         <div id="edit-tpl-body"></div>
+                    </div>
+                    <!-- 源码模式：直接编辑邮件正文的 HTML，原样保存 -->
+                    <textarea id="body-source" class="code-textarea" spellcheck="false" style="display:none;"></textarea>
+                    <div class="code-hint" id="code-hint" style="display:none;">
+                        源码模式：内容原样保存（支持任意 HTML）。切回「富文本」时，编辑器不支持的结构（如 <code>&lt;style&gt;</code>、<code>&lt;table&gt;</code>）可能被简化，建议代码编排在源码模式下完成。
                     </div>
                 </div>
             </div>
@@ -912,6 +1145,15 @@
                         </div>
                     </div>
                 </div>
+
+                    <!-- v2.0 合并：适用范围同时含单机 / 机群时，数据列配置分两套，用子 Tab 切换 -->
+                    <div class="col-subswitch-wrap" id="data-col-subswitch" style="display:none;">
+                        <div class="view-switch" id="data-col-subswitch-tabs">
+                            <button type="button" data-col="single" class="active" onclick="setDataColTab('single')">单机配置</button>
+                            <button type="button" data-col="fleet" onclick="setDataColTab('fleet')">机群配置</button>
+                        </div>
+                        <span class="col-subswitch-hint">两种口径各存一套列配置，互不影响</span>
+                    </div>
 
                     <!-- 数据列配置（机群模版） -->
                     <div class="attachment-section" id="fleet-column-config" style="margin-top:12px;display:none;">
@@ -983,6 +1225,83 @@
             <!-- 步骤3：PDF附件 -->
             <div class="step-panel" id="step-pdf" style="display:none;">
 
+                <!-- v2.0 配置模式切换 -->
+                <div class="mode-switch" id="pdfModeSwitch">
+                    <button type="button" class="active" data-mode="designer" onclick="switchPdfMode('designer')">版式设计器（推荐）</button>
+                    <button type="button" data-mode="word" onclick="switchPdfMode('word')">Word 模板（兼容）</button>
+                </div>
+
+                <!-- ===== v2.0 模式一：版式设计器 ===== -->
+                <div id="pdfDesignerMode">
+                    <div class="designer-toolbar">
+                        <div class="tb-item">
+                            <span>版式模板</span>
+                            <select id="pdfLayoutTemplate" onchange="applyLayoutTemplate(this.value)">
+                                <option value="standard">标准版（A4 横向）</option>
+                                <option value="simple">精简版（A4 纵向）</option>
+                                <option value="fleet">机群对比版</option>
+                            </select>
+                        </div>
+                        <div class="tb-item">
+                            <span>主题色</span>
+                            <select id="pdfThemeColor" onchange="applyTheme(this.value)">
+                                <option value="#E60012">三一红 #E60012</option>
+                                <option value="#1a1a1a">深灰 #1a1a1a</option>
+                                <option value="#0e7490">科技青 #0e7490</option>
+                            </select>
+                        </div>
+                        <div class="tb-item">
+                            <span>预览</span>
+                            <select id="pdfPreviewMode" onchange="renderPdfCanvas()">
+                                <option value="placeholder">变量占位</option>
+                                <option value="mock">真实数据（抽样）</option>
+                            </select>
+                        </div>
+                        <div class="tb-spacer"></div>
+                        <button type="button" class="tb-btn" onclick="resetLayoutToDefault()">重置为默认</button>
+                        <button type="button" class="tb-btn" onclick="switchStep(4)">预览 PDF</button>
+                        <button type="button" class="tb-btn primary" onclick="publishPdfLayout()">保存并发布</button>
+                    </div>
+
+                    <div class="designer-body">
+                        <!-- 区块库 -->
+                        <div class="designer-col">
+                            <div class="designer-col-title">区块库</div>
+                            <div class="block-lib" id="blockLib">
+                                <div class="block-lib-item" onclick="addPdfBlock('metric')"><span class="bli-icon">▫</span>指标卡</div>
+                                <div class="block-lib-item" onclick="addPdfBlock('ring')"><span class="bli-icon">◎</span>环形图</div>
+                                <div class="block-lib-item" onclick="addPdfBlock('bar')"><span class="bli-icon">▤</span>进度条</div>
+                                <div class="block-lib-item" onclick="addPdfBlock('table')"><span class="bli-icon">▦</span>数据表</div>
+                                <div class="block-lib-item" onclick="addPdfBlock('desc')"><span class="bli-icon">i</span>说明文字</div>
+                                <div class="block-lib-item" onclick="addPdfBlock('text')"><span class="bli-icon">¶</span>文本段落</div>
+                                <div class="block-lib-item" onclick="addPdfBlock('pagebreak')"><span class="bli-icon">⤓</span>分页符</div>
+                            </div>
+                        </div>
+
+                        <!-- 画布 -->
+                        <div class="designer-col">
+                            <div class="designer-col-title">画布（A4 横向 · 297 × 210mm）</div>
+                            <div class="canvas-wrap">
+                                <div class="canvas-scale" id="canvasScale">
+                                    <div class="canvas-page" id="pdfCanvas"></div>
+                                </div>
+                            </div>
+                            <div class="designer-validate" id="designerValidate"></div>
+                        </div>
+
+                        <!-- 属性面板 -->
+                        <div class="designer-col">
+                            <div class="designer-col-title">属性配置</div>
+                            <div class="prop-panel" id="propPanel">
+                                <div class="prop-empty">点击画布中的区块<br>即可配置标题与变量绑定</div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- ===== 模式二：Word 模板（沿用 v1.2） ===== -->
+                <div id="pdfWordMode" style="display:none;">
+
                 <!-- 附件基本设置 -->
                 <div class="attachment-section">
                     <div class="attach-config">
@@ -1021,6 +1340,15 @@
                                 <button class="pdf-file-remove" onclick="event.stopPropagation(); removePdfTemplate()" title="移除文件">×</button>
                             </div>
                             <input type="file" id="pdf-template-file" accept=".docx" style="display:none;" onchange="handlePdfTemplateUpload(this)">
+                        </div>
+
+                        <!-- v2.0 合并：PDF 数据列配置分两套（单机 / 机群），用子 Tab 切换 -->
+                        <div class="col-subswitch-wrap" id="pdf-col-subswitch" style="display:none;">
+                            <div class="view-switch" id="pdf-col-subswitch-tabs">
+                                <button type="button" data-col="single" class="active" onclick="setPdfColTab('single')">单机配置</button>
+                                <button type="button" data-col="fleet" onclick="setPdfColTab('fleet')">机群配置</button>
+                            </div>
+                            <span class="col-subswitch-hint">两种口径各存一套列配置，互不影响</span>
                         </div>
 
                         <!-- PDF 键值输入区 -->
@@ -1086,6 +1414,62 @@
                         </div>
                     </div>
                 </div>
+                </div><!-- /pdfWordMode -->
+
+            </div>
+
+            <!-- 预览与测试（v2.0 调整：不再是独立 tab，从「PDF附件」步骤的「预览 PDF」按钮进入） -->
+            <div class="step-panel" id="step-preview" style="display:none;">
+
+                <div class="preview-toolbar">
+                    <div class="view-switch" id="previewViewSwitch">
+                        <button type="button" class="active" data-view="desktop" onclick="setPreviewView('desktop')">桌面</button>
+                        <button type="button" data-view="mobile" onclick="setPreviewView('mobile')">移动</button>
+                        <button type="button" data-view="dark" onclick="setPreviewView('dark')">暗色</button>
+                        <button type="button" data-view="strip" onclick="setPreviewView('strip')">最差兼容</button>
+                    </div>
+                    <span style="font-size:12px;color:#666;">预览语言</span>
+                    <select id="previewLang" onchange="renderEmailPreview()" style="height:32px;border:1px solid #d9d9d9;border-radius:5px;padding:0 8px;font-size:12px;font-family:inherit;">
+                        <option value="zh-CN">简体中文</option>
+                        <option value="en">English</option>
+                        <option value="id">Bahasa Indonesia</option>
+                        <option value="es">Español</option>
+                        <option value="ru">русский</option>
+                        <option value="ar">العربية（RTL）</option>
+                        <option value="th">ภาษาไทย</option>
+                        <option value="ko">한국어</option>
+                        <option value="vi">Tiếng Việt</option>
+                    </select>
+                    <label style="font-size:12px;color:#666;display:flex;align-items:center;gap:6px;">
+                        <input type="checkbox" id="previewMockVars" checked onchange="renderEmailPreview()"> 使用模拟数据
+                    </label>
+                    <div style="flex:1"></div>
+                    <button type="button" class="btn btn-outline btn-sm" onclick="sendTestEmail()">测试发送</button>
+                </div>
+
+                <div class="preview-stage">
+                    <div>
+                        <div class="email-frame" id="emailFrame"></div>
+                        <div class="preview-strip-note">「最差兼容」模拟 Outlook 剥离 &lt;style&gt; 与外链图片后的降级效果（按钮为纯色块、无圆角、无背景图）</div>
+                    </div>
+                </div>
+
+                <div class="section-title" style="margin:20px 0 8px;">PDF 报表预览（当前版式设计器配置）</div>
+                <div class="pdf-preview-stage" id="pdfPreviewStage"></div>
+
+                <div class="section-title" style="margin:20px 0 4px;">邮件客户端兼容性自检</div>
+                <table class="compat-table">
+                    <thead>
+                        <tr><th>客户端</th><th>table 布局</th><th>内联样式</th><th>base64 图片</th><th>RTL</th><th>结论</th></tr>
+                    </thead>
+                    <tbody>
+                        <tr><td>Outlook（桌面）</td><td class="ok-mark">✓</td><td class="ok-mark">✓</td><td class="warn-mark">△</td><td class="ok-mark">✓</td><td>VML 兜底按钮圆角</td></tr>
+                        <tr><td>Outlook（网页）</td><td class="ok-mark">✓</td><td class="ok-mark">✓</td><td class="ok-mark">✓</td><td class="ok-mark">✓</td><td>可直接使用</td></tr>
+                        <tr><td>Gmail</td><td class="ok-mark">✓</td><td class="ok-mark">✓</td><td class="warn-mark">✕</td><td class="ok-mark">✓</td><td>Logo 回退为文字品牌</td></tr>
+                        <tr><td>Apple Mail</td><td class="ok-mark">✓</td><td class="ok-mark">✓</td><td class="ok-mark">✓</td><td class="ok-mark">✓</td><td>完整还原</td></tr>
+                        <tr><td>QQ 邮箱 / 163 邮箱</td><td class="ok-mark">✓</td><td class="ok-mark">✓</td><td class="warn-mark">△</td><td class="warn-mark">△</td><td>关键样式双写兜底</td></tr>
+                    </tbody>
+                </table>
 
             </div>
 
@@ -1306,39 +1690,53 @@ const TPL_ICONS = {
 
 const templates = [
     {
-        id: 0, machineType: '单机', enabled: true, updatedAt: '2026-07-17 08:00', icon: TPL_ICONS.daily,
+        id: 0, machineTypes: ['单机', '机群'], enabled: true, updatedAt: '2026-07-17 08:00', icon: TPL_ICONS.daily,
         translations: {
             'zh-CN': { name: '设备运行日报模版', description: '适用于单台设备每日运行数据汇报', body: defaultBodyReport(), attachmentFileName: '{{模版名称}}_{{发送日期}}' }
         }
     },
     {
-        id: 1, machineType: '单机', enabled: true, updatedAt: '2026-07-17 08:30', icon: TPL_ICONS.weekly,
+        id: 1, machineTypes: ['单机', '机群'], enabled: true, updatedAt: '2026-07-17 08:30', icon: TPL_ICONS.weekly,
         translations: {
             'zh-CN': { name: '设备运行周报模版', description: '适用于单台设备每周运行数据汇总汇报', body: defaultBodyReport(), attachmentFileName: '{{模版名称}}_{{发送日期}}' }
         }
     },
     {
-        id: 2, machineType: '机群', enabled: true, updatedAt: '2026-07-18 09:00', icon: TPL_ICONS.monthly,
+        id: 2, machineTypes: ['单机', '机群'], enabled: true, updatedAt: '2026-07-18 09:00', icon: TPL_ICONS.monthly,
         translations: {
             'zh-CN': { name: '设备运行月报模版', description: '适用于机群设备每月运行数据汇总汇报', body: defaultBodyReport(), attachmentFileName: '{{模版名称}}_{{发送日期}}' }
         }
     },
     {
-        id: 3, machineType: '机群', enabled: true, updatedAt: '2026-07-19 10:15', icon: TPL_ICONS.alert,
+        id: 3, machineTypes: ['单机', '机群'], enabled: true, updatedAt: '2026-07-19 10:15', icon: TPL_ICONS.alert,
         translations: {
             'zh-CN': { name: '设备异常告警通知模版', description: '设备发生异常时自动发送告警通知', body: defaultBodyAlert(), attachmentFileName: '异常告警_{{发送日期}}' }
         }
     },
     {
-        id: 4, machineType: '机群', enabled: false, updatedAt: '2026-07-20 14:20', icon: TPL_ICONS.offline,
+        id: 4, machineTypes: ['单机', '机群'], enabled: false, updatedAt: '2026-07-20 14:20', icon: TPL_ICONS.offline,
         translations: {
             'zh-CN': { name: '设备离线提醒模版', description: '设备离线超过阈值时自动发送提醒', body: defaultBodyOffline(), attachmentFileName: '离线提醒_{{发送日期}}' }
         }
     },
     {
-        id: 5, machineType: '单机', enabled: true, updatedAt: '2026-07-21 16:00', icon: TPL_ICONS.energy,
+        id: 5, machineTypes: ['单机', '机群'], enabled: true, updatedAt: '2026-07-21 16:00', icon: TPL_ICONS.energy,
         translations: {
             'zh-CN': { name: '能耗分析月报模版', description: '单台设备月度能耗油耗分析报表', body: defaultBodyEnergy(), attachmentFileName: '能耗月报_{{发送日期}}' }
+        }
+    },
+    {
+        id: 6, machineTypes: ['单机', '机群'], dimension: '项目', pdfLayout: '标准版', emailLayout: 'digest',
+        enabled: true, updatedAt: '2026-09-14 09:20', icon: TPL_ICONS.monthly,
+        translations: {
+            'zh-CN': { name: '项目生产日报模版（按行程）', description: '按项目统计行程明细与产出，PDF 正文内嵌核心指标', body: defaultBodyReport(), attachmentFileName: '{{模版名称}}_{{项目名称}}_{{发送日期}}' }
+        }
+    },
+    {
+        id: 7, machineTypes: ['单机', '机群'], dimension: '项目', pdfLayout: 'Word 模板', emailLayout: 'notification',
+        enabled: false, updatedAt: '2026-09-14 09:35', icon: TPL_ICONS.daily,
+        translations: {
+            'zh-CN': { name: '项目能耗周报模版（Word 版式）', description: '沿用 Word 模板方案的旧模版，未迁移到版式设计器', body: defaultBodyReport(), attachmentFileName: '项目能耗_{{发送日期}}' }
         }
     }
 ];
@@ -1384,7 +1782,7 @@ function renderTemplateTable() {
     document.getElementById('tpl-count').textContent = '共 ' + totalCount + ' 个模版' + (shownCount < totalCount ? '（筛选后 ' + shownCount + ' 个）' : '');
 
     if (filtered.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#bbb;padding:40px 0;">无匹配模版</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;color:#bbb;padding:40px 0;">无匹配模版</td></tr>';
         return;
     }
 
@@ -1397,10 +1795,21 @@ function renderTemplateTable() {
         const langLabel = langCfg ? langCfg.label : (primaryLang || '-');
         const delDisabled = templates.length <= 1 ? 'style="color:#bbb;cursor:not-allowed;" title="至少保留一个模版"' : '';
         const iconHtml = t.icon ? `<img class="tpl-icon" src="${t.icon}" alt="">` : '<span style="color:#ccc;font-size:18px;">📄</span>';
+        const dimLabel = t.dimension || '设备';
+        const dimTag = dimLabel === '项目'
+            ? '<span class="tag" style="background:#fdecee;color:#E60012;border:1px solid #ffd6da;">项目</span>'
+            : '<span class="tag tag-gray">设备</span>';
+        const tplTypes = getTypes(t);
+        const pdfLayout = t.pdfLayout || ((tplTypes.length === 1 && tplTypes[0] === '机群') ? '机群对比版' : '标准版');
+        const pdfTag = pdfLayout === 'Word 模板'
+            ? '<span class="tag tag-blue">Word 模板</span>'
+            : `<span class="tag" style="background:#f0f7ff;color:#1d5fa8;border:1px solid #c9e0ff;">${pdfLayout}</span>`;
         return `<tr>
             <td style="text-align:center;">${iconHtml}</td>
             <td><strong>${zhTr.name || '(未命名)'}</strong></td>
-            <td><span class="tag tag-orange">${t.machineType || '单机'}</span></td>
+            <td>${tplTypes.map(ty => `<span class="tag tag-orange" style="margin-right:4px;">${ty}</span>`).join('')}</td>
+            <td>${dimTag}</td>
+            <td>${pdfTag}</td>
             <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${zhTr.description || ''}</td>
             <td><span class="tag tag-blue">${langLabel}</span></td>
             <td><span class="tag ${t.enabled ? 'tag-green' : 'tag-gray'}">${t.enabled ? '已启用' : '已停用'}</span></td>
@@ -1438,6 +1847,9 @@ function openEditModal(index, isNew) {
     tbDataKV = null;
     window._scModelKV = null;
     window._pdfScModelKV = null;
+    // v2.0 合并：数据列配置是否已加载，避免步骤未进入时被 saveEditToState 覆盖成默认值
+    attColLoaded = false;
+    pdfColLoaded = false;
     switchStep(1);
 
     document.getElementById('edit-modal').classList.add('show');
@@ -1453,8 +1865,14 @@ function loadEditForm(isNew) {
     document.getElementById('edit-modal-title').textContent = isNew ? '新建邮件模版' : '编辑模版';
     document.getElementById('edit-tpl-name').value = hasTr ? tr.name : '';
     document.getElementById('edit-tpl-desc').value = hasTr ? (tr.description || '') : '';
-    document.getElementById('edit-tpl-machine-type').value = t.machineType || '单机';
+    // v2.0 合并：适用范围（单机 / 机群）多选；编辑已有模版时也允许调整
+    setEditTypes(isNew ? ['单机', '机群'] : getTypes(t));
+    dataColTab = 'single';
+    pdfColTab = 'single';
     toggleDataColumnConfig(true);
+    // 编辑已有模版时语言锁定不可修改（适用范围仍可调整）
+    const editLangSel = document.getElementById('edit-lang-select');
+    if (editLangSel) editLangSel.disabled = !isNew;
     document.getElementById('edit-tpl-enabled').checked = t.enabled;
     loadIconState(t.icon || '');
 
@@ -1467,6 +1885,7 @@ function loadEditForm(isNew) {
     setTimeout(() => {
         setBodyHTML(bodyToLoad);
         if (quill) quill.update();
+        switchBodyMode('rich'); // 打开模版 / 切换语言时回到富文本模式
     }, 80);
 }
 
@@ -1521,6 +1940,9 @@ function switchEditLang(lang) {
     tbDataKV = null;
     window._scModelKV = null;
     window._pdfScModelKV = null;
+    // v2.0 合并：数据列配置是否已加载，避免步骤未进入时被 saveEditToState 覆盖成默认值
+    attColLoaded = false;
+    pdfColLoaded = false;
     switchStep(1);
     loadEditForm();
 }
@@ -1547,23 +1969,31 @@ function saveEditToState() {
     // PDF 附件文件名模板
     const pdfFilenameEl = document.getElementById('pdf-attach-filename');
     t.translations[currentEditLang].pdfAttachmentFileName = pdfFilenameEl ? pdfFilenameEl.value.trim() : '';
-    // PDF 键值数据（机群）
-    t.translations[currentEditLang].pdfDocKV = pdfDocKV.map(r => [r[0]||'', r[1]||'']);
-    const mt = document.getElementById('edit-tpl-machine-type').value;
-    if (mt === '单机' && window._scModelKV && Object.keys(window._scModelKV).length > 0) {
-        t.translations[currentEditLang].attachmentTableKV = JSON.parse(JSON.stringify(window._scModelKV));
-    } else if (tbDataKV && tbDataKV.length) {
-        t.translations[currentEditLang].attachmentTableKV = tbDataKV.map(r => [r[0]||'', r[1]||'']);
-    }
-    // PDF 单机数据列配置（三栏级联 per-model 格式）
-    if (mt === '单机') {
-        if (window._pdfScModelKV && Object.keys(window._pdfScModelKV).length > 0) {
-            t.translations[currentEditLang].pdfAttachmentTableKV = JSON.parse(JSON.stringify(window._pdfScModelKV));
-        } else {
-            delete t.translations[currentEditLang].pdfAttachmentTableKV;
+    // v2.0 合并：机群 / 单机两套数据列配置分别落库，互不覆盖
+    const editTypes = getEditTypes();
+    const trObj = t.translations[currentEditLang];
+    // 机群那套：XLSX/CSV 行式列配置 + PDF 文档键值（仅在对应步骤已加载时才写，避免覆盖已保存配置）
+    if (editTypes.includes('机群')) {
+        if (attColLoaded && Array.isArray(tbDataKV)) {
+            trObj.attachmentTableKVFleet = tbDataKV.map(r => [r[0]||'', r[1]||'']);
+        }
+        if (pdfColLoaded && Array.isArray(pdfDocKV)) {
+            trObj.pdfDocKV = pdfDocKV.map(r => [r[0]||'', r[1]||'']);
         }
     }
-    t.machineType = document.getElementById('edit-tpl-machine-type').value;
+    // 单机那套：per-model 列配置（XLSX/CSV 与 PDF 各一份）
+    if (editTypes.includes('单机')) {
+        if (attColLoaded) {
+            trObj.attachmentTableKV = (window._scModelKV && Object.keys(window._scModelKV).length > 0)
+                ? JSON.parse(JSON.stringify(window._scModelKV)) : {};
+        }
+        if (pdfColLoaded) {
+            trObj.pdfAttachmentTableKV = (window._pdfScModelKV && Object.keys(window._pdfScModelKV).length > 0)
+                ? JSON.parse(JSON.stringify(window._pdfScModelKV)) : {};
+        }
+    }
+    t.machineTypes = editTypes;
+    delete t.machineType;   // 旧字段清理（读取统一走 getTypes）
     t.enabled = document.getElementById('edit-tpl-enabled').checked;
     t.icon = iconDataUrl || '';
 }
@@ -1576,6 +2006,11 @@ function closeEditModal() {
 
 // ==================== Quill 富文本编辑器 ====================
 let quill;
+// v2.0 调整：正文编辑模式 —— 'rich' = 富文本（Quill）；'code' = HTML 源码（代码原样输入 / 保存）
+let bodyMode = 'rich';
+// 源码缓存：避免「源码 → 富文本 → 源码」来回切换时，原始代码被 Quill 的简化结果覆盖
+let bodyRawCache = '';
+let bodyRichSnapshot = '';
 
 function initQuill() {
     if (quill) return;
@@ -1602,6 +2037,11 @@ function initQuill() {
 }
 
 function getBodyHTML() {
+    // 源码模式下以源码文本为准：原样保存，不经过 Quill 解析（代码、表格、内联样式不丢）
+    if (bodyMode === 'code') {
+        const src = document.getElementById('body-source');
+        return src ? src.value.trim() : '';
+    }
     if (!quill) return '';
     // 将变量样式 span 还原为纯文本 {{变量}}（用于存储）
     const el = quill.root.cloneNode(true);
@@ -1644,7 +2084,49 @@ function setBodyHTML(html) {
     setTimeout(() => { if (quill) quill.update(); }, 30);
 }
 
+// 切换正文编辑模式：富文本 ↔ HTML 源码（双向带内容）
+function switchBodyMode(mode) {
+    const src = document.getElementById('body-source');
+    if (!src) return;
+    const container = document.getElementById('editor-container');
+    const hint = document.getElementById('code-hint');
+
+    if (mode === 'code' && bodyMode !== 'code') {
+        // 若切到富文本后用户没改过内容，则恢复原始源码，避免代码被 Quill 简化
+        if (bodyRawCache && getBodyHTML() === bodyRichSnapshot) {
+            src.value = bodyRawCache;
+        } else {
+            src.value = getBodyHTML();
+        }
+        bodyMode = 'code';
+    } else if (mode === 'rich' && bodyMode === 'code') {
+        bodyRawCache = src.value;             // 记住源码
+        bodyMode = 'rich';                    // 先切模式：下面的 getBodyHTML() 才会读富文本而不是源码
+        setBodyHTML(bodyRawCache);            // 回写到富文本（Quill 不支持的结构会被简化）
+        bodyRichSnapshot = getBodyHTML();     // 记录转换后的富文本快照，用于判断是否被编辑过
+    }
+
+    if (container) container.style.display = (bodyMode === 'code') ? 'none' : '';
+    src.style.display = (bodyMode === 'code') ? '' : 'none';
+    if (hint) hint.style.display = (bodyMode === 'code') ? '' : 'none';
+    Array.prototype.slice.call(document.querySelectorAll('#body-editor-modes .be-mode-btn')).forEach(function (b) {
+        b.classList.toggle('active', b.dataset.mode === bodyMode);
+    });
+    if (bodyMode === 'code') setTimeout(function () { src.focus(); }, 0);
+}
+
 function insertVarEdit(v) {
+    // 源码模式：按光标位置插入到文本域
+    if (bodyMode === 'code') {
+        const src = document.getElementById('body-source');
+        if (!src) return;
+        const s = (src.selectionStart != null) ? src.selectionStart : src.value.length;
+        const e = (src.selectionEnd != null) ? src.selectionEnd : s;
+        src.value = src.value.slice(0, s) + v + src.value.slice(e);
+        src.focus();
+        src.setSelectionRange(s + v.length, s + v.length);
+        return;
+    }
     if (!quill) return;
     const range = quill.getSelection(true);
     quill.clipboard.dangerouslyPasteHTML(range.index,
@@ -1660,7 +2142,7 @@ function saveTemplate() {
     const zhTr = t.translations['zh-CN'];
     if (!zhTr || !zhTr.name) { showToast('中文模版名称不能为空', 'error'); return; }
     if (!zhTr || !zhTr.desc) { showToast('中文模版描述不能为空', 'error'); return; }
-    if (!t.machineType) { showToast('请选择模版类型', 'error'); return; }
+    if (!getTypes(t).length) { showToast('请选择适用范围', 'error'); return; }
     if (!t.icon) { showToast('请上传模版图标', 'error'); return; }
     if (!zhTr || !zhTr.body) { showToast('中文正文内容不能为空', 'error'); return; }
     t.updatedAt = nowStr();
@@ -1723,6 +2205,359 @@ function confirmDeleteTemplate() {
 }
 
 // ==================== 步骤切换 ====================
+/* ==================== v2.0：PDF 版式设计器 ==================== */
+const PDF_MOCK = {
+    deviceNo: 'SY215C9CA01234',
+    period: '2026-09-01 至 2026-09-30',
+    workHours: '284.4',
+    idleHours: '2.3',
+    fuel: '5,669.0',
+    avgFuel: '19.9',
+    project: '长沙梅溪湖工地'
+};
+
+const PDF_VARIABLES = [
+    { v: '{{工时}}', name: '工时' },
+    { v: '{{怠速工时}}', name: '怠速工时' },
+    { v: '{{能耗}}', name: '能耗' },
+    { v: '{{里程}}', name: '里程' },
+    { v: '{{周期油耗}}', name: '周期油耗' },
+    { v: '{{周期油耗/小时}}', name: '周期油耗/小时' },
+    { v: '{{开工率}}', name: '开工率' },
+    { v: '{{设备编号}}', name: '设备编号' }
+];
+
+const BLOCK_LABEL = {
+    header: '品牌头部', metrics: '指标卡组', ring: '环形图', bars: '进度条',
+    table: '数据表', desc: '说明文字', text: '文本段落', pagebreak: '分页符', footer: '页脚'
+};
+
+const LAYOUT_PRESETS = {
+    standard: [
+        { type: 'header', title: '设备性能报表' },
+        { type: 'metrics', title: '核心指标', var: '' },
+        { type: 'ring', title: '工作 / 怠速时间分布', var: '{{怠速占比}}' },
+        { type: 'bars', title: '发动机利用率', var: '{{工时}}' },
+        { type: 'table', title: '燃油消耗明细', var: '{{周期油耗}}' },
+        { type: 'desc', title: '', vars: '' },
+        { type: 'table', title: '数据汇总', var: '{{能耗}}' },
+        { type: 'footer', title: '' }
+    ],
+    simple: [
+        { type: 'header', title: '设备性能报表（精简版）' },
+        { type: 'metrics', title: '核心指标', var: '' },
+        { type: 'table', title: '数据汇总', var: '{{能耗}}' },
+        { type: 'footer', title: '' }
+    ],
+    fleet: [
+        { type: 'header', title: '机群对比报表' },
+        { type: 'metrics', title: '机群总览', var: '' },
+        { type: 'table', title: '设备排行', var: '{{工时}}' },
+        { type: 'bars', title: '利用率分布', var: '{{开工率}}' },
+        { type: 'footer', title: '' }
+    ]
+};
+
+let pdfBlocks = [];
+let selectedBlockId = null;
+let blockSeq = 0;
+let currentTheme = '#E60012';
+let currentPdfMode = 'designer';
+
+function pdfUid() { return 'blk_' + (++blockSeq); }
+
+function clonePreset(key) {
+    return (LAYOUT_PRESETS[key] || LAYOUT_PRESETS.standard).map(b => Object.assign({}, b, { id: pdfUid() }));
+}
+
+function pvVar(placeholder, mockValue) {
+    const el = document.getElementById('pdfPreviewMode');
+    return (el && el.value === 'mock') ? mockValue : placeholder;
+}
+
+function applyTheme(color) {
+    currentTheme = color;
+    let s = document.getElementById('pdfThemeStyle');
+    if (!s) { s = document.createElement('style'); s.id = 'pdfThemeStyle'; document.head.appendChild(s); }
+    s.textContent = `
+      .canvas-page .blk-brand{background:${color} !important;}
+      .canvas-page .blk-metric{border-top-color:${color} !important;}
+      .canvas-page .blk-metric .n{color:${color} !important;}
+      .canvas-page .blk-sec-title{border-left-color:${color} !important;}
+      .canvas-page .blk-doc-header{border-bottom-color:${color} !important;}
+      .canvas-page .blk-footer{border-top-color:${color} !important;}
+      .canvas-page th{background:${color} !important;}
+      .canvas-page .blk-bar-fill{background:${color} !important;}
+      .canvas-page .blk-period{background:${color} !important;}
+      .canvas-page .blk-ring{background:conic-gradient(${color} 0 99.2%, #eeeeee 99.2% 100%) !important;}
+      .canvas-page .blk-ring b{color:${color} !important;}
+    `;
+}
+
+function buildBlockInner(b) {
+    switch (b.type) {
+        case 'header':
+            return `<div class="blk-doc-header">
+                <div style="display:flex;align-items:flex-start;">
+                    <span class="blk-brand">SANY</span>
+                    <div class="blk-brand-sub">三一智联系统<br>MySANY 设备管理平台</div>
+                </div>
+                <div class="blk-doc-title">
+                    <h1>${b.title || '设备性能报表'}</h1>
+                    <p>设备编号：<b>${pvVar('{{设备编号}}', PDF_MOCK.deviceNo)}</b></p>
+                    <span class="blk-period">统计周期：${pvVar('{{统计周期}}', PDF_MOCK.period)}</span>
+                </div>
+            </div>`;
+        case 'metrics':
+            return `<div class="blk-metrics">
+                <div class="blk-metric"><div class="l">工作时间</div><div class="n">${pvVar('{{工时}}', PDF_MOCK.workHours)}</div><div class="u">小时</div></div>
+                <div class="blk-metric"><div class="l">怠速时间</div><div class="n">${pvVar('{{怠速工时}}', PDF_MOCK.idleHours)}</div><div class="u">小时</div></div>
+                <div class="blk-metric"><div class="l">燃油消耗</div><div class="n">${pvVar('{{能耗}}', PDF_MOCK.fuel)}</div><div class="u">升</div></div>
+                <div class="blk-metric"><div class="l">平均小时油耗</div><div class="n">${pvVar('{{周期油耗/小时}}', PDF_MOCK.avgFuel)}</div><div class="u">升/小时</div></div>
+            </div>`;
+        case 'ring':
+            return `<div class="blk-sec-title">${b.title || '环形图'}</div>
+            <div class="blk-ring-row">
+                <div class="blk-ring"><b>${pvVar('{{工时}}', PDF_MOCK.workHours)}</b></div>
+                <div class="blk-legend">
+                    <div class="item"><span><span class="dot" style="background:${currentTheme}"></span>工作时间</span><span>99.2%</span></div>
+                    <div class="item"><span><span class="dot" style="background:#eeeeee"></span>怠速时间</span><span>0.8%</span></div>
+                </div>
+            </div>`;
+        case 'bars':
+            return `<div class="blk-sec-title">${b.title || '进度条'}</div>
+            <div class="blk-bar"><div class="h"><span>高功率段</span><span>131.4 小时 · 46.6%</span></div><div class="blk-bar-track"><div class="blk-bar-fill" style="width:100%"></div></div></div>
+            <div class="blk-bar"><div class="h"><span>中功率段</span><span>48.8 小时 · 17.3%</span></div><div class="blk-bar-track"><div class="blk-bar-fill" style="width:37%"></div></div></div>
+            <div class="blk-bar"><div class="h"><span>低功率段</span><span>101.9 小时 · 36.1%</span></div><div class="blk-bar-track"><div class="blk-bar-fill" style="width:78%"></div></div></div>`;
+        case 'table':
+            return `<div class="blk-sec-title">${b.title || '数据表'}</div>
+            <table>
+                <thead><tr><th>项目</th><th class="num">周期值</th><th class="num">累计终身</th></tr></thead>
+                <tbody>
+                    <tr><td>工作时长</td><td class="num">${pvVar('{{工时}}', PDF_MOCK.workHours)}</td><td class="num">--</td></tr>
+                    <tr><td>怠速时长</td><td class="num">${pvVar('{{怠速工时}}', PDF_MOCK.idleHours)}</td><td class="num">--</td></tr>
+                    <tr><td>燃油消耗量</td><td class="num">${pvVar('{{能耗}}', PDF_MOCK.fuel)}</td><td class="num">--</td></tr>
+                    <tr><td>综合小时油耗</td><td class="num">${pvVar('{{周期油耗/小时}}', PDF_MOCK.avgFuel)}</td><td class="num">--</td></tr>
+                </tbody>
+            </table>`;
+        case 'desc':
+            return `<p style="font-size:11px;color:#888;margin:6px 0;">口径说明：统计周期按设备所在地时区切分；时长不足 1 小时按「x 小时 y 分钟」展示。</p>`;
+        case 'text':
+            return `<p style="font-size:12px;color:#333;margin:6px 0;">本报告由 MySANY 设备管理平台自动生成，数据仅供贵司内部授权人员查阅使用。</p>`;
+        case 'pagebreak':
+            return `<div style="border-top:1px dashed #d9d9d9;margin:14px 0;text-align:center;font-size:11px;color:#bbb;">分页符（以下内容另起一页）</div>`;
+        case 'footer':
+            return `<div class="blk-footer">
+                <div><b style="color:${currentTheme};font-size:12px;letter-spacing:1px;">SANY</b>&nbsp;三一智联系统</div>
+                <div>${pvVar('{{生成时间}}', '2026-09-14 10:20')}</div>
+                <div>报告生成人：admin（三一客户服务部）· MySANY 设备管理平台</div>
+            </div>`;
+        default:
+            return '';
+    }
+}
+
+function renderPdfCanvas() {
+    const canvas = document.getElementById('pdfCanvas');
+    if (!canvas || pdfBlocks.length === 0) {
+        if (canvas) canvas.innerHTML = '<div style="color:#bbb;text-align:center;padding:80px 0;font-size:13px;">暂无区块，请从左侧区块库添加</div>';
+        return;
+    }
+    canvas.innerHTML = pdfBlocks.map(b => `
+        <div class="canvas-block ${b.id === selectedBlockId ? 'selected' : ''}" data-id="${b.id}" onclick="selectPdfBlock('${b.id}')">
+            <span class="blk-tag">${BLOCK_LABEL[b.type] || b.type}${b.var ? ' · ' + b.var : ''}</span>
+            ${buildBlockInner(b)}
+        </div>
+    `).join('');
+    renderPropPanel();
+    renderPdfPreviewStage();
+    validatePdfLayout();
+}
+
+function renderPdfPreviewStage() {
+    const stage = document.getElementById('pdfPreviewStage');
+    if (!stage) return;
+    stage.innerHTML = `<div style="transform:scale(0.52);transform-origin:top left;width:297mm;">
+        <div class="canvas-page" style="box-shadow:none;">${pdfBlocks.map(buildBlockInner).join('')}</div>
+    </div><div style="height:${Math.round(210 * 3.78 * 0.52 * 0.62)}px;"></div>`;
+}
+
+function selectPdfBlock(id) {
+    selectedBlockId = id;
+    renderPdfCanvas();
+}
+
+function renderPropPanel() {
+    const panel = document.getElementById('propPanel');
+    if (!panel) return;
+    const b = pdfBlocks.find(x => x.id === selectedBlockId);
+    if (!b) {
+        panel.innerHTML = '<div class="prop-empty">点击画布中的区块<br>即可配置标题与变量绑定</div>';
+        return;
+    }
+    panel.innerHTML = `
+        <div class="prop-group">
+            <label>区块类型</label>
+            <input type="text" value="${BLOCK_LABEL[b.type] || b.type}" readonly style="background:#fafafa;color:#888;">
+        </div>
+        <div class="prop-group">
+            <label>区块标题</label>
+            <input type="text" value="${b.title || ''}" oninput="updateBlockProp('title', this.value)">
+        </div>
+        <div class="prop-group">
+            <label>变量绑定</label>
+            <select onchange="updateBlockProp('var', this.value)">
+                <option value="" ${b.var ? '' : 'selected'}>未绑定</option>
+                ${PDF_VARIABLES.map(v => `<option value="${v.v}" ${b.var === v.v ? 'selected' : ''}>${v.name}（${v.v}）</option>`).join('')}
+            </select>
+            ${b.var ? `<span class="var-chip">${b.var}</span>` : ''}
+        </div>
+        <div class="prop-actions">
+            <button class="prop-danger" onclick="removePdfBlock('${b.id}')">删除该区块</button>
+        </div>
+        <div style="font-size:11px;color:#999;line-height:1.7;margin-top:10px;">
+            提示：指标卡/环形图/进度条/数据表需绑定数值型字段；变量在推送时替换为真实数据，无数据展示为 <b>--</b>。
+        </div>`;
+}
+
+function updateBlockProp(key, value) {
+    const b = pdfBlocks.find(x => x.id === selectedBlockId);
+    if (!b) return;
+    b[key] = value;
+    renderPdfCanvas();
+    if (key === 'var') renderPropPanel();
+}
+
+function addPdfBlock(type) {
+    pdfBlocks.push({ id: pdfUid(), type: type, title: BLOCK_LABEL[type] || type, var: '' });
+    selectedBlockId = pdfBlocks[pdfBlocks.length - 1].id;
+    renderPdfCanvas();
+    showToast('已添加区块：' + (BLOCK_LABEL[type] || type), 'success');
+}
+
+function removePdfBlock(id) {
+    pdfBlocks = pdfBlocks.filter(b => b.id !== id);
+    if (selectedBlockId === id) selectedBlockId = null;
+    renderPdfCanvas();
+}
+
+function applyLayoutTemplate(key) {
+    pdfBlocks = clonePreset(key);
+    selectedBlockId = null;
+    renderPdfCanvas();
+    showToast('已套用版式模板：' + document.querySelector('#pdfLayoutTemplate option:checked').textContent, 'success');
+}
+
+function resetLayoutToDefault() {
+    const key = document.getElementById('pdfLayoutTemplate').value;
+    pdfBlocks = clonePreset(key);
+    selectedBlockId = null;
+    renderPdfCanvas();
+    showToast('已重置为默认版式', 'success');
+}
+
+function validatePdfLayout() {
+    const el = document.getElementById('designerValidate');
+    if (!el) return;
+    const msgs = [];
+    if (!pdfBlocks.some(b => b.type === 'header')) msgs.push('缺少品牌头部区块');
+    if (!pdfBlocks.some(b => b.type === 'footer')) msgs.push('缺少页脚区块');
+    if (!pdfBlocks.some(b => ['metrics', 'ring', 'bars', 'table'].includes(b.type))) msgs.push('至少需要一个数据区块（指标卡 / 环形图 / 进度条 / 数据表）');
+    if (pdfBlocks.some(b => b.type === 'metrics' && !b.var)) msgs.push('存在未绑定变量的指标卡');
+    if (pdfBlocks.length > 20) msgs.push('区块数量超过 20 个，生成时将自动降级');
+    if (msgs.length === 0) {
+        el.className = 'designer-validate ok active';
+        el.innerHTML = '✓ 版式校验通过：共 ' + pdfBlocks.length + ' 个区块，品牌头部 / 页脚完整，变量映射有效，可用于生成 PDF 报表。';
+    } else {
+        el.className = 'designer-validate warn active';
+        el.innerHTML = '⚠ 校验提示：' + msgs.join('；') + '。';
+    }
+}
+
+function publishPdfLayout() {
+    const msgs = [];
+    if (!pdfBlocks.some(b => b.type === 'header')) msgs.push('缺少品牌头部');
+    if (!pdfBlocks.some(b => b.type === 'footer')) msgs.push('缺少页脚');
+    if (msgs.length) { showToast('发布失败：' + msgs.join('、'), 'error'); return; }
+    showToast('PDF 版式已保存并发布（版本 v3），下次推送即时生效', 'success');
+}
+
+function switchPdfMode(mode) {
+    currentPdfMode = mode;
+    document.querySelectorAll('#pdfModeSwitch button').forEach(b => b.classList.toggle('active', b.dataset.mode === mode));
+    document.getElementById('pdfDesignerMode').style.display = mode === 'designer' ? '' : 'none';
+    document.getElementById('pdfWordMode').style.display = mode === 'word' ? '' : 'none';
+    if (mode === 'designer') initPdfDesigner();
+}
+
+function initPdfDesigner() {
+    const tpl = document.getElementById('pdfLayoutTemplate');
+    if (pdfBlocks.length === 0) pdfBlocks = clonePreset(tpl ? tpl.value : 'standard');
+    applyTheme(document.getElementById('pdfThemeColor').value);
+    renderPdfCanvas();
+}
+
+/* ==================== v2.0：邮件版式与预览 ==================== */
+let previewView = 'desktop';
+
+const EMAIL_I18N = {
+    'zh-CN': { hello: '尊敬的 {{收件人姓名}}：', line1: '您订阅的《{{模版名称}}》已生成完毕，生成时间 {{生成时间}}。', btn: '查看并下载完整报告', tips: '温馨提示', t1: '报告已作为 PDF 附件发送，也可通过上方链接在线查看；', t2: '链接自生成之日起 3 天内有效；', t3: '附件含贵司专属数据，请勿外传。', foot: '此邮件为系统自动发送，请勿直接回复。', team: '—— MySANY 服务团队' },
+    'en': { hello: 'Dear {{收件人姓名}},', line1: 'Your subscription 《{{模版名称}}》 is ready. Generated at {{生成时间}}.', btn: 'View & Download Report', tips: 'Notes', t1: 'The report is attached as PDF and also available via the link above;', t2: 'The link is valid for 3 days from generation;', t3: 'The attachment contains your proprietary data, do not forward.', foot: 'This is an automated message, please do not reply.', team: '— MySANY Service Team' },
+    'id': { hello: 'Yth. {{收件人姓名}},', line1: 'Langganan Anda 《{{模版名称}}》 telah selesai dibuat pada {{生成时间}}.', btn: 'Lihat & Unduh Laporan', tips: 'Catatan', t1: 'Laporan dikirim sebagai lampiran PDF dan dapat dilihat melalui tautan di atas;', t2: 'Tautan berlaku 3 hari sejak dibuat;', t3: 'Lampiran berisi data eksklusif Anda, jangan diteruskan.', foot: 'Email ini dikirim otomatis, mohon tidak membalas.', team: '— Tim Layanan MySANY' },
+    'ar': { hello: 'عزيزي {{收件人姓名}}،', line1: 'تم إنشاء تقرير 《{{模版名称}}》 في {{生成时间}}.', btn: 'عرض وتنزيل التقرير', tips: 'ملاحظات', t1: 'تم إرسال التقرير كمرفق PDF ويمكن عرضه عبر الرابط أعلاه؛', t2: 'الرابط صالح لمدة 3 أيام؛', t3: 'المرفق يحتوي على بيانات خاصة، يرجى عدم إعادة إرساله.', foot: 'هذه رسالة آلية، يرجى عدم الرد.', team: '— فريق خدمة MySANY' }
+};
+
+function emailT() {
+    const lang = document.getElementById('previewLang') ? document.getElementById('previewLang').value : 'zh-CN';
+    return EMAIL_I18N[lang] || EMAIL_I18N['en'];
+}
+
+function renderEmailPreview() {
+    const frame = document.getElementById('emailFrame');
+    if (!frame) return;
+    const t = emailT();
+    const useMock = document.getElementById('previewMockVars').checked;
+    const v = (ph, mock) => useMock ? mock : ph;
+    const lang = document.getElementById('previewLang').value;
+
+    frame.className = 'email-frame' + (previewView === 'desktop' ? '' : ' ' + previewView);
+    frame.setAttribute('dir', lang === 'ar' ? 'rtl' : 'ltr');
+
+    /* 系统固定页头（品牌条） */
+    let html = `<div class="email-brand-bar">SANY · MySANY 设备管理平台</div><div class="email-body">`;
+
+    /* ==== 以下为管理员富文本内容（等价于编辑器所见） ==== */
+    html += `<p>${t.hello.replace('{{收件人姓名}}', v('{{收件人姓名}}', 'Schuck'))}</p>`;
+    html += `<p>${t.line1.replace('{{模版名称}}', v('{{模版名称}}', '设备运行月报模版')).replace('{{生成时间}}', v('{{生成时间}}', '2026-09-14 10:20'))}</p>`;
+    html += `<p><b>本期关键数据</b></p>`;
+    html += `<table class="email-mini-table">
+        <thead><tr><th>设备编号</th><th>工时</th><th>能耗</th><th>里程</th></tr></thead>
+        <tbody>
+            <tr><td>${v('{{设备编号}}', 'SY215C9CA01234')}</td><td>${v('{{工时}}', '284.4')}</td><td>${v('{{能耗}}', '5,669.0')}</td><td>${v('{{里程}}', '128.6')}</td></tr>
+            <tr><td>EX003</td><td>251.5</td><td>4,980.2</td><td>96.4</td></tr>
+            <tr><td>EX007</td><td>198.4</td><td>3,652.0</td><td>74.1</td></tr>
+        </tbody>
+    </table>`;
+    html += `<p style="text-align:center;margin:18px 0;"><span class="email-btn">${t.btn}</span></p>`;
+    html += `<p style="font-weight:600;">${t.tips}</p><ol style="padding-left:18px;margin:0 0 10px;"><li>${t.t1}</li><li>${t.t2}</li><li>${t.t3}</li></ol>`;
+    html += `<p style="font-size:12px;color:#666;">本报告包含贵司专属设备运营数据，仅供贵司内部授权人员查阅使用，请勿外传。</p>`;
+    html += `</div>`;
+
+    /* 系统固定页脚 */
+    html += `<div class="email-foot">${t.foot}<br>${t.team}</div>`;
+    frame.innerHTML = html;
+}
+
+function setPreviewView(view) {
+    previewView = view;
+    document.querySelectorAll('#previewViewSwitch button').forEach(b => b.classList.toggle('active', b.dataset.view === view));
+    renderEmailPreview();
+}
+
+function sendTestEmail() {
+    showToast('测试邮件已发送至 admin@sany.com.cn（含当前版式渲染结果）', 'success');
+}
+
 function switchStep(stepNum) {
     // 离开步骤1时保存正文内容
     if (stepNum !== 1) { saveEditToState(); }
@@ -1732,27 +2567,99 @@ function switchStep(stepNum) {
     document.getElementById('step-body').style.display = stepNum === 1 ? '' : 'none';
     document.getElementById('step-attachment').style.display = stepNum === 2 ? '' : 'none';
     document.getElementById('step-pdf').style.display = stepNum === 3 ? '' : 'none';
+    const previewPanel = document.getElementById('step-preview');
+    if (previewPanel) previewPanel.style.display = stepNum === 4 ? '' : 'none';
 
+    // v2.0 调整：「预览与测试」已不是独立 tab（从「PDF附件」步骤的「预览 PDF」进入），
+    // 预览时高亮「PDF附件」tab，避免出现没有任何 tab 选中的状态
+    const activeTabStep = (stepNum === 4) ? 3 : stepNum;
     document.querySelectorAll('.step-tab').forEach(tab => {
-        tab.classList.toggle('active', parseInt(tab.dataset.step) === stepNum);
+        tab.classList.toggle('active', parseInt(tab.dataset.step) === activeTabStep);
     });
 
     // 进入步骤2时初始化 XLSX/CSV 表格
     if (stepNum === 2) { initAttachmentTable(); toggleDataColumnConfig(); }
     // 进入步骤3时初始化 PDF 区域
-    if (stepNum === 3) { initPdfSection(); }
+    if (stepNum === 3) { initPdfSection(); if (currentPdfMode === 'designer') initPdfDesigner(); }
+    // 进入步骤4时渲染邮件预览与 PDF 预览
+    if (stepNum === 4) { renderEmailPreview(); renderPdfCanvas(); }
 }
 
-// 数据列配置：机群显示键值对，单机显示勾选式
+// ==================== v2.0 合并：适用范围（单机 / 机群）多选 + 数据列配置子 Tab ====================
+// 读取模版适用范围（新结构 machineTypes；老数据 machineType 兜底兼容）
+function getTypes(t) {
+    if (t && Array.isArray(t.machineTypes) && t.machineTypes.length) return t.machineTypes.slice();
+    return [(t && t.machineType) || '单机'];
+}
+// 编辑弹窗当前勾选的适用范围
+function getEditTypes() {
+    const box = document.getElementById('edit-tpl-scope');
+    if (!box) return ['单机', '机群'];
+    return Array.prototype.slice.call(box.querySelectorAll('input[type="checkbox"]:checked')).map(b => b.dataset.type);
+}
+function setEditTypes(types) {
+    const box = document.getElementById('edit-tpl-scope');
+    if (!box) return;
+    box.querySelectorAll('input[type="checkbox"]').forEach(cb => {
+        cb.checked = (types || []).includes(cb.dataset.type);
+    });
+}
+function editTypesIncludes(type) {
+    return getEditTypes().includes(type);
+}
+// 勾选 / 取消适用范围（至少保留一个），并同步两块数据列配置区
+function toggleEditType(type) {
+    const box = document.getElementById('edit-tpl-scope');
+    if (!box) return;
+    const cb = box.querySelector(`input[data-type="${type}"]`);
+    if (!cb) return;
+    if (!cb.checked && getEditTypes().length === 0) {
+        cb.checked = true;   // 取消最后一个时回滚
+        showToast('适用范围至少保留一个', 'error');
+        return;
+    }
+    toggleDataColumnConfig();
+    togglePdfDataColumnConfig();
+}
+
+let dataColTab = 'single';   // 数据列配置子 Tab：'single' | 'fleet'
+let pdfColTab = 'single';    // PDF 数据列配置子 Tab
+// v2.0 合并：两套列配置是否已按当前模版初始化（未初始化时不落库，避免把已保存配置覆盖成默认值）
+let attColLoaded = false;    // 步骤2：XLSX/CSV 数据列配置
+let pdfColLoaded = false;    // 步骤3：PDF 数据列配置
+
+function setDataColTab(tab) { dataColTab = tab; toggleDataColumnConfig(); }
+function setPdfColTab(tab) { pdfColTab = tab; togglePdfDataColumnConfig(); }
+
+function syncColSubswitch(tabsId, active) {
+    const wrap = document.getElementById(tabsId);
+    if (!wrap) return;
+    wrap.querySelectorAll('button').forEach(b => b.classList.toggle('active', b.dataset.col === active));
+}
+
+// 数据列配置：机群显示键值对表格，单机显示三栏级联；两种都适用时用子 Tab 切换两套
 function toggleDataColumnConfig(skipInit) {
-    const mt = document.getElementById('edit-tpl-machine-type').value;
+    const types = getEditTypes();
+    const hasFleet = types.includes('机群');
+    const hasSingle = types.includes('单机');
     const fleetEl = document.getElementById('fleet-column-config');
     const singleEl = document.getElementById('single-column-config');
-    if (fleetEl) fleetEl.style.display = mt === '机群' ? '' : 'none';
+    const subWrap = document.getElementById('data-col-subswitch');
+
+    if (subWrap) subWrap.style.display = (hasFleet && hasSingle) ? '' : 'none';
+    if (!hasFleet) dataColTab = 'single';
+    else if (!hasSingle) dataColTab = 'fleet';
+
+    const showFleet = hasFleet && (!hasSingle || dataColTab === 'fleet');
+    const showSingle = hasSingle && (!hasFleet || dataColTab === 'single');
+
+    if (fleetEl) fleetEl.style.display = showFleet ? '' : 'none';
     if (singleEl) {
-        singleEl.style.display = mt !== '机群' ? '' : 'none';
-        if (mt !== '机群' && !skipInit) scInit();
+        singleEl.style.display = showSingle ? '' : 'none';
+        if (showSingle && !skipInit) scInit();
     }
+    if (showFleet) tbKVRender();
+    syncColSubswitch('data-col-subswitch-tabs', dataColTab);
 }
 
 function initAttachmentTable() {
@@ -1762,24 +2669,12 @@ function initAttachmentTable() {
     const defName = defaultAttachmentFileName();
     document.getElementById('attach-filename').value = tr.attachmentFileName || defName;
 
-    if (tr.attachmentTableKV) {
-        if (Array.isArray(tr.attachmentTableKV)) {
-            // 旧格式：扁平数组
-            window._scModelKV = null;
-            if (tr.attachmentTableKV.length) {
-                tbDataKV = tr.attachmentTableKV.map(r => [r[0]||'', r[1]||'']);
-            }
-        } else if (typeof tr.attachmentTableKV === 'object') {
-            // 新 per-model 格式：{modelKey: [['name','{{tag}}'],...]}
-            window._scModelKV = JSON.parse(JSON.stringify(tr.attachmentTableKV));
-            const modelKeys = Object.keys(tr.attachmentTableKV);
-            if (modelKeys.length > 0) {
-                const firstCols = tr.attachmentTableKV[modelKeys[0]];
-                if (Array.isArray(firstCols) && firstCols.length) {
-                    tbDataKV = firstCols.map(r => [r[0]||'', r[1]||'']);
-                }
-            }
-        }
+    // v2.0 合并：机群 / 单机两套列配置分别恢复
+    // 机群（行式）：新字段 attachmentTableKVFleet；老数据里数组形式的 attachmentTableKV 也视为机群行
+    const fleetRows = Array.isArray(tr.attachmentTableKVFleet) ? tr.attachmentTableKVFleet
+                   : (Array.isArray(tr.attachmentTableKV) ? tr.attachmentTableKV : null);
+    if (fleetRows && fleetRows.length) {
+        tbDataKV = fleetRows.map(r => [r[0]||'', r[1]||'']);
     } else if (tr.attachmentTable && tr.attachmentTable.cols) {
         // 旧格式迁移
         tbDataKV = [];
@@ -1789,6 +2684,10 @@ function initAttachmentTable() {
     } else {
         tbDataKV = JSON.parse(JSON.stringify(tbDefaultKV));
     }
+    // 单机（per-model 对象）：{modelKey: [['name','{{tag}}'],...]}
+    window._scModelKV = (tr.attachmentTableKV && typeof tr.attachmentTableKV === 'object' && !Array.isArray(tr.attachmentTableKV))
+        ? JSON.parse(JSON.stringify(tr.attachmentTableKV)) : null;
+    attColLoaded = true;
     tbKVRender();
 }
 
@@ -1812,16 +2711,16 @@ function initPdfSection() {
         pdfTemplateUploaded = false;
     }
 
-    // 数据列配置切换：机群=文档键值表格，单机=三栏级联
+    // 数据列配置切换：机群=文档键值表格，单机=三栏级联（两种都适用时子 Tab 切换）
     togglePdfDataColumnConfig(true);
     // 恢复 PDF 键值数据（机群）
     pdfDocKV = tr.pdfDocKV && tr.pdfDocKV.length ? tr.pdfDocKV.map(r => [r[0]||'', r[1]||'']) : [['', '']];
     renderPdfKV();
-    // 恢复 PDF 单机数据列配置
-    const mt = document.getElementById('edit-tpl-machine-type').value;
-    if (mt !== '机群') {
+    // 恢复 PDF 单机数据列配置（适用范围含单机时）
+    if (editTypesIncludes('单机')) {
         pdfScInit(tr.pdfAttachmentTableKV || null);
     }
+    pdfColLoaded = true;
 }
 
 function defaultAttachmentFileName() {
@@ -2322,6 +3221,8 @@ function scSyncFromTbDataKV() {
         }
         return;
     }
+    // v2.0 合并：tbDataKV 现在属于「机群」那套配置，适用范围含机群时不能拿它当单机的兜底数据
+    if (editTypesIncludes('机群')) return;
     // 旧格式 tbDataKV 数组：全部归入第一个模型
     if (!tbDataKV || !tbDataKV.length) return;
     const firstModelKey = SINGLE_MACHINE_VARS[0].models[0].key;
@@ -2333,9 +3234,12 @@ function scSyncFromTbDataKV() {
 function scSyncToTbDataKV() {
     const curMap = scGetCurrentMap();
     const all = scAllIndicators();
+    _scSaveToAttachmentKV();
+    // v2.0 合并：只有适用范围不含机群时，才把单机结果镜像到机群表格（保持旧行为）；
+    // 合并模版下 tbDataKV 属于机群那套配置，不能被单机配置覆盖
+    if (editTypesIncludes('机群')) return;
     tbDataKV = all.filter(item => curMap[item.tag]).map(item => [item.name, item.tag]);
     if (tbDataKV.length === 0) tbDataKV = [];
-    _scSaveToAttachmentKV();
     tbKVRender();
 }
 
@@ -3048,16 +3952,28 @@ function pdfScRemoveVarTag(tag, modelKey) {
     pdfScSaveToState();
 }
 
-// PDF 附件数据列配置切换：机群=文档键值表格，单机=三栏级联
+// PDF 附件数据列配置切换：机群=文档键值表格，单机=三栏级联；两种都适用时用子 Tab 切换两套
 function togglePdfDataColumnConfig(skipInit) {
-    const mt = document.getElementById('edit-tpl-machine-type').value;
+    const types = getEditTypes();
+    const hasFleet = types.includes('机群');
+    const hasSingle = types.includes('单机');
     const kvEl = document.getElementById('pdf-kv-section');
     const singleEl = document.getElementById('pdf-single-column-config');
-    if (kvEl) kvEl.style.display = mt === '机群' ? '' : 'none';
+    const subWrap = document.getElementById('pdf-col-subswitch');
+
+    if (subWrap) subWrap.style.display = (hasFleet && hasSingle) ? '' : 'none';
+    if (!hasFleet) pdfColTab = 'single';
+    else if (!hasSingle) pdfColTab = 'fleet';
+
+    const showFleet = hasFleet && (!hasSingle || pdfColTab === 'fleet');
+    const showSingle = hasSingle && (!hasFleet || pdfColTab === 'single');
+
+    if (kvEl) kvEl.style.display = showFleet ? '' : 'none';
     if (singleEl) {
-        singleEl.style.display = mt !== '机群' ? '' : 'none';
-        if (mt !== '机群' && !skipInit) pdfScInit(null);
+        singleEl.style.display = showSingle ? '' : 'none';
+        if (showSingle && !skipInit) pdfScInit(window._pdfScModelKV || null);
     }
+    syncColSubswitch('pdf-col-subswitch-tabs', pdfColTab);
 }
 
 // ==================== 设备变量数据源 ====================
@@ -3130,7 +4046,7 @@ const SINGLE_MACHINE_VARS = [
 function createAndEdit() {
     const newTpl = {
         id: templates.length,
-        machineType: '单机',
+        machineTypes: ['单机', '机群'],
         enabled: true,
         updatedAt: nowStr(),
         translations: {

@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>设备报表管理</title>
+    <title>设备报表管理（v2.0）</title>
     <style>
         * {
             box-sizing: border-box;
@@ -207,6 +207,105 @@
             height: 2px;
             background-color: #E60012;
         }
+
+        /* 顶部标签页右侧的「我需要更多报表」入口 */
+        .tabs-right {
+            margin-left: auto;
+            display: flex;
+            align-items: center;
+            padding-right: 24px;
+        }
+
+        .more-reports-entry {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            height: 32px;
+            padding: 0 14px;
+            font-size: 13px;
+            font-family: inherit;
+            color: #E60012;
+            background: #fff;
+            border: 1px solid #E60012;
+            border-radius: 16px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+
+        .more-reports-entry:hover {
+            background: #E60012;
+            color: #fff;
+        }
+
+        .more-reports-entry svg { flex-shrink: 0; }
+
+        /* ====== 「我需要更多报表」诉求弹窗 ====== */
+        .more-section-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 10px;
+        }
+        .more-option {
+            display: flex;
+            gap: 10px;
+            padding: 12px 14px;
+            border: 1px solid #f0f0f0;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s;
+        }
+        .more-option + .more-option { margin-top: 10px; }
+        .more-option:hover { border-color: #E60012; background: #fffafa; }
+        .more-option input {
+            margin: 3px 0 0;
+            flex-shrink: 0;
+            accent-color: #E60012;
+            cursor: pointer;
+        }
+        .more-option-name {
+            font-size: 13px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 3px;
+        }
+        .more-option-desc {
+            font-size: 12px;
+            color: #888;
+            line-height: 1.5;
+        }
+        .more-option-tag {
+            display: inline-block;
+            margin-left: 6px;
+            font-size: 10px;
+            font-weight: 400;
+            padding: 1px 6px;
+            border-radius: 3px;
+            vertical-align: middle;
+        }
+        .more-option-tag.planned { color: #1890ff; background: #e6f4ff; }
+        .more-option-tag.apply   { color: #fa8c16; background: #fff7e6; }
+        .more-note-input {
+            width: 100%;
+            min-height: 96px;
+            padding: 10px 12px;
+            font-size: 13px;
+            font-family: inherit;
+            line-height: 1.6;
+            color: #333;
+            border: 1px solid #d9d9d9;
+            border-radius: 8px;
+            resize: vertical;
+            box-sizing: border-box;
+        }
+        .more-note-input:focus { outline: none; border-color: #E60012; }
+        .more-form-tip {
+            font-size: 12px;
+            margin-top: 10px;
+            display: none;
+        }
+        .more-form-tip.error   { display: block; color: #E60012; }
+        .more-form-tip.success { display: block; color: #52c41a; }
 
         /* 工具栏 */
         .toolbar {
@@ -1225,8 +1324,6 @@
             border-radius: 0 4px 4px 0;
             line-height: 1.6;
         }
-            margin-top: 6px;
-        }
 
         .dropdown-panel {
             border: 1px solid #d9d9d9;
@@ -1262,6 +1359,33 @@
 
         .form-row.two-col {
             grid-template-columns: 1fr 1fr;
+        }
+
+        /* v2.0 调整：剩余字段自动铺满整行（只剩一项时拉伸到整行，不留空轨道） */
+        .form-row.auto-col {
+            grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        }
+
+        /* ===== v2.0 调整：添加报表弹窗的间距 / 栅格统一，减少零散感 ===== */
+        #addReportModal .modal-body {
+            padding: 20px 24px 8px;
+        }
+        #addReportModal .steps {
+            margin-bottom: 24px;
+        }
+        #addReportModal .form-group {
+            margin-bottom: 16px;
+        }
+        #addReportModal .form-row {
+            gap: 14px;
+        }
+        #addReportModal .form-section-title {
+            margin: 18px 0 12px;
+            padding-top: 12px;
+        }
+        #addReportModal .frequency-fields,
+        #addReportModal .dim-switch {
+            margin-bottom: 0;
         }
 
         .form-textarea {
@@ -1389,37 +1513,7 @@
             color: #333;
         }
 
-        /* 提示信息 */
-        .alert-info {
-            display: none;
-            align-items: flex-start;
-            gap: 10px;
-            padding: 12px 16px;
-            background: #e6f4ff;
-            border: 1px solid #91caff;
-            border-radius: 4px;
-            font-size: 13px;
-            color: #333;
-            margin-bottom: 24px;
-        }
-
-        .alert-info.active {
-            display: flex;
-        }
-
-        .alert-info svg {
-            color: #E60012;
-            flex-shrink: 0;
-            margin-top: 1px;
-        }
-
         /* 穿梭框 */
-        .transfer-hint {
-            font-size: 14px;
-            color: #333;
-            margin-bottom: 16px;
-        }
-
         .transfer-box {
             display: grid;
             grid-template-columns: 1fr 1fr;
@@ -1692,6 +1786,12 @@
             font-weight: 500;
         }
 
+        /* v2.0：资产选择上限提示（单机 1 个 / 机群最多 100 个） */
+        .asset-limit {
+            font-size: 12px;
+            color: #999;
+        }
+
         .clear-all {
             font-size: 13px;
             color: #ff4d4f;
@@ -1887,6 +1987,17 @@
             background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='2'%3E%3Crect x='3' y='4' width='18' height='18' rx='2' ry='2'/%3E%3Cline x1='16' y1='2' x2='16' y2='6'/%3E%3Cline x1='8' y1='2' x2='8' y2='6'/%3E%3Cline x1='3' y1='10' x2='21' y2='10'/%3E%3C/svg%3E") no-repeat 12px center;
             background-size: 16px;
             cursor: pointer;
+        }
+
+        /* v2.0 调整：合并字段（如「接收时间」= 接收时区 + 递送时间）内部并排的控件
+           间距与 .form-row 一致（14px），内部两个选择框各占一半，宽度与相邻行的选择框一致 */
+        .combo-inputs {
+            display: flex;
+            gap: 14px;
+        }
+        .combo-inputs .form-select {
+            flex: 1 1 0;
+            min-width: 0;
         }
 
         .frequency-fields {
@@ -2086,6 +2197,363 @@
             color: #fff;
         }
         .onboarding-btn-done:hover { background: #cc0010; }
+
+        /* ==================== v2.0 新增：维度切换 ==================== */
+        .dim-switch {
+            display: inline-flex;
+            padding: 3px;
+            background: #f2f2f2;
+            border-radius: 8px;
+            margin-bottom: 18px;
+        }
+        .dim-switch button {
+            min-width: 132px;
+            padding: 9px 20px;
+            border: none;
+            background: transparent;
+            border-radius: 6px;
+            font-size: 13px;
+            font-weight: 600;
+            color: #666;
+            cursor: pointer;
+            font-family: inherit;
+            transition: all .18s;
+        }
+        .dim-switch button.active {
+            background: #fff;
+            color: #E60012;
+            box-shadow: 0 1px 4px rgba(0,0,0,.1);
+        }
+        .dim-switch button:hover:not(.active) { color: #333; }
+
+        /* v2.0 调整：报表类型按「单机 / 机群」左右 Tab 分组（复用 dim-switch 外观，等分铺满） */
+        .dim-switch.type-switch {
+            display: flex;
+            width: 100%;
+            margin-bottom: 10px;
+        }
+        .dim-switch.type-switch button {
+            flex: 1;
+            min-width: 0;
+            padding: 8px 12px;
+            font-size: 12px;
+        }
+
+        .dim-badge {
+            display: inline-block;
+            padding: 2px 8px;
+            border-radius: 3px;
+            font-size: 11px;
+            line-height: 18px;
+            white-space: nowrap;
+        }
+        .dim-badge.device { background: #f2f2f2; color: #666; }
+        .dim-badge.project { background: #fdecee; color: #E60012; }
+
+        .format-cell { white-space: nowrap; }
+        /* v2.0 调整：接收时间 / 生效区间列不换行 */
+        .nowrap-cell { white-space: nowrap; }
+        .format-cell .fmt-layout {
+            display: block;
+            font-size: 11px;
+            color: #999;
+            margin-top: 2px;
+        }
+
+        /* ==================== v2.0 新增：项目选择面板 ==================== */
+        .proj-panel { display: none; }
+        .proj-panel.active { display: block; }
+
+        .proj-tabs {
+            display: flex;
+            align-items: stretch;
+            border: 1px solid #e0e0e0;
+            border-radius: 6px 6px 0 0;
+            overflow: hidden;
+            background: #fff;
+        }
+        .proj-tab {
+            flex: 1;
+            padding: 13px 8px;
+            border: none;
+            background: #fff;
+            font-size: 13px;
+            color: #444;
+            cursor: pointer;
+            font-family: inherit;
+            border-right: 1px solid #eee;
+            transition: all .15s;
+        }
+        .proj-tab:last-child { border-right: none; }
+        .proj-tab:hover { color: #E60012; }
+        .proj-tab.active {
+            background: #262626;
+            color: #fff;
+            font-weight: 600;
+        }
+
+        .proj-body {
+            display: grid;
+            grid-template-columns: 1fr 1fr;
+            gap: 16px;
+            border: 1px solid #e0e0e0;
+            border-top: none;
+            border-radius: 0 0 6px 6px;
+            padding: 14px;
+            background: #fff;
+        }
+        .proj-col { border: 1px solid #e8e8e8; border-radius: 4px; display: flex; flex-direction: column; min-height: 300px; }
+        .proj-col-head { padding: 10px 12px; border-bottom: 1px solid #f0f0f0; }
+        .proj-search {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            border: 1px solid #d9d9d9;
+            border-radius: 4px;
+            padding: 0 10px;
+            height: 38px;
+        }
+        .proj-search:focus-within { border-color: #E60012; }
+        .proj-search svg { flex-shrink: 0; color: #999; }
+        .proj-search input {
+            flex: 1;
+            border: none;
+            outline: none;
+            font-size: 13px;
+            font-family: inherit;
+            color: #333;
+            background: transparent;
+            height: 100%;
+        }
+        .proj-search input::placeholder { color: #bbb; }
+        .proj-sort {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            margin-top: 8px;
+            font-size: 12px;
+            color: #666;
+            cursor: pointer;
+            user-select: none;
+            width: fit-content;
+        }
+        .proj-sort:hover { color: #E60012; }
+        .proj-col-head-right {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            font-size: 13px;
+            color: #333;
+        }
+        .proj-remove-all {
+            background: none;
+            border: none;
+            color: #E60012;
+            font-size: 12px;
+            cursor: pointer;
+            font-family: inherit;
+            padding: 0;
+        }
+        .proj-remove-all:disabled { color: #ccc; cursor: not-allowed; }
+
+        .proj-list { flex: 1; overflow-y: auto; max-height: 300px; padding: 6px 0; }
+        .proj-item {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 12px;
+            cursor: pointer;
+            transition: background .15s;
+        }
+        .proj-item:hover { background: #fafafa; }
+        .proj-item-body { flex: 1; min-width: 0; }
+        .proj-item-title {
+            font-size: 13px;
+            color: #333;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+        }
+        .proj-item-desc { font-size: 11px; color: #999; margin-top: 2px; }
+        .proj-item-meta {
+            font-size: 11px;
+            color: #666;
+            background: #f2f2f2;
+            border-radius: 10px;
+            padding: 2px 8px;
+            white-space: nowrap;
+        }
+        .proj-item-action {
+            border: 1px solid #d9d9d9;
+            background: #fff;
+            border-radius: 4px;
+            width: 24px;
+            height: 24px;
+            line-height: 1;
+            font-size: 14px;
+            color: #666;
+            cursor: pointer;
+            font-family: inherit;
+        }
+        .proj-item-action:hover { border-color: #E60012; color: #E60012; }
+        .proj-item-action.remove:hover { border-color: #E60012; color: #E60012; }
+        .proj-group-title {
+            padding: 8px 12px 4px;
+            font-size: 11px;
+            color: #999;
+            letter-spacing: .5px;
+        }
+        .proj-empty {
+            flex: 1;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 10px;
+            color: #999;
+            font-size: 13px;
+            padding: 30px 12px;
+        }
+        .proj-empty svg { opacity: .85; }
+
+        .proj-counter {
+            margin-top: 10px;
+            font-size: 12px;
+            color: #666;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+        .proj-counter b { color: #E60012; }
+        .proj-counter .proj-counter-warn { color: #d48806; }
+
+        .proj-tip {
+            margin-top: 8px;
+            font-size: 12px;
+            color: #d48806;
+            background: #fffbe6;
+            border: 1px solid #ffe58f;
+            border-left: 3px solid #faad14;
+            border-radius: 0 4px 4px 0;
+            padding: 8px 12px;
+            line-height: 1.6;
+            display: none;
+        }
+        .proj-tip.active { display: block; }
+
+        .proj-option-block { display: none; }
+        .proj-option-block.active { display: block; }
+        .select-disabled { background: #f7f7f7 !important; color: #bbb !important; cursor: not-allowed; }
+
+        /* ==================== v2.0：统计口径与班次 ==================== */
+        .shift-only { display: none; }
+        .shift-only.active { display: block; }
+        .form-row .shift-only.active { display: block; }
+        .shift-time-row { display: flex; align-items: center; gap: 8px; }
+        .shift-time-row select,
+        .shift-time-row input { flex: 1; min-width: 0; }
+        .shift-time-row span { color: #bbb; }
+
+        /* 班次时间段：支持自定义添加 / 删除多个时间段 */
+        .shift-segments {
+            display: flex;
+            flex-direction: column;
+            gap: 8px;
+            padding: 12px;
+            background: #fafbfc;
+            border: 1px solid #eef0f3;
+            border-radius: 10px;
+        }
+        .shift-time-row {
+            padding: 8px 12px;
+            background: #fff;
+            border: 1px solid #e8e8e8;
+            border-radius: 8px;
+            transition: border-color .15s, box-shadow .15s;
+        }
+        .shift-time-row:hover {
+            border-color: #ffd6da;
+            box-shadow: 0 2px 8px rgba(230, 0, 18, .06);
+        }
+        .shift-time-row input { height: 34px; font-size: 13px; }
+        .shift-time-row .shift-seg-label {
+            flex: 0 0 auto;
+            padding: 3px 8px;
+            font-size: 12px;
+            font-weight: 500;
+            color: #E60012;
+            background: #fdecee;
+            border-radius: 4px;
+            white-space: nowrap;
+        }
+        .shift-add-btn {
+            display: block;
+            width: 100%;
+            margin-top: 10px;
+            height: 34px;
+            font-size: 13px;
+            font-family: inherit;
+            color: #E60012;
+            background: #fff;
+            border: 1px dashed #f0a5ad;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all .15s;
+        }
+        .shift-add-btn:hover { background: #fdecee; border-color: #E60012; }
+        .shift-del-btn {
+            flex: 0 0 auto;
+            width: 26px;
+            height: 26px;
+            border: none;
+            background: #f5f5f5;
+            color: #999;
+            border-radius: 50%;
+            cursor: pointer;
+            font-size: 14px;
+            line-height: 1;
+            font-family: inherit;
+            transition: all .15s;
+        }
+        .shift-del-btn:hover { background: #fdecee; color: #E60012; }
+
+        /* 班次合计校验结果条 */
+        .shift-summary {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            margin-top: 10px;
+            padding: 8px 12px;
+            font-size: 12px;
+            line-height: 1.6;
+            border: 1px solid transparent;
+            border-radius: 6px;
+        }
+        .shift-summary .shift-chip {
+            flex: 0 0 auto;
+            padding: 2px 8px;
+            border-radius: 4px;
+            font-weight: 600;
+        }
+        .shift-summary.ok {
+            color: #389e0d;
+            background: #f6ffed;
+            border-color: #b7eb8f;
+        }
+        .shift-summary.ok .shift-chip { color: #389e0d; background: #d9f7be; }
+        .shift-summary.bad {
+            color: #cf1322;
+            background: #fff2f0;
+            border-color: #ffccc7;
+        }
+        .shift-summary.bad .shift-chip { color: #cf1322; background: #ffccc7; }
+        .label-note {
+            margin-left: 8px;
+            font-size: 12px;
+            font-weight: 400;
+            color: #999;
+        }
+
     </style>
 
 </head>
@@ -2126,7 +2594,7 @@
                         </a>
                     </li>
                     <li class="sidebar-item">
-                        <a class="sidebar-link" href="机群报表.html">
+                        <a class="sidebar-link" href="报表模版.html">
                             <span class="sidebar-icon">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><path d="M3 9h18"></path><path d="M9 21V9"></path></svg>
                             </span>
@@ -2168,8 +2636,17 @@
                     <div class="page-card">
             <!-- 顶部标签页 -->
             <div class="tabs">
-                <a href="机群报表.html" class="tab" data-onboarding="tab-template">机群报表</a>
+                <a href="报表模版.html" class="tab" data-onboarding="tab-template">报表模版</a>
                 <a class="tab active">管理报表</a>
+                <div class="tabs-right">
+                    <button class="more-reports-entry" id="moreReportsEntry" type="button">
+                        <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
+                            <line x1="12" y1="5" x2="12" y2="19"></line>
+                            <line x1="5" y1="12" x2="19" y2="12"></line>
+                        </svg>
+                        我需要更多报表
+                    </button>
+                </div>
             </div>
 
             <!-- 工具栏 -->
@@ -2234,16 +2711,18 @@
                         <tr>
                             <th>报表名称</th>
                             <th>报表类型</th>
+                            <th>维度</th>
                             <th>所有者</th>
                             <th>频率</th>
+                            <th>数据范围</th>
+                            <th>统计口径</th>
                             <th>格式</th>
                             <th>收件人</th>
-                            <th>资产数量</th>
                             <th>资产</th>
                             <th>主题</th>
-                            <th>开始日期</th>
-                            <th>结束日期</th>
-                            <th>时区</th>
+                            <th>接收日期</th>
+                            <th>接收时间</th>
+                            <th>生效区间</th>
                             <th>创建时间</th>
                             <th>开关</th>
                             <th>状态</th>
@@ -2287,7 +2766,7 @@
                 <div class="steps">
                     <div class="step active" data-step="1">
                         <div class="step-num"><span>1</span></div>
-                        <div class="step-label">资产选择</div>
+                        <div class="step-label" id="step1Label">资产选择</div>
                     </div>
                     <div class="step-line"></div>
                     <div class="step" data-step="2">
@@ -2297,34 +2776,17 @@
                 </div>
 
 
-                <!-- 步骤 1：资产选择 -->
+                <!-- 步骤 1：报表范围 -->
                 <div class="step-content active" data-step="1">
+
                     <div class="form-group">
-                        <label class="form-label">定期报表类型</label>
+                        <label class="form-label" id="reportTypeLabel">定期报表类型</label>
+                        <div class="dim-switch type-switch" id="typeGroupTabs"></div>
                         <select class="form-select" id="reportTypeSelect">
                             <option value="" disabled selected>选择报表类型</option>
-                            <option value="设备运行日报（单个资产）">设备运行日报（单个资产）</option>
-                            <option value="设备运行周报（单个资产）">设备运行周报（单个资产）</option>
-                            <option value="设备运行月报（单个资产）">设备运行月报（单个资产）</option>
-                            <option value="设备能耗月报（单个资产）">设备能耗月报（单个资产）</option>
-                            <option value="异常告警通知（单个资产）">异常告警通知（单个资产）</option>
-                            <option value="机群运行日报（设备机群）">机群运行日报（设备机群）</option>
-                            <option value="机群运行周报（设备机群）">机群运行周报（设备机群）</option>
-                            <option value="机群能耗分析（设备机群）">机群能耗分析（设备机群）</option>
-                            <option value="开工率统计报表（设备机群）">开工率统计报表（设备机群）</option>
                         </select>
+                        <div class="form-hint" id="reportTypeHint" style="margin-top:6px;display:none;"></div>
                     </div>
-
-                    <div class="alert-info" id="singleAssetAlert">
-                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
-                            <circle cx="12" cy="12" r="10"></circle>
-                            <line x1="12" y1="16" x2="12" y2="12"></line>
-                            <line x1="12" y1="8" x2="12.01" y2="8"></line>
-                        </svg>
-                        <span>此报表仅为一个资产提供数据。选择一个资产以生成报表。</span>
-                    </div>
-
-                    <div class="transfer-hint" id="transferHint">搜索并选择要添加到报表中的资产（最多选择 100 个资产）。</div>
 
                     <div class="transfer-box" id="assetTransferBox">
                         <div class="transfer-panel">
@@ -2344,6 +2806,7 @@
                         <div class="transfer-panel">
                             <div class="selected-panel-header">
                                 <span class="selected-title">已选资产</span>
+                                <span class="asset-limit" id="assetLimitTip"></span>
                                 <button class="clear-all" id="clearAllBtn" disabled>删除全部 (<span id="selectedCount">0</span>)</button>
                             </div>
                             <div class="transfer-panel-header">
@@ -2354,6 +2817,65 @@
                             </div>
                         </div>
                     </div>
+                </div>
+
+                <!-- ===== v2.0 项目维度：项目选择面板 ===== -->
+                <div class="proj-panel" id="projPanel">
+                    <div class="proj-tabs" id="projTabs">
+                        <button type="button" class="proj-tab active" data-src="all">所有项目</button>
+                        <button type="button" class="proj-tab" data-src="jobsite">工地现场</button>
+                        <button type="button" class="proj-tab" data-src="geofence">在地理围栏中</button>
+                        <button type="button" class="proj-tab" data-src="group">在群组中</button>
+                    </div>
+
+                    <div class="proj-body">
+                        <!-- 左：可选 -->
+                        <div class="proj-col">
+                            <div class="proj-col-head">
+                                <div class="proj-search">
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="11" cy="11" r="8"></circle>
+                                        <path d="M21 21l-4.35-4.35"></path>
+                                    </svg>
+                                    <input type="text" id="projLeftSearch" placeholder="搜索项目名称">
+                                </div>
+                                <div class="proj-sort" id="projSort">
+                                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <line x1="12" y1="19" x2="12" y2="5"></line>
+                                        <polyline points="5 12 12 5 19 12"></polyline>
+                                    </svg>
+                                    <span id="projSortLabel">A to Z</span>
+                                    <svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <polyline points="6 9 12 15 18 9"></polyline>
+                                    </svg>
+                                </div>
+                            </div>
+                            <div class="proj-list" id="projLeftList"></div>
+                        </div>
+
+                        <!-- 右：已选 -->
+                        <div class="proj-col">
+                            <div class="proj-col-head">
+                                <div class="proj-col-head-right">
+                                    <span>已选项目</span>
+                                    <button type="button" class="proj-remove-all" id="projRemoveAll" disabled>全部移除 (0)</button>
+                                </div>
+                            </div>
+                            <div class="proj-col-head" style="border-bottom:1px solid #f0f0f0;">
+                                <div class="proj-search">
+                                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                                        <circle cx="11" cy="11" r="8"></circle>
+                                        <path d="M21 21l-4.35-4.35"></path>
+                                    </svg>
+                                    <input type="text" id="projRightSearch" placeholder="搜索已选项目">
+                                </div>
+                            </div>
+                            <div class="proj-list" id="projRightList"></div>
+                        </div>
+                    </div>
+
+                    <div class="proj-counter" id="projCounter"></div>
+                    <div class="proj-tip" id="projTip"></div>
                 </div>
 
 
@@ -2375,19 +2897,89 @@
                                 <option value="PDF">PDF</option>
                             </select>
                         </div>
-                        <div class="form-group">
+                        <!-- v2.0 调整：频率（每日 / 每周 / 每月）与发送方式解耦，两种发送方式下都显示 -->
+                        <div class="form-group" id="freqGroup">
                             <label class="form-label">频率</label>
                             <select class="form-select" id="reportFrequency">
-                                <option value="一次">一次</option>
-                                <option value="下载">下载</option>
-                                <option value="每日">每日</option>
+                                <option value="每日" selected>每日</option>
                                 <option value="每周">每周</option>
                                 <option value="每月">每月</option>
+                                <option value="下载" hidden>下载</option>
                             </select>
                         </div>
                     </div>
 
+                    <!-- v2.0 调整：发送方式 + 统计口径 同一行（统计口径在周 / 月下隐藏，此时发送方式独占左列） -->
+                    <div class="form-row two-col">
+                        <div class="form-group">
+                            <label class="form-label">发送方式</label>
+                            <div class="dim-switch type-switch" id="sendModeTabs">
+                                <button type="button" data-mode="download">直接下载</button>
+                                <button type="button" data-mode="mail">邮件接收</button>
+                            </div>
+                        </div>
+                        <div class="form-group" id="caliberBlock">
+                            <label class="form-label">统计口径</label>
+                            <select class="form-select" id="caliberSelect">
+                                <option value="natural">自然日（00:00 – 24:00）</option>
+                                <option value="shift">班次（自定义）</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <!-- ===== v2.0 班次时间（统计口径选「班次」时展开） ===== -->
+                    <div class="form-group shift-only">
+                        <label class="form-label">班次时间<span class="label-note">各时间段不能重叠，合计必须正好铺满 24 小时（如 07:00–19:00 + 19:00–07:00）</span></label>
+                        <div class="shift-segments" id="shiftSegments"></div>
+                        <button type="button" class="shift-add-btn" id="shiftAddSegment">＋ 添加时间段</button>
+                        <div class="shift-summary" id="shiftDurationHint"></div>
+                    </div>
+
+                    <!-- ===== v2.0 项目维度专属配置 ===== -->
+                    <div class="proj-option-block" id="projOptionBlock">
+                        <div class="form-section-title">项目维度配置</div>
+                        <div class="form-row" style="grid-template-columns: 1fr 1fr 1fr;">
+                            <div class="form-group">
+                                <label class="form-label">聚合主体</label>
+                                <select class="form-select" id="projCaliber">
+                                    <option value="按行程">按行程（一次装载任务 = 一个 Trip）</option>
+                                    <option value="按设备">按设备</option>
+                                </select>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">行程明细</label>
+                                <select class="form-select" id="projTripDetail">
+                                    <option value="包含">包含行程明细（T1–T5）</option>
+                                    <option value="不包含">不包含</option>
+                                </select>
+                                <div class="form-hint" id="projTripDetailHint" style="margin-top:6px;display:none;">仅日粒度支持行程明细，周/月自动汇总</div>
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label">汇总层级</label>
+                                <select class="form-select" id="projLevel">
+                                    <option value="项目+设备">项目 + 设备</option>
+                                    <option value="项目汇总">仅项目汇总</option>
+                                    <option value="项目+设备+行程">项目 + 设备 + 行程</option>
+                                </select>
+                            </div>
+                        </div>
+                    </div>
+
                     <div id="dynamicStep2Fields" class="frequency-fields"></div>
+
+                    <!-- v2.0 调整：时间范围 —— 直接下载时按该范围立即出报表（开始 / 结束均必填）；邮件接收时作为生效区间（可留空） -->
+                    <div id="rangeBlock">
+                        <div class="form-row two-col">
+                            <div class="form-group">
+                                <label class="form-label" id="rangeStartLabel">开始日期<span class="req">*</span></label>
+                                <input type="date" class="form-input" id="rangeStart">
+                            </div>
+                            <div class="form-group">
+                                <label class="form-label" id="rangeEndLabel">结束日期<span class="req">*</span></label>
+                                <input type="date" class="form-input" id="rangeEnd">
+                            </div>
+                        </div>
+                    </div>
 
                     <div class="form-hint" id="step2Hint"></div>
 
@@ -2435,6 +3027,7 @@
             </div>
             <div class="modal-footer">
                 <button class="btn" id="backBtn">取消</button>
+                <button class="btn" id="downloadNowBtn" disabled>下载</button>
                 <button class="btn btn-primary" id="nextBtn">下一个</button>
             </div>
 
@@ -2508,18 +3101,46 @@
         </div>
     </div>
 
+    <!-- 「我需要更多报表」诉求弹窗 -->
+    <div class="modal-overlay" id="moreReportsModal">
+        <div class="modal">
+            <div class="modal-header">
+                <div class="modal-title">我需要更多报表</div>
+                <button class="modal-close" id="moreReportsClose" title="关闭">
+                    <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+                        <line x1="18" y1="6" x2="6" y2="18"></line>
+                        <line x1="6" y1="6" x2="18" y2="18"></line>
+                    </svg>
+                </button>
+            </div>
+            <div class="modal-body" style="padding:20px 24px;">
+                <div style="font-size:12px;color:#888;line-height:1.7;margin-bottom:18px;">勾选你希望上线的报表，或直接描述你的诉求。提交后我们会评估排期，并将结果通知给你。</div>
+                <div class="more-section-title">候选报表（可多选）</div>
+                <div id="moreReportOptions"></div>
+                <div class="more-section-title" style="margin-top:20px;">自定义诉求说明</div>
+                <textarea class="more-note-input" id="moreReportNote" placeholder="例如：我希望有一份按周统计的「设备保养提醒报表」，需要包含下次保养时间、剩余小时数、所属项目…"></textarea>
+                <div class="more-form-tip" id="moreReportTip"></div>
+            </div>
+            <div class="modal-footer">
+                <button class="btn" type="button" onclick="closeMoreReportsModal()">取消</button>
+                <button class="btn btn-primary" type="button" onclick="submitMoreReports()">提交</button>
+            </div>
+        </div>
+    </div>
+
     <script>
         (function () {
             const modal = document.getElementById('addReportModal');
             const openBtn = document.querySelector('.add-btn');
             const closeBtn = document.getElementById('modalClose');
             const backBtn = document.getElementById('backBtn');
+            const downloadNowBtn = document.getElementById('downloadNowBtn');
+            const rangeStart = document.getElementById('rangeStart');
+            const rangeEnd = document.getElementById('rangeEnd');
             const nextBtn = document.getElementById('nextBtn');
             const steps = document.querySelectorAll('.step');
             const stepContents = document.querySelectorAll('.step-content');
             const reportTypeSelect = document.getElementById('reportTypeSelect');
-            const singleAssetAlert = document.getElementById('singleAssetAlert');
-            const transferHint = document.getElementById('transferHint');
 
             const assetTransferBox = document.getElementById('assetTransferBox');
             const leftPanelBody = document.getElementById('leftPanelBody');
@@ -2685,29 +3306,70 @@
             // 报表列表数据
             let reportList = [
                 {
-                    id: 1,
-                    name: '设备燃油监控报表',
-                    type: '设备能耗月报（单个资产）',
+                    id: 6,
+                    name: '梅溪湖项目生产报表',
+                    type: '项目生产报表（按行程）',
+                    dimension: 'project',
                     owner: 'Admin',
-                    frequency: '一次',
-                    format: 'XLSX',
-                    recipients: 'carol.smith@example.com',
-                    filters: '动力设备',
-                    subject: 'G001 燃油消耗分析',
-                    content: 'G001发电机燃油消耗分析',
-                    datetime: '2026-07-15 14:00',
-                    endDate: '2026-07-15',
-                    enabled: false,
-                    assets: 'G001',
-                    createTime: '2026-07-15 14:00'
+                    frequency: '每日',
+                    duration: '前一天',
+                    caliber: '自然日',
+                    deliveryDate: '-',
+                    deliveryTime: '08:00',
+                    startDate: '2026-09-14',
+                    format: 'PDF',
+                    pdfLayout: '标准版',
+                    recipients: 'alice.chen@sany.com.cn',
+                    filters: '项目',
+                    subject: '梅溪湖项目生产日报',
+                    datetime: '2026-09-14 08:00',
+                    endDate: '-',
+                    timezone: 'UTC+8',
+                    enabled: true,
+                    assets: '长沙梅溪湖工地, 挖掘机车队',
+                    projects: '长沙梅溪湖工地, 挖掘机车队',
+                    projCaliber: '按行程',
+                    createTime: '2026-09-14 08:00'
+                },
+                {
+                    id: 7,
+                    name: 'Jakarta 项目能耗报表',
+                    type: '项目能耗报表',
+                    dimension: 'project',
+                    owner: 'Admin',
+                    frequency: '每周',
+                    duration: '上周',
+                    caliber: '自然日',
+                    deliveryDate: '星期一',
+                    deliveryTime: '09:00',
+                    startDate: '2026-09-14',
+                    format: 'PDF',
+                    pdfLayout: '机群对比版',
+                    recipients: 'brian@centralatlantatractor.com',
+                    filters: '项目',
+                    subject: 'Jakarta North Quarry 项目能耗周报',
+                    datetime: '2026-09-14 09:00',
+                    endDate: '2026-12-31',
+                    timezone: 'UTC+7',
+                    enabled: true,
+                    assets: 'Jakarta North Quarry',
+                    projects: 'Jakarta North Quarry',
+                    projCaliber: '按设备',
+                    createTime: '2026-09-01 09:00'
                 },
                 {
                     id: 2,
                     name: '设备机群运行日报',
-                    type: '机群运行日报（设备机群）',
+                    type: '机群作业状态报表',
                     owner: 'Admin',
+                    caliber: '班次 07:00–19:00',
                     frequency: '每日',
+                    duration: '前一天',
+                    deliveryDate: '-',
+                    deliveryTime: '08:30',
+                    startDate: '2026-07-16',
                     format: 'XLSX',
+                    dimension: 'device',
                     recipients: 'brian@centralatlantatractor.com',
                     filters: '全部',
                     subject: '机群运行日报 每日 报表',
@@ -2722,10 +3384,16 @@
                 {
                     id: 3,
                     name: 'G002发电机状态监控',
-                    type: '异常告警通知（单个资产）',
+                    type: '设备事件统计报表',
                     owner: 'Admin',
                     frequency: '每日',
+                    duration: '前一天',
+                    caliber: '自然日',
+                    deliveryDate: '-',
+                    deliveryTime: '08:00',
+                    startDate: '2026-07-10',
                     format: 'XLSX',
+                    dimension: 'device',
                     recipients: 'david.johnson@example.com',
                     filters: '动力设备',
                     subject: 'G002 每日运行报表',
@@ -2741,10 +3409,16 @@
                 {
                     id: 4,
                     name: '挖掘机月度能耗统计',
-                    type: '机群能耗分析（设备机群）',
+                    type: '机群燃油效率报表',
                     owner: 'Admin',
                     frequency: '每月',
+                    duration: '上个月',
+                    caliber: '自然日',
+                    deliveryDate: '1',
+                    deliveryTime: '09:00',
+                    startDate: '2026-05-01',
                     format: 'XLSX',
+                    dimension: 'device',
                     recipients: 'aubrey_lancaster@yanceybros.com',
                     filters: '挖掘类设备',
                     subject: '挖掘机月度能耗统计',
@@ -2760,10 +3434,16 @@
                 {
                     id: 5,
                     name: '装载机车队日报',
-                    type: '机群运行日报（设备机群）',
+                    type: '机群作业状态报表',
                     owner: 'Admin',
                     frequency: '每日',
+                    duration: '前一天',
+                    caliber: '自然日',
+                    deliveryDate: '-',
+                    deliveryTime: '08:00',
+                    startDate: '2026-07-20',
                     format: 'XLSX',
+                    dimension: 'device',
                     recipients: 'alex@example.com',
                     filters: '轮式装载机',
                     subject: '装载机车队每日运行报表',
@@ -2816,7 +3496,7 @@
                 const pageData = filtered.slice(start, start + pageSize);
 
                 if (total === 0) {
-                    reportTableBody.innerHTML = `<tr><td colspan="15">
+                    reportTableBody.innerHTML = `<tr><td colspan="18">
                         <div class="empty-state">
                             <div class="empty-illustration">
                                 <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -2864,20 +3544,36 @@
                             statusContent = `<span class="status-badge normal">正常</span>`;
                         }
 
+                        // v2.0 调整：列与「添加报表」录入字段对齐
+                        // 数据范围 / 统计口径 / 接收日期 / 接收时间（时区+时间）/ 生效区间（开始 ~ 结束）
+                        const durationText = r.duration || '-';
+                        const caliberText = r.caliber || '自然日';
+                        const receiveDateText = r.deliveryDate || '-';
+                        const receiveTimeText = r.timezone
+                            ? r.timezone + (r.deliveryTime ? ' ' + r.deliveryTime : '')
+                            : '-';
+                        const rangeStartText = r.startDate || (r.datetime && r.datetime !== '-' ? r.datetime.split(' ')[0] : '');
+                        const rangeEndText = (r.endDate && r.endDate !== '-') ? r.endDate : '';
+                        const rangeText = (rangeStartText && rangeEndText)
+                            ? rangeStartText + ' ~ ' + rangeEndText
+                            : (rangeStartText ? rangeStartText + ' 起' : (rangeEndText ? '至 ' + rangeEndText : '-'));
+
                         return `
                         <tr data-id="${r.id}" class="${rowClass}">
                             <td class="col-name" title="${escapeHtml(r.name)}">${escapeHtml(r.name)}</td>
                             <td title="${escapeHtml(r.type)}">${escapeHtml(r.type)}</td>
+                            <td>${r.dimension === 'project' ? '<span class="dim-badge project">项目</span>' : '<span class="dim-badge device">设备</span>'}</td>
                             <td title="${escapeHtml(r.owner)}">${escapeHtml(r.owner)}</td>
                             <td><span class="status-badge enabled">${escapeHtml(r.frequency)}</span></td>
-                            <td>${escapeHtml(r.format)}</td>
+                            <td>${escapeHtml(durationText)}</td>
+                            <td title="${escapeHtml(caliberText)}">${escapeHtml(caliberText)}</td>
+                            <td class="format-cell">${escapeHtml(r.format)}</td>
                             <td title="${escapeHtml(r.recipients)}">${escapeHtml(r.recipients)}</td>
-                            <td>${(r.assets || '').split(',').filter(Boolean).length}</td>
                             <td class="col-assets" title="${escapeHtml(r.assets)}">${escapeHtml(r.assets)}</td>
                             <td title="${escapeHtml(r.subject)}">${escapeHtml(r.subject)}</td>
-                            <td>${escapeHtml(r.datetime ? r.datetime.split(' ')[0] : '')}</td>
-                            <td>${escapeHtml(r.endDate)}</td>
-                            <td>${r.timezone ? escapeHtml(r.timezone) : '-'}</td>
+                            <td>${escapeHtml(receiveDateText)}</td>
+                            <td class="nowrap-cell">${escapeHtml(receiveTimeText)}</td>
+                            <td class="nowrap-cell">${escapeHtml(rangeText)}</td>
                             <td>${escapeHtml(r.createTime || '-')}</td>
                             <td>${toggleContent}</td>
                             <td>${statusContent}</td>
@@ -2947,7 +3643,8 @@
                 });
             }
 
-            const monthlyDateOptions = Array.from({ length: 28 }, (_, i) => String(i + 1)).concat(['最后一天', '第一天']);
+            // v2.0 调整：接收日期（每月）只保留 1–28 号，移除「最后一天 / 第一天」特殊选项
+            const monthlyDateOptions = Array.from({ length: 28 }, (_, i) => String(i + 1));
 
             const timezoneOptions = [
                 { value: 'UTC-12', label: 'UTC-12（国际日期变更线西）' },
@@ -2980,36 +3677,24 @@
             const frequencyConfig = {
                 '下载': {
                     columns: 2,
-                    fields: [
-                        { id: 'startDate', label: '开始日期', type: 'date', className: 'date-picker' },
-                        { id: 'endDate', label: '结束日期', type: 'date', className: 'date-picker' }
-                    ],
+                    // v2.0 调整：日期改由「时间范围」静态区块（rangeStart / rangeEnd）承载，此处不再动态渲染
+                    fields: [],
                     extraFields: [],
                     hintTemplate: '报表将立即下载。日期范围限定为3个月。',
                     showEmail: false,
                     nextBtnText: '下载',
                 },
-                '一次': {
+                '每日': {
+                    // v2.0 调整：「持续时间」改名「数据范围」；接收时区 + 递送时间合并为一个字段「接收时间」
                     columns: 2,
                     fields: [
-                        { id: 'startDate', label: '开始日期', type: 'date', className: 'date-picker' },
-                        { id: 'endDate', label: '结束日期', type: 'date', className: 'date-picker' }
+                        { id: 'duration', label: '数据范围', type: 'select', options: ['前一天'], className: 'date-select' },
+                        { id: 'receiveTime', label: '接收时间', type: 'combo', inputs: [
+                            { id: 'timezone', options: timezoneOptions },
+                            { id: 'deliveryTime', options: timeOptions }
+                        ] }
                     ],
                     extraFields: [],
-                    hintTemplate: '报表将立即递送。日期范围限定为3个月。',
-                    showEmail: true,
-                    nextBtnText: '添加',
-                },
-                '每日': {
-                    columns: 3,
-                    fields: [
-                        { id: 'duration', label: '持续时间', type: 'select', options: ['前一天'], className: 'date-select' },
-                        { id: 'deliveryTime', label: '递送时间', type: 'select', options: timeOptions, className: 'time-picker' },
-                        { id: 'endDate', label: '结束日期（选填）', type: 'date', className: 'date-picker' }
-                    ],
-                    extraFields: [
-                        { id: 'timezone', label: '接收时区', type: 'select', options: timezoneOptions, className: 'timezone-picker' }
-                    ],
                     showTimezoneHint: true,
                     hintTemplate: '报表将于每天 {deliveryTime} 递送，显示 {duration} 的数据（接收时区：{timezone}）',
                     showEmail: true,
@@ -3017,32 +3702,32 @@
                     includeWeekend: true
                 },
                 '每周': {
-                    columns: 3,
+                    columns: 2,
                     fields: [
-                        { id: 'duration', label: '持续时间', type: 'select', options: ['上周'], className: 'date-select' },
-                        { id: 'deliveryDate', label: '递送日期', type: 'select', options: ['星期一', '星期二', '星期三', '星期四', '星期五', '星期六', '星期日'], className: 'date-select' },
-                        { id: 'deliveryTime', label: '递送时间', type: 'select', options: timeOptions, className: 'time-picker' }
+                        { id: 'duration', label: '数据范围', type: 'select', options: ['上周'], className: 'date-select' },
+                        { id: 'deliveryDate', label: '接收日期', type: 'select', options: ['星期一', '星期二', '星期三', '星期四', '星期五', '星期六', '星期日'], className: 'date-select' },
+                        { id: 'receiveTime', label: '接收时间', type: 'combo', inputs: [
+                            { id: 'timezone', options: timezoneOptions },
+                            { id: 'deliveryTime', options: timeOptions }
+                        ] }
                     ],
-                    extraFields: [
-                        { id: 'endDate', label: '结束日期（选填）', type: 'date', className: 'date-picker' },
-                        { id: 'timezone', label: '接收时区', type: 'select', options: timezoneOptions, className: 'timezone-picker' }
-                    ],
+                    extraFields: [],
                     showTimezoneHint: true,
                     hintTemplate: '报表将于每 {deliveryDate} 的 {deliveryTime} 递送，显示 {duration} 的数据（接收时区：{timezone}）',
                     showEmail: true,
                     nextBtnText: '添加',
                 },
                 '每月': {
-                    columns: 3,
+                    columns: 2,
                     fields: [
-                        { id: 'duration', label: '持续时间', type: 'select', options: ['上个月'], className: 'date-select' },
-                        { id: 'deliveryDate', label: '递送日期', type: 'select', options: monthlyDateOptions, className: 'date-select' },
-                        { id: 'deliveryTime', label: '递送时间', type: 'select', options: timeOptions, className: 'time-picker' }
+                        { id: 'duration', label: '数据范围', type: 'select', options: ['上个月'], className: 'date-select' },
+                        { id: 'deliveryDate', label: '接收日期', type: 'select', options: monthlyDateOptions, className: 'date-select' },
+                        { id: 'receiveTime', label: '接收时间', type: 'combo', inputs: [
+                            { id: 'timezone', options: timezoneOptions },
+                            { id: 'deliveryTime', options: timeOptions }
+                        ] }
                     ],
-                    extraFields: [
-                        { id: 'endDate', label: '结束日期（选填）', type: 'date', className: 'date-picker' },
-                        { id: 'timezone', label: '接收时区', type: 'select', options: timezoneOptions, className: 'timezone-picker' }
-                    ],
+                    extraFields: [],
                     showTimezoneHint: true,
                     hintTemplate: '报表将于每个月 {deliveryDate} {deliveryTime} 递送，显示 {duration} 的数据（接收时区：{timezone}）',
                     showEmail: true,
@@ -3053,12 +3738,641 @@
 
             // 刷新报表类型下拉
             function refreshTypeOptions() {
-                const allOpts = reportTypeSelect.querySelectorAll('option');
-                allOpts.forEach(opt => {
-                    if (!opt.value) return; // skip placeholder
-                    opt.disabled = false;
+                renderTypeOptions();
+            }
+
+            /* ==================== v2.0：维度与项目选择 ==================== */
+            // v2.0 调整：维度切换器已从弹窗移除，这里保留空实现，避免各调用点报错
+            const dimSwitch = document.getElementById('dimSwitch');
+            function syncDimSwitch() {
+                if (!dimSwitch) return;
+                dimSwitch.querySelectorAll('button').forEach(b => {
+                    b.classList.toggle('active', b.dataset.dim === currentDimension);
                 });
             }
+
+            // v2.0 调整：报表类型按「单机 / 机群」左右 Tab 分组切换（替代原下拉里的 optgroup）
+            const typeGroupTabs = document.getElementById('typeGroupTabs');
+            let typeGroup = '';
+
+            function getGroupsOfCurrentDim() {
+                const groups = [];
+                getTypesOfCurrentDim().forEach(t => {
+                    if (groups.indexOf(t.g) < 0) groups.push(t.g);
+                });
+                return groups;
+            }
+
+            function renderTypeGroupTabs() {
+                if (!typeGroupTabs) return;
+                const groups = getGroupsOfCurrentDim();
+                typeGroupTabs.style.display = groups.length > 1 ? 'flex' : 'none';
+                typeGroupTabs.innerHTML = groups.map(g =>
+                    '<button type="button" class="type-group-tab' + (g === typeGroup ? ' active' : '')
+                    + '" data-g="' + g + '">' + g + '</button>'
+                ).join('');
+                typeGroupTabs.querySelectorAll('button').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        if (btn.dataset.g === typeGroup) return;
+                        typeGroup = btn.dataset.g;
+                        selectedType = '';
+                        renderTypeOptions();
+                        updateTypeRelatedUI();
+                        markDirty();
+                    });
+                });
+            }
+
+            const step1Label = document.getElementById('step1Label');
+            const reportTypeLabel = document.getElementById('reportTypeLabel');
+            const reportTypeHint = document.getElementById('reportTypeHint');
+            const projPanel = document.getElementById('projPanel');
+            const projTabs = document.getElementById('projTabs');
+            const projLeftSearch = document.getElementById('projLeftSearch');
+            const projRightSearch = document.getElementById('projRightSearch');
+            const projSort = document.getElementById('projSort');
+            const projSortLabel = document.getElementById('projSortLabel');
+            const projLeftList = document.getElementById('projLeftList');
+            const projRightList = document.getElementById('projRightList');
+            const projRemoveAll = document.getElementById('projRemoveAll');
+            const projCounter = document.getElementById('projCounter');
+            const projTip = document.getElementById('projTip');
+            const projOptionBlock = document.getElementById('projOptionBlock');
+            const projCaliber = document.getElementById('projCaliber');
+            const projTripDetail = document.getElementById('projTripDetail');
+            const projTripDetailHint = document.getElementById('projTripDetailHint');
+            const projLevel = document.getElementById('projLevel');
+
+            const MAX_PROJECTS = 20;
+
+            // v2.0：资产数量上限 —— 单机报表仅 1 个；机群报表最多 100 个
+            const MAX_ASSETS = 100;
+            function assetLimit() {
+                return isSingleAsset() ? 1 : MAX_ASSETS;
+            }
+            function updateAssetLimitTip() {
+                const el = document.getElementById('assetLimitTip');
+                if (!el) return;
+                const limit = assetLimit();
+                el.textContent = limit === 1 ? '仅支持 1 个' : `最多 ${limit} 个`;
+            }
+
+            let currentDimension = 'device';
+            let projSource = 'all';
+            let projSortAsc = true;
+            let selectedProjects = [];
+
+            // v2.0 调整：文案不再随维度联动，步骤条与类型标签固定为设备维度口径
+            const DIM_META = {
+                device: { stepLabel: '资产选择', typeLabel: '定期报表类型' },
+                project: { stepLabel: '资产选择', typeLabel: '定期报表类型' }
+            };
+
+            // v2.0 报表类型：设备维度 13 项（按客户平台报表库取可实现清单，机型通用）+ 项目维度 5 项新增
+            const REPORT_TYPES = {
+                device: [
+                    { v: '设备利用率报表', g: '单机', layout: '标准版', single: true },
+                    { v: '设备运行快照报表', g: '单机', layout: '精简版', single: true },
+                    { v: '设备燃油效率报表', g: '单机', layout: '标准版', single: true },
+                    { v: '设备怠速分析报表', g: '单机', layout: '标准版', single: true },
+                    { v: '设备事件统计报表', g: '单机', layout: '精简版', single: true },
+                    { v: '设备事件历史报表', g: '单机', layout: '精简版', single: true },
+                    { v: '单机月度 360° 报表', g: '单机', layout: '标准版', single: true },
+                    { v: '机群作业状态报表', g: '机群', layout: '机群对比版' },
+                    { v: '机群状态清单报表', g: '机群', layout: '精简版' },
+                    { v: '机群利用率报表', g: '机群', layout: '机群对比版' },
+                    { v: '机群怠速与利用率报表', g: '机群', layout: '机群对比版' },
+                    { v: '机群燃油效率报表', g: '机群', layout: '机群对比版' },
+                    { v: '位置历史报表', g: '机群', layout: '精简版' }
+                ],
+                project: [
+                    { v: '项目生产报表（按行程）', g: '项目', layout: '标准版', tip: '以一次装载任务（Trip：T1 装载 → T5 空载结束）为单位，输出行程明细与项目产出汇总。' },
+                    { v: '项目效率报表', g: '项目', layout: '机群对比版', tip: '按设备对比利用率、行程数与单行程耗时，定位项目效率短板。' },
+                    { v: '项目能耗报表', g: '项目', layout: '标准版', tip: '按行程与按设备双口径统计能耗、百公里能耗与能量回收。' },
+                    { v: '项目安全报表', g: '项目', layout: '精简版', tip: '汇总超速时长/占比、急刹车次数与告警事件。' },
+                    { v: '项目设备清单报表', g: '项目', layout: '精简版', tip: '项目在册设备一览：编号、机型、状态、工时、里程与最近上报时间。' }
+                ]
+            };
+
+            const SRC_LABEL = {
+                all: '所有项目',
+                jobsite: '工地现场',
+                geofence: '地理围栏',
+                group: '设备群组'
+            };
+
+            // v2.0 项目数据（Mock）：工地现场 / 地理围栏 / 群组
+            const projects = [
+                { id: 'PJ001', name: '长沙梅溪湖工地', desc: '湖南省长沙市岳麓区 · 土方工程', src: 'jobsite', devices: 12 },
+                { id: 'PJ002', name: 'Jakarta North Quarry', desc: 'Indonesia · 露天采石场', src: 'jobsite', devices: 9 },
+                { id: 'PJ003', name: 'Pune Highway Package-3', desc: 'India · 公路施工标段', src: 'jobsite', devices: 18 },
+                { id: 'PJ004', name: 'NEOM Site B', desc: 'Saudi Arabia · 基建土方', src: 'jobsite', devices: 24 },
+                { id: 'PJ005', name: 'Bali Resort Foundation', desc: 'Indonesia · 基础施工', src: 'jobsite', devices: 0 },
+                { id: 'PJ101', name: '梅溪湖-1 号围栏', desc: '地理围栏 · 半径 1.2km', src: 'geofence', devices: 7 },
+                { id: 'PJ102', name: 'Jakarta Yard Fence', desc: '地理围栏 · 多边形 0.8km²', src: 'geofence', devices: 5 },
+                { id: 'PJ103', name: 'Pune Site A Fence', desc: '地理围栏 · 半径 0.6km', src: 'geofence', devices: 11 },
+                { id: 'PJ201', name: '挖掘机车队', desc: '设备群组 · 挖掘机 26 台', src: 'group', devices: 26 },
+                { id: 'PJ202', name: '宽体车运输组', desc: '设备群组 · 宽体车 18 台', src: 'group', devices: 18 },
+                { id: 'PJ203', name: '装载机班组', desc: '设备群组 · 轮式装载机 9 台', src: 'group', devices: 9 }
+            ];
+
+            function getTypesOfCurrentDim() {
+                return REPORT_TYPES[currentDimension] || [];
+            }
+
+            function renderTypeOptions() {
+                const all = getTypesOfCurrentDim();
+
+                // 分组跟随已选类型；否则回落到第一个分组
+                const picked = all.find(t => t.v === selectedType);
+                if (picked) typeGroup = picked.g;
+                if (!typeGroup || !all.some(t => t.g === typeGroup)) {
+                    typeGroup = all.length ? all[0].g : '';
+                }
+                renderTypeGroupTabs();
+
+                const current = reportTypeSelect.value;
+                const list = all.filter(t => t.g === typeGroup);
+                let html = '<option value="" disabled' + (current ? '' : ' selected') + '>选择报表类型</option>';
+                list.forEach(t => {
+                    html += `<option value="${t.v}">${t.v}</option>`;
+                });
+                reportTypeSelect.innerHTML = html;
+                if (current && list.some(t => t.v === current)) {
+                    reportTypeSelect.value = current;
+                } else {
+                    reportTypeSelect.value = '';
+                }
+                updateTypeHint();
+            }
+
+            function updateTypeHint() {
+                // v2.0 调整：项目维度不再展示「计划报告类型」的提示语
+                if (isProjectDim()) {
+                    reportTypeHint.style.display = 'none';
+                    return;
+                }
+                const t = getTypesOfCurrentDim().find(x => x.v === selectedType);
+                if (t && t.tip) {
+                    reportTypeHint.textContent = t.tip;
+                    reportTypeHint.style.display = 'block';
+                } else {
+                    reportTypeHint.style.display = 'none';
+                }
+            }
+
+            // 维度切换
+            function switchDimension(dim, silent) {
+                if (dim === currentDimension) return;
+                const hasPicked = selectedAssets.length > 0 || selectedProjects.length > 0;
+                if (!silent && hasPicked) {
+                    if (!confirm('切换维度将清空已选择的内容，是否继续？')) return;
+                }
+                currentDimension = dim;
+                syncDimSwitch();
+                step1Label.textContent = DIM_META[dim].stepLabel;
+                reportTypeLabel.textContent = DIM_META[dim].typeLabel;
+
+                selectedType = '';
+                selectedAssets = [];
+                selectedProjects = [];
+                leftSearch.value = '';
+                rightSearch.value = '';
+                projLeftSearch.value = '';
+                projRightSearch.value = '';
+
+                renderTypeOptions();
+                updateTypeRelatedUI();
+                renderLeftPanel();
+                renderRightPanel();
+                renderProjectLeft();
+                renderProjectRight();
+                if (!silent) markDirty();
+            }
+
+            function renderProjectLeft() {
+                const keyword = projLeftSearch.value.trim().toLowerCase();
+                let list = projects.filter(p => projSource === 'all' || p.src === projSource);
+                if (keyword) {
+                    list = list.filter(p => p.name.toLowerCase().includes(keyword) || (p.desc || '').toLowerCase().includes(keyword));
+                }
+                list = list.filter(p => !selectedProjects.some(s => s.id === p.id));
+                list.sort((a, b) => projSortAsc ? a.name.localeCompare(b.name) : b.name.localeCompare(a.name));
+
+                if (list.length === 0) {
+                    projLeftList.innerHTML = `
+                        <div class="proj-empty">
+                            <svg width="56" height="56" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M6 22 24 8l18 14v18a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V22z" stroke="#d9d9d9" stroke-width="2" fill="#fafafa"/>
+                                <path d="M18 42V30h12v12" stroke="#d9d9d9" stroke-width="2" fill="#fff"/>
+                                <path d="M24 26v10" stroke="#E60012" stroke-width="3" stroke-linecap="round"/>
+                                <circle cx="24" cy="41" r="1.6" fill="#E60012"/>
+                            </svg>
+                            <span>未找到匹配的项目</span>
+                        </div>`;
+                    return;
+                }
+
+                projLeftList.innerHTML = list.map(p => `
+                    <div class="proj-item" data-id="${p.id}">
+                        <div class="proj-item-body">
+                            <div class="proj-item-title">${escapeHtml(p.name)}</div>
+                            <div class="proj-item-desc">${escapeHtml(p.desc || '')}</div>
+                        </div>
+                        <span class="proj-item-meta">${p.devices} 台</span>
+                        <button type="button" class="proj-item-action add" title="添加">+</button>
+                    </div>
+                `).join('');
+
+                projLeftList.querySelectorAll('.proj-item').forEach(item => {
+                    item.addEventListener('click', () => addProject(item.dataset.id));
+                });
+            }
+
+            function renderProjectRight() {
+                const keyword = projRightSearch.value.trim().toLowerCase();
+                projRemoveAll.textContent = `全部移除 (${selectedProjects.length})`;
+                projRemoveAll.disabled = selectedProjects.length === 0;
+
+                if (selectedProjects.length === 0) {
+                    projRightList.innerHTML = `
+                        <div class="proj-empty">
+                            <svg width="56" height="56" viewBox="0 0 48 48" fill="none" xmlns="http://www.w3.org/2000/svg">
+                                <path d="M6 22 24 8l18 14v18a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2V22z" stroke="#d9d9d9" stroke-width="2" fill="#fafafa"/>
+                                <path d="M18 42V30h12v12" stroke="#d9d9d9" stroke-width="2" fill="#fff"/>
+                                <path d="M24 26v10" stroke="#E60012" stroke-width="3" stroke-linecap="round"/>
+                                <circle cx="24" cy="41" r="1.6" fill="#E60012"/>
+                            </svg>
+                            <span>暂未添加任何项目</span>
+                        </div>`;
+                    updateProjectCounter();
+                    return;
+                }
+
+                let list = selectedProjects;
+                if (keyword) {
+                    list = list.filter(p => p.name.toLowerCase().includes(keyword) || (p.desc || '').toLowerCase().includes(keyword));
+                }
+
+                // 按来源分组折叠展示
+                const groups = {};
+                list.forEach(p => {
+                    if (!groups[p.src]) groups[p.src] = [];
+                    groups[p.src].push(p);
+                });
+
+                let html = '';
+                Object.keys(groups).forEach(src => {
+                    html += `<div class="proj-group-title">${SRC_LABEL[src] || src}（${groups[src].length}）</div>`;
+                    html += groups[src].map(p => `
+                        <div class="proj-item" data-id="${p.id}">
+                            <div class="proj-item-body">
+                                <div class="proj-item-title">${escapeHtml(p.name)}</div>
+                                <div class="proj-item-desc">${escapeHtml(p.desc || '')}</div>
+                            </div>
+                            <span class="proj-item-meta">${p.devices} 台</span>
+                            <button type="button" class="proj-item-action remove" title="移除">×</button>
+                        </div>
+                    `).join('');
+                });
+                projRightList.innerHTML = html;
+
+                projRightList.querySelectorAll('.proj-item').forEach(item => {
+                    item.addEventListener('click', () => removeProject(item.dataset.id));
+                });
+
+                updateProjectCounter();
+            }
+
+            function updateProjectCounter() {
+                const deviceTotal = selectedProjects.reduce((sum, p) => sum + (p.devices || 0), 0);
+                let warn = '';
+                if (selectedProjects.length > MAX_PROJECTS) {
+                    warn = ` <span class="proj-counter-warn">最多选择 ${MAX_PROJECTS} 个项目</span>`;
+                }
+                projCounter.innerHTML = selectedProjects.length === 0
+                    ? '尚未选择项目'
+                    : `已选 <b>${selectedProjects.length}</b> 个项目 · 覆盖 <b>${deviceTotal}</b> 台设备${warn}`;
+
+                const emptyProjects = selectedProjects.filter(p => !p.devices);
+                if (emptyProjects.length > 0) {
+                    projTip.textContent = `提示：${emptyProjects.map(p => p.name).join('、')} 下暂无可见设备，报表将展示空态。`;
+                    projTip.classList.add('active');
+                } else {
+                    projTip.classList.remove('active');
+                }
+            }
+
+            function addProject(id) {
+                const p = projects.find(x => x.id === id);
+                if (!p) return;
+                if (selectedProjects.length >= MAX_PROJECTS) {
+                    alert(`最多选择 ${MAX_PROJECTS} 个项目`);
+                    return;
+                }
+                if (!selectedProjects.some(s => s.id === id)) {
+                    selectedProjects.push(p);
+                }
+                markDirty();
+                renderProjectLeft();
+                renderProjectRight();
+            }
+
+            function removeProject(id) {
+                selectedProjects = selectedProjects.filter(s => s.id !== id);
+                markDirty();
+                renderProjectLeft();
+                renderProjectRight();
+            }
+
+            function isProjectDim() {
+                return currentDimension === 'project';
+            }
+
+            // v2.0 调整：PDF 版式 / PDF 语言 / 附件内容已从界面移除，保留空实现避免调用点报错
+            function updateFormatRelatedUI() {}
+
+            // 频率联动：行程明细仅日粒度可用
+            function updateTripDetailState() {
+                const isDaily = reportFrequency.value === '每日';
+                projTripDetail.disabled = !isDaily;
+                projTripDetail.classList.toggle('select-disabled', !isDaily);
+                if (!isDaily) projTripDetail.value = '不包含';
+                projTripDetailHint.style.display = isDaily ? 'none' : 'block';
+            }
+
+            /* ==================== v2.0：统计口径与班次 ==================== */
+            const caliberSelect = document.getElementById('caliberSelect');
+            const caliberBlock = document.getElementById('caliberBlock');
+            const shiftSegmentsBox = document.getElementById('shiftSegments');
+            const shiftAddSegmentBtn = document.getElementById('shiftAddSegment');
+            const shiftDurationHint = document.getElementById('shiftDurationHint');
+            // 班次时间段（可添加多个；各段不重叠，且合计必须正好铺满 24 小时）
+            let shiftSegments = [
+                { start: '07:00', end: '19:00' },
+                { start: '19:00', end: '07:00' }
+            ];
+
+            function initShiftOptions() {
+                // 班次时间用原生 time 输入（可自定义添加多个时间段）
+                applyDefaultShift();
+            }
+
+            function toMinutes(t) {
+                const parts = (t || '00:00').split(':');
+                return parseInt(parts[0], 10) * 60 + parseInt(parts[1], 10);
+            }
+
+            // 单个时间段时长（小时）；结束不晚于开始视为跨天（+24 小时）
+            function segmentHours(seg) {
+                if (!seg.start || !seg.end) return 0;
+                let diff = toMinutes(seg.end) - toMinutes(seg.start);
+                if (diff <= 0) diff += 24 * 60;
+                return diff / 60;
+            }
+
+            function shiftDurationHours() {
+                return shiftSegments.reduce((sum, s) => sum + segmentHours(s), 0);
+            }
+
+            function isCrossDayShift() {
+                return shiftSegments.some(s => s.start && s.end && toMinutes(s.end) <= toMinutes(s.start));
+            }
+
+            // 渲染「班次时间」时间段列表（支持自定义添加 / 删除）
+            function renderShiftSegments() {
+                if (!shiftSegmentsBox) return;
+                shiftSegmentsBox.innerHTML = shiftSegments.map((seg, i) => `
+                    <div class="shift-time-row" data-idx="${i}">
+                        <span class="shift-seg-label">班次${i + 1}</span>
+                        <input type="time" class="form-select" step="60" data-role="start" value="${seg.start || ''}">
+                        <span>—</span>
+                        <input type="time" class="form-select" step="60" data-role="end" value="${seg.end || ''}">
+                        ${shiftSegments.length > 1 ? `<button type="button" class="shift-del-btn" data-del="${i}" title="删除该时间段">×</button>` : ''}
+                    </div>
+                `).join('');
+
+                shiftSegmentsBox.querySelectorAll('.shift-time-row').forEach(row => {
+                    const idx = parseInt(row.dataset.idx, 10);
+                    row.querySelectorAll('input').forEach(inp => {
+                        inp.addEventListener('input', () => {
+                            shiftSegments[idx][inp.dataset.role] = inp.value;
+                            updateShiftDurationHint();
+                            markDirty();
+                        });
+                    });
+                });
+                shiftSegmentsBox.querySelectorAll('.shift-del-btn').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        shiftSegments.splice(parseInt(btn.dataset.del, 10), 1);
+                        renderShiftSegments();
+                        updateShiftDurationHint();
+                        markDirty();
+                    });
+                });
+            }
+
+            // 默认班次：两班制 07:00–19:00 + 19:00–07:00（白班 / 夜班，合计正好 24 小时）
+            function applyDefaultShift() {
+                shiftSegments = [
+                    { start: '07:00', end: '19:00' },
+                    { start: '19:00', end: '07:00' }
+                ];
+                renderShiftSegments();
+                updateShiftDurationHint();
+                renderCaliberPreview();
+            }
+
+            function setShiftSummary(state, chip, text) {
+                shiftDurationHint.className = 'shift-summary ' + state;
+                shiftDurationHint.innerHTML = '<span class="shift-chip">' + chip + '</span><span>' + text + '</span>';
+            }
+
+            function updateShiftDurationHint() {
+                syncSubmitState();
+                if (!shiftSegments.length || shiftSegments.some(s => !s.start || !s.end)) {
+                    setShiftSummary('bad', '待填', '请填写每个时间段的开始与结束时刻');
+                    return;
+                }
+                const total = shiftDurationHours();
+                const badSeg = shiftSegments.some(s => segmentHours(s) < 1 || segmentHours(s) > 24);
+                const overlap = findOverlapSegment();
+                const diff = 24 - total;
+                const badTotal = Math.abs(diff) > 1e-9;
+
+                let text;
+                if (overlap) text = `时间段存在重叠（${overlap.start}–${overlap.end}）`;
+                else if (badSeg) text = '单个时间段时长需在 1–24 小时之间';
+                else if (badTotal) text = diff > 0 ? `还差 ${diff} 小时才铺满 24 小时` : `超出 ${Math.abs(diff)} 小时`;
+                else text = `${shiftSegments.length} 个时间段${isCrossDayShift() ? '，含跨天' : ''}，已铺满一天`;
+
+                setShiftSummary((overlap || badSeg || badTotal) ? 'bad' : 'ok', `合计 ${total} 小时`, text);
+            }
+
+            function fmtTime(mins) {
+                const m = ((mins % 1440) + 1440) % 1440;
+                return String(Math.floor(m / 60)).padStart(2, '0') + ':' + String(m % 60).padStart(2, '0');
+            }
+
+            // 按分钟占用检测时间段是否重叠 / 重复（跨天段按 0–1440 环绕）
+            function findOverlapSegment() {
+                const used = new Array(1440).fill(false);
+                for (let i = 0; i < shiftSegments.length; i++) {
+                    const seg = shiftSegments[i];
+                    if (!seg.start || !seg.end) continue;
+                    const s = toMinutes(seg.start);
+                    let e = toMinutes(seg.end);
+                    if (e <= s) e += 1440;
+                    for (let m = s; m < e; m++) {
+                        const idx = m % 1440;
+                        if (used[idx]) return seg;
+                        used[idx] = true;
+                    }
+                }
+                return null;
+            }
+
+            // 新增时间段时，自动填入最长的空闲窗口（便于把一天补齐到 24 小时）
+            function nextFreeSegment() {
+                const used = new Array(1440).fill(false);
+                shiftSegments.forEach(seg => {
+                    if (!seg.start || !seg.end) return;
+                    const s = toMinutes(seg.start);
+                    let e = toMinutes(seg.end);
+                    if (e <= s) e += 1440;
+                    for (let m = s; m < e; m++) used[m % 1440] = true;
+                });
+                let bestStart = 0, bestLen = 0, curLen = 0;
+                for (let k = 0; k < 2880; k++) {
+                    if (used[k % 1440]) {
+                        curLen = 0;
+                    } else {
+                        curLen++;
+                        if (curLen > bestLen && curLen <= 1440) {
+                            bestLen = curLen;
+                            bestStart = (k - curLen + 1) % 1440;
+                        }
+                    }
+                }
+                if (bestLen < 60) return { start: '', end: '' };
+                return { start: fmtTime(bestStart), end: fmtTime(bestStart + bestLen) };
+            }
+
+            // 班次时间是否满足 1–24 小时限制（单段与合计都算，且不允许时间段重叠）
+            function shiftTimeValid() {
+                if (!caliberApplies() || caliberSelect.value !== 'shift') return true;
+                if (!shiftSegments.length) return false;
+                if (shiftSegments.some(s => !s.start || !s.end)) return false;
+                if (shiftSegments.some(s => segmentHours(s) < 1 || segmentHours(s) > 24)) return false;
+                if (findOverlapSegment()) return false;
+                // 合计必须正好铺满 24 小时
+                return Math.abs(shiftDurationHours() - 24) < 1e-9;
+            }
+
+            // 不满足 24 小时限制时禁用提交按钮（防止提交）
+            function syncSubmitState() {
+                if (!nextBtn) return;
+                const blocked = currentStep === 2 && !shiftTimeValid();
+                nextBtn.disabled = blocked;
+                nextBtn.title = blocked ? '班次时长必须满足 1–24 小时才能提交' : '';
+            }
+
+            // 班次时间校验：保存 / 提交前，单段与合计时长都必须满足 1–24 小时
+            function validateShiftTime() {
+                if (!caliberApplies() || caliberSelect.value !== 'shift') return true;
+                if (!shiftSegments.length) {
+                    alert('请至少添加一个班次时间段');
+                    return false;
+                }
+                if (shiftSegments.some(s => !s.start || !s.end)) {
+                    alert('请填写每个班次时间段的开始与结束时刻');
+                    return false;
+                }
+                const overlap = findOverlapSegment();
+                if (overlap) {
+                    alert(`班次时间段存在重叠：${overlap.start}–${overlap.end}，请调整后再提交`);
+                    return false;
+                }
+                const badSeg = shiftSegments.find(s => segmentHours(s) < 1 || segmentHours(s) > 24);
+                if (badSeg) {
+                    alert(`班次时间段 ${badSeg.start}–${badSeg.end} 时长需在 1–24 小时之间（当前 ${segmentHours(badSeg)} 小时）`);
+                    return false;
+                }
+                const total = shiftDurationHours();
+                if (Math.abs(total - 24) > 1e-9) {
+                    const tip = total < 24 ? `，还差 ${(24 - total).toFixed(1)} 小时` : `，超出 ${(total - 24).toFixed(1)} 小时`;
+                    alert(`班次各时间段合计必须正好铺满 24 小时（当前 ${total} 小时${tip}）`);
+                    return false;
+                }
+                return true;
+            }
+
+
+            // 统计口径与班次只对「每日」频率有意义：周 / 月按自然周期统计，不涉及统计口径
+            // v2.0 调整：发送方式（直接下载 / 邮件接收）替代原「频率」下拉
+            // 直接下载 → 频率值「下载」（按时间范围立即出报表，不写入列表）；邮件接收 → 频率值「每日」（定期递送）
+            const sendModeTabs = document.getElementById('sendModeTabs');
+            const freqGroup = document.getElementById('freqGroup');
+            // v2.0 调整：发送方式与频率解耦 —— 发送方式决定「立即下载 / 定期邮件接收」，
+            // 频率（每日 / 每周 / 每月）在两种方式下都显示，不再被发送方式改写
+            let sendMode = 'mail';
+
+            function isDownloadMode() {
+                return sendMode === 'download';
+            }
+
+            // v2.0 调整：每月 + 直接下载时，时间范围按「月份」口径（开始 / 结束月份 + 月份选择器）
+            function isMonthRange() {
+                return isDownloadMode() && reportFrequency.value === '每月';
+            }
+
+            // 当前生效的频率配置键：直接下载走 '下载' 配置（只要日期范围），其余走所选周期频率
+            function effectiveFreq() {
+                return isDownloadMode() ? '下载' : reportFrequency.value;
+            }
+
+            // 同步发送方式 Tab 高亮 + 时间范围文案
+            // 时间范围两种方式都显示：直接下载 = 出报表范围（开始 / 结束都必填）；邮件接收 = 生效区间（可留空）
+            function syncSendMode() {
+                const isDownload = isDownloadMode();
+                if (sendModeTabs) {
+                    sendModeTabs.querySelectorAll('button').forEach(b => {
+                        b.classList.toggle('active', (b.dataset.mode === 'download') === isDownload);
+                    });
+                }
+                if (freqGroup) freqGroup.style.display = '';
+
+                const startLabel = document.getElementById('rangeStartLabel');
+                const endLabel = document.getElementById('rangeEndLabel');
+                const monthMode = isMonthRange();
+                const unit = monthMode ? '月份' : '日期';
+                if (startLabel) startLabel.innerHTML = isDownload ? '开始' + unit + '<span class="req">*</span>' : '开始' + unit;
+                if (endLabel) endLabel.innerHTML = isDownload ? '结束' + unit + '<span class="req">*</span>' : '结束' + unit + '（选填）';
+                // 每月 + 直接下载：日期选择器 → 月份选择器（换 type 后浏览器会自动清掉不兼容的旧值）
+                if (rangeStart) rangeStart.type = monthMode ? 'month' : 'date';
+                if (rangeEnd) rangeEnd.type = monthMode ? 'month' : 'date';
+            }
+
+            function caliberApplies() {
+                // v2.0 调整：统计口径只在「每日」频率下显示 —— 每周 / 每月按自然周期统计，
+                // 无论发送方式是「直接下载」还是「邮件接收」都不显示
+                return reportFrequency.value === '每日';
+            }
+
+            function syncCaliberVisibility() {
+                if (caliberBlock) caliberBlock.style.display = caliberApplies() ? 'block' : 'none';
+                updateCaliberUI();
+            }
+
+            function updateCaliberUI() {
+                const isShift = caliberApplies() && caliberSelect.value === 'shift';
+                document.querySelectorAll('.shift-only').forEach(el => el.classList.toggle('active', isShift));
+                renderCaliberPreview();
+                syncSubmitState();
+            }
+
+            // v2.0 调整：统计口径预览（日/周/月区间）已从界面移除，保留空实现避免调用点报错
+            function renderCaliberPreview() {}
 
             function openModal() {
                 refreshTypeOptions();
@@ -3104,13 +4418,45 @@
                 reportName.value = '';
                 nameCount.textContent = '0';
                 reportFormat.value = 'CSV';
-                reportFrequency.value = '一次';
+                reportFrequency.value = '每日';
+                sendMode = 'mail';
+                syncSendMode();
+
+                // v2.0 维度 / 项目 / PDF 重置
+                currentDimension = 'device';
+                projSource = 'all';
+                projSortAsc = true;
+                selectedProjects = [];
+                typeGroup = '';
+                syncDimSwitch();
+                projTabs.querySelectorAll('.proj-tab').forEach(b => b.classList.toggle('active', b.dataset.src === 'all'));
+                projLeftSearch.value = '';
+                projRightSearch.value = '';
+                projSortLabel.textContent = 'A to Z';
+                projCaliber.value = '按行程';
+                projLevel.value = '项目+设备';
+
+                // v2.0 统计口径重置为自然日；切到班次时用默认两班制 07:00–19:00 + 19:00–07:00（合计 24 小时）
+                caliberSelect.value = 'natural';
+                applyDefaultShift();
+                updateCaliberUI();
+
+                // v2.0 时间范围（底部「下载」使用）默认留空
+                rangeStart.value = '';
+                rangeEnd.value = '';
+                step1Label.textContent = DIM_META.device.stepLabel;
+                reportTypeLabel.textContent = DIM_META.device.typeLabel;
 
                 emailSubject.value = '';
                 emailCount.textContent = '0';
                 document.getElementById('recipientSearch').value = '';
                 renderRecipientList();
                 renderFrequencyFields();
+                renderTypeOptions();
+                renderProjectLeft();
+                renderProjectRight();
+                updateTripDetailState();
+                updateFormatRelatedUI();
                 updateSteps();
             }
 
@@ -3126,7 +4472,18 @@
                 });
                 backBtn.textContent = currentStep === 1 ? '取消' : '后退';
                 const config = frequencyConfig[reportFrequency.value] || {};
-                nextBtn.textContent = currentStep === 1 ? '下一个' : (config.nextBtnText || '添加');
+                nextBtn.textContent = currentStep === 1 ? '下一个' : (isEditMode ? '保存' : (config.nextBtnText || '添加'));
+                // 「下载」只在第 2 步「制定报表计划」（新建）+ 发送方式为「直接下载」时出现；
+                // 邮件接收则只保留「添加 / 保存」主按钮
+                const isDownload = isDownloadMode();
+                const showActions = currentStep === 2 && !isEditMode;
+                [downloadNowBtn].forEach(btn => {
+                    if (!btn) return;
+                    btn.style.display = (showActions && isDownload) ? '' : 'none';
+                    btn.classList.toggle('btn-primary', isDownload);
+                    btn.disabled = false;
+                });
+                nextBtn.style.display = (showActions && isDownload) ? 'none' : '';
             }
 
             function goToStep(step) {
@@ -3135,6 +4492,7 @@
                 if (currentStep === 2) {
                     fillStep2Defaults();
                 }
+                syncSubmitState();
             }
 
             function fillStep2Defaults() {
@@ -3154,14 +4512,22 @@
 
             function updateTypeRelatedUI() {
                 const hasType = !!selectedType;
-                singleAssetAlert.classList.toggle('active', selectedType.includes('单个资产'));
-                transferHint.style.display = hasType ? 'block' : 'none';
 
+                // v2.0 调整：暂不出「所有设备 / 项目维度」维度 Tab，统一用「报表类型下拉 + 资产穿梭框」
                 assetTransferBox.style.display = hasType ? 'grid' : 'none';
+                updateAssetLimitTip();
+
+                // 项目维度专属内容暂不展示（项目选择面板隐藏）
+                projPanel.classList.remove('active');
+                projOptionBlock.classList.toggle('active', isProjectDim());
+
+                updateTypeHint();
+                updateFormatRelatedUI();
             }
 
             function isSingleAsset() {
-                return selectedType.includes('单个资产');
+                const t = getTypesOfCurrentDim().find(x => x.v === selectedType);
+                return !!(t && t.single);
             }
 
             function getThumbSvg() {
@@ -3278,6 +4644,7 @@
 
                 selectedCountEl.textContent = selectedAssets.length;
                 clearAllBtn.disabled = selectedAssets.length === 0;
+                updateAssetLimitTip();
 
                 if (filtered.length === 0) {
                     rightPanelBody.innerHTML = '<div class="empty-transfer">暂无已选资产</div>';
@@ -3335,12 +4702,9 @@
             }
 
             function addAsset(id) {
-                if (isSingleAsset() && selectedAssets.length > 0) {
-                    alert('此报表类型仅支持选择一个资产');
-                    return;
-                }
-                if (selectedAssets.length >= 100) {
-                    alert('最多只能选择 100 个资产');
+                const limit = assetLimit();
+                if (selectedAssets.length >= limit) {
+                    alert(limit === 1 ? '此报表类型仅支持选择一个资产' : `最多只能选择 ${MAX_ASSETS} 个资产`);
                     return;
                 }
                 const asset = assets.find(a => a.id === id);
@@ -3353,18 +4717,19 @@
             }
 
             function batchAddAssets(ids) {
-                if (isSingleAsset()) {
+                const limit = assetLimit();
+                if (limit === 1) {
                     alert('此报表类型仅支持选择一个资产');
                     return;
                 }
-                const remaining = 100 - selectedAssets.length;
+                const remaining = limit - selectedAssets.length;
                 if (remaining <= 0) {
-                    alert('最多只能选择 100 个资产');
+                    alert(`最多只能选择 ${limit} 个资产`);
                     return;
                 }
                 let added = 0;
                 for (const id of ids) {
-                    if (selectedAssets.length >= 100) break;
+                    if (selectedAssets.length >= limit) break;
                     const asset = assets.find(a => a.id === id);
                     if (asset && !selectedAssets.some(s => s.id === id)) {
                         selectedAssets.push(asset);
@@ -3376,9 +4741,8 @@
                     renderLeftPanel();
                     renderRightPanel();
                 }
-                if (added < ids.length) {
-                    const skipped = ids.length - added;
-                    alert(`已添加 ${added} 个资产${skipped > 0 ? `，${skipped} 个资产因已达上限未添加` : ''}`);
+                if (added < ids.length && selectedAssets.length >= limit) {
+                    alert(`最多只能选择 ${limit} 个资产，本次已添加 ${added} 个`);
                 }
             }
 
@@ -3390,20 +4754,28 @@
             }
 
             function buildFieldHtml(field, value) {
+                // 把字段的 options 渲染成 <option>
+                const buildOptions = (options, selected) => (options || []).map(opt => {
+                    const optValue = typeof opt === 'string' ? opt : opt.value;
+                    const optLabel = typeof opt === 'string' ? opt : opt.label;
+                    return `<option value="${optValue}" ${optValue === selected ? 'selected' : ''}>${optLabel}</option>`;
+                }).join('');
+
                 let inputHtml = '';
                 if (field.type === 'select') {
-                    const options = field.options.map(opt => {
-                        const optValue = typeof opt === 'string' ? opt : opt.value;
-                        const optLabel = typeof opt === 'string' ? opt : opt.label;
-                        return `<option value="${optValue}" ${optValue === value ? 'selected' : ''}>${optLabel}</option>`;
-                    }).join('');
-                    inputHtml = `<select class="form-select" id="${field.id}">${options}</select>`;
+                    inputHtml = `<select class="form-select" id="${field.id}">${buildOptions(field.options, value)}</select>`;
+                } else if (field.type === 'combo') {
+                    // v2.0 调整：多个控件合并为一个字段（如「接收时间」= 接收时区 + 递送时间）
+                    inputHtml = '<div class="combo-inputs">' + (field.inputs || []).map(inp => {
+                        const iv = inp.value !== undefined ? inp.value : getFieldDefault({ id: inp.id });
+                        return `<select class="form-select" id="${inp.id}">${buildOptions(inp.options, iv)}</select>`;
+                    }).join('') + '</div>';
                 } else if (field.type === 'date') {
                     inputHtml = `<input type="date" class="form-input" id="${field.id}" value="${value}" placeholder="选择日期">`;
                 }
                 return `
                     <div class="form-group ${field.className || ''}">
-                        <label class="form-label">${field.label}${(field.label.includes('选填') || field.type === 'select') ? '' : '<span class="req">*</span>'}</label>
+                        <label class="form-label">${field.label}${(field.label.includes('选填') || field.type === 'select' || field.type === 'combo') ? '' : '<span class="req">*</span>'}</label>
                         ${inputHtml}
                     </div>
                 `;
@@ -3427,8 +4799,10 @@
             }
 
             function renderFrequencyFields() {
-                const freq = reportFrequency.value;
+                const freq = effectiveFreq();
                 const config = frequencyConfig[freq];
+                // 统计口径与班次只对「每日」显示
+                syncCaliberVisibility();
                 if (!config) return;
 
                 const allFields = config.fields.concat(config.extraFields || []);
@@ -3439,7 +4813,7 @@
                         ${allFields.slice(0, columns).map(f => buildFieldHtml(f, getFieldDefault(f))).join('')}
                     </div>
                     ${allFields.length > columns ? `
-                        <div class="form-row two-col" style="margin-top: 0;">
+                        <div class="form-row auto-col" style="margin-top: 0;">
                             ${allFields.slice(columns).map(f => buildFieldHtml(f, getFieldDefault(f))).join('')}
                         </div>
                     ` : ''}
@@ -3461,7 +4835,7 @@
             }
 
             function updateStep2Hint() {
-                const freq = reportFrequency.value;
+                const freq = effectiveFreq();
                 const config = frequencyConfig[freq];
                 if (!config) return;
 
@@ -3478,19 +4852,23 @@
             }
 
             function bindDynamicFieldEvents() {
-                const freq = reportFrequency.value;
+                const freq = effectiveFreq();
                 const config = frequencyConfig[freq];
                 if (!config) return;
 
                 const allFields = config.fields.concat(config.extraFields || []);
                 allFields.forEach(field => {
-                    const el = document.getElementById(field.id);
-                    if (el) {
-                        el.addEventListener('change', () => {
-                            markDirty();
-                            updateStep2Hint();
-                        });
-                    }
+                    // 合并字段（combo）需分别绑定其内部控件
+                    const ids = field.type === 'combo' ? (field.inputs || []).map(i => i.id) : [field.id];
+                    ids.forEach(id => {
+                        const el = document.getElementById(id);
+                        if (el) {
+                            el.addEventListener('change', () => {
+                                markDirty();
+                                updateStep2Hint();
+                            });
+                        }
+                    });
                 });
             }
 
@@ -3606,8 +4984,19 @@
 
             function validateStep1() {
                 if (!selectedType) {
-                    alert('请先选择报表类型');
+                    alert(isProjectDim() ? '请先选择计划报告类型' : '请先选择报表类型');
                     return false;
+                }
+                if (isProjectDim()) {
+                    if (selectedProjects.length === 0) {
+                        alert('请至少选择一个项目');
+                        return false;
+                    }
+                    if (selectedProjects.length > MAX_PROJECTS) {
+                        alert(`最多选择 ${MAX_PROJECTS} 个项目`);
+                        return false;
+                    }
+                    return true;
                 }
                 if (selectedAssets.length === 0) {
                     alert('请至少选择一个资产');
@@ -3617,54 +5006,70 @@
                     alert('此报表类型仅支持选择一个资产');
                     return false;
                 }
+                if (selectedAssets.length > MAX_ASSETS) {
+                    alert(`最多只能选择 ${MAX_ASSETS} 个资产`);
+                    return false;
+                }
                 return true;
             }
 
-            function validateDateRange() {
-                const startVal = getDynamicValue('startDate');
-                const endVal = getDynamicValue('endDate');
-                if (!startVal || !endVal) {
-                    alert('请选择开始日期和结束日期');
+            // 时间范围校验：requireEnd=true 时结束日期必填（「下载」）
+            function validateDateRange(requireEnd) {
+                const unit = isMonthRange() ? '月份' : '日期';
+                const startVal = rangeStart.value;
+                const endVal = rangeEnd.value;
+                if (!startVal) {
+                    alert('请选择开始' + unit);
                     return false;
                 }
+                if (requireEnd && !endVal) {
+                    alert('请选择结束' + unit);
+                    return false;
+                }
+                if (!endVal) return true;
                 const start = new Date(startVal);
                 const end = new Date(endVal);
                 if (end < start) {
-                    alert('结束日期不能早于开始日期');
+                    alert('结束' + unit + '不能早于开始' + unit);
                     return false;
                 }
                 const diffDays = (end - start) / (1000 * 60 * 60 * 24);
                 if (diffDays > 365) {
-                    alert('日期范围不能超过一年');
+                    alert(unit + '范围不能超过一年');
                     return false;
                 }
                 return true;
             }
 
-            function validateStep2() {
+            function validateStep2(freqOverride) {
                 const name = reportName.value.trim();
                 if (!name) {
                     alert('请输入报表名称');
                     return false;
                 }
 
-                const freq = reportFrequency.value;
+                // 班次口径：必须满足铺满 24 小时等限制
+                if (!validateShiftTime()) return false;
+
+                const freq = freqOverride || reportFrequency.value;
                 const config = frequencyConfig[freq];
                 if (!config) return false;
 
-                if (freq === '下载' || freq === '一次') {
-                    if (!validateDateRange()) return false;
+                // 时间范围：「直接下载」必填；「邮件接收」为选填的生效区间，一旦填写也要校验
+                if (freq === '下载') {
+                    if (!validateDateRange(true)) return false;
                 } else {
+                    if (rangeStart.value && !validateDateRange(false)) return false;
                     if (!getDynamicValue('duration')) {
-                        alert('请选择持续时间');
+                        alert('请选择数据范围');
                         return false;
                     }
                     if (!getDynamicValue('deliveryTime')) {
-                        alert('请选择递送时间');
+                        alert('请选择接收时间');
                         return false;
                     }
                     if ((freq === '每周' || freq === '每月') && !getDynamicValue('deliveryDate')) {
-                        alert('请选择递送日期');
+                        alert('请选择接收日期');
                         return false;
                     }
                 }
@@ -3677,26 +5082,49 @@
                 return true;
             }
 
-            function collectReportData() {
-                const freq = reportFrequency.value;
+            function collectReportData(freqOverride) {
+                const freq = freqOverride || reportFrequency.value;
                 const config = frequencyConfig[freq];
                 const data = {
                     name: reportName.value.trim(),
                     type: selectedType,
+                    dimension: currentDimension,
                     assets: selectedAssets.map(a => ({ id: a.id, title: a.title, desc: a.desc })),
+                    projects: selectedProjects.map(p => ({ id: p.id, name: p.name, desc: p.desc, src: p.src, devices: p.devices })),
                     format: reportFormat.value,
                     frequency: freq,
 
                 };
 
-                if (freq === '下载' || freq === '一次') {
-                    data.startDate = getDynamicValue('startDate');
-                    data.endDate = getDynamicValue('endDate');
+                // v2.0：项目维度专属口径
+                if (isProjectDim()) {
+                    data.projCaliber = projCaliber.value;
+                    data.projTripDetail = projTripDetail.value;
+                    data.projLevel = projLevel.value;
+                }
+
+                // v2.0：统计口径与班次（仅「每日」频率需要；周 / 月按自然周期统计）
+                const useShift = caliberApplies() && caliberSelect.value === 'shift';
+                data.caliber = useShift ? 'shift' : 'natural';
+                if (useShift) {
+                    data.shiftTemplate = 'custom';
+                    data.shiftSegments = shiftSegments.map(s => ({ start: s.start, end: s.end }));
+                    data.shiftStart = shiftSegments[0].start;
+                    data.shiftEnd = shiftSegments[0].end;
+                    data.caliberLabel = '班次 ' + shiftSegments.map(s => `${s.start}–${s.end}`).join('、');
                 } else {
+                    data.caliberLabel = '自然日';
+                }
+
+                if (freq === '下载') {
+                    data.startDate = rangeStart.value;
+                    data.endDate = rangeEnd.value;
+                } else {
+                    data.startDate = rangeStart.value || null;
+                    data.endDate = rangeEnd.value || null;
                     data.duration = getDynamicValue('duration');
                     data.deliveryTime = getDynamicValue('deliveryTime');
                     data.timezone = getDynamicValue('timezone') || 'UTC+8';
-                    data.endDate = getDynamicValue('endDate') || null;
                     if (freq === '每周' || freq === '每月') {
                         data.deliveryDate = getDynamicValue('deliveryDate');
                     }
@@ -3732,12 +5160,68 @@
             reportTypeSelect.addEventListener('change', () => {
                 selectedType = reportTypeSelect.value;
                 selectedAssets = [];
+                selectedProjects = [];
                 leftSearch.value = '';
                 rightSearch.value = '';
+                projLeftSearch.value = '';
+                projRightSearch.value = '';
                 markDirty();
                 updateTypeRelatedUI();
                 renderLeftPanel();
                 renderRightPanel();
+                renderProjectLeft();
+                renderProjectRight();
+            });
+
+            /* ===== v2.0 事件绑定：项目面板 / PDF 联动（维度切换器已移除） ===== */
+            if (dimSwitch) {
+                dimSwitch.querySelectorAll('button').forEach(btn => {
+                    btn.addEventListener('click', () => switchDimension(btn.dataset.dim));
+                });
+            }
+
+            projTabs.querySelectorAll('.proj-tab').forEach(tab => {
+                tab.addEventListener('click', () => {
+                    projTabs.querySelectorAll('.proj-tab').forEach(t => t.classList.toggle('active', t === tab));
+                    projSource = tab.dataset.src;
+                    projLeftSearch.placeholder = projSource === 'jobsite' ? '查找工地现场' : '搜索项目名称';
+                    markDirty();
+                    renderProjectLeft();
+                });
+            });
+
+            projSort.addEventListener('click', () => {
+                projSortAsc = !projSortAsc;
+                projSortLabel.textContent = projSortAsc ? 'A to Z' : 'Z to A';
+                renderProjectLeft();
+            });
+
+            projLeftSearch.addEventListener('input', renderProjectLeft);
+            projRightSearch.addEventListener('input', renderProjectRight);
+
+            projRemoveAll.addEventListener('click', () => {
+                selectedProjects = [];
+                markDirty();
+                renderProjectLeft();
+                renderProjectRight();
+            });
+
+            reportFormat.addEventListener('change', () => {
+                updateFormatRelatedUI();
+                markDirty();
+            });
+
+            projCaliber.addEventListener('change', markDirty);
+            projTripDetail.addEventListener('change', markDirty);
+            projLevel.addEventListener('change', markDirty);
+
+            /* v2.0 统计口径与班次事件 */
+            caliberSelect.addEventListener('change', () => { updateCaliberUI(); markDirty(); });
+            shiftAddSegmentBtn.addEventListener('click', () => {
+                shiftSegments.push(nextFreeSegment());
+                renderShiftSegments();
+                updateShiftDurationHint();
+                markDirty();
             });
 
             leftSearch.addEventListener('input', renderLeftPanel);
@@ -3778,12 +5262,29 @@
             reportFrequency.addEventListener('change', () => {
                 renderFrequencyFields();
                 updateSteps();
+                updateTripDetailState();
+                syncSendMode(); // 频率变化会影响时间范围的标签 / 控件类型（如「每月」→ 月份选择器）
                 markDirty();
-                if (emailSubject.value.includes(' 报表')) {
+                if (!isDownloadMode() && emailSubject.value.includes(' 报表')) {
                     emailSubject.value = selectedType + ' ' + reportFrequency.value + ' 报表';
                     emailCount.textContent = emailSubject.value.length;
                 }
             });
+
+            // v2.0 调整：发送方式切换（直接下载 / 邮件接收）—— 只切模式，频率保持不变
+            if (sendModeTabs) {
+                sendModeTabs.querySelectorAll('button').forEach(btn => {
+                    btn.addEventListener('click', () => {
+                        const mode = btn.dataset.mode === 'download' ? 'download' : 'mail';
+                        if (sendMode === mode) return;
+                        sendMode = mode;
+                        syncSendMode();
+                        renderFrequencyFields();
+                        updateSteps();
+                        markDirty();
+                    });
+                });
+            }
 
 
             includeWeekend.addEventListener('change', markDirty);
@@ -3795,6 +5296,7 @@
                     goToStep(2);
                 } else if (isEditMode) {
                     // 编辑模式：更新所有字段
+                    if (!validateShiftTime()) return;
                     const report = collectReportData();
                     const recipientsStr = selectedRecipients.map(r => r.email).join('; ');
                     const targetReport = reportList.find(r => r.id === editingReportId);
@@ -3815,30 +5317,49 @@
                     showToast('报表已更新', 'success');
                 } else {
                     if (!validateStep2()) return;
-                    const report = collectReportData();
-                    const newId = reportList.length > 0 ? Math.max(...reportList.map(r => r.id)) + 1 : 1;
-                    const recipientsStr = (report.recipients || []).map(r => r.email).join('; ');
-                    const assetsStr = (report.assets || []).map(a => a.id).join(', ');
-                    reportList.unshift({
-                        id: newId,
-                        name: report.name,
-                        type: report.type,
-                        owner: 'Admin',
-                        frequency: report.frequency,
-                        format: report.format,
-                        recipients: recipientsStr || '-',
-                        filters: report.assets ? report.assets.map(a => a.group).filter((v, i, arr) => arr.indexOf(v) === i).join(', ') : '-',
-                        subject: report.emailSubject || report.name,
-                        datetime: report.startDate ? report.startDate + (report.deliveryTime ? ' ' + report.deliveryTime : '') : '-',
-                        endDate: report.endDate || '-',
-                        enabled: true,
-                        createTime: new Date().toISOString().slice(0, 16).replace('T', ' '),
-                        assets: assetsStr || '-'
-                    });
-                    currentPage = 1;
-                    renderReportTable();
+                    pushReportRecord(collectReportData());
                     closeModal();
                 }
+            });
+
+            // 把报表数据写入列表（新建）
+            function pushReportRecord(report) {
+                const newId = reportList.length > 0 ? Math.max(...reportList.map(r => r.id)) + 1 : 1;
+                const recipientsStr = (report.recipients || []).map(r => r.email).join('; ');
+                const assetsStr = (report.assets || []).map(a => a.id).join(', ');
+                const projectsStr = (report.projects || []).map(p => p.name).join(', ');
+                reportList.unshift({
+                    id: newId,
+                    name: report.name,
+                    type: report.type,
+                    dimension: report.dimension || 'device',
+                    owner: 'Admin',
+                    frequency: report.frequency,
+                    format: report.format,
+                    pdfLayout: report.pdfLayout || '',
+                    recipients: recipientsStr || '-',
+                    filters: report.assets ? report.assets.map(a => a.group).filter((v, i, arr) => arr.indexOf(v) === i).join(', ') : '-',
+                    subject: report.emailSubject || report.name,
+                    datetime: report.startDate ? report.startDate + (report.deliveryTime ? ' ' + report.deliveryTime : '') : '-',
+                    endDate: report.endDate || '-',
+                    enabled: true,
+                    createTime: new Date().toISOString().slice(0, 16).replace('T', ' '),
+                    assets: assetsStr || projectsStr || '-',
+                    projects: projectsStr || '',
+                    projCaliber: report.projCaliber || '',
+                    caliber: report.caliberLabel || '自然日'
+                });
+                currentPage = 1;
+                renderReportTable();
+            }
+
+            // 底部「下载」：按时间范围立即生成并下载（不写入报表列表）
+            downloadNowBtn.addEventListener('click', () => {
+                if (downloadNowBtn.disabled) return;
+                if (!validateStep2('下载')) return;
+                const report = collectReportData('下载');
+                closeModal();
+                showToast(`已按 ${report.startDate} ~ ${report.endDate} 生成报表，开始下载`, 'success');
             });
 
             leaveConfirmClose.addEventListener('click', hideLeaveConfirm);
@@ -3855,6 +5376,8 @@
 
             updateTypeRelatedUI();
             renderFrequencyFields();
+            initShiftOptions();
+            updateCaliberUI();
             renderReportTable();
 
             // ========== 详情弹窗 ==========
@@ -3868,20 +5391,25 @@
                 document.getElementById('detailModalTitle').textContent = report.name;
 
                 // 报表基本信息
+                const isProject = report.dimension === 'project';
                 detailInfoGrid.innerHTML = [
+                    { label: '报表维度', value: isProject ? '项目维度' : '设备维度' },
                     { label: '报表类型', value: report.type },
                     { label: '所有者', value: report.owner },
                     { label: '频率', value: report.frequency },
                     { label: '格式', value: report.format },
+                    { label: 'PDF 版式', value: report.pdfLayout || '-' },
+                    { label: '统计口径', value: report.caliber || '自然日' },
+                    { label: '聚合主体', value: report.projCaliber || '-' },
                     { label: '电子邮件主题', value: report.subject },
                     { label: '开始日期', value: report.datetime },
                     { label: '结束日期', value: report.endDate },
                     { label: '时区', value: report.timezone || '-' },
                     { label: '创建时间', value: report.createTime || '-' },
-                    { label: '资产数量', value: String((report.assets || '').split(',').filter(Boolean).length) },
+                    { label: isProject ? '项目数量' : '资产数量', value: String((report.assets || '').split(',').filter(Boolean).length) },
                     { label: '开关', value: report.enabled ? '开启' : '关闭' },
                     { label: '状态', value: report.overdue ? '已过期' : (report.expired ? '已失效' : (report.partial ? '部分失效' : '正常')) },
-                    { label: '涉及资产', value: report.assets },
+                    { label: isProject ? '涉及项目' : '涉及资产', value: report.assets },
                 ].map(({ label, value }) => `
                     <div class="detail-info-item">
                         <span class="detail-info-label">${label}</span>
@@ -3963,33 +5491,47 @@
 
                 // 加载步骤1数据
                 selectedType = report.type;
+
+                // v2.0 维度还原
+                currentDimension = report.dimension === 'project' ? 'project' : 'device';
+                syncDimSwitch();
+                step1Label.textContent = DIM_META[currentDimension].stepLabel;
+                reportTypeLabel.textContent = DIM_META[currentDimension].typeLabel;
+                renderTypeOptions();
                 reportTypeSelect.value = selectedType;
+
                 const assetIds = (report.assets || '').split(',').map(s => s.trim()).filter(Boolean);
                 selectedAssets = assets.filter(a => assetIds.includes(a.id));
+                selectedProjects = (report.projects || (isProjectDim() ? report.assets : '') || '')
+                    .split(',').map(s => s.trim()).filter(Boolean)
+                    .map(name => projects.find(p => p.name === name) || { id: name, name: name, desc: '已订阅项目', src: 'jobsite', devices: 0 });
                 updateTypeRelatedUI();
                 renderRightPanel();
                 renderLeftPanel();
+                renderProjectLeft();
+                renderProjectRight();
 
                 // 加载步骤2数据
                 reportName.value = report.name;
                 nameCount.textContent = report.name.length;
                 reportFormat.value = report.format;
+                updateFormatRelatedUI();
+                if (report.projCaliber) projCaliber.value = report.projCaliber;
+                updateTripDetailState();
                 reportFrequency.value = report.frequency;
+                sendMode = 'mail';
+                syncSendMode();
                 renderFrequencyFields(); // 根据频率渲染动态字段
                 // 编辑模式下确保邮件区域可见
                 emailSection.style.display = 'block';
 
-                // 加载日期时间
+                // 加载日期时间（时间范围现由底部「下载」使用）
+                rangeStart.value = (report.datetime && report.datetime !== '-')
+                    ? (report.datetime.split(' ')[0] || '')
+                    : (report.startDate || '');
+                rangeEnd.value = (report.endDate && report.endDate !== '-') ? report.endDate : '';
                 if (report.datetime && report.datetime !== '-') {
-                    const parts = report.datetime.split(' ');
-                    safelySetValue('startDate', parts[0] || '');
-                    safelySetValue('deliveryTime', parts[1] || '');
-                    if (report.endDate && report.endDate !== '-') {
-                        safelySetValue('endDate', report.endDate);
-                    }
-                } else {
-                    safelySetValue('startDate', report.startDate || '');
-                    safelySetValue('endDate', report.endDate || '');
+                    safelySetValue('deliveryTime', report.datetime.split(' ')[1] || '');
                 }
                 safelySetValue('timezone', report.timezone || 'UTC+8');
 
@@ -4059,7 +5601,7 @@
                     {
                         selector: '[data-onboarding="tab-template"]',
                         title: '专业报表，开箱即用',
-                        desc: '<strong>切换至「机群报表」页</strong>，一键套用行业标准报表。免去繁琐的从零配置，助您快速搭建专属报表。',
+                        desc: '<strong>切换至「报表模版」页</strong>，一键套用行业标准报表。免去繁琐的从零配置，助您快速搭建专属报表。',
                         placement: 'bottom',
                         offsetX: 0,
                         offsetY: 14
@@ -4105,8 +5647,13 @@
 
                 showStep: function(index) {
                     var step = this.steps[index];
-                    var target = document.querySelector(step.selector);
-                    if (!target) return;
+                    var target = step ? document.querySelector(step.selector) : null;
+                    if (!target) {
+                        // 页面上没有该锚点时跳过这一步，避免定位到 null 报错
+                        if (index + 1 < this.steps.length) return this.showStep(index + 1);
+                        if (index > 0) return this.showStep(index - 1);
+                        return this.close();
+                    }
 
                     this.currentStep = index;
 
@@ -4146,6 +5693,7 @@
                 },
 
                 positionElements: function(target, step) {
+                    if (!target) return;
                     var rect = target.getBoundingClientRect();
                     var scrollX = window.scrollX || window.pageXOffset;
                     var scrollY = window.scrollY || window.pageYOffset;
@@ -4306,6 +5854,109 @@
             </div>
         </div>
     </div>
+
+    <script>
+        // ====================================================================
+        // 「我需要更多报表」诉求弹窗（与报表模版页保持一致）
+        // ====================================================================
+        const MORE_REPORT_OPTIONS = [
+            { name: '超时工作报表', tag: '已规划', tagType: 'planned',
+              desc: '统计设备超过设定工时阈值的时长、次数与占比，用于识别加班与合规风险。' },
+            { name: '设备异常通知报表', tag: '已规划', tagType: 'planned',
+              desc: '汇总异常事件的即时通知记录与处理情况：异常类型、发生时间、通知对象与处理状态。' },
+            { name: '电池电量报表', tag: '已规划', tagType: 'planned',
+              desc: '统计设备 / 机群的电池荷电状态（SOC）与充电情况：期末 SOC、最低 SOC、充电次数与充电时长。' },
+            { name: '碳排放报表', tag: '可申请', tagType: 'apply',
+              desc: '把燃油 / 电能消耗折算为碳排放量，支持按项目、机型、周期统计，用于 ESG 与绿色施工汇报。' },
+            { name: '驾驶员行为评分报表', tag: '可申请', tagType: 'apply',
+              desc: '按急加速、急刹车、超速、怠速等事件给出机手的行为评分与排名，便于考核与培训。' },
+            { name: '备件与保养消耗报表', tag: '可申请', tagType: 'apply',
+              desc: '统计保养、维修产生的备件消耗与费用，按设备、项目与周期汇总。' }
+        ];
+
+        function renderMoreReportOptions() {
+            document.getElementById('moreReportOptions').innerHTML = MORE_REPORT_OPTIONS.map(function (o) {
+                return '<label class="more-option">'
+                    + '<input type="checkbox" value="' + o.name + '">'
+                    + '<div style="flex:1;min-width:0;">'
+                    + '<div class="more-option-name">' + o.name
+                    + '<span class="more-option-tag ' + o.tagType + '">' + o.tag + '</span></div>'
+                    + '<div class="more-option-desc">' + o.desc + '</div>'
+                    + '</div></label>';
+            }).join('');
+        }
+
+        function openMoreReportsModal() {
+            const tip = document.getElementById('moreReportTip');
+            tip.className = 'more-form-tip';
+            tip.textContent = '';
+            document.getElementById('moreReportNote').value = '';
+            renderMoreReportOptions();
+            document.getElementById('moreReportsModal').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function closeMoreReportsModal() {
+            document.getElementById('moreReportsModal').classList.remove('active');
+            document.body.style.overflow = '';
+        }
+
+        function submitMoreReports() {
+            const checked = Array.prototype.slice
+                .call(document.querySelectorAll('#moreReportOptions input:checked'))
+                .map(function (c) { return c.value; });
+            const note = document.getElementById('moreReportNote').value.trim();
+            const tip = document.getElementById('moreReportTip');
+
+            if (!checked.length && !note) {
+                tip.className = 'more-form-tip error';
+                tip.textContent = '请至少勾选一张候选报表，或填写自定义诉求说明';
+                return;
+            }
+
+            // 2026-09-17 调整：诉求写入 localStorage，供后台「报表需求反馈」页展示
+            saveReportRequest('管理报表', checked, note);
+
+            tip.className = 'more-form-tip success';
+            tip.textContent = '已提交诉求'
+                + (checked.length ? '（勾选 ' + checked.length + ' 张：' + checked.join('、') + '）' : '（自定义 1 条）')
+                + '，可在后台「报表需求反馈」查看处理进度。';
+            setTimeout(closeMoreReportsModal, 1400);
+        }
+
+        // 写入诉求（后台 V2/mysany后台V2/报表需求反馈.html 读取同一个 localStorage key）
+        function saveReportRequest(source, reports, note) {
+            try {
+                const KEY = 'mysany_report_requests';
+                const now = new Date();
+                const p2 = function (n) { return String(n).padStart(2, '0'); };
+                const time = now.getFullYear() + '-' + p2(now.getMonth() + 1) + '-' + p2(now.getDate())
+                    + ' ' + p2(now.getHours()) + ':' + p2(now.getMinutes());
+                const list = JSON.parse(localStorage.getItem(KEY) || '[]');
+                list.unshift({
+                    id: 'REQ-' + now.getTime(),
+                    time: time,
+                    user: 'Schuck',
+                    source: source,
+                    reports: reports,
+                    note: note,
+                    status: '待评估'
+                });
+                localStorage.setItem(KEY, JSON.stringify(list));
+            } catch (e) { /* 演示环境忽略存储异常 */ }
+        }
+
+        document.getElementById('moreReportsEntry').addEventListener('click', openMoreReportsModal);
+        document.getElementById('moreReportsClose').addEventListener('click', closeMoreReportsModal);
+        document.getElementById('moreReportsModal').addEventListener('click', function (e) {
+            if (e.target === document.getElementById('moreReportsModal')) closeMoreReportsModal();
+        });
+        document.addEventListener('keydown', function (e) {
+            if (e.key === 'Escape' && document.getElementById('moreReportsModal').classList.contains('active')) {
+                closeMoreReportsModal();
+            }
+        });
+    </script>
 
 </body>
 </html>
