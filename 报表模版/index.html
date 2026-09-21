@@ -1,0 +1,180 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>报表模版 · 静态页面</title>
+    <style>
+        * { box-sizing: border-box; margin: 0; padding: 0; }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+            background: #f5f6f8;
+            color: #333;
+            padding: 40px 24px 64px;
+        }
+
+        .wrap { max-width: 1100px; margin: 0 auto; }
+
+        .page-head {
+            display: flex;
+            align-items: baseline;
+            gap: 12px;
+            padding-bottom: 16px;
+            border-bottom: 2px solid #E60012;
+            margin-bottom: 32px;
+        }
+
+        .logo { font-size: 22px; font-weight: 700; color: #E60012; letter-spacing: -0.5px; }
+        .page-title { font-size: 16px; font-weight: 600; color: #333; }
+        .page-count { margin-left: auto; font-size: 12px; color: #999; }
+
+        .group { margin-bottom: 32px; }
+
+        .group-title {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 12px;
+        }
+
+        .group-title::before {
+            content: "";
+            width: 3px;
+            height: 14px;
+            border-radius: 2px;
+            background: #E60012;
+        }
+
+        .group-note { font-size: 12px; font-weight: 400; color: #999; }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(240px, 1fr));
+            gap: 12px;
+        }
+
+        .card {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+            padding: 14px 16px;
+            background: #fff;
+            border: 1px solid #ececec;
+            border-radius: 8px;
+            text-decoration: none;
+            transition: border-color 0.2s, box-shadow 0.2s, transform 0.2s;
+        }
+
+        .card:hover {
+            border-color: #E60012;
+            box-shadow: 0 4px 14px rgba(0, 0, 0, 0.08);
+            transform: translateY(-2px);
+        }
+
+        .card-name { font-size: 14px; font-weight: 600; color: #222; }
+        .card:hover .card-name { color: #E60012; }
+        .card-path { font-size: 11px; color: #b5b5b5; word-break: break-all; }
+    </style>
+</head>
+<body>
+<div class="wrap">
+    <div class="page-head">
+        <span class="logo">SANY</span>
+        <span class="page-title">报表模版 · 静态页面</span>
+        <span class="page-count">16 个页面</span>
+    </div>
+
+    <section class="group">
+        <div class="group-title">版式基准</div>
+        <div class="grid">
+            <a class="card" href="设备性能报表-SANY.html" target="_blank" rel="noopener">
+                <span class="card-name">设备性能报表</span>
+                <span class="card-path">设备性能报表-SANY.html</span>
+            </a>
+        </div>
+    </section>
+
+    <section class="group">
+        <div class="group-title">PDF 版式设计器 · 演示版</div>
+        <div class="grid">
+            <a class="card" href="../report_configurator_ui.html" target="_blank" rel="noopener">
+                <span class="card-name">报表配置器（PDF 版式演示）</span>
+                <span class="card-path">../report_configurator_ui.html</span>
+            </a>
+        </div>
+    </section>
+
+    <section class="group">
+        <div class="group-title">演示报表 · 机群版</div>
+        <div class="grid">
+            <a class="card" href="演示报表/机群版/01-综合报表-SANY.html" target="_blank" rel="noopener">
+                <span class="card-name">01 综合报表</span>
+                <span class="card-path">演示报表/机群版/01-综合报表-SANY.html</span>
+            </a>
+            <a class="card" href="演示报表/机群版/02-超时工作报表-SANY.html" target="_blank" rel="noopener">
+                <span class="card-name">02 超时工作报表</span>
+                <span class="card-path">演示报表/机群版/02-超时工作报表-SANY.html</span>
+            </a>
+            <a class="card" href="演示报表/机群版/03-电池充电参数报表-SANY.html" target="_blank" rel="noopener">
+                <span class="card-name">03 电池充电参数报表</span>
+                <span class="card-path">演示报表/机群版/03-电池充电参数报表-SANY.html</span>
+            </a>
+            <a class="card" href="演示报表/机群版/04-设备能耗报表-SANY.html" target="_blank" rel="noopener">
+                <span class="card-name">04 设备能耗报表</span>
+                <span class="card-path">演示报表/机群版/04-设备能耗报表-SANY.html</span>
+            </a>
+            <a class="card" href="演示报表/机群版/05-设备工作模式-SANY.html" target="_blank" rel="noopener">
+                <span class="card-name">05 设备工作模式</span>
+                <span class="card-path">演示报表/机群版/05-设备工作模式-SANY.html</span>
+            </a>
+            <a class="card" href="演示报表/机群版/06-设备移动里程报表-SANY.html" target="_blank" rel="noopener">
+                <span class="card-name">06 设备移动里程报表</span>
+                <span class="card-path">演示报表/机群版/06-设备移动里程报表-SANY.html</span>
+            </a>
+            <a class="card" href="演示报表/机群版/07-设备异常通知报表-SANY.html" target="_blank" rel="noopener">
+                <span class="card-name">07 设备异常通知报表</span>
+                <span class="card-path">演示报表/机群版/07-设备异常通知报表-SANY.html</span>
+            </a>
+        </div>
+    </section>
+
+    <section class="group">
+        <div class="group-title">演示报表 · 单机版</div>
+        <div class="grid">
+            <a class="card" href="演示报表/单机版/01-综合报表-SANY.html" target="_blank" rel="noopener">
+                <span class="card-name">01 综合报表</span>
+                <span class="card-path">演示报表/单机版/01-综合报表-SANY.html</span>
+            </a>
+            <a class="card" href="演示报表/单机版/02-超时工作报表-SANY.html" target="_blank" rel="noopener">
+                <span class="card-name">02 超时工作报表</span>
+                <span class="card-path">演示报表/单机版/02-超时工作报表-SANY.html</span>
+            </a>
+            <a class="card" href="演示报表/单机版/03-电池充电参数报表-SANY.html" target="_blank" rel="noopener">
+                <span class="card-name">03 电池充电参数报表</span>
+                <span class="card-path">演示报表/单机版/03-电池充电参数报表-SANY.html</span>
+            </a>
+            <a class="card" href="演示报表/单机版/04-设备能耗报表-SANY.html" target="_blank" rel="noopener">
+                <span class="card-name">04 设备能耗报表</span>
+                <span class="card-path">演示报表/单机版/04-设备能耗报表-SANY.html</span>
+            </a>
+            <a class="card" href="演示报表/单机版/05-设备工作模式-SANY.html" target="_blank" rel="noopener">
+                <span class="card-name">05 设备工作模式</span>
+                <span class="card-path">演示报表/单机版/05-设备工作模式-SANY.html</span>
+            </a>
+            <a class="card" href="演示报表/单机版/06-设备移动里程报表-SANY.html" target="_blank" rel="noopener">
+                <span class="card-name">06 设备移动里程报表</span>
+                <span class="card-path">演示报表/单机版/06-设备移动里程报表-SANY.html</span>
+            </a>
+            <a class="card" href="演示报表/单机版/07-设备异常通知报表-SANY.html" target="_blank" rel="noopener">
+                <span class="card-name">07 设备异常通知报表</span>
+                <span class="card-path">演示报表/单机版/07-设备异常通知报表-SANY.html</span>
+            </a>
+        </div>
+    </section>
+</div>
+</body>
+</html>
