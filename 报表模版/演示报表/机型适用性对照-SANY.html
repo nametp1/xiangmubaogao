@@ -1,0 +1,139 @@
+<!DOCTYPE html>
+<!--
+  页面：机型适用性对照（审计自《日周月报表字段聚合表》字段总表 1813 行 / 28 个真实机型）
+  用途：① 判断某机型能否出某张报表 ② 说明字段无值时的呈现规则（与 7 张演示报表一致）
+-->
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>机型适用性对照 · MySANY 报表模版</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f2f3f5;color:#1a1a1a;font-size:12px;font-family:"PingFang SC","Microsoft YaHei","Helvetica Neue",Arial,sans-serif}
+.report{width:297mm;min-height:210mm;margin:22px auto;padding:13mm 14mm 11mm;background:#fff;box-shadow:0 6px 24px rgba(0,0,0,.07)}
+.header{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;border-bottom:4px solid #E60012;padding-bottom:14px}
+.brand{background:#E60012;color:#fff;font-weight:900;font-size:26px;letter-spacing:2px;padding:6px 14px;border-radius:3px}
+.product{font-size:13px;color:#666;line-height:1.55}
+.report-title{text-align:right}
+.report-title h1{margin:0;font-size:25px;font-weight:800}
+.report-title p{margin:6px 0 0;font-size:13px;color:#666}
+.section{margin-top:20px;border:1px solid #f0f0f0;border-radius:6px;padding:14px 16px 16px}
+.section-title{margin:0 0 12px;padding-left:10px;border-left:4px solid #E60012;font-size:15px;font-weight:800}
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{background:#d9000f;background:linear-gradient(180deg,#e8000f,#cc0010);color:#fff;padding:8px 9px;text-align:left;font-weight:600;white-space:nowrap}
+td{padding:7px 9px;border-bottom:1px solid #f2f2f2;vertical-align:top}
+tbody tr:nth-child(even) td{background:#fbfafa}
+.num{text-align:right;font-variant-numeric:tabular-nums}
+.muted{color:#8c8c8c;font-size:11px}
+.legend{font-size:11px;color:#8c8c8c;margin-top:8px}
+@page{size:A4 landscape;margin:9mm}
+@media print{html,body{background:#fff}.report{margin:0;padding:0;box-shadow:none}
+body{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+.section,table{page-break-inside:avoid;break-inside:avoid}.section{border:0;border-bottom:1px solid #f0f0f0;border-radius:0}}
+</style>
+</head>
+<body>
+<div class="report">
+    <div class="header">
+        <div style="display:flex;align-items:center;gap:12px">
+            <span class="brand">SANY</span>
+            <div class="product">三一智联系统<br>MySANY 设备管理平台</div>
+        </div>
+        <div class="report-title">
+            <h1>机型适用性对照</h1>
+            <p>审计口径：字段总表 1813 行 · 28 个真实机型（不含「待确定」「印尼客户需求」）· 2026-09-20</p>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">七张报表的支持范围</div>
+        <table>
+            <thead><tr><th>报表</th><th>依赖字段族</th><th class="num">可用机型</th><th>说明</th></tr></thead>
+            <tbody>
+            <tr><td>综合报表</td><td>工时 + 能耗 / 里程 字段族</td><td class="num">27 / 28</td><td class="muted">仅「牵引车」字段不足（△）</td></tr>
+            <tr><td>超时工作报表</td><td>工时类字段</td><td class="num">26 / 28</td><td class="muted">履带起重机、牵引车 无工时字段</td></tr>
+            <tr><td>电池充电参数报表</td><td>电池 / 充电字段族</td><td class="num">11 / 28</td><td class="muted">仅电动或带电池字段的机型和充电——见下表 ✓</td></tr>
+            <tr><td>设备能耗报表</td><td>电耗 ∪ 油耗 字段族</td><td class="num">24 / 28</td><td class="muted">履带起重机、旋挖钻机、平衡重式叉车、轮胎式装载机 无能耗字段</td></tr>
+            <tr><td>设备工作模式</td><td>档位 / 行走字段族</td><td class="num">8 / 28（行走 2 / 28）</td><td class="muted">仅上表 ✓ 的 8 个机型有档位信号</td></tr>
+            <tr><td>设备移动里程报表</td><td>里程 / 车速 / 位置字段族</td><td class="num">24 / 28</td><td class="muted">履带起重机、旋挖钻机、轮胎式装载机、牵引车 无里程字段</td></tr>
+            <tr><td>设备异常通知报表</td><td>oT 平台告警事件流</td><td class="num">28 / 28</td><td class="muted">不依赖字段总表；危险力矩报警仅登记于「伸缩臂叉车」</td></tr>
+            </tbody>
+        </table>
+        <div class="legend">✓ = 该机型可用；△ = 字段不足需人工确认；— = 该机型无所需字段，不出本报表（后台按此判断，避免出空报表）</div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">机型 × 报表 支持矩阵</div>
+        <table>
+            <thead><tr><th>机型</th><th class="num">字段数</th><th class="num">综合</th><th class="num">超时工作</th>
+            <th class="num">电池充电参数</th><th class="num">设备能耗</th><th class="num">设备工作模式</th>
+            <th class="num">设备移动里程</th><th class="num">设备异常通知</th></tr></thead>
+            <tbody>
+            <tr><td>纯电动牵引车</td><td class="num">12</td><td class="num">✓</td><td class="num">✓</td><td class="num">—</td><td class="num">✓</td><td class="num">—</td><td class="num">✓</td><td class="num">✓</td></tr>
+            <tr><td>电动牵引车</td><td class="num">60</td><td class="num">✓</td><td class="num">✓</td><td class="num">△</td><td class="num">✓</td><td class="num">—</td><td class="num">✓</td><td class="num">✓</td></tr>
+            <tr><td>挖掘机</td><td class="num">111</td><td class="num">✓</td><td class="num">✓</td><td class="num">—</td><td class="num">✓</td><td class="num">✓</td><td class="num">✓</td><td class="num">✓</td></tr>
+            <tr><td>矿用宽体自卸车</td><td class="num">7</td><td class="num">✓</td><td class="num">✓</td><td class="num">—</td><td class="num">✓</td><td class="num">—</td><td class="num">✓</td><td class="num">✓</td></tr>
+            <tr><td>电动装载机</td><td class="num">49</td><td class="num">✓</td><td class="num">✓</td><td class="num">△</td><td class="num">✓</td><td class="num">✓</td><td class="num">✓</td><td class="num">✓</td></tr>
+            <tr><td>搅拌车</td><td class="num">27</td><td class="num">✓</td><td class="num">✓</td><td class="num">—</td><td class="num">✓</td><td class="num">—</td><td class="num">✓</td><td class="num">✓</td></tr>
+            <tr><td>汽车起重机</td><td class="num">92</td><td class="num">✓</td><td class="num">✓</td><td class="num">△</td><td class="num">✓</td><td class="num">—</td><td class="num">✓</td><td class="num">✓</td></tr>
+            <tr><td>电动搅拌车</td><td class="num">30</td><td class="num">✓</td><td class="num">✓</td><td class="num">△</td><td class="num">✓</td><td class="num">—</td><td class="num">✓</td><td class="num">✓</td></tr>
+            <tr><td>电动自卸车</td><td class="num">118</td><td class="num">✓</td><td class="num">✓</td><td class="num">△</td><td class="num">✓</td><td class="num">✓</td><td class="num">✓</td><td class="num">✓</td></tr>
+            <tr><td>电动挖掘机</td><td class="num">19</td><td class="num">✓</td><td class="num">✓</td><td class="num">△</td><td class="num">✓</td><td class="num">✓</td><td class="num">✓</td><td class="num">✓</td></tr>
+            <tr><td>自装卸车</td><td class="num">9</td><td class="num">✓</td><td class="num">✓</td><td class="num">△</td><td class="num">✓</td><td class="num">—</td><td class="num">✓</td><td class="num">✓</td></tr>
+            <tr><td>履带起重机</td><td class="num">16</td><td class="num">✓</td><td class="num">—</td><td class="num">—</td><td class="num">✓</td><td class="num">—</td><td class="num">—</td><td class="num">✓</td></tr>
+            <tr><td>半挂牵引车</td><td class="num">28</td><td class="num">✓</td><td class="num">✓</td><td class="num">—</td><td class="num">✓</td><td class="num">—</td><td class="num">✓</td><td class="num">✓</td></tr>
+            <tr><td>旋挖钻机</td><td class="num">16</td><td class="num">✓</td><td class="num">✓</td><td class="num">—</td><td class="num">✓</td><td class="num">—</td><td class="num">—</td><td class="num">✓</td></tr>
+            <tr><td>平衡重式叉车</td><td class="num">14</td><td class="num">✓</td><td class="num">✓</td><td class="num">—</td><td class="num">✓</td><td class="num">—</td><td class="num">✓</td><td class="num">✓</td></tr>
+            <tr><td>自卸车</td><td class="num">38</td><td class="num">✓</td><td class="num">✓</td><td class="num">—</td><td class="num">✓</td><td class="num">✓</td><td class="num">✓</td><td class="num">✓</td></tr>
+            <tr><td>正面吊</td><td class="num">14</td><td class="num">✓</td><td class="num">✓</td><td class="num">—</td><td class="num">✓</td><td class="num">—</td><td class="num">✓</td><td class="num">✓</td></tr>
+            <tr><td>轮胎式装载机</td><td class="num">6</td><td class="num">✓</td><td class="num">✓</td><td class="num">—</td><td class="num">✓</td><td class="num">—</td><td class="num">—</td><td class="num">✓</td></tr>
+            <tr><td>堆高机</td><td class="num">71</td><td class="num">✓</td><td class="num">✓</td><td class="num">—</td><td class="num">✓</td><td class="num">—</td><td class="num">✓</td><td class="num">✓</td></tr>
+            <tr><td>伸缩臂叉车</td><td class="num">77</td><td class="num">✓</td><td class="num">✓</td><td class="num">—</td><td class="num">✓</td><td class="num">✓</td><td class="num">✓</td><td class="num">✓</td></tr>
+            <tr><td>履带吊起重机</td><td class="num">128</td><td class="num">✓</td><td class="num">✓</td><td class="num">△</td><td class="num">✓</td><td class="num">—</td><td class="num">✓</td><td class="num">✓</td></tr>
+            <tr><td>电动堆高机</td><td class="num">46</td><td class="num">✓</td><td class="num">✓</td><td class="num">△</td><td class="num">✓</td><td class="num">—</td><td class="num">✓</td><td class="num">✓</td></tr>
+            <tr><td>电动集卡</td><td class="num">56</td><td class="num">✓</td><td class="num">✓</td><td class="num">△</td><td class="num">✓</td><td class="num">✓</td><td class="num">✓</td><td class="num">✓</td></tr>
+            <tr><td>旋挖钻</td><td class="num">66</td><td class="num">✓</td><td class="num">✓</td><td class="num">—</td><td class="num">✓</td><td class="num">✓</td><td class="num">✓</td><td class="num">✓</td></tr>
+            <tr><td>燃油装载机</td><td class="num">28</td><td class="num">✓</td><td class="num">✓</td><td class="num">—</td><td class="num">✓</td><td class="num">—</td><td class="num">✓</td><td class="num">✓</td></tr>
+            <tr><td>电动宽体车</td><td class="num">41</td><td class="num">✓</td><td class="num">✓</td><td class="num">△</td><td class="num">✓</td><td class="num">—</td><td class="num">✓</td><td class="num">✓</td></tr>
+            <tr><td>燃油宽体车</td><td class="num">40</td><td class="num">✓</td><td class="num">✓</td><td class="num">—</td><td class="num">✓</td><td class="num">—</td><td class="num">✓</td><td class="num">✓</td></tr>
+            <tr><td>牵引车</td><td class="num">1</td><td class="num">△</td><td class="num">—</td><td class="num">—</td><td class="num">✓</td><td class="num">—</td><td class="num">—</td><td class="num">✓</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="section">
+        <div class="section-title">空值处理规则（7 张报表现已内置）</div>
+        <table>
+            <thead><tr><th style="width:26%">情形</th><th>处理方式</th></tr></thead>
+            <tbody>
+                <tr><td>单元格级：字段本期无值</td><td>显示 <b>--</b>，不留 0、不显示空白，不计入合计与均值</td></tr>
+                <tr><td>行级：某行无值</td><td>隐藏该行（某挡位无信号、某单体指标未上报、某日无数据）</td></tr>
+                <tr><td>块级：该机型无此字段族</td><td>隐藏该区块（如无档位信号的机型隐藏「档位分布 / 作业模式」整块）</td></tr>
+                <tr><td>整份：机型不适用本报表</td><td>不出该报表（按上表判断）</td></tr>
+                <tr><td>机群汇总：某设备缺该字段</td><td>该格留空（--）；合计 / 均值只按「有该字段值」的设备计算，不按 0 计</td></tr>
+                <tr><td>单机对比表：机群均值无值</td><td>隐藏该行</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="section">
+        <div class="section-title">关键字段族的机型清单</div>
+        <table>
+            <thead><tr><th>字段族</th><th class="num">机型数</th><th>机型</th></tr></thead>
+            <tbody>
+                <tr><td>工时类</td><td class="num">26</td><td class="muted">除 履带起重机、牵引车 外的全部机型</td></tr>
+                <tr><td>档位 / 各挡位</td><td class="num">8</td><td class="muted">挖掘机、电动装载机、电动自卸车、电动挖掘机、自卸车、伸缩臂叉车、电动集卡、旋挖钻</td></tr>
+                <tr><td>左 / 右行走时间</td><td class="num">2</td><td class="muted">挖掘机、电动挖掘机</td></tr>
+                <tr><td>电池 / 充电</td><td class="num">11</td><td class="muted">电动牵引车、电动装载机、汽车起重机、电动搅拌车、电动自卸车、电动挖掘机、自装卸车、履带吊起重机、电动堆高机、电动集卡、电动宽体车</td></tr>
+                <tr><td>油耗 / 油位</td><td class="num">16</td><td class="muted">挖掘机、矿用宽体自卸车、搅拌车、汽车起重机、履带起重机、半挂牵引车、旋挖钻机、平衡重式叉车、自卸车、轮胎式装载机、堆高机、伸缩臂叉车、履带吊起重机、旋挖钻、燃油装载机、燃油宽体车</td></tr>
+                <tr><td>电耗 / 能耗 / 回收</td><td class="num">23</td><td class="muted">除 矿用宽体自卸车、履带起重机、旋挖钻机、平衡重式叉车、轮胎式装载机 外的全部机型</td></tr>
+                <tr><td>里程 / 车速 / 载荷 / 定位</td><td class="num">24</td><td class="muted">除 履带起重机、旋挖钻机、轮胎式装载机、牵引车 外的全部机型</td></tr>
+                <tr><td>状态类（设备 / 在线 / 充电 / 锁机 / ESC）</td><td class="num">19</td><td class="muted">除 纯电动牵引车、矿用宽体自卸车、自装卸车、履带起重机、旋挖钻机、平衡重式叉车、正面吊、轮胎式装载机、牵引车 外的全部机型</td></tr>
+                <tr><td>危险力矩报警</td><td class="num">1</td><td class="muted">伸缩臂叉车（另有 38 个「待确定」物模型待归类；其他起重类机型是否可用待确认）</td></tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+</body>
+</html>

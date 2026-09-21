@@ -1,0 +1,1030 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>卡特彼勒 - 工业设备报表配置后台</title>
+    
+    <!-- 引入 Tailwind CSS 进行页面排版和样式控制 -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- 引入 FontAwesome 图标库 -->
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    
+    <!-- 引入 React 和 ReactDOM (UMD 离线可用版本) -->
+    <script crossorigin src="https://unpkg.com/react@18/umd/react.development.js"></script>
+    <script crossorigin src="https://unpkg.com/react-dom@18/umd/react-dom.development.js"></script>
+    
+    <!-- 引入 Babel 编译器，让浏览器能够直接运行 JSX 语法 -->
+    <script src="https://unpkg.com/@babel/standalone/babel.min.js"></script>
+
+    <style>
+        /* 优化本地滚动条样式 */
+        ::-webkit-scrollbar { width: 6px; height: 6px; }
+        ::-webkit-scrollbar-track { background: transparent; }
+        ::-webkit-scrollbar-thumb { background: #cbd5e1; border-radius: 3px; }
+        ::-webkit-scrollbar-thumb:hover { background: #94a3b8; }
+        body { margin: 0; padding: 0; background-color: #f8fafc; }
+    </style>
+</head>
+<body>
+    <!-- React 挂载点 -->
+    <div id="root"></div>
+
+    <!-- 核心业务代码开始 -->
+    <script type="text/babel">
+        const { useState, useEffect, useRef } = React;
+
+        // 图表类型与对应的 FontAwesome 图标
+        const CHART_TYPES = [
+            { id: 'line_chart', name: '折线图 (趋势)', icon: 'fas fa-chart-line' },
+            { id: 'bar_chart', name: '柱状图/条形图', icon: 'fas fa-chart-bar' },
+            { id: 'pie_chart', name: '饼状图 (占比)', icon: 'fas fa-chart-pie' },
+            { id: 'doughnut_chart', name: '环形图 (占比)', icon: 'fas fa-circle-notch' },
+            { id: 'data_table', name: '数据明细表', icon: 'fas fa-table' },
+            { id: 'text_block', name: '富文本/导言', icon: 'fas fa-align-left' },
+        ];
+
+        // ===== 默认版式（还原「卡特彼勒_机群_燃油与能耗报表」5 个组件；重置时复用） =====
+        const DEFAULT_COMPONENTS = [
+            {
+                id: 'comp_1',
+                type: 'bar_chart',
+                title: '各设备总耗油排行',
+                metrics: ['总燃油消耗量'],
+                pdfWidth: '100%',
+                pageBreak: false,
+                xAxis: 'equipment',
+                groupBy: 'metric',
+                barDirection: 'horizontal',
+                textContent: ''
+            },
+            {
+                id: 'comp_2',
+                type: 'line_chart',
+                title: '单周设备运行趋势',
+                metrics: ['左行走时长', '右行走时长'],
+                pdfWidth: '50%',
+                pageBreak: false,
+                xAxis: 'time',
+                groupBy: 'metric',
+                barDirection: 'vertical',
+                textContent: ''
+            },
+            {
+                id: 'comp_3',
+                type: 'pie_chart',
+                title: '机群能耗占比',
+                metrics: ['总燃油消耗量'],
+                pdfWidth: '50%',
+                pageBreak: false,
+                xAxis: 'equipment',
+                groupBy: 'metric',
+                barDirection: 'vertical',
+                textContent: ''
+            },
+            {
+                id: 'comp_4',
+                type: 'text_block',
+                title: '数据分析说明',
+                textContent: '根据本周期数据显示，机群整体作业效率达标。但部分设备（如挖掘机 A）的怠速时长占比较高，建议在后续排班中优化其调度策略，以降低无效燃油消耗。',
+                metrics: [],
+                pdfWidth: '100%',
+                pageBreak: true,
+                xAxis: 'time',
+                groupBy: 'metric',
+                barDirection: 'vertical'
+            },
+            {
+                id: 'comp_5',
+                type: 'data_table',
+                title: '机群运行核心指标明细',
+                metrics: ['总燃油消耗量', '左行走时长', '右行走时长', '怠速时长'],
+                pdfWidth: '100%',
+                pageBreak: false,
+                xAxis: 'time',
+                groupBy: 'metric',
+                barDirection: 'vertical',
+                rowDimension: 'equipment',
+                colDimension: 'metrics',
+                textContent: ''
+            }
+        ];
+        const DEFAULT_GLOBAL = {
+            templateName: '卡特彼勒_机群_燃油与能耗报表',
+            scope: 'fleet',
+            watermark: true,
+            logoHeader: true
+        };
+        const cloneDefaults = () => DEFAULT_COMPONENTS.map(c => ({ ...c, metrics: [...c.metrics] }));
+
+        // 统一补全组件字段，兼容外部 JSON 缺字段的情况
+        const normalizeComponent = (c, i) => ({
+            id: c.id || `comp_${Date.now()}_${i}`,
+            type: CHART_TYPES.some(t => t.id === c.type) ? c.type : 'bar_chart',
+            title: String(c.title || `组件 ${i + 1}`),
+            metrics: Array.isArray(c.metrics) ? c.metrics.map(m => String(m)) : [],
+            pdfWidth: c.pdfWidth === '50%' ? '50%' : '100%',
+            pageBreak: !!c.pageBreak,
+            xAxis: c.xAxis === 'equipment' ? 'equipment' : 'time',
+            groupBy: c.groupBy === 'equipment' ? 'equipment' : 'metric',
+            barDirection: c.barDirection === 'horizontal' ? 'horizontal' : 'vertical',
+            rowDimension: c.rowDimension === 'time' ? 'time' : 'equipment',
+            colDimension: ['metrics', 'equipment', 'time'].indexOf(c.colDimension) >= 0 ? c.colDimension : 'metrics',
+            textContent: typeof c.textContent === 'string' ? c.textContent : ''
+        });
+
+        // ===== 存储 / 导出工具（file:// 打开时 localStorage 可能被禁用，统一兜底） =====
+        const STORAGE_KEY = 'sany_report_designer_v1';
+        const STORAGE_AT_KEY = STORAGE_KEY + '_savedAt';
+
+        const storage = {
+            get(key) { try { return window.localStorage.getItem(key || STORAGE_KEY); } catch (e) { return null; } },
+            set(v, key) { try { window.localStorage.setItem(key || STORAGE_KEY, v); return true; } catch (e) { return false; } }
+        };
+
+        const chartName = (id) => (CHART_TYPES.find(t => t.id === id) || {}).name || id;
+
+        const safeFileName = (name) => String(name || 'report').replace(/[\\/:*?"<>|\s]+/g, '_').slice(0, 60);
+
+        const downloadTextFile = (filename, text) => {
+            const blob = new Blob([text], { type: 'application/json;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = filename;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            window.setTimeout(() => URL.revokeObjectURL(url), 1000);
+        };
+
+        const copyToClipboard = async (text) => {
+            try {
+                if (navigator.clipboard && window.isSecureContext) {
+                    await navigator.clipboard.writeText(text);
+                    return true;
+                }
+                const ta = document.createElement('textarea');
+                ta.value = text;
+                ta.style.position = 'fixed';
+                ta.style.opacity = '0';
+                document.body.appendChild(ta);
+                ta.select();
+                const ok = document.execCommand('copy');
+                document.body.removeChild(ta);
+                return ok;
+            } catch (e) {
+                return false;
+            }
+        };
+
+        function ReportConfigurator() {
+            // 1. 全局报表属性
+            const [globalConfig, setGlobalConfig] = useState(() => ({ ...DEFAULT_GLOBAL }));
+
+            // 2. 组件画布状态 (默认放置两个组件用于演示)
+            const [components, setComponents] = useState(() => cloneDefaults());
+
+            const [selectedCompId, setSelectedCompId] = useState('comp_1');
+
+            // 3. 保存 / 导出 / 导入相关状态
+            const [jsonModal, setJsonModal] = useState(false);
+            const [jsonDraft, setJsonDraft] = useState('');
+            const [toast, setToast] = useState(null);
+            const [savedAt, setSavedAt] = useState('');
+            const [storageOk, setStorageOk] = useState(true);
+            const toastTimer = useRef(null);
+            const hydrated = useRef(false);
+            const firstSave = useRef(true);
+
+            const selectedComp = components.find(c => c.id === selectedCompId);
+
+            // 更新全局设置
+            const updateGlobal = (key, value) => setGlobalConfig(prev => ({ ...prev, [key]: value }));
+
+            // 更新选中的组件属性
+            const updateSelectedComp = (key, value) => {
+                setComponents(comps => comps.map(c => 
+                    c.id === selectedCompId ? { ...c, [key]: value } : c
+                ));
+            };
+
+            // 新增指标
+            const addMetric = () => {
+                updateSelectedComp('metrics', [...selectedComp.metrics, '新业务指标']);
+            };
+
+            // 修改指标名称
+            const updateMetric = (index, value) => {
+                const newMetrics = [...selectedComp.metrics];
+                newMetrics[index] = value;
+                updateSelectedComp('metrics', newMetrics);
+            };
+
+            // 移除指标
+            const removeMetric = (index) => {
+                const newMetrics = [...selectedComp.metrics];
+                newMetrics.splice(index, 1);
+                updateSelectedComp('metrics', newMetrics);
+            };
+
+            // 添加新图表组件
+            const addComponent = () => {
+                const newId = `comp_${Date.now()}`;
+                setComponents([...components, {
+                    id: newId,
+                    type: 'pie_chart',
+                    title: '新图表组件',
+                    metrics: ['总工作时长'],
+                    pdfWidth: '50%',
+                    pageBreak: false,
+                    xAxis: 'time',
+                    groupBy: 'metric',
+                    barDirection: 'vertical',
+                    rowDimension: 'equipment',
+                    colDimension: 'metrics',
+                    textContent: '这里是富文本导言内容...'
+                }]);
+                setSelectedCompId(newId);
+            };
+
+            // 移除选中组件
+            const removeSelected = () => {
+                setComponents(comps => comps.filter(c => c.id !== selectedCompId));
+                setSelectedCompId(null);
+            };
+
+            // ===== 轻提示 =====
+            const notify = (msg, type = 'ok') => {
+                setToast({ msg, type });
+                if (toastTimer.current) window.clearTimeout(toastTimer.current);
+                toastTimer.current = window.setTimeout(() => setToast(null), 3200);
+            };
+
+            // ===== 保存前校验 =====
+            const validateDesign = () => {
+                const issues = [];
+                if (!String(globalConfig.templateName || '').trim()) issues.push('报表模板名称未填写');
+                if (!components.length) issues.push('画布至少需要 1 个组件');
+                components.forEach((c, i) => {
+                    if (!String(c.title || '').trim()) issues.push(`第 ${i + 1} 个组件缺少标题`);
+                    if (c.type !== 'text_block' && !(c.metrics || []).some(m => String(m || '').trim())) {
+                        issues.push(`第 ${i + 1} 个组件（${chartName(c.type)}）未绑定业务指标`);
+                    }
+                });
+                return issues;
+            };
+
+            // ===== 导出载荷（结构与下游一致：version / globalSettings / componentsLayout）=====
+            const componentToJson = (c) => {
+                const base = { id: c.id, type: c.type, title: c.title };
+                if (c.type === 'text_block') base.textContent = c.textContent || '';
+                base.metrics = (c.metrics || []).slice();
+                base.pdfWidth = c.pdfWidth;
+                base.pageBreak = !!c.pageBreak;
+                if (c.type === 'data_table') {
+                    base.rowDimension = c.rowDimension || 'equipment';
+                    base.colDimension = c.colDimension || 'metrics';
+                } else if (c.type !== 'text_block') {
+                    base.xAxis = c.xAxis;
+                    base.groupBy = c.groupBy;
+                    if (c.type === 'bar_chart') base.barDirection = c.barDirection || 'vertical';
+                }
+                return base;
+            };
+
+            const buildPayload = () => ({
+                version: '1.0',
+                globalSettings: {
+                    templateName: globalConfig.templateName,
+                    scope: globalConfig.scope,
+                    logoHeader: !!globalConfig.logoHeader,
+                    watermark: !!globalConfig.watermark
+                },
+                componentsLayout: components.map(componentToJson)
+            });
+
+            // 写入浏览器本地存储（失败返回 false，由调用方提示改用文件导出）
+            const persist = () => {
+                const ok = storage.set(JSON.stringify(buildPayload()));
+                if (ok) {
+                    storage.set(new Date().toISOString(), STORAGE_AT_KEY);
+                    setSavedAt(new Date().toLocaleTimeString('zh-CN', { hour12: false }));
+                }
+                setStorageOk(ok);
+                return ok;
+            };
+
+            // 「保存」：校验通过后写入浏览器本地存储
+            const saveDesign = () => {
+                const issues = validateDesign();
+                if (issues.length) { notify('未通过校验：' + issues[0], 'err'); return; }
+                if (persist()) {
+                    notify(`已保存：${globalConfig.templateName} · ${components.length} 个组件`);
+                } else {
+                    notify('本机存储不可用（以 file:// 打开时常见），请改用「保存 JSON 模板」导出文件', 'err');
+                }
+            };
+
+            // 「保存 JSON 模板」：生成 JSON → 弹窗（可复制/下载/二次编辑后导入），并同步落盘到本地存储
+            const saveJsonTemplate = () => {
+                const issues = validateDesign();
+                if (issues.length) { notify('未通过校验：' + issues[0], 'err'); return; }
+                setJsonDraft(JSON.stringify(buildPayload(), null, 2));
+                setJsonModal(true);
+                notify(persist() ? 'JSON 模板已生成，并已写入浏览器本地' : 'JSON 模板已生成，请点「下载 .json」保存到文件');
+            };
+
+            const copyJson = async () => {
+                const ok = await copyToClipboard(jsonDraft);
+                notify(ok ? 'JSON 已复制到剪贴板' : '复制失败，请手动选中文本复制', ok ? 'ok' : 'err');
+            };
+
+            const downloadJson = () => {
+                downloadTextFile(`${safeFileName(globalConfig.templateName)}.json`, jsonDraft);
+                notify('已开始下载 .json 文件');
+            };
+
+            // 解析 JSON 并应用到画布（source: import=弹窗导入 / file=文件导入 / load=载入本地）
+            // 兼容两种结构：{version, globalSettings, componentsLayout} 与旧的 {globalConfig, components}
+            const applyJsonDraft = (text, source = 'import') => {
+                const raw = typeof text === 'string' ? text : jsonDraft;
+                let data;
+                try {
+                    data = JSON.parse(raw);
+                } catch (e) {
+                    notify('JSON 解析失败：' + e.message, 'err');
+                    return false;
+                }
+                const d = data || {};
+                const gc = d.globalSettings || d.globalConfig || d.global;
+                const layout = Array.isArray(d.componentsLayout) ? d.componentsLayout
+                    : (Array.isArray(d.components) ? d.components : null);
+                if (!gc || !layout) {
+                    notify('JSON 结构不符：需要 globalSettings 与 componentsLayout 两个字段', 'err');
+                    return false;
+                }
+                if (!layout.length) { notify('componentsLayout 不能为空数组', 'err'); return false; }
+                const comps = layout.map(normalizeComponent);
+                setGlobalConfig({ ...DEFAULT_GLOBAL, ...gc });
+                setComponents(comps);
+                setSelectedCompId(comps[0].id);
+                setJsonModal(false);
+                setJsonDraft('');
+                persist();
+                notify(source === 'load' ? `已载入上次保存：${comps.length} 个组件` : `已导入并应用：${comps.length} 个组件`);
+                return true;
+            };
+
+            const importJsonFile = (file) => {
+                if (!file) return;
+                const reader = new FileReader();
+                reader.onload = () => applyJsonDraft(String(reader.result || ''), 'file');
+                reader.onerror = () => notify('文件读取失败', 'err');
+                reader.readAsText(file);
+            };
+
+            const loadSaved = () => {
+                const raw = storage.get();
+                if (!raw) { notify('本机没有找到已保存的模板，可先点「保存」或「保存 JSON 模板」', 'err'); return; }
+                applyJsonDraft(raw, 'load');
+            };
+
+            const resetDesign = () => {
+                setGlobalConfig({ ...DEFAULT_GLOBAL });
+                setComponents(cloneDefaults());
+                setSelectedCompId('comp_1');
+                persist();
+                notify('已重置为默认版式');
+            };
+
+            // 首次进入：尝试恢复上次保存，并探测本地存储是否可用
+            useEffect(() => {
+                const raw = storage.get();
+                if (raw) {
+                    try {
+                        const d = JSON.parse(raw);
+                        const gc = d.globalSettings || d.globalConfig || d.global;
+                        const layout = Array.isArray(d.componentsLayout) ? d.componentsLayout
+                            : (Array.isArray(d.components) ? d.components : null);
+                        if (gc && layout && layout.length) {
+                            const comps = layout.map(normalizeComponent);
+                            setGlobalConfig({ ...DEFAULT_GLOBAL, ...gc });
+                            setComponents(comps);
+                            setSelectedCompId(comps[0].id);
+                            const at = d.savedAt || storage.get(STORAGE_AT_KEY);
+                            if (at) setSavedAt(new Date(at).toLocaleTimeString('zh-CN', { hour12: false }));
+                        }
+                    } catch (e) { /* 本地数据损坏则忽略，保留默认版式 */ }
+                } else {
+                    setStorageOk(storage.set(JSON.stringify(buildPayload())));
+                }
+                hydrated.current = true;
+            }, []);
+
+            // 改动后自动保存（校验不通过时不覆盖已存版本）
+            useEffect(() => {
+                if (!hydrated.current) return;
+                if (firstSave.current) { firstSave.current = false; return; }
+                const t = window.setTimeout(() => {
+                    if (validateDesign().length === 0) persist();
+                }, 900);
+                return () => window.clearTimeout(t);
+            }, [globalConfig, components]);
+
+            return (
+                <div className="flex h-screen w-full text-slate-800 font-sans text-sm">
+                    
+                    {/* ================= 左侧：全局属性面板 ================= */}
+                    <div className="w-64 bg-white border-r border-slate-200 flex flex-col shadow-sm z-20">
+                        <div className="h-12 border-b border-slate-100 bg-slate-50 font-bold text-slate-700 flex items-center px-4 gap-2">
+                            <i className="fas fa-sliders-h text-blue-600"></i> 全局属性配置
+                        </div>
+                        <div className="flex-1 overflow-y-auto p-4 space-y-6">
+                            
+                            <div className="space-y-2">
+                                <label className="text-xs font-bold text-slate-500 uppercase">报表模板名称</label>
+                                <input 
+                                    type="text" 
+                                    value={globalConfig.templateName}
+                                    onChange={(e) => updateGlobal('templateName', e.target.value)}
+                                    className="w-full border border-slate-300 rounded px-3 py-2 text-sm focus:outline-none focus:border-blue-500 transition-colors"
+                                />
+                            </div>
+
+                            <div className="space-y-2">
+                                <label className="text-xs font-bold text-slate-500 uppercase">管理范围透视</label>
+                                <div className="flex bg-slate-100 rounded-md p-1 border border-slate-200">
+                                    <button 
+                                        onClick={() => updateGlobal('scope', 'single')}
+                                        className={`flex-1 py-1.5 text-center rounded text-xs font-medium transition-colors ${globalConfig.scope === 'single' ? 'bg-white shadow text-blue-600' : 'text-slate-500 hover:text-slate-700'}`}
+                                    >
+                                        单机设备
+                                    </button>
+                                    <button 
+                                        onClick={() => updateGlobal('scope', 'fleet')}
+                                        className={`flex-1 py-1.5 text-center rounded text-xs font-medium transition-colors ${globalConfig.scope === 'fleet' ? 'bg-white shadow text-blue-600' : 'text-slate-500 hover:text-slate-700'}`}
+                                    >
+                                        机群 (聚合)
+                                    </button>
+                                </div>
+                                {globalConfig.scope === 'fleet' ? (
+                                    <p className="text-[10px] text-amber-700 bg-amber-50 p-2 rounded border border-amber-100 leading-relaxed mt-2">
+                                        <i className="fas fa-info-circle mr-1"></i> 已开启机群模式。图表与表格将支持按「设备」维度进行分组对比和透视。
+                                    </p>
+                                ) : (
+                                    <p className="text-[10px] text-slate-500 bg-slate-50 p-2 rounded border border-slate-100 leading-relaxed mt-2">
+                                        <i className="fas fa-info-circle mr-1"></i> 单机模式。报表仅展示单一设备的时间序列数据。
+                                    </p>
+                                )}
+                            </div>
+
+                            <div className="space-y-3 pt-4 border-t border-slate-100">
+                                <label className="text-xs font-bold text-slate-500 uppercase">PDF 全局视觉与规范</label>
+                                <label className="flex items-center gap-2 cursor-pointer hover:bg-slate-50 p-1 -ml-1 rounded">
+                                    <input type="checkbox" checked={globalConfig.logoHeader} onChange={(e) => updateGlobal('logoHeader', e.target.checked)} className="rounded text-blue-600 w-4 h-4" />
+                                    <span className="text-sm">启用企业红头 (Logo)</span>
+                                </label>
+                                <label className="flex items-center gap-2 cursor-pointer hover:bg-slate-50 p-1 -ml-1 rounded">
+                                    <input type="checkbox" checked={globalConfig.watermark} onChange={(e) => updateGlobal('watermark', e.target.checked)} className="rounded text-blue-600 w-4 h-4" />
+                                    <span className="text-sm">页面背景防伪水印</span>
+                                </label>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* ================= 中间：报表画布区 ================= */}
+                    <div className="flex-1 flex flex-col bg-slate-200/50">
+                        <div className="h-12 border-b border-slate-200 bg-white flex items-center justify-between px-6 shadow-sm z-10">
+                            <div className="font-bold text-slate-700 flex items-center gap-2">
+                                <i className="fas fa-layer-group text-slate-400"></i> A4 画布排版预览
+                                <span className="text-xs font-normal text-slate-400 ml-2">
+                                    {savedAt ? `已保存 ${savedAt}` : '尚未保存'}
+                                    {storageOk ? '' : '（本机存储不可用，请导出 JSON）'}
+                                </span>
+                            </div>
+                            <div className="flex items-center gap-2">
+                                <button
+                                    onClick={loadSaved}
+                                    title="从浏览器本地存储恢复上次保存的版式"
+                                    className="border border-slate-300 hover:border-slate-400 bg-white text-slate-700 px-3 py-1.5 rounded text-sm transition-colors flex items-center gap-2"
+                                >
+                                    <i className="fas fa-rotate-left"></i> 载入上次
+                                </button>
+                                <button
+                                    onClick={resetDesign}
+                                    className="border border-slate-300 hover:border-slate-400 bg-white text-slate-700 px-3 py-1.5 rounded text-sm transition-colors flex items-center gap-2"
+                                >
+                                    <i className="fas fa-eraser"></i> 重置
+                                </button>
+                                <button
+                                    onClick={saveDesign}
+                                    className="bg-blue-600 hover:bg-blue-700 text-white px-5 py-1.5 rounded text-sm font-medium transition-colors shadow flex items-center gap-2"
+                                >
+                                    <i className="fas fa-floppy-disk"></i> 保存
+                                </button>
+                                <button
+                                    onClick={saveJsonTemplate}
+                                    className="bg-slate-800 hover:bg-slate-900 text-white px-5 py-1.5 rounded text-sm font-medium transition-colors shadow flex items-center gap-2"
+                                >
+                                    <i className="fas fa-code"></i> 保存 JSON 模板
+                                </button>
+                            </div>
+                        </div>
+                        
+                        <div className="flex-1 overflow-y-auto p-8 flex justify-center relative">
+                            {/* 水印 */}
+                            {globalConfig.watermark && (
+                                <div className="fixed inset-0 pointer-events-none flex items-center justify-center opacity-[0.04] z-0 overflow-hidden">
+                                    <div className="text-7xl font-black transform -rotate-45 whitespace-nowrap text-slate-900">
+                                        CATERPILLAR CONFIDENTIAL
+                                    </div>
+                                </div>
+                            )}
+
+                            {/* A4 纸张主体 */}
+                            <div className="w-[840px] min-h-[1188px] bg-white shadow-xl border border-slate-300 relative z-10 pb-16 flex flex-col">
+                                
+                                {/* 纸张页眉 */}
+                                {globalConfig.logoHeader && (
+                                    <div className="h-20 border-b-[3px] border-amber-400 flex items-center px-10 mb-8 pt-4">
+                                        <div className="w-10 h-10 bg-amber-400 font-black flex items-center justify-center text-slate-900 rounded-sm mr-4 text-xl tracking-tighter">CAT</div>
+                                        <div className="text-2xl font-bold text-slate-800 tracking-wide">{globalConfig.templateName}</div>
+                                    </div>
+                                )}
+                                
+                                {/* 纸张内容区 (支持流式和Flex换行，实现50%并排) */}
+                                <div className="px-10 flex flex-wrap content-start gap-y-6">
+                                    {components.map((comp) => {
+                                        
+                                        // 动态计算该组件的样式
+                                        const isHalf = comp.pdfWidth === '50%';
+                                        // 如果是50%，为了留出间距，实际宽度设为 48.something%，或者使用 grid/flex+gap
+                                        const compWidthClass = isHalf ? 'w-[calc(50%-10px)]' : 'w-full';
+                                        // 判断当前是不是奇数个半宽组件，用来加右边距
+                                        const needsMarginRight = isHalf;
+
+                                        return (
+                                            <div key={comp.id} className={`${compWidthClass} relative group`}>
+                                                
+                                                <div 
+                                                    onClick={() => setSelectedCompId(comp.id)}
+                                                    className={`border-2 rounded-lg p-5 cursor-pointer transition-all duration-200 bg-white
+                                                        ${selectedCompId === comp.id ? 'border-blue-500 shadow-[0_0_0_4px_rgba(59,130,246,0.1)]' : 'border-slate-200 hover:border-slate-300 hover:shadow-sm'}`}
+                                                >
+                                                    {/* 组件标题 */}
+                                                    <div className="flex items-center justify-between mb-4 border-b border-slate-100 pb-3">
+                                                        <div className="flex items-center gap-2">
+                                                            <div className="w-6 h-6 rounded bg-slate-100 flex items-center justify-center text-blue-600">
+                                                                <i className={CHART_TYPES.find(t => t.id === comp.type)?.icon}></i>
+                                                            </div>
+                                                            <span className="font-bold text-slate-800 text-sm">
+                                                                {comp.title || '未命名组件'}
+                                                            </span>
+                                                        </div>
+                                                    </div>
+
+                                                    {/* 组件可视化渲染区域 */}
+                                                    <div className="h-56 bg-slate-50/50 rounded border border-slate-100 flex flex-col relative overflow-hidden">
+                                                        
+                                                        {comp.type === 'text_block' ? (
+                                                            // ================= 富文本渲染 =================
+                                                            <div className="p-4 w-full h-full text-slate-600 text-xs leading-relaxed">
+                                                                {comp.textContent ? (
+                                                                    <div className="whitespace-pre-wrap">{comp.textContent}</div>
+                                                                ) : (
+                                                                    <div className="text-slate-400 italic">在此处配置前置导言或总结分析说明文字...</div>
+                                                                )}
+                                                            </div>
+
+                                                        ) : comp.type === 'data_table' ? (
+                                                            // ================= 表格渲染 =================
+                                                            <div className="w-full h-full p-3 flex flex-col">
+                                                                <div className="flex bg-slate-200 rounded-t py-1.5 px-2 mb-1 gap-1">
+                                                                    <div className="flex-1 text-[10px] text-slate-600 font-bold">
+                                                                        {comp.rowDimension === 'equipment' ? '设备名称' : '时间序列'}
+                                                                    </div>
+                                                                    {comp.colDimension === 'metrics' ? (
+                                                                        comp.metrics.map((m, i) => (
+                                                                            <div key={i} className="flex-1 text-[10px] text-slate-600 font-bold truncate">{m}</div>
+                                                                        ))
+                                                                    ) : (
+                                                                        <>
+                                                                            <div className="flex-1 text-[10px] text-slate-600 font-bold">设备 A (编号291)</div>
+                                                                            <div className="flex-1 text-[10px] text-slate-600 font-bold">设备 B (编号831)</div>
+                                                                        </>
+                                                                    )}
+                                                                </div>
+                                                                <div className="flex-1 space-y-1">
+                                                                    {[1, 2, 3].map(i => (
+                                                                        <div key={i} className="flex gap-1 border-b border-slate-100 py-1.5 px-2 items-center">
+                                                                            <div className="flex-1 h-3 bg-slate-200/60 rounded"></div>
+                                                                            {(comp.colDimension === 'metrics' ? comp.metrics : [1,2]).map((_, idx) => (
+                                                                                <div key={idx} className="flex-1 h-3 bg-blue-100/50 rounded"></div>
+                                                                            ))}
+                                                                        </div>
+                                                                    ))}
+                                                                </div>
+                                                            </div>
+
+                                                        ) : comp.type === 'pie_chart' || comp.type === 'doughnut_chart' ? (
+                                                            // ================= 饼图/环图渲染 =================
+                                                            <div className="flex flex-col items-center justify-center w-full h-full pt-4">
+                                                                <div 
+                                                                    className="w-28 h-28 rounded-full relative shadow-inner"
+                                                                    style={{ background: 'conic-gradient(#3b82f6 0% 40%, #10b981 40% 75%, #f59e0b 75% 100%)' }}
+                                                                >
+                                                                    {comp.type === 'doughnut_chart' && (
+                                                                        <div className="absolute inset-0 m-auto w-14 h-14 bg-white rounded-full shadow-sm"></div>
+                                                                    )}
+                                                                </div>
+                                                                {/* 图例 */}
+                                                                <div className="flex flex-wrap gap-2 justify-center mt-4 px-2">
+                                                                    {comp.metrics.map((m, i) => (
+                                                                        <div key={i} className="flex items-center gap-1 text-[10px] text-slate-500">
+                                                                            <span className={`w-2 h-2 rounded-full ${i%3===0?'bg-blue-500':i%3===1?'bg-emerald-500':'bg-amber-500'}`}></span>
+                                                                            <span className="truncate max-w-[80px]">{m}</span>
+                                                                        </div>
+                                                                    ))}
+                                                                </div>
+                                                            </div>
+                                                            
+                                                        ) : comp.type === 'bar_chart' ? (
+                                                            // ================= 柱状图/条形图渲染 (动态横竖) =================
+                                                            <div className="flex flex-col w-full h-full p-4 relative">
+                                                                {/* Y轴标尺线 */}
+                                                                <div className="absolute top-4 bottom-8 left-12 border-l border-slate-300"></div>
+                                                                <div className="absolute bottom-8 left-12 right-4 border-b border-slate-300"></div>
+                                                                
+                                                                <div className={`flex-1 ml-10 mb-6 flex ${comp.barDirection === 'horizontal' ? 'flex-col justify-around' : 'flex-row justify-around items-end'} gap-2 z-10`}>
+                                                                    {[1, 2, 3].map(barIdx => (
+                                                                        <div key={barIdx} className={`flex ${comp.barDirection === 'horizontal' ? 'flex-col justify-center' : 'items-end'} gap-1 w-full h-full`}>
+                                                                            {/* 标签 */}
+                                                                            {comp.barDirection === 'horizontal' && (
+                                                                                <div className="text-[9px] text-slate-500 absolute -left-1 truncate w-10 text-right">项目{barIdx}</div>
+                                                                            )}
+                                                                            {/* 柱子 (根据指标数量生成) */}
+                                                                            {comp.metrics.map((_, mIdx) => (
+                                                                                <div key={mIdx} 
+                                                                                    className={`bg-blue-${400 + (mIdx%3)*100} rounded-sm opacity-80`}
+                                                                                    style={{
+                                                                                        width: comp.barDirection === 'horizontal' ? `${40 + Math.random()*50}%` : (comp.metrics.length > 2 ? '10px' : '20px'),
+                                                                                        height: comp.barDirection === 'horizontal' ? (comp.metrics.length > 2 ? '8px' : '16px') : `${40 + Math.random()*50}%`,
+                                                                                        marginTop: comp.barDirection === 'horizontal' ? '2px' : '0'
+                                                                                    }}
+                                                                                ></div>
+                                                                            ))}
+                                                                        </div>
+                                                                    ))}
+                                                                </div>
+                                                                
+                                                                {/* 动态图例 (跟随业务指标) */}
+                                                                <div className="absolute bottom-1 left-0 right-0 flex justify-center gap-4">
+                                                                    {comp.metrics.length > 0 ? comp.metrics.map((m, i) => (
+                                                                        <div key={i} className="flex items-center gap-1 text-[10px] text-slate-500">
+                                                                            <span className={`w-2 h-2 rounded-sm bg-blue-${400 + (i%3)*100}`}></span>
+                                                                            {globalConfig.scope === 'fleet' && comp.groupBy === 'equipment' ? `设备${i+1}` : m}
+                                                                        </div>
+                                                                    )) : (
+                                                                        <div className="text-[10px] text-red-400">请在右侧配置指标</div>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+                                                        ) : (
+                                                            // ================= 折线图渲染 =================
+                                                            <div className="flex flex-col w-full h-full p-4 relative justify-end">
+                                                                <div className="absolute top-4 bottom-8 left-10 border-l border-slate-300"></div>
+                                                                <div className="absolute bottom-8 left-10 right-4 border-b border-slate-300"></div>
+                                                                <svg className="absolute inset-0 w-full h-full p-4 pl-12 pb-10" preserveAspectRatio="none">
+                                                                    {comp.metrics.map((_, idx) => (
+                                                                        <polyline 
+                                                                            key={idx}
+                                                                            fill="none" 
+                                                                            stroke={idx % 2 === 0 ? "#3b82f6" : "#10b981"} 
+                                                                            strokeWidth="2"
+                                                                            points={`0,${80 - idx*10} 50,${40 + Math.random()*40} 100,${60 + Math.random()*40} 150,${30 + Math.random()*20} 200,${50 + Math.random()*40}`}
+                                                                            vectorEffect="non-scaling-stroke"
+                                                                        />
+                                                                    ))}
+                                                                </svg>
+                                                                {/* 动态图例 */}
+                                                                <div className="absolute bottom-1 left-0 right-0 flex justify-center gap-4">
+                                                                    {comp.metrics.length > 0 ? comp.metrics.map((m, i) => (
+                                                                        <div key={i} className="flex items-center gap-1 text-[10px] text-slate-500">
+                                                                            <span className="w-3 h-[2px]" style={{backgroundColor: i % 2 === 0 ? "#3b82f6" : "#10b981"}}></span>
+                                                                            {globalConfig.scope === 'fleet' && comp.groupBy === 'equipment' ? `设备${i+1}` : m}
+                                                                        </div>
+                                                                    )) : <div className="text-[10px] text-red-400">请在右侧配置指标</div>}
+                                                                </div>
+                                                            </div>
+                                                        )}
+                                                    </div>
+                                                </div>
+
+                                                {/* PDF 换页线提示 */}
+                                                {comp.pageBreak && (
+                                                    <div className="absolute -bottom-5 left-0 w-full flex items-center group-hover:opacity-100 opacity-60 transition-opacity z-20">
+                                                        <div className="flex-1 border-b border-red-400 border-dashed"></div>
+                                                        <div className="mx-2 text-[10px] font-bold text-red-500 bg-white px-2 py-0.5 rounded border border-red-200 shadow-sm"><i className="fas fa-cut mr-1"></i> PDF 换页断点</div>
+                                                        <div className="flex-1 border-b border-red-400 border-dashed"></div>
+                                                    </div>
+                                                )}
+                                            </div>
+                                        );
+                                    })}
+
+                                    {/* 插入新组件按钮，始终占据 100% 宽度，换行显示 */}
+                                    <div className="w-full mt-4">
+                                        <button 
+                                            onClick={addComponent}
+                                            className="w-full py-5 border-2 border-dashed border-blue-300 bg-blue-50/30 rounded-lg text-blue-600 hover:bg-blue-50 hover:border-blue-400 transition-colors flex items-center justify-center gap-2 font-bold shadow-sm"
+                                        >
+                                            <i className="fas fa-plus-circle text-lg"></i> 在下方插入新数据块
+                                        </button>
+                                    </div>
+
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+
+                    {/* ================= 右侧：组件参数配置面板 ================= */}
+                    <div className="w-[340px] bg-white border-l border-slate-200 flex flex-col shadow-[-4px_0_15px_-3px_rgba(0,0,0,0.05)] z-20">
+                        <div className="h-12 border-b border-slate-100 bg-slate-50 flex items-center px-5 font-bold text-slate-700 gap-2">
+                            <i className="fas fa-edit text-blue-600"></i> 数据与视图配置
+                        </div>
+
+                        {selectedComp ? (
+                            <div className="flex-1 overflow-y-auto p-6 space-y-8">
+                                
+                                {/* 1. 基础视图配置 */}
+                                <div className="space-y-4">
+                                    <h3 className="text-sm font-bold text-slate-800 border-b border-slate-200 pb-2">视图形态</h3>
+                                    
+                                    <div className="space-y-1.5">
+                                        <label className="text-xs text-slate-500 font-medium">组件大标题 (支持中文显示)</label>
+                                        <input 
+                                            type="text" 
+                                            value={selectedComp.title || ''}
+                                            onChange={(e) => updateSelectedComp('title', e.target.value)}
+                                            className="w-full border border-slate-300 rounded px-3 py-2 text-sm focus:border-blue-500 outline-none transition-colors"
+                                            placeholder="如：发动机核心指标监控"
+                                        />
+                                    </div>
+
+                                    <div className="space-y-1.5">
+                                        <label className="text-xs text-slate-500 font-medium">图表类型</label>
+                                        <select 
+                                            className="w-full border border-slate-300 rounded px-3 py-2 text-sm focus:border-blue-500 outline-none bg-slate-50"
+                                            value={selectedComp.type}
+                                            onChange={(e) => updateSelectedComp('type', e.target.value)}
+                                        >
+                                            {CHART_TYPES.map(t => (
+                                                <option key={t.id} value={t.id}>{t.name}</option>
+                                            ))}
+                                        </select>
+                                    </div>
+
+                                    {/* ★ 核心：柱状图专有的横竖排布控制 */}
+                                    {selectedComp.type === 'bar_chart' && (
+                                        <div className="p-3 bg-indigo-50 border border-indigo-100 rounded text-sm space-y-2 mt-2">
+                                            <label className="text-xs font-bold text-indigo-700 block"><i className="fas fa-arrows-alt"></i> 柱状图排布方向 (自动适配长文本标签)</label>
+                                            <div className="flex gap-2">
+                                                <button 
+                                                    onClick={() => updateSelectedComp('barDirection', 'vertical')}
+                                                    className={`flex-1 py-1.5 text-xs rounded border ${selectedComp.barDirection === 'vertical' ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white border-slate-300 text-slate-600'}`}
+                                                >
+                                                    <i className="fas fa-chart-bar"></i> 垂直 (时间序列)
+                                                </button>
+                                                <button 
+                                                    onClick={() => updateSelectedComp('barDirection', 'horizontal')}
+                                                    className={`flex-1 py-1.5 text-xs rounded border ${selectedComp.barDirection === 'horizontal' ? 'bg-indigo-600 text-white border-indigo-600' : 'bg-white border-slate-300 text-slate-600'}`}
+                                                >
+                                                    <i className="fas fa-bars"></i> 水平 (设备排行)
+                                                </button>
+                                            </div>
+                                        </div>
+                                    )}
+                                </div>
+
+                                {/* 2. 数据源与机群透视配置 (仅非文本组件显示) */}
+                                {selectedComp.type !== 'text_block' ? (
+                                    <div className="space-y-5">
+                                        <h3 className="text-sm font-bold text-slate-800 border-b border-slate-200 pb-2">数据建模与指标</h3>
+
+                                        {/* 机群透视规则 - 图表 */}
+                                        {globalConfig.scope === 'fleet' && selectedComp.type !== 'data_table' && (
+                                            <div className="p-3 bg-blue-50/80 border border-blue-200 rounded-lg space-y-3 shadow-sm">
+                                                <div className="text-xs font-bold text-blue-800"><i className="fas fa-cube mr-1"></i> 多维数据透视 (机群模式)</div>
+                                                <div className="space-y-1">
+                                                    <label className="text-[11px] text-blue-700">图表 X轴 (底部分类)</label>
+                                                    <select 
+                                                        value={selectedComp.xAxis}
+                                                        onChange={(e) => updateSelectedComp('xAxis', e.target.value)}
+                                                        className="w-full border border-blue-200 rounded px-2 py-1.5 text-xs outline-none focus:border-blue-500"
+                                                    >
+                                                        <option value="time">时间序列 (按日月周排)</option>
+                                                        <option value="equipment">设备对比 (按各台设备排)</option>
+                                                    </select>
+                                                </div>
+                                                <div className="space-y-1">
+                                                    <label className="text-[11px] text-blue-700">图表 图例 (按什么分组划线?)</label>
+                                                    <select 
+                                                        value={selectedComp.groupBy}
+                                                        onChange={(e) => updateSelectedComp('groupBy', e.target.value)}
+                                                        className="w-full border border-blue-200 rounded px-2 py-1.5 text-xs outline-none focus:border-blue-500"
+                                                    >
+                                                        <option value="metric">不同业务指标 (如: 左行走 vs 右行走)</option>
+                                                        <option value="equipment">不同设备横评 (如: 挖机A vs 挖机B)</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* 表格专属透视 */}
+                                        {globalConfig.scope === 'fleet' && selectedComp.type === 'data_table' && (
+                                            <div className="p-3 bg-amber-50 border border-amber-200 rounded-lg space-y-3 shadow-sm">
+                                                <div className="text-xs font-bold text-amber-800"><i className="fas fa-table mr-1"></i> 二维报表行列透视</div>
+                                                <div className="space-y-1">
+                                                    <label className="text-[11px] text-amber-700">表头列展示内容：</label>
+                                                    <select 
+                                                        value={selectedComp.colDimension}
+                                                        onChange={(e) => updateSelectedComp('colDimension', e.target.value)}
+                                                        className="w-full border border-amber-200 rounded px-2 py-1.5 text-xs outline-none focus:border-amber-500"
+                                                    >
+                                                        <option value="metrics">展开各项指标名称</option>
+                                                        <option value="equipment">展开各台设备台账</option>
+                                                    </select>
+                                                </div>
+                                                <div className="space-y-1">
+                                                    <label className="text-[11px] text-amber-700">数据行展示维度：</label>
+                                                    <select 
+                                                        value={selectedComp.rowDimension}
+                                                        onChange={(e) => updateSelectedComp('rowDimension', e.target.value)}
+                                                        className="w-full border border-amber-200 rounded px-2 py-1.5 text-xs outline-none focus:border-amber-500"
+                                                    >
+                                                        <option value="equipment">按设备逐行罗列</option>
+                                                        <option value="time">按日期逐行罗列</option>
+                                                    </select>
+                                                </div>
+                                            </div>
+                                        )}
+
+                                        {/* 指标管理数组 */}
+                                        <div className="space-y-3">
+                                            <label className="text-xs text-slate-500 font-bold">绑定的核心指标字段</label>
+                                            <div className="space-y-2">
+                                                {selectedComp.metrics.map((m, index) => (
+                                                    <div key={index} className="flex gap-2 items-center">
+                                                        <input 
+                                                            type="text" 
+                                                            value={m}
+                                                            onChange={(e) => updateMetric(index, e.target.value)}
+                                                            className="flex-1 border border-slate-300 rounded px-2 py-1.5 text-sm focus:border-blue-500 outline-none"
+                                                            placeholder="输入指标中文名称..."
+                                                        />
+                                                        <button 
+                                                            onClick={() => removeMetric(index)}
+                                                            className="w-8 h-8 flex items-center justify-center bg-red-50 text-red-500 rounded hover:bg-red-100 transition-colors"
+                                                            title="删除指标"
+                                                        >
+                                                            <i className="fas fa-trash-alt text-xs"></i>
+                                                        </button>
+                                                    </div>
+                                                ))}
+                                                <button 
+                                                    onClick={addMetric}
+                                                    className="w-full py-2 border border-dashed border-blue-300 text-blue-600 rounded text-xs font-bold hover:bg-blue-50 transition-colors"
+                                                >
+                                                    + 添加挂载指标
+                                                </button>
+                                            </div>
+                                        </div>
+                                    </div>
+                                ) : (
+                                    // 富文本专属编辑区
+                                    <div className="space-y-4">
+                                        <h3 className="text-sm font-bold text-slate-800 border-b border-slate-200 pb-2">文本内容编辑</h3>
+                                        <div className="space-y-1.5">
+                                            <label className="text-xs text-slate-500 font-medium">段落内容 (实时预览)</label>
+                                            <textarea 
+                                                value={selectedComp.textContent || ''}
+                                                onChange={(e) => updateSelectedComp('textContent', e.target.value)}
+                                                className="w-full h-32 border border-slate-300 rounded px-3 py-2 text-sm focus:border-blue-500 outline-none transition-colors resize-none"
+                                                placeholder="输入报表的文字说明、前置导言或总结分析..."
+                                            ></textarea>
+                                        </div>
+                                    </div>
+                                )}
+
+                                {/* 3. 物理排版设置 */}
+                                <div className="space-y-4">
+                                    <h3 className="text-sm font-bold text-slate-800 border-b border-slate-200 pb-2">PDF 物理排版</h3>
+                                    
+                                    <div className="space-y-1.5">
+                                        <label className="text-xs text-slate-500 font-medium">页面宽度占比</label>
+                                        <select 
+                                            className="w-full border border-slate-300 rounded px-3 py-2 text-sm outline-none focus:border-blue-500"
+                                            value={selectedComp.pdfWidth}
+                                            onChange={(e) => updateSelectedComp('pdfWidth', e.target.value)}
+                                        >
+                                            <option value="100%">100% (满屏整行)</option>
+                                            <option value="50%">50% (半宽双列并排)</option>
+                                        </select>
+                                    </div>
+
+                                    <div className="pt-2">
+                                        <label className="flex items-center gap-3 cursor-pointer bg-slate-50 hover:bg-slate-100 p-3 rounded-lg border border-slate-200 transition-colors">
+                                            <input 
+                                                type="checkbox" 
+                                                checked={selectedComp.pageBreak} 
+                                                onChange={(e) => updateSelectedComp('pageBreak', e.target.checked)} 
+                                                className="rounded text-blue-600 w-4 h-4" 
+                                            />
+                                            <span className="text-sm font-bold text-slate-700 flex-1">组件后强制换新页</span>
+                                            <i className="fas fa-file-pdf text-red-500 text-lg"></i>
+                                        </label>
+                                    </div>
+                                </div>
+
+                                {/* 底部操作 */}
+                                <div className="pt-8 mt-auto">
+                                    <button 
+                                        onClick={removeSelected}
+                                        className="w-full flex items-center justify-center gap-2 py-3 bg-red-50 text-red-600 border border-red-200 hover:bg-red-500 hover:text-white rounded-lg text-sm font-bold transition-colors"
+                                    >
+                                        <i className="fas fa-trash"></i> 删除当前组件模块
+                                    </button>
+                                </div>
+
+                            </div>
+                        ) : (
+                            <div className="flex-1 flex flex-col items-center justify-center text-slate-400 text-sm p-8 text-center bg-slate-50">
+                                <i className="fas fa-mouse-pointer text-4xl mb-4 text-slate-300"></i>
+                                <span>点击中间 A4 画布上的组件模块<br/>以唤醒参数配置面板</span>
+                            </div>
+                        )}
+                    </div>
+
+                    {/* ===== 全局轻提示 ===== */}
+                    {toast && (
+                        <div className={`fixed top-6 left-1/2 -translate-x-1/2 z-[90] px-4 py-2 rounded-md shadow-lg text-sm text-white ${toast.type === 'err' ? 'bg-red-600' : 'bg-slate-800'}`}>
+                            <i className={`fas ${toast.type === 'err' ? 'fa-circle-exclamation' : 'fa-circle-check'} mr-2`}></i>{toast.msg}
+                        </div>
+                    )}
+
+                    {/* ===== JSON 模板弹窗（保存/导出/导入） ===== */}
+                    {jsonModal && (
+                        <div
+                            className="fixed inset-0 z-[80] bg-slate-900/40 flex items-center justify-center p-6"
+                            onClick={(e) => { if (e.target === e.currentTarget) setJsonModal(false); }}
+                        >
+                            <div className="w-[780px] max-h-[82vh] bg-white rounded-lg shadow-2xl flex flex-col overflow-hidden">
+                                <div className="px-5 py-3 border-b border-slate-100 flex items-center justify-between">
+                                    <div className="font-bold text-slate-700 flex items-center gap-2">
+                                        <i className="fas fa-clipboard-list text-blue-600"></i> 报表配置已生成 (JSON Payload)
+                                    </div>
+                                    <button onClick={() => setJsonModal(false)} className="text-slate-400 hover:text-slate-700 text-xl leading-none">&times;</button>
+                                </div>
+                                <div className="px-5 py-2 bg-slate-50 border-b border-slate-100 text-xs text-slate-500 flex items-center justify-between">
+                                    <span>
+                                        version {jsonDraft.indexOf('"version"') >= 0 ? '1.0' : '—'} · {globalConfig.scope === 'fleet' ? '机群(fleet)' : '单机(single)'} · {components.length} 个组件 · {components.reduce((n, c) => n + (c.metrics || []).length, 0)} 项指标
+                                    </span>
+                                    <span>{jsonDraft.length} 字符</span>
+                                </div>
+                                <textarea
+                                    value={jsonDraft}
+                                    onChange={(e) => setJsonDraft(e.target.value)}
+                                    spellCheck={false}
+                                    className="flex-1 min-h-[380px] p-4 bg-slate-900 text-slate-100 font-mono text-[11.5px] leading-relaxed outline-none resize-none"
+                                />
+                                <div className="px-5 py-3 border-t border-slate-100 flex items-center justify-between">
+                                    <label className="text-xs text-slate-600 border border-slate-300 hover:border-slate-400 rounded px-3 py-1.5 cursor-pointer flex items-center gap-2">
+                                        <i className="fas fa-file-import"></i> 从文件导入
+                                        <input
+                                            type="file"
+                                            accept=".json,application/json"
+                                            className="hidden"
+                                            onChange={(e) => { importJsonFile(e.target.files && e.target.files[0]); e.target.value = ''; }}
+                                        />
+                                    </label>
+                                    <div className="flex items-center gap-2">
+                                        <button onClick={() => applyJsonDraft(jsonDraft, 'import')} className="border border-slate-300 hover:border-slate-400 bg-white text-slate-700 px-4 py-1.5 rounded text-sm transition-colors">导入并应用</button>
+                                        <button onClick={copyJson} className="border border-slate-300 hover:border-slate-400 bg-white text-slate-700 px-4 py-1.5 rounded text-sm transition-colors flex items-center gap-2"><i className="fas fa-copy"></i> 复制</button>
+                                        <button onClick={downloadJson} className="border border-slate-300 hover:border-slate-400 bg-white text-slate-700 px-4 py-1.5 rounded text-sm transition-colors flex items-center gap-2"><i className="fas fa-download"></i> 下载 .json</button>
+                                        <button onClick={() => setJsonModal(false)} className="bg-blue-600 hover:bg-blue-700 text-white px-6 py-1.5 rounded text-sm font-medium transition-colors">完成</button>
+                                    </div>
+                                </div>
+                            </div>
+                        </div>
+                    )}
+                </div>
+            );
+        }
+
+        const root = ReactDOM.createRoot(document.getElementById('root'));
+        root.render(<ReportConfigurator />);
+    </script>
+</body>
+</html>

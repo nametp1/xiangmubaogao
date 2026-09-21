@@ -1,0 +1,685 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>手机端 · 机群报表（v2.0 · 统一模板渲染）</title>
+<style>
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    body {
+        font-family: "PingFang SC", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+        background: #eef0f3; color: #1a1a1a; min-height: 100vh;
+        display: flex; align-items: flex-start; justify-content: center;
+        gap: 28px; padding: 28px 20px 60px; flex-wrap: wrap;
+    }
+    /* ================= 手机外框 ================= */
+    .phone {
+        width: 390px; height: 844px; background: #f4f5f7; border-radius: 34px;
+        box-shadow: 0 12px 40px rgba(0,0,0,.18); overflow: hidden; position: relative;
+        display: flex; flex-direction: column; flex: 0 0 auto;
+    }
+    .phone-status {
+        height: 34px; background: #161a2e; color: #fff; font-size: 11px;
+        display: flex; align-items: center; justify-content: space-between; padding: 0 18px; flex-shrink: 0;
+    }
+    /* ================= 顶部导航 ================= */
+    .app-header { background: #161a2e; color: #fff; padding: 6px 14px 10px; flex-shrink: 0; }
+    .app-header-top { display: flex; align-items: center; gap: 10px; height: 40px; }
+    .app-back { font-size: 22px; color: #fff; cursor: pointer; line-height: 1; }
+    .app-title { font-size: 19px; font-weight: 600; letter-spacing: .3px; }
+    .machine-picker {
+        display: flex; align-items: center; justify-content: center; gap: 6px;
+        padding: 9px 0 4px; font-size: 15px; color: #fff; cursor: pointer;
+    }
+    .machine-picker .arrow { font-size: 11px; color: #b9bfd0; }
+    .caliber-chip {
+        margin: 6px auto 0; width: fit-content; font-size: 11px; color: #161a2e;
+        background: #ffd966; border-radius: 10px; padding: 2px 10px;
+    }
+    /* ================= 周期 Tab ================= */
+    .period-tabs {
+        margin: 12px 14px 0; background: #fff; border-radius: 10px; padding: 4px;
+        display: grid; grid-template-columns: repeat(3, 1fr); gap: 2px; flex-shrink: 0;
+        box-shadow: 0 1px 4px rgba(0,0,0,.04);
+    }
+    .period-tab {
+        border: none; background: transparent; padding: 9px 0; border-radius: 8px;
+        font-size: 14px; color: #555; font-family: inherit; cursor: pointer; transition: all .18s;
+    }
+    .period-tab.active { background: #fff; color: #111; font-weight: 600; box-shadow: 0 1px 4px rgba(0,0,0,.08); }
+    .period-tab:hover:not(.active) { color: #E60012; }
+    /* ================= 日期行 ================= */
+    .date-row {
+        display: flex; align-items: center; justify-content: center; gap: 22px;
+        padding: 14px 14px 10px; flex-shrink: 0;
+    }
+    .date-nav {
+        width: 28px; height: 28px; border-radius: 50%; border: none; background: transparent;
+        font-size: 17px; color: #333; cursor: pointer; font-family: inherit;
+    }
+    .date-nav:hover:not(:disabled) { color: #E60012; }
+    .date-nav:disabled { color: #ccc; cursor: not-allowed; }
+    .date-main { font-size: 17px; font-weight: 700; letter-spacing: .3px; cursor: pointer; }
+    .date-main .caret { font-size: 10px; margin-left: 4px; color: #666; }
+    .date-sub { text-align: center; font-size: 11px; color: #888; margin-top: -4px; padding-bottom: 8px; }
+    /* ================= 内容区 ================= */
+    .screen { flex: 1; overflow-y: auto; padding: 4px 14px 20px; }
+    .block { margin-bottom: 12px; }
+    .block-title {
+        display: flex; align-items: center; justify-content: space-between;
+        font-size: 13px; font-weight: 600; color: #333; margin-bottom: 8px;
+    }
+    .block-title .tpl-tag {
+        font-size: 10px; font-weight: 400; color: #999; background: #f2f2f2; border-radius: 3px; padding: 1px 6px;
+    }
+    .metric-scroll { display: flex; gap: 10px; overflow-x: auto; padding-bottom: 4px; }
+    .metric-scroll::-webkit-scrollbar { height: 0; }
+    .metric-card {
+        flex: 0 0 152px; background: #fff; border-radius: 12px; padding: 12px;
+        border-top: 3px solid #E60012; box-shadow: 0 1px 4px rgba(0,0,0,.05);
+    }
+    .metric-card .m-label { font-size: 11px; color: #888; line-height: 1.4; }
+    .metric-card .m-value { font-size: 22px; font-weight: 800; color: #E60012; margin-top: 6px; line-height: 1.1; }
+    .metric-card .m-value small { font-size: 11px; font-weight: 400; color: #999; margin-left: 2px; }
+    .metric-card .m-agg { display: inline-block; margin-top: 7px; font-size: 10px; border-radius: 3px; padding: 1px 6px; }
+    .agg-sum { background: #f0f7ff; color: #1d5fa8; }
+    .agg-recalc { background: #fdecee; color: #E60012; }
+    .agg-last { background: #fff7e6; color: #d48806; }
+    .agg-max { background: #f6ffed; color: #389e0d; }
+    .agg-required { background: #E60012; color: #fff; margin-right: 4px; }
+    .ring-block { background: #fff; border-radius: 12px; padding: 14px; display: flex; align-items: center; gap: 16px; }
+    .ring {
+        width: 106px; height: 106px; border-radius: 50%; position: relative; flex-shrink: 0;
+        background: conic-gradient(#E60012 0 25%, #f0a000 25% 50%, #4b8bf4 50% 75%, #d9d9d9 75% 100%);
+    }
+    .ring::after { content: ""; position: absolute; inset: 17px; background: #fff; border-radius: 50%; }
+    .ring .ring-center {
+        position: absolute; inset: 0; z-index: 1; display: flex; flex-direction: column;
+        align-items: center; justify-content: center; font-size: 10px; color: #999;
+    }
+    .ring .ring-center b { font-size: 16px; color: #E60012; }
+    .legend { flex: 1; }
+    .legend .lg-item {
+        display: flex; align-items: center; justify-content: space-between;
+        font-size: 12px; padding: 5px 0; border-bottom: 1px solid #f5f5f5; color: #555;
+    }
+    .legend .lg-item:last-child { border-bottom: none; }
+    .legend .dot { width: 9px; height: 9px; border-radius: 2px; display: inline-block; margin-right: 7px; }
+    .rank-block { background: #fff; border-radius: 12px; padding: 6px 14px 12px; }
+    .rank-item { padding: 9px 0; border-bottom: 1px solid #f6f6f6; }
+    .rank-item:last-child { border-bottom: none; }
+    .rank-head { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #444; margin-bottom: 6px; }
+    .rank-no {
+        width: 17px; height: 17px; border-radius: 4px; background: #f2f2f2; color: #888;
+        font-size: 10px; display: flex; align-items: center; justify-content: center; flex-shrink: 0;
+    }
+    .rank-no.top { background: #E60012; color: #fff; }
+    .rank-name { flex: 1; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .rank-val { font-weight: 700; color: #1a1a1a; }
+    .bar-track { height: 8px; background: #f2f2f2; border-radius: 4px; overflow: hidden; }
+    .bar-fill { height: 100%; background: #E60012; border-radius: 4px; }
+    .list-block { background: #fff; border-radius: 12px; overflow: hidden; }
+    .list-head {
+        display: grid; font-size: 11px; color: #999; padding: 10px 12px; background: #fafafa;
+        border-bottom: 1px solid #f0f0f0; gap: 4px;
+    }
+    .list-row {
+        display: grid; font-size: 12px; padding: 11px 12px; border-bottom: 1px solid #f6f6f6; color: #444; gap: 4px;
+    }
+    .list-row:last-child { border-bottom: none; }
+    .list-row .num, .list-head .num { text-align: right; }
+    .list-more {
+        display: block; width: 100%; border: none; background: #fafafa; color: #E60012;
+        font-size: 12px; padding: 11px 0; cursor: pointer; font-family: inherit;
+    }
+    .desc-block {
+        background: #f7f9fc; border: 1px solid #e8eef7; border-radius: 10px;
+        padding: 12px 14px; font-size: 11px; color: #667; line-height: 1.9;
+    }
+    .desc-block b { color: #33405e; }
+    .desc-block .latency { color: #d48806; }
+    .nostat-block {
+        background: #fffdf5; border: 1px solid #ffe9a8; border-radius: 10px; padding: 12px 14px;
+    }
+    .nostat-title { font-size: 12px; color: #d48806; font-weight: 600; margin-bottom: 8px; }
+    .nostat-item { font-size: 11px; color: #a99; line-height: 1.9; }
+    .nostat-item code { background: #f7f2e2; border-radius: 3px; padding: 0 4px; font-size: 10px; color: #b08a2e; }
+    .empty-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 60px 24px; text-align: center; }
+    .empty-link { color: #2b6cff; font-size: 14px; margin-top: 18px; cursor: pointer; }
+    /* ================= 演示控制台 ================= */
+    .devpanel {
+        width: 360px; background: #fff; border-radius: 12px; padding: 18px;
+        box-shadow: 0 2px 12px rgba(0,0,0,.06); font-size: 13px; flex: 0 0 auto;
+    }
+    .devpanel h3 { font-size: 14px; margin-bottom: 4px; }
+    .devpanel .sub { font-size: 12px; color: #999; line-height: 1.7; margin-bottom: 14px; }
+    .devpanel .grp { margin-bottom: 14px; }
+    .devpanel label { display: block; font-size: 12px; color: #666; margin-bottom: 6px; }
+    .seg { display: inline-flex; padding: 3px; background: #f2f2f2; border-radius: 7px; }
+    .seg button {
+        border: none; background: transparent; padding: 6px 12px; border-radius: 5px;
+        font-size: 12px; color: #666; cursor: pointer; font-family: inherit;
+    }
+    .seg button.active { background: #fff; color: #E60012; font-weight: 600; box-shadow: 0 1px 3px rgba(0,0,0,.08); }
+    .devpanel .aggtbl { width: 100%; border-collapse: collapse; font-size: 11px; margin-top: 6px; }
+    .devpanel .aggtbl th { color: #999; font-weight: 400; text-align: left; padding: 5px 0; border-bottom: 1px solid #f0f0f0; }
+    .devpanel .aggtbl td { padding: 5px 4px 5px 0; border-bottom: 1px solid #f6f6f6; color: #555; }
+    .devpanel .aggtbl td.a { color: #E60012; font-weight: 600; white-space: nowrap; }
+    .devpanel .aggtbl td.s { color: #bbb; }
+    .devpanel .src { font-size: 10px; color: #bbb; margin-top: 8px; line-height: 1.7; }
+    /* 字段标题 chips（只列标题，不平铺口径） */
+    .dev-chips { display: flex; flex-wrap: wrap; gap: 6px; }
+    .dev-chip {
+        font-size: 11px; color: #555; background: #fafafa; border: 1px solid #ececec;
+        border-radius: 4px; padding: 3px 8px;
+    }
+    .dev-chip.req { border-color: #ffd6da; background: #fffafa; color: #E60012; font-weight: 600; }
+    .dev-chips.off .dev-chip { color: #bbb; border-style: dashed; }
+    .dev-agg-sum { font-size: 11px; color: #999; margin-top: 8px; line-height: 1.7; }
+    .dev-toggle {
+        border: 1px dashed #d9d9d9; background: #fff; border-radius: 4px;
+        font-size: 11px; color: #666; padding: 4px 10px; cursor: pointer; font-family: inherit;
+        margin-bottom: 8px;
+    }
+    .dev-toggle:hover { border-color: #E60012; color: #E60012; }
+    .nostat-chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+    .nostat-chip {
+        font-size: 11px; color: #b0a487; background: #fbf6e6; border: 1px dashed #f0dfb0;
+        border-radius: 4px; padding: 3px 8px;
+    }
+    .nostat-toggle {
+        margin-top: 8px; border: 1px dashed #e8d9a8; background: #fff; color: #b08a2e;
+        font-size: 11px; border-radius: 4px; padding: 4px 10px; cursor: pointer; font-family: inherit;
+    }
+    .nostat-toggle:hover { border-color: #d4a12a; }
+    .devpanel .note {
+        margin-top: 12px; font-size: 11px; color: #777; line-height: 1.8;
+        background: #fafafa; border-radius: 6px; padding: 10px;
+    }
+</style>
+</head>
+<body>
+
+<!-- ==================== 手机端页面 ==================== -->
+<div class="phone">
+    <div class="phone-status">
+        <span>9:41</span>
+        <span>MySANY</span>
+        <span>100%</span>
+    </div>
+
+    <div class="app-header">
+        <div class="app-header-top">
+            <span class="app-back">‹</span>
+            <span class="app-title" id="pageTitle">挖掘机机群报表</span>
+        </div>
+        <div class="machine-picker" onclick="showToast('机型切换：按用户权限返回全部机型')">
+            <span id="machineType">挖掘机</span>
+            <span class="arrow">▼</span>
+        </div>
+        <div class="caliber-chip" id="caliberChip">统计口径：自然日</div>
+    </div>
+
+    <div class="period-tabs">
+        <button class="period-tab active" data-period="day" onclick="switchPeriod('day')">日报</button>
+        <button class="period-tab" data-period="week" onclick="switchPeriod('week')">周报</button>
+        <button class="period-tab" data-period="month" onclick="switchPeriod('month')">月报</button>
+    </div>
+
+    <div class="date-row">
+        <button class="date-nav" id="navPrev" onclick="shiftDate(-1)">‹</button>
+        <span class="date-main" id="dateMain">2026/09/13<span class="caret">▼</span></span>
+        <button class="date-nav" id="navNext" onclick="shiftDate(1)">›</button>
+    </div>
+    <div class="date-sub" id="dateSub"></div>
+
+    <div class="screen" id="screen"></div>
+</div>
+
+<!-- ==================== 演示控制台 ==================== -->
+<div class="devpanel">
+    <h3>演示控制台</h3>
+    <div class="sub">
+        本页由「统一模板 + 字段口径注册表」动态渲染。字段与周期可用性取自
+        <b>《日周月报表字段聚合表》§2.1 挖掘机</b>（共 16 项）。
+    </div>
+
+    <div class="grp">
+        <label>机型（统一模板按权限返回）</label>
+        <div class="seg" id="machineSeg">
+            <button class="active" data-machine="挖掘机" onclick="changeMachine('挖掘机')">挖掘机</button>
+            <button data-machine="宽体车" onclick="changeMachine('宽体车')">宽体车</button>
+            <button data-machine="轮式装载机" onclick="changeMachine('轮式装载机')">轮式装载机</button>
+        </div>
+        <div class="src" id="machineSrc"></div>
+    </div>
+
+    <div class="grp">
+        <label>统计口径</label>
+        <div class="seg" id="caliberSeg">
+            <button class="active" data-caliber="natural" onclick="setCaliber('natural')">自然日</button>
+            <button data-caliber="shift" onclick="setCaliber('shift')">班次 07:00–19:00</button>
+        </div>
+    </div>
+
+    <div class="grp">
+        <label>页面状态</label>
+        <div class="seg" id="stateSeg">
+            <button class="active" data-state="data" onclick="setState('data')">有数据</button>
+            <button data-state="empty" onclick="setState('empty')">未绑定设备</button>
+        </div>
+    </div>
+
+    <div class="grp">
+        <label>当前周期字段（<span id="periodName">日报</span>，共 <span id="fieldCount">0</span> 项）</label>
+        <div class="dev-chips" id="devChips"></div>
+        <div class="dev-agg-sum" id="devAggSum"></div>
+    </div>
+
+    <div class="grp">
+        <label>当前周期不统计的字段（<span id="noStatCount">0</span> 项）</label>
+        <button class="dev-toggle" id="noStatToggle" onclick="toggleNoStatList()">展开查看标题</button>
+        <div class="dev-chips off" id="devNoStatChips" style="display:none;"></div>
+    </div>
+
+    <div class="note" id="devNote"></div>
+</div>
+
+<script>
+/* ========================================================================
+ * 统一模板（一份配置 → 手机端适配器渲染）
+ * ====================================================================== */
+const TEMPLATE = {
+    id: 'tpl_fleet_overview',
+    name: '机群报表 · 概览模板',
+    dataLatencyHours: 48,
+    machineType: '挖掘机',
+    sourceDoc: '用户需求/日周月报表字段聚合表.md §2.1',
+    blocks: ['metrics', 'ring', 'rank', 'list', 'nostat', 'desc']
+};
+
+/* ==================== 字段与周期可用性（严格取自字段聚合表） ==================== */
+/* avail: { day|week|month : 'show' | 'required' | 'noStat' | 'hidden' } */
+const FIELDS = {
+    /* 挖掘机 §2.1 */
+    date:        { label: '日期', unit: '—', type: 'meta', avail: { day: 'noStat', week: 'noStat', month: 'show' }, agg: { month: 'NONE' }, calc: '月报明细键，不参与计算' },
+    serialNo:    { label: '设备序列号', unit: '—', type: 'meta', avail: { day: 'noStat', week: 'noStat', month: 'show' }, agg: { month: 'NONE' }, calc: '月报明细键，不参与计算' },
+    idleFuelDaily: { label: '每日怠速燃油或动力消耗', unit: '升', type: 'atomic', key: 'G', avail: { day: 'show', week: 'noStat', month: 'noStat' }, agg: { day: 'SUM' }, calc: '日=当日怠速段消耗累计（= G）' },
+    totalFuelDaily: { label: '燃油或动力总消耗', unit: '升', type: 'derived', parts: ['G', 'H'], avail: { day: 'show', week: 'noStat', month: 'noStat' }, agg: { day: 'SUM' }, calc: '日=怠速 + 运行消耗（= G + H）' },
+    idleA:       { label: '怠速时长（A）', unit: '小时', type: 'atomic', key: 'A', avail: { day: 'show', week: 'show', month: 'show' }, agg: { day: 'SUM', week: 'SUM', month: 'SUM' }, calc: '日=当日累计；周/月=期内累计' },
+    attachB:     { label: '前端属具作业时长（B）', unit: '小时', type: 'atomic', key: 'B', avail: { day: 'noStat', week: 'noStat', month: 'show' }, agg: { month: 'SUM' }, calc: '月=期内累计' },
+    slewC:       { label: '回转时长（C）', unit: '小时', type: 'atomic', key: 'C', avail: { day: 'noStat', week: 'noStat', month: 'show' }, agg: { month: 'SUM' }, calc: '月=期内累计' },
+    travelD:     { label: '行走时长（D）', unit: '小时', type: 'atomic', key: 'D', avail: { day: 'noStat', week: 'noStat', month: 'show' }, agg: { month: 'SUM' }, calc: '月=期内累计' },
+    totalWork:   { label: '当日总工作时长 [A+B+C+D]', unit: '小时', type: 'derived', parts: ['A', 'B', 'C', 'D'], avail: { day: 'noStat', week: 'noStat', month: 'required' }, agg: { month: 'SUM' }, calc: '派生：A、B、C、D 分别累计后相加' },
+    attachRatio: { label: '前端属具作业占比', unit: '%', type: 'recalc', n: 'B', d: 'ABCD', avail: { day: 'noStat', week: 'noStat', month: 'show' }, agg: { month: 'RECALC' }, calc: 'B ÷（A+B+C+D）' },
+    slewRatio:   { label: '回转时长占比', unit: '%', type: 'recalc', n: 'C', d: 'ABCD', avail: { day: 'noStat', week: 'noStat', month: 'show' }, agg: { month: 'RECALC' }, calc: 'C ÷（A+B+C+D）' },
+    runTime:     { label: '总运行时长（B+C+D）', unit: '小时', type: 'derived', parts: ['B', 'C', 'D'], avail: { day: 'noStat', week: 'noStat', month: 'show' }, agg: { month: 'SUM' }, calc: '派生：B、C、D 分别累计后相加' },
+    runFuelH:    { label: '运行燃油或动力消耗（H）', unit: '升', type: 'atomic', key: 'H', avail: { day: 'noStat', week: 'noStat', month: 'show' }, agg: { month: 'SUM' }, calc: '月=期内运行段累计' },
+    idleFuelG:   { label: '怠速燃油或动力消耗（G）', unit: '升', type: 'atomic', key: 'G', avail: { day: 'noStat', week: 'noStat', month: 'show' }, agg: { month: 'SUM' }, calc: '月=期内怠速段累计' },
+    totalFuelGH: { label: '燃油或动力总消耗 [G+H]', unit: '升', type: 'derived', parts: ['G', 'H'], avail: { day: 'noStat', week: 'noStat', month: 'show' }, agg: { month: 'SUM' }, calc: '派生：G、H 分别累计后相加' },
+    avgFuel:     { label: '平均燃油或动力消耗', unit: '升/小时', type: 'recalc', n: 'GH', d: 'ABCD', avail: { day: 'noStat', week: 'noStat', month: 'show' }, agg: { month: 'RECALC' }, calc: '（G+H）÷（A+B+C+D）' }
+};
+
+/* 各周期的展示配置：指标卡 / 环形 / 排行 / 明细列 */
+const PERIOD_VIEW = {
+    day: {
+        name: '日报',
+        metrics: ['idleFuelDaily', 'totalFuelDaily', 'idleA'],
+        ring: null,
+        rankMetric: 'idleA',
+        listCols: ['idleFuelDaily', 'totalFuelDaily', 'idleA']
+    },
+    week: {
+        name: '周报',
+        metrics: ['idleA'],
+        ring: null,
+        rankMetric: 'idleA',
+        listCols: ['idleA']
+    },
+    month: {
+        name: '月报',
+        metrics: ['totalWork', 'idleA', 'totalFuelGH', 'avgFuel'],
+        ring: ['idleA', 'attachB', 'slewC', 'travelD'],
+        rankMetric: 'totalWork',
+        listCols: ['totalWork', 'runTime', 'totalFuelGH', 'avgFuel']
+    }
+};
+
+/* ==================== 模拟数据（按天生成，30 天） ==================== */
+const MACHINES = [
+    { id: 'EX003', model: 'SY215C10', seed: 3 },
+    { id: 'EX007', model: 'SY365H', seed: 7 },
+    { id: 'EX012', model: 'SY485H', seed: 12 },
+    { id: 'EX018', model: 'SY215C10', seed: 18 },
+    { id: 'EX021', model: 'SY305H', seed: 21 },
+    { id: 'EX026', model: 'SY135C10', seed: 26 },
+    { id: 'EX031', model: 'SY550H', seed: 31 }
+];
+const DAYS = 30;
+
+function buildDailyData(seed) {
+    const arr = [];
+    for (let d = 0; d < DAYS; d++) {
+        const A = +(1.0 + ((seed + d * 2) % 14) / 10).toFixed(2);        // 怠速 A
+        const B = +(3.0 + ((seed * 2 + d * 3) % 40) / 10).toFixed(2);    // 属具 B
+        const C = +(1.5 + ((seed + d * 5) % 25) / 10).toFixed(2);        // 回转 C
+        const D = +(0.4 + ((seed * 3 + d) % 15) / 10).toFixed(2);        // 行走 D
+        const G = +(A * 5.2).toFixed(2);                                 // 怠速消耗 G
+        const H = +(B * 6.8 + C * 5.4).toFixed(2);                       // 运行消耗 H
+        arr.push({ A: A, B: B, C: C, D: D, G: G, H: H });
+    }
+    return arr;
+}
+
+const DATA = {};
+MACHINES.forEach(m => { DATA[m.id] = buildDailyData(m.seed); });
+
+/* ==================== 聚合引擎（与 PRD 4.9 一致） ==================== */
+function periodDays(period) {
+    if (period === 'day') return 1;
+    if (period === 'week') return 7;
+    return DAYS;
+}
+
+function periodRows(machineId, period, endIndex) {
+    const all = DATA[machineId] || [];
+    const n = Math.min(periodDays(period), endIndex + 1);
+    return all.slice(endIndex - n + 1, endIndex + 1);
+}
+
+/* 期间求和：按组成字母（A/B/C/D/G/H）对每日数据求和 */
+function sumParts(parts, rows) {
+    return parts.reduce((s, p) => s + rows.reduce((s2, r) => s2 + (r[p] || 0), 0), 0);
+}
+
+function aggregate(machineId, fieldKey, period, endIndex) {
+    const def = FIELDS[fieldKey];
+    if (!def) return null;
+    const state = def.avail[period];
+    if (!state || state === 'noStat' || state === 'hidden') return null;
+
+    const rows = periodRows(machineId, period, endIndex);
+    if (rows.length === 0) return null;
+    const method = (def.agg && def.agg[period]) || 'SUM';
+
+    switch (def.type) {
+        case 'atomic':
+            return rows.reduce((s, r) => s + (r[def.key] || 0), 0);
+        case 'derived':
+            return sumParts(def.parts, rows);
+        case 'recalc': {
+            const num = def.n === 'GH' ? sumParts(['G', 'H'], rows) : sumParts([def.n], rows);
+            const den = def.d === 'ABCD' ? sumParts(['A', 'B', 'C', 'D'], rows) : sumParts([def.d], rows);
+            return den === 0 ? null : num / den;
+        }
+        case 'meta':
+            return method === 'NONE' ? (rows.length > 0 ? rows.length + ' 天记录' : null) : null;
+        default:
+            return null;
+    }
+}
+
+function fmt(v, decimals) {
+    if (v === null || v === undefined) return '--';
+    const n = Number(v).toFixed(decimals === undefined ? 1 : decimals);
+    return n.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+}
+
+/* ==================== 页面状态 ==================== */
+let state = {
+    period: 'day',
+    caliber: 'natural',
+    machineType: '挖掘机',
+    machineId: 'EX003',
+    endIndex: DAYS - 1,
+    pageState: 'data',
+    listExpanded: false,
+    noStatOpen: false
+};
+
+/* ==================== 日期标签 ==================== */
+function dayLabel(idx) {
+    const day = 13 - (DAYS - 1 - idx);
+    const d = new Date(2026, 8, day);
+    return d.getFullYear() + '/' + String(d.getMonth() + 1).padStart(2, '0') + '/' + String(d.getDate()).padStart(2, '0');
+}
+
+function dateText() {
+    const idx = state.endIndex;
+    if (state.period === 'day') return dayLabel(idx);
+    if (state.period === 'week') {
+        const n = Math.min(7, idx + 1);
+        return dayLabel(idx - n + 1) + ' – ' + dayLabel(idx);
+    }
+    return '2026 年 9 月';
+}
+
+function dateSubText() {
+    const cal = state.caliber === 'shift'
+        ? `统计口径：班次 07:00–19:00 · 统计日 ${dayLabel(state.endIndex)} 07:00 → 19:00`
+        : `统计口径：自然日 · 统计日 ${dayLabel(state.endIndex)} 00:00 → 24:00`;
+    return cal + ` · 字段集：${PERIOD_VIEW[state.period].name}（${availableKeys().length} 项）`;
+}
+
+function availableKeys() {
+    return Object.keys(FIELDS).filter(k => FIELDS[k].avail[state.period] === 'show' || FIELDS[k].avail[state.period] === 'required');
+}
+
+function noStatKeys() {
+    return Object.keys(FIELDS).filter(k => FIELDS[k].avail[state.period] === 'noStat');
+}
+
+/* ==================== 渲染：手机端适配器 ==================== */
+function render() {
+    const M = FIELDS;
+    document.getElementById('machineType').textContent = state.machineType;
+    document.getElementById('pageTitle').textContent = state.machineType + '机群报表';
+    document.getElementById('caliberChip').textContent =
+        '统计口径：' + (state.caliber === 'shift' ? '班次 07:00–19:00' : '自然日');
+    document.getElementById('dateMain').innerHTML = dateText() + '<span class="caret">▼</span>';
+    document.getElementById('dateSub').textContent = dateSubText();
+    document.getElementById('navNext').disabled = state.endIndex >= DAYS - 1;
+
+    document.querySelectorAll('.period-tab').forEach(t => t.classList.toggle('active', t.dataset.period === state.period));
+    document.querySelectorAll('#caliberSeg button').forEach(b => b.classList.toggle('active', b.dataset.caliber === state.caliber));
+    document.querySelectorAll('#stateSeg button').forEach(b => b.classList.toggle('active', b.dataset.state === state.pageState));
+    document.querySelectorAll('#machineSeg button').forEach(b => b.classList.toggle('active', b.dataset.machine === state.machineType));
+
+    const screen = document.getElementById('screen');
+
+    if (state.pageState === 'empty') {
+        screen.innerHTML = `
+            <div class="empty-wrap">
+                <svg width="140" height="120" viewBox="0 0 140 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="18" y="66" width="104" height="34" rx="4" fill="#e9ebee"/>
+                    <rect x="24" y="60" width="92" height="10" rx="3" fill="#f3f4f6"/>
+                    <rect x="46" y="24" width="14" height="16" rx="2" fill="#d7dae0"/>
+                    <path d="M60 40c6 0 10 4 10 9v8h-8v-6" stroke="#c3c8d1" stroke-width="3" fill="none" stroke-linecap="round"/>
+                    <circle cx="98" cy="40" r="3" fill="#d7dae0"/>
+                    <path d="M84 46c4 2 7 5 8 8" stroke="#c3c8d1" stroke-width="2" fill="none"/>
+                </svg>
+                <div class="empty-link" onclick="showToast('跳转绑定设备流程')">立即绑定设备，开启智能管理</div>
+            </div>`;
+        renderDevPanel();
+        return;
+    }
+
+    const view = PERIOD_VIEW[state.period];
+    const html = [];
+
+    /* 1. 指标卡（仅当期可用字段） */
+    html.push('<div class="block"><div class="block-title"><span>核心指标</span><span class="tpl-tag">模板区块：metrics</span></div><div class="metric-scroll">');
+    view.metrics.forEach(key => {
+        const def = M[key];
+        const val = aggregate(state.machineId, key, state.period, state.endIndex);
+        const st = def.avail[state.period];
+        const method = (def.agg && def.agg[state.period]) || 'SUM';
+        html.push(`<div class="metric-card">
+            <div class="m-label">${def.label}</div>
+            <div class="m-value">${fmt(val, 1)}<small>${def.unit}</small></div>
+            ${st === 'required' ? '<span class="m-agg agg-required">必需</span>' : ''}<span class="m-agg ${AGG_CLASS[method] || 'agg-sum'}">${method === 'RECALC' ? '重算 RECALC' : (method === 'SUM' ? '累加 SUM' : method)}</span>
+        </div>`);
+    });
+    html.push('</div></div>');
+
+    /* 2. 环形分布（月报 A/B/C/D；日/周无占比字段） */
+    html.push('<div class="block"><div class="block-title"><span>时长结构</span><span class="tpl-tag">模板区块：ring</span></div>');
+    if (view.ring) {
+        const vals = view.ring.map(k => ({ k: k, label: M[k].label, v: aggregate(state.machineId, k, state.period, state.endIndex) || 0 }));
+        const total = vals.reduce((s, x) => s + x.v, 0) || 1;
+        const colors = ['#E60012', '#f0a000', '#4b8bf4', '#d9d9d9'];
+        let acc = 0;
+        const stops = vals.map((x, i) => {
+            const from = acc / total * 100;
+            acc += x.v;
+            const to = acc / total * 100;
+            return `${colors[i]} ${from.toFixed(1)}% ${to.toFixed(1)}%`;
+        }).join(', ');
+        html.push(`<div class="ring-block">
+            <div class="ring" style="background:conic-gradient(${stops});"><div class="ring-center"><b>${fmt(total, 1)}</b>小时</div></div>
+            <div class="legend">
+                ${vals.map((x, i) => `<div class="lg-item"><span><span class="dot" style="background:${colors[i]}"></span>${x.label}</span><span><b>${(x.v / total * 100).toFixed(1)}%</b></span></div>`).join('')}
+            </div>
+        </div>`);
+    } else {
+        html.push(`<div class="desc-block">该周期（${view.name}）暂无占比 / 结构类字段：依据《日周月报表字段聚合表》§2.1，A / B / C / D 四段时长<b>仅月报提供</b>，日 / 周不统计。</div>`);
+    }
+    html.push('</div>');
+
+    /* 3. 设备排行 */
+    const rows = MACHINES.map(m => ({ id: m.id, model: m.model, v: aggregate(m.id, view.rankMetric, state.period, state.endIndex) || 0 }))
+        .sort((a, b) => b.v - a.v).slice(0, 5);
+    const max = rows.length ? rows[0].v : 1;
+    html.push(`<div class="block"><div class="block-title"><span>${M[view.rankMetric].label} 排行</span><span class="tpl-tag">模板区块：rank</span></div><div class="rank-block">`);
+    rows.forEach((r, i) => {
+        html.push(`<div class="rank-item">
+            <div class="rank-head">
+                <span class="rank-no ${i === 0 ? 'top' : ''}">${i + 1}</span>
+                <span class="rank-name">${r.id} · ${r.model}</span>
+                <span class="rank-val">${fmt(r.v, 1)} ${M[view.rankMetric].unit}</span>
+            </div>
+            <div class="bar-track"><div class="bar-fill" style="width:${(r.v / max * 100).toFixed(0)}%"></div></div>
+        </div>`);
+    });
+    html.push('</div></div>');
+
+    /* 4. 设备明细（列随周期变化） */
+    const cols = view.listCols;
+    const shown = state.listExpanded ? MACHINES : MACHINES.slice(0, 5);
+    const grid = `grid-template-columns: 1fr repeat(${cols.length}, .9fr);`;
+    html.push(`<div class="block"><div class="block-title"><span>设备明细</span><span class="tpl-tag">模板区块：list</span></div>
+        <div class="list-block">
+            <div class="list-head" style="${grid}">
+                <span>设备</span>
+                ${cols.map(c => `<span class="num">${M[c].label.replace(/（[A-H]）|\[.*?\]/g, '')}</span>`).join('')}
+            </div>
+            ${shown.map(m => `<div class="list-row" style="${grid}">
+                <span>${m.id}<div style="font-size:10px;color:#aaa;">${m.model}</div></span>
+                ${cols.map(c => `<span class="num">${fmt(aggregate(m.id, c, state.period, state.endIndex), 1)}</span>`).join('')}
+            </div>`).join('')}
+            <button class="list-more" onclick="toggleList()">${state.listExpanded ? '收起' : '查看全部 ' + MACHINES.length + ' 台设备'}</button>
+        </div></div>`);
+
+    /* 5. 该周期不统计字段（字段聚合表 ❌ 项）：默认只给结论，展开才列标题 */
+    const ns = noStatKeys();
+    html.push(`<div class="block"><div class="block-title"><span>${view.name}不统计的字段</span><span class="tpl-tag">模板区块：nostat</span></div>
+        <div class="nostat-block">
+            <div class="nostat-title">依据字段聚合表，当前周期有 ${ns.length} 项为 ❌ 不统计，不参与本报表</div>
+            ${state.noStatOpen
+                ? `<div class="nostat-chips">${ns.map(k => `<span class="nostat-chip">${M[k].label} ❌</span>`).join('')}</div>
+                   <button class="nostat-toggle" onclick="toggleNoStatList()">收起标题</button>`
+                : `<button class="nostat-toggle" onclick="toggleNoStatList()">展开查看这 ${ns.length} 项标题</button>`}
+        </div></div>`);
+
+    /* 6. 口径说明 */
+    const cal = state.caliber === 'shift'
+        ? '统计口径为<b>班次 07:00–19:00</b>（统计日 07:00 → 19:00）'
+        : '统计口径为<b>自然日</b>（00:00 → 24:00）';
+    html.push(`<div class="block"><div class="block-title"><span>口径说明</span><span class="tpl-tag">模板区块：desc</span></div>
+        <div class="desc-block">
+            · 开工台数：统计<b>当期在线时长 ≥ 30 分钟</b>的设备数量；<br>
+            · ${cal}；<br>
+            · 字段与周期可用性来源：<b>《日周月报表字段聚合表》§2.1 挖掘机（16 项）</b>；<br>
+            · 切换周期会同时切换<b>字段集与算法</b>：比率类重算（B ÷ A+B+C+D）、派生类先求和再计算；<br>
+            · <span class="latency">机群报表部分数据最长 ${TEMPLATE.dataLatencyHours} 小时更新</span>，采集设备工时、能耗数据。
+        </div></div>`);
+
+    screen.innerHTML = html.join('');
+    renderDevPanel();
+}
+
+const AGG_CLASS = { SUM: 'agg-sum', RECALC: 'agg-recalc', LAST: 'agg-last', MAX: 'agg-max' };
+
+/* ==================== 演示面板 ==================== */
+function renderDevPanel() {
+    const view = PERIOD_VIEW[state.period];
+    const keys = availableKeys();
+    const ns = noStatKeys();
+
+    document.getElementById('periodName').textContent = view.name;
+    document.getElementById('fieldCount').textContent = keys.length;
+    document.getElementById('noStatCount').textContent = ns.length;
+    document.getElementById('machineSrc').textContent = '当前演示机型字段集：挖掘机 §2.1（切换机型为示意，实际由后端按权限返回）';
+
+    /* 只列字段标题，不平铺口径明细 */
+    document.getElementById('devChips').innerHTML = keys.map(k => {
+        const def = FIELDS[k];
+        const req = def.avail[state.period] === 'required' ? ' req' : '';
+        return `<span class="dev-chip${req}">${def.label}</span>`;
+    }).join('');
+
+    const aggCount = {};
+    keys.forEach(k => {
+        const def = FIELDS[k];
+        const agg = (def.agg && def.agg[state.period]) || 'NONE';
+        aggCount[agg] = (aggCount[agg] || 0) + 1;
+    });
+    document.getElementById('devAggSum').innerHTML =
+        '算法分布：' + Object.keys(aggCount).map(a => `${a} × ${aggCount[a]}`).join('　·　');
+
+    const chips = document.getElementById('devNoStatChips');
+    const toggle = document.getElementById('noStatToggle');
+    chips.style.display = state.noStatOpen ? '' : 'none';
+    chips.innerHTML = ns.map(k => `<span class="dev-chip">${FIELDS[k].label}</span>`).join('');
+    toggle.textContent = state.noStatOpen ? '收起标题' : '展开查看标题';
+
+    document.getElementById('devNote').innerHTML =
+        `<b>${view.name}</b>共 ${keys.length} 项字段、${ns.length} 项不统计。<br>` +
+        '典型差异：挖掘机<b>日报只统计 3 项</b>（每日怠速消耗、总消耗、怠速时长 A），' +
+        '<b>周报只有 1 项</b>（怠速时长 A），<b>月报才是完整 16 项</b>（含 B/C/D、占比、派生与平均消耗）。' +
+        '<br>来源：' + TEMPLATE.sourceDoc;
+}
+
+function toggleNoStatList() {
+    state.noStatOpen = !state.noStatOpen;
+    render();
+}
+
+/* ==================== 交互 ==================== */
+function switchPeriod(p) { state.period = p; state.endIndex = DAYS - 1; render(); }
+
+function shiftDate(delta) {
+    const step = state.period === 'day' ? 1 : (state.period === 'week' ? 7 : DAYS);
+    state.endIndex = Math.min(DAYS - 1, Math.max(0, state.endIndex + delta * step));
+    render();
+}
+
+function setCaliber(c) { state.caliber = c; render(); }
+function setState(s) { state.pageState = s; render(); }
+function toggleList() { state.listExpanded = !state.listExpanded; render(); }
+function changeMachine(t) { state.machineType = t; render(); }
+
+function showToast(msg) {
+    const t = document.createElement('div');
+    t.textContent = msg;
+    t.style.cssText = 'position:fixed;left:50%;bottom:60px;transform:translateX(-50%);background:rgba(0,0,0,.78);color:#fff;'
+        + 'font-size:12px;padding:9px 16px;border-radius:18px;z-index:99;';
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 1800);
+}
+
+/* ==================== 初始化 ==================== */
+render();
+</script>
+</body>
+</html>

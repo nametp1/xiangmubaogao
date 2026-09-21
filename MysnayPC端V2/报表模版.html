@@ -643,6 +643,80 @@
         }
         .more-option-tag.planned { color: #1890ff; background: #e6f4ff; }
         .more-option-tag.apply   { color: #fa8c16; background: #fff7e6; }
+        /* 候选项缩略图：hover 出现放大镜蒙层，提示可点击看大图 */
+        .more-option-thumb {
+            position: relative;
+            width: 104px;
+            height: 72px;
+            flex-shrink: 0;
+            border: 1px solid #ececec;
+            border-radius: 8px;
+            background: #fafafa;
+            overflow: hidden;
+            cursor: zoom-in;
+        }
+        .more-option-thumb img {
+            width: 100%;
+            height: 100%;
+            object-fit: cover;
+            display: block;
+            transition: transform 0.25s ease;
+        }
+        .more-option-thumb:hover { border-color: #E60012; }
+        .more-option-thumb:hover img { transform: scale(1.06); }
+        .more-option-thumb .zoom {
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            background: rgba(0,0,0,0.42);
+            color: #fff;
+            opacity: 0;
+            transition: opacity 0.2s ease;
+        }
+        .more-option-thumb:hover .zoom { opacity: 1; }
+
+        /* 预览图放大（点击缩略图直接出大图；点任意位置/按 Esc 关闭）
+           层级要高于新手引导遮罩(9998/10000)与弹窗(1000) */
+        #reportPreview {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            z-index: 10050;
+            padding: 32px;
+            background: rgba(0,0,0,0.82);
+            -webkit-backdrop-filter: blur(3px);
+            backdrop-filter: blur(3px);
+            align-items: center;
+            justify-content: center;
+            cursor: zoom-out;
+        }
+        #reportPreview.active { display: flex; }
+        #reportPreviewImg {
+            display: block;
+            max-width: 88vw;
+            max-height: 84vh;
+            object-fit: contain;
+            background: #fff;
+            border-radius: 8px;
+            box-shadow: 0 24px 60px rgba(0,0,0,0.45);
+            animation: rpIn 0.2s cubic-bezier(0.16, 1, 0.3, 1);
+        }
+        @keyframes rpIn {
+            from { opacity: 0; transform: scale(0.97); }
+            to   { opacity: 1; transform: none; }
+        }
+        @media (max-width: 640px) {
+            #reportPreview { padding: 16px; }
+            #reportPreviewImg { max-width: 96vw; max-height: 78vh; }
+        }
         .more-note-input {
             width: 100%;
             min-height: 96px;
@@ -1541,7 +1615,7 @@
 
     <!-- 「我需要更多报表」诉求弹窗 -->
     <div class="modal-overlay" id="moreReportsModal">
-        <div class="modal" style="max-width:640px;">
+        <div class="modal" style="max-width:680px;">
             <div class="modal-header">
                 <div class="modal-title">我需要更多报表</div>
                 <button class="modal-close" id="moreReportsClose" title="关闭">
@@ -1564,6 +1638,13 @@
                 <button class="btn btn-primary" type="button" onclick="submitMoreReports()">提交</button>
             </div>
         </div>
+    </div>
+
+    <!-- 预览图放大（点击候选报表缩略图直接出大图，点任意位置 / 按 Esc 关闭）
+         图片取不到时回落到内置静态图，避免出现只有灰底的弹窗 -->
+    <div id="reportPreview" onclick="hideReportPreview()">
+        <img id="reportPreviewImg" alt=""
+             onerror="if(this.getAttribute('src')!=='预览图/默认预览.png'){this.src='预览图/默认预览.png'}">
     </div>
 
     <script>
@@ -1965,18 +2046,82 @@
         // ====================================================================
         const MORE_REPORT_OPTIONS = [
             { name: '超时工作报表', tag: '已规划', tagType: 'planned',
+              image: '预览图/超时工作报表.png',
               desc: '统计设备超过设定工时阈值的时长、次数与占比，用于识别加班与合规风险。' },
             { name: '设备异常通知报表', tag: '已规划', tagType: 'planned',
+              image: '预览图/设备异常通知报表.png',
               desc: '汇总异常事件的即时通知记录与处理情况：异常类型、发生时间、通知对象与处理状态。' },
             { name: '电池电量报表', tag: '已规划', tagType: 'planned',
+              image: '预览图/电池电量报表.png',
               desc: '统计设备 / 机群的电池荷电状态（SOC）与充电情况：期末 SOC、最低 SOC、充电次数与充电时长。' },
             { name: '碳排放报表', tag: '可申请', tagType: 'apply',
+              image: '预览图/碳排放报表.png',
               desc: '把燃油 / 电能消耗折算为碳排放量，支持按项目、机型、周期统计，用于 ESG 与绿色施工汇报。' },
             { name: '驾驶员行为评分报表', tag: '可申请', tagType: 'apply',
+              image: '预览图/驾驶员行为评分报表.png',
               desc: '按急加速、急刹车、超速、怠速等事件给出机手的行为评分与排名，便于考核与培训。' },
             { name: '备件与保养消耗报表', tag: '可申请', tagType: 'apply',
+              image: '预览图/备件与保养消耗报表.png',
               desc: '统计保养、维修产生的备件消耗与费用，按设备、项目与周期汇总。' }
         ];
+
+        // 2026-09-21 新增：候选报表可由后台「报表需求反馈」页配置
+        // 数据来源：localStorage['mysany_more_report_options']（与 V2/mysany后台V2/报表需求反馈.html 共用同一 key）
+        // 无配置 / 配置异常时回落到上面的内置默认清单
+        const REPORT_OPTIONS_KEY = 'mysany_more_report_options';
+
+        // 没配预览图（或图片加载失败）时用的内置静态图：保证每行都有一张真图可点开放大，不出灰色空窗
+        const DEFAULT_PREVIEW_IMAGE = '预览图/默认预览.png';
+        // 图片加载失败时的兜底（内联到 img 的 onerror）
+        const IMG_FALLBACK = "if(this.getAttribute('src')!=='" + DEFAULT_PREVIEW_IMAGE + "'){this.src='" + DEFAULT_PREVIEW_IMAGE + "'}";
+
+        // 当前界面语言（站点写入过 mysany_lang 时按其展示，否则简体中文）
+        function currentUiLang() {
+            try { return localStorage.getItem('mysany_lang') || 'zh-CN'; } catch (e) { return 'zh-CN'; }
+        }
+
+        // 多语言取值：当前语言 → 简体中文 → 任一有值的语言（兼容旧的纯字符串写法）
+        function pickLangText(v) {
+            if (v == null) return '';
+            if (typeof v === 'string') return v;
+            const order = [currentUiLang(), 'zh-CN'];
+            for (let i = 0; i < order.length; i++) {
+                const s = v[order[i]];
+                if (s && String(s).trim()) return String(s);
+            }
+            const keys = Object.keys(v);
+            for (let j = 0; j < keys.length; j++) {
+                const s = v[keys[j]];
+                if (s && String(s).trim()) return String(s);
+            }
+            return '';
+        }
+
+        const OPT_TAG_LABEL = {
+            planned: { 'zh-CN': '已规划', en: 'Planned' },
+            apply: { 'zh-CN': '可申请', en: 'On request' }
+        };
+
+        function readConfiguredReportOptions() {
+            try {
+                const raw = localStorage.getItem(REPORT_OPTIONS_KEY);
+                if (!raw) return null;
+                const arr = JSON.parse(raw);
+                if (!Array.isArray(arr)) return null;
+                const list = arr.map(function (o) {
+                    if (!o) return null;
+                    const tagType = (o.tagType === 'apply') ? 'apply' : 'planned';
+                    return {
+                        name: pickLangText(o.name),
+                        desc: pickLangText(o.desc),
+                        tag: o.tag || pickLangText(OPT_TAG_LABEL[tagType]),
+                        tagType: tagType,
+                        image: (typeof o.image === 'string' ? o.image : '')
+                    };
+                }).filter(function (o) { return o && o.name; });
+                return list.length ? list : null;
+            } catch (e) { return null; }
+        }
 
         const moreReportsModal = document.getElementById('moreReportsModal');
         const moreReportsOptionsBox = document.getElementById('moreReportOptions');
@@ -1984,16 +2129,55 @@
         const moreReportsTip = document.getElementById('moreReportTip');
 
         function renderMoreReportOptions() {
-            moreReportsOptionsBox.innerHTML = MORE_REPORT_OPTIONS.map(function (o) {
+            // 优先取后台配置的清单，未配置时用内置默认（每次打开弹窗都重新读取，后台改完刷新即可生效）
+            const list = readConfiguredReportOptions() || MORE_REPORT_OPTIONS;
+            const safe = function (v) {
+                return String(v == null ? '' : v).replace(/[&<>"]/g, function (c) {
+                    return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+                });
+            };
+            moreReportsOptionsBox.innerHTML = list.map(function (o) {
+                // 每行都出一张静态图：优先用配置里的预览图，没配（或加载失败）就用内置静态图
+                const thumb = '<div class="more-option-thumb" title="点击查看大图" onclick="showReportPreview(event, this)">'
+                    + '<img src="' + safe(o.image || DEFAULT_PREVIEW_IMAGE) + '" alt=""'
+                    + ' onerror="' + IMG_FALLBACK + '">'
+                    + '<span class="zoom"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><line x1="16.5" y1="16.5" x2="21" y2="21"></line></svg></span>'
+                    + '</div>';
                 return '<label class="more-option">'
-                    + '<input type="checkbox" value="' + o.name + '">'
+                    + '<input type="checkbox" value="' + safe(o.name) + '">'
+                    + thumb
                     + '<div style="flex:1;min-width:0;">'
-                    + '<div class="more-option-name">' + o.name
-                    + '<span class="more-option-tag ' + o.tagType + '">' + o.tag + '</span></div>'
-                    + '<div class="more-option-desc">' + o.desc + '</div>'
+                    + '<div class="more-option-name">' + safe(o.name)
+                    + '<span class="more-option-tag ' + (o.tagType === 'apply' ? 'apply' : 'planned') + '">' + safe(o.tag) + '</span></div>'
+                    + '<div class="more-option-desc">' + safe(o.desc) + '</div>'
                     + '</div></label>';
             }).join('');
         }
+
+        // 预览图放大：点击缩略图直接出大图（要阻止事件冒泡到 label，否则会连带勾选复选框）
+        function showReportPreview(e, el) {
+            if (e) { e.preventDefault(); e.stopPropagation(); }
+            const img = el && el.querySelector ? el.querySelector('img') : null;
+            const src = img ? img.getAttribute('src') : (el && el.getAttribute ? el.getAttribute('src') : '');
+            if (!src) return;
+            document.getElementById('reportPreviewImg').src = src;
+            document.getElementById('reportPreview').classList.add('active');
+            document.body.style.overflow = 'hidden';
+        }
+
+        function hideReportPreview() {
+            document.getElementById('reportPreview').classList.remove('active');
+            document.getElementById('reportPreviewImg').src = '';
+            // 「我需要更多报表」弹窗还开着时保持页面锁定，避免关掉大图后背景跟着滚动
+            const moreOpen = document.getElementById('moreReportsModal').classList.contains('active');
+            document.body.style.overflow = moreOpen ? 'hidden' : '';
+        }
+
+        document.addEventListener('keydown', function (e) {
+            const pv = document.getElementById('reportPreview');
+            if (!pv || !pv.classList.contains('active')) return;
+            if (e.key === 'Escape') hideReportPreview();
+        });
 
         function openMoreReportsModal() {
             moreReportsTip.className = 'more-form-tip';

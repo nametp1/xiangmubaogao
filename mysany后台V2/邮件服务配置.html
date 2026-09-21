@@ -1,0 +1,1753 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>MySANY 管理后台 - 邮件服务配置（v2.0）</title>
+    <style>
+        * {
+            box-sizing: border-box;
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif;
+            background-color: #f5f6f8;
+            color: #333;
+        }
+
+        .app-wrapper {
+            display: flex;
+            flex-direction: column;
+            min-height: 100vh;
+        }
+
+        .main-wrapper {
+            display: flex;
+            flex: 1;
+        }
+
+        /* 顶部导航栏 */
+        .navbar {
+            height: 50px;
+            background: #fff;
+            border-bottom: 1px solid #e8e8e8;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 0 24px;
+            flex-shrink: 0;
+        }
+
+        .navbar-left {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .logo {
+            font-size: 20px;
+            font-weight: 700;
+            color: #E60012;
+            letter-spacing: -0.5px;
+        }
+
+        .navbar-right {
+            display: flex;
+            align-items: center;
+            gap: 20px;
+            font-size: 14px;
+            color: #666;
+        }
+
+        .navbar-item {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
+
+        .navbar-item:hover {
+            color: #E60012;
+        }
+
+        .navbar-avatar {
+            width: 28px;
+            height: 28px;
+            border-radius: 50%;
+            background: #f0f0f0;
+            overflow: hidden;
+        }
+
+        /* 侧边栏 */
+        .sidebar {
+            width: 210px;
+            background: #fff;
+            border-right: 1px solid #e8e8e8;
+            display: flex;
+            flex-direction: column;
+            flex-shrink: 0;
+            overflow-y: auto;
+        }
+
+        .sidebar-menu {
+            list-style: none;
+            padding: 8px 0;
+        }
+
+        .sidebar-item {
+            position: relative;
+        }
+
+        .sidebar-link {
+            display: flex;
+            align-items: center;
+            gap: 10px;
+            padding: 10px 16px;
+            font-size: 14px;
+            color: #666;
+            text-decoration: none;
+            transition: all 0.2s;
+            cursor: pointer;
+        }
+
+        .sidebar-link:hover {
+            color: #E60012;
+            background: #fff5f5;
+        }
+
+        .sidebar-item.active > .sidebar-link,
+        .sidebar-link.active {
+            background: #E60012;
+            color: #fff;
+            font-weight: 500;
+        }
+
+        .sidebar-item.active > .sidebar-link:hover,
+        .sidebar-link.active:hover {
+            background: #cc0010;
+            color: #fff;
+        }
+
+        .sidebar-submenu {
+            list-style: none;
+            padding: 0;
+        }
+
+        .sidebar-submenu .sidebar-link {
+            padding-left: 42px;
+            font-size: 13px;
+        }
+
+        .sidebar-icon {
+            width: 18px;
+            height: 18px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            flex-shrink: 0;
+        }
+
+        /* 主内容区 */
+        .main-content {
+            flex: 1;
+            overflow-y: auto;
+            padding: 24px;
+            background: #f5f6f8;
+        }
+
+        /* 标签页 */
+        .tabs {
+            display: flex;
+            border-bottom: 1px solid #e8e8e8;
+            background: #fff;
+            border-radius: 8px 8px 0 0;
+        }
+
+        .tab {
+            padding: 16px 24px;
+            font-size: 15px;
+            color: #666;
+            cursor: pointer;
+            position: relative;
+            transition: color 0.2s;
+            border: none;
+            background: transparent;
+        }
+
+        .tab:hover {
+            color: #E60012;
+        }
+
+        .tab.active {
+            color: #333;
+            font-weight: 500;
+        }
+
+        .tab.active::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 24px;
+            right: 24px;
+            height: 2px;
+            background: #E60012;
+            border-radius: 1px;
+        }
+
+        .tab-content {
+            display: none;
+            background: #fff;
+            border-radius: 0 0 8px 8px;
+            box-shadow: 0 2px 8px rgba(0,0,0,0.06);
+        }
+
+        .tab-content.active {
+            display: block;
+        }
+
+        .tab-inner {
+            padding: 24px;
+        }
+
+        .btn {
+            height: 34px;
+            padding: 0 16px;
+            border-radius: 6px;
+            font-size: 13px;
+            cursor: pointer;
+            border: 1px solid #d9d9d9;
+            background: #fff;
+            color: #666;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .btn:hover {
+            border-color: #E60012;
+            color: #E60012;
+        }
+
+        .btn-primary {
+            background: #E60012;
+            color: #fff;
+            border-color: #E60012;
+        }
+
+        .btn-primary:hover {
+            background: #cc0010;
+            border-color: #cc0010;
+            color: #fff;
+        }
+
+        /* Tag 标签 */
+        .tag {
+            display: inline-block;
+            padding: 2px 10px;
+            border-radius: 4px;
+            font-size: 12px;
+            line-height: 20px;
+        }
+
+        .tag-green { background: #f6ffed; color: #52c41a; border: 1px solid #b7eb8f; }
+        .tag-blue { background: #e6f7ff; color: #1890ff; border: 1px solid #91d5ff; }
+        .tag-orange { background: #fff7e6; color: #fa8c16; border: 1px solid #ffd591; }
+        .tag-gray { background: #f5f5f5; color: #999; border: 1px solid #d9d9d9; }
+
+        /* 表单 */
+        .section-title {
+            font-size: 16px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 20px;
+            padding-bottom: 12px;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .section-title .dot {
+            width: 4px;
+            height: 18px;
+            background: #E60012;
+            border-radius: 2px;
+        }
+
+        .form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .form-group {
+            display: flex;
+            flex-direction: column;
+            gap: 6px;
+        }
+
+        .form-group label {
+            font-size: 13px;
+            color: #666;
+            font-weight: 500;
+        }
+
+        .form-group label .required {
+            color: #E60012;
+            margin-right: 2px;
+        }
+
+        .form-group input, .form-group select {
+            height: 38px;
+            border: 1px solid #d9d9d9;
+            border-radius: 6px;
+            padding: 0 12px;
+            font-size: 14px;
+            color: #333;
+            outline: none;
+            transition: border-color 0.2s;
+            background: #fff;
+        }
+
+        .form-group input:focus, .form-group select:focus {
+            border-color: #E60012;
+        }
+
+        .form-group input[type="password"] {
+            letter-spacing: 2px;
+        }
+
+        .form-group .input-row {
+            display: flex;
+            gap: 8px;
+        }
+
+        .form-group .input-row input {
+            flex: 1;
+        }
+
+        .password-toggle {
+            width: 38px;
+            height: 38px;
+            border: 1px solid #d9d9d9;
+            border-radius: 6px;
+            background: #fff;
+            cursor: pointer;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: #999;
+            transition: all 0.2s;
+        }
+
+        .password-toggle:hover {
+            border-color: #E60012;
+            color: #E60012;
+        }
+
+        .form-section {
+            margin-bottom: 32px;
+            padding: 24px;
+            background: #fafafa;
+            border-radius: 8px;
+            border: 1px solid #f0f0f0;
+        }
+
+        .form-actions {
+            display: flex;
+            gap: 12px;
+            padding-top: 20px;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        .form-hint {
+            font-size: 12px;
+            color: #999;
+            margin-top: 4px;
+        }
+
+        /* 弹窗 */
+        .modal-overlay {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            right: 0;
+            bottom: 0;
+            background: rgba(0,0,0,0.45);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .modal-overlay.show {
+            display: flex;
+        }
+
+        .modal {
+            background: #fff;
+            border-radius: 8px;
+            width: 760px;
+            max-height: 90vh;
+            overflow: hidden;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.15);
+            display: flex;
+            flex-direction: column;
+        }
+
+        .modal-header {
+            padding: 16px 24px;
+            border-bottom: 1px solid #f0f0f0;
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+        }
+
+        .modal-header h3 {
+            font-size: 16px;
+            color: #333;
+            font-weight: 600;
+        }
+
+        .modal-close {
+            font-size: 20px;
+            color: #999;
+            cursor: pointer;
+            border: none;
+            background: transparent;
+            line-height: 1;
+        }
+
+        .modal-close:hover {
+            color: #E60012;
+        }
+
+        .modal-body {
+            padding: 24px;
+            overflow-y: auto;
+            flex: 1;
+        }
+
+        .modal-footer {
+            padding: 16px 24px;
+            border-top: 1px solid #f0f0f0;
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+            background: #fafafa;
+        }
+
+        .modal .form-group {
+            margin-bottom: 0;
+        }
+
+        .modal .form-group textarea {
+            border: 1px solid #d9d9d9;
+            border-radius: 6px;
+            padding: 10px 12px;
+            font-size: 14px;
+            color: #333;
+            outline: none;
+            resize: vertical;
+            font-family: inherit;
+            transition: border-color 0.2s;
+        }
+
+        .modal .form-group textarea:focus {
+            border-color: #E60012;
+        }
+
+        .modal .modal-actions {
+            display: flex;
+            justify-content: flex-end;
+            gap: 12px;
+        }
+
+        /* 开关 */
+        .switch {
+            position: relative;
+            display: inline-block;
+            width: 44px;
+            height: 22px;
+        }
+        .switch input { opacity: 0; width: 0; height: 0; }
+        .slider {
+            position: absolute;
+            cursor: pointer;
+            top: 0; left: 0; right: 0; bottom: 0;
+            background-color: #ccc;
+            transition: .3s;
+            border-radius: 22px;
+        }
+        .slider:before {
+            position: absolute;
+            content: "";
+            height: 16px;
+            width: 16px;
+            left: 3px;
+            bottom: 3px;
+            background-color: white;
+            transition: .3s;
+            border-radius: 50%;
+        }
+        input:checked + .slider { background-color: #E60012; }
+        input:checked + .slider:before { transform: translateX(22px); }
+        .switch-label { font-size: 13px; color: #666; margin-left: 8px; }
+
+        /* Toast */
+        .toast {
+            position: fixed;
+            top: 24px;
+            left: 50%;
+            transform: translateX(-50%);
+            padding: 10px 24px;
+            border-radius: 6px;
+            font-size: 14px;
+            z-index: 2000;
+            animation: fadeInDown 0.3s ease;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.15);
+        }
+
+        .toast-success { background: #f6ffed; color: #52c41a; border: 1px solid #b7eb8f; }
+        .toast-error { background: #fff1f0; color: #E60012; border: 1px solid #ffa39e; }
+
+        @keyframes fadeInDown {
+            from { opacity: 0; transform: translateX(-50%) translateY(-10px); }
+            to { opacity: 1; transform: translateX(-50%) translateY(0); }
+        }
+
+        /* 表格 */
+        .table-wrapper {
+            overflow-x: auto;
+        }
+
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            font-size: 13px;
+        }
+
+        table thead th {
+            background: #fafafa;
+            padding: 12px 14px;
+            text-align: left;
+            font-weight: 500;
+            color: #666;
+            border-bottom: 1px solid #e8e8e8;
+            white-space: nowrap;
+        }
+
+        table tbody td {
+            padding: 12px 14px;
+            border-bottom: 1px solid #f0f0f0;
+            color: #333;
+        }
+
+        table tbody tr:hover {
+            background: #fff5f5;
+        }
+
+        /* 操作日志 */
+        .audit-log {
+            margin-top: 32px;
+        }
+
+        .audit-log .section-title {
+            margin-bottom: 16px;
+        }
+
+        .last-modified {
+            font-size: 12px;
+            color: #999;
+            padding: 12px 0;
+        }
+
+        /* 操作日志 - 筛选栏 */
+        .filter-bar {
+            display: flex;
+            align-items: center;
+            flex-wrap: wrap;
+            gap: 12px;
+            margin-bottom: 20px;
+            padding: 16px;
+            background: #fafafa;
+            border-radius: 8px;
+            border: 1px solid #f0f0f0;
+        }
+
+        .filter-bar label {
+            font-size: 13px;
+            color: #666;
+            white-space: nowrap;
+        }
+
+        .filter-bar input, .filter-bar select {
+            height: 32px;
+            border: 1px solid #d9d9d9;
+            border-radius: 4px;
+            padding: 0 10px;
+            font-size: 13px;
+            outline: none;
+            transition: border-color 0.2s;
+        }
+
+        .filter-bar input:focus, .filter-bar select:focus {
+            border-color: #E60012;
+        }
+
+        .filter-bar input[type="date"] {
+            width: 140px;
+        }
+
+        .filter-bar select {
+            width: 110px;
+        }
+
+        .filter-bar input[type="text"] {
+            width: 160px;
+        }
+
+        .filter-sep {
+            color: #ccc;
+            font-size: 12px;
+        }
+
+        .total-count {
+            font-size: 13px;
+            color: #666;
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .total-count strong {
+            color: #E60012;
+            font-size: 16px;
+        }
+
+        /* 分页 */
+        .pagination {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: 20px;
+            padding-top: 16px;
+            border-top: 1px solid #f0f0f0;
+        }
+
+        .pagination-pages {
+            display: flex;
+            align-items: center;
+            gap: 6px;
+        }
+
+        .pagination-btn {
+            height: 30px;
+            min-width: 30px;
+            padding: 0 10px;
+            border-radius: 4px;
+            font-size: 13px;
+            cursor: pointer;
+            border: 1px solid #d9d9d9;
+            background: #fff;
+            color: #666;
+            transition: all 0.2s;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .pagination-btn:hover:not(:disabled) {
+            border-color: #E60012;
+            color: #E60012;
+        }
+
+        .pagination-btn.active {
+            background: #E60012;
+            color: #fff;
+            border-color: #E60012;
+        }
+
+        .pagination-btn:disabled {
+            cursor: not-allowed;
+            opacity: 0.5;
+        }
+
+        .pagination-info {
+            font-size: 13px;
+            color: #999;
+        }
+
+        /* 批量变更展开 */
+        .batch-toggle {
+            color: #E60012;
+            cursor: pointer;
+            font-size: 13px;
+            text-decoration: underline;
+            white-space: nowrap;
+        }
+
+        .batch-toggle:hover {
+            color: #cc0010;
+        }
+
+        .batch-detail-pop {
+            position: relative;
+            display: inline-block;
+        }
+
+        .batch-detail-pop .batch-popover {
+            display: none;
+            position: absolute;
+            top: 28px;
+            left: 0;
+            z-index: 100;
+            background: #fff;
+            border: 1px solid #e8e8e8;
+            border-radius: 8px;
+            box-shadow: 0 4px 16px rgba(0,0,0,0.12);
+            padding: 12px;
+            min-width: 380px;
+        }
+
+        .batch-detail-pop.show .batch-popover {
+            display: block;
+        }
+
+        .batch-popover table {
+            font-size: 12px;
+        }
+
+        .batch-popover table thead th {
+            padding: 6px 12px;
+            font-size: 12px;
+            background: #fafafa;
+        }
+
+        .batch-popover table tbody td {
+            padding: 5px 12px;
+            font-size: 12px;
+        }
+
+        .batch-popover-close {
+            float: right;
+            cursor: pointer;
+            font-size: 16px;
+            color: #999;
+            line-height: 1;
+            border: none;
+            background: transparent;
+        }
+
+        .batch-popover-close:hover {
+            color: #E60012;
+        }
+
+        .batch-popover-title {
+            font-size: 13px;
+            font-weight: 600;
+            color: #333;
+            margin-bottom: 8px;
+            padding-bottom: 8px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .empty-state {
+            text-align: center;
+            padding: 48px 0;
+            color: #999;
+            font-size: 14px;
+        }
+
+        /* ========== 邮箱账户列表页 ========== */
+        .account-toolbar {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 20px;
+            flex-wrap: wrap;
+        }
+
+        .account-toolbar .search-item {
+            display: flex;
+            align-items: center;
+            gap: 8px;
+        }
+
+        .account-toolbar label {
+            font-size: 13px;
+            color: #666;
+            white-space: nowrap;
+        }
+
+        .account-toolbar input {
+            height: 32px;
+            border: 1px solid #d9d9d9;
+            border-radius: 4px;
+            padding: 0 10px;
+            font-size: 13px;
+            width: 160px;
+            outline: none;
+        }
+
+        .account-toolbar input:focus {
+            border-color: #E60012;
+        }
+
+        .account-toolbar .btn {
+            height: 32px;
+        }
+
+        .account-toolbar .btn-primary {
+            margin-left: auto;
+        }
+
+        .account-table .status-dot {
+            display: inline-block;
+            width: 6px;
+            height: 6px;
+            border-radius: 50%;
+            margin-right: 6px;
+            vertical-align: middle;
+        }
+        .account-table .status-dot.on { background: #52c41a; }
+        .account-table .status-dot.off { background: #999; }
+
+        .account-table .op-link {
+            color: #1890ff;
+            cursor: pointer;
+            font-size: 13px;
+            margin-right: 12px;
+            transition: color .2s;
+        }
+        .account-table .op-link:hover { color: #40a9ff; text-decoration: underline; }
+        .account-table .op-link.danger { color: #ff4d4f; }
+        .account-table .op-link.danger:hover { color: #ff7875; }
+
+        .policy-tag {
+            display: inline-block;
+            padding: 1px 8px;
+            border-radius: 4px;
+            font-size: 12px;
+            border: 1px solid #91d5ff;
+            background: #e6f7ff;
+            color: #1890ff;
+        }
+
+        /* ========== 新建/编辑邮箱账户弹窗 ========== */
+        .account-form-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+        }
+
+        .account-form-grid .form-group.full-width {
+            grid-column: 1 / -1;
+        }
+
+        .ssl-section {
+            margin-top: 24px;
+            border: 1px solid #f0f0f0;
+            border-radius: 8px;
+            overflow: hidden;
+        }
+
+        .ssl-section-header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 12px 16px;
+            background: #fafafa;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .ssl-section-title {
+            font-size: 14px;
+            font-weight: 600;
+            color: #333;
+        }
+
+        .ssl-section-actions {
+            display: flex;
+            gap: 8px;
+        }
+
+        .ssl-section-actions .btn {
+            height: 28px;
+            font-size: 12px;
+            padding: 0 10px;
+        }
+
+        .ssl-table {
+            width: 100%;
+        }
+
+        .ssl-table thead th {
+            background: #fafafa;
+            padding: 10px 14px;
+            font-size: 13px;
+            color: #666;
+            font-weight: 500;
+            border-bottom: 1px solid #f0f0f0;
+            text-align: left;
+        }
+
+        .ssl-table tbody td {
+            padding: 10px 14px;
+            border-bottom: 1px solid #f0f0f0;
+        }
+
+        .ssl-table tbody td .ssl-empty {
+            text-align: center;
+            color: #999;
+            font-size: 13px;
+            padding: 16px;
+        }
+
+        .ssl-table input {
+            width: 100%;
+            height: 32px;
+            border: 1px solid #d9d9d9;
+            border-radius: 4px;
+            padding: 0 10px;
+            font-size: 13px;
+            outline: none;
+        }
+
+        .ssl-table input:focus {
+            border-color: #E60012;
+        }
+
+        .ssl-remove {
+            color: #ff4d4f;
+            cursor: pointer;
+            font-size: 13px;
+        }
+
+        .ssl-remove:hover {
+            color: #ff7875;
+            text-decoration: underline;
+        }
+    </style>
+</head>
+<body>
+<div class="app-wrapper">
+    <!-- 顶部导航栏 -->
+    <nav class="navbar">
+        <div class="navbar-left">
+            <span class="logo">MySANY</span>
+            <span style="font-size:12px;color:#999;margin-left:4px;">管理后台</span>
+        </div>
+        <div class="navbar-right">
+            <span class="navbar-item">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="12" cy="12" r="10"/><path d="M2 12h20"/><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"/></svg>
+                中文
+            </span>
+            <span class="navbar-item">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"/><circle cx="12" cy="7" r="4"/></svg>
+                admin@sany.com.cn
+            </span>
+        </div>
+    </nav>
+
+    <div class="main-wrapper">
+        <!-- 侧边栏 -->
+        <aside class="sidebar">
+            <ul class="sidebar-menu">
+                <li class="sidebar-item active">
+                    <a class="sidebar-link">
+                        <span class="sidebar-icon">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                        </span>
+                        系统设置
+                    </a>
+                    <ul class="sidebar-submenu">
+                        <li class="sidebar-item active">
+                            <a class="sidebar-link active">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                                邮件服务配置
+                            </a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a class="sidebar-link" href="邮件模版设置.html">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                                邮件模版设置
+                            </a>
+                        </li>
+                        <li class="sidebar-item">
+                            <a class="sidebar-link" href="设备报告触发日志.html">
+                                <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                                触发日志
+                            </a>
+                        </li>
+                        <li class="sidebar-item"><a class="sidebar-link" href="报表需求反馈.html"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6v6H9z"/><path d="M5 9h14a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2z"/><line x1="7" y1="14" x2="17" y2="14"/><line x1="7" y1="17" x2="13" y2="17"/></svg>报表需求反馈</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </aside>
+
+        <!-- 主内容 -->
+        <main class="main-content">
+            <!-- 标签页 -->
+            <div class="tabs">
+                <button class="tab active" onclick="switchPage('email')">邮件服务配置</button>
+                <!-- <button class="tab" onclick="switchPage('audit')">操作日志</button> -->
+            </div>
+
+            <!-- ==================== 邮件服务配置页 ==================== -->
+            <div class="tab-content active" id="page-email">
+                <div class="tab-inner">
+                    <!-- 搜索栏 + 新建 -->
+                    <div class="account-toolbar">
+                        <div class="search-item">
+                            <label>账户代码：</label>
+                            <input type="text" id="search-account-code" placeholder="请输入账户代码" oninput="filterAccounts()">
+                        </div>
+                        <div class="search-item">
+                            <label>账户名称：</label>
+                            <input type="text" id="search-account-name" placeholder="请输入账户名称" oninput="filterAccounts()">
+                        </div>
+                        <button class="btn" onclick="resetAccountSearch()">重置</button>
+                        <button class="btn btn-primary" onclick="openAccountModal('new')">+ 新建邮箱账户</button>
+                    </div>
+
+                    <!-- 账户列表 -->
+                    <div class="table-wrapper account-table">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>账户代码</th>
+                                    <th>账户名称</th>
+                                    <th>邮件服务器</th>
+                                    <th>端口</th>
+                                    <th>安全策略</th>
+                                    <th style="color:red;">备注</th>
+                                    <th>状态</th>
+                                    <th>操作</th>
+                                </tr>
+                            </thead>
+                            <tbody id="account-tbody"></tbody>
+                        </table>
+                        <div class="empty-state" id="account-empty" style="display:none;">暂无匹配的邮箱账户</div>
+                    </div>
+
+                    <!-- 分页 -->
+                    <div class="pagination" id="account-pagination">
+                        <div class="pagination-info">显示第 <span id="account-range">0-0</span> 条</div>
+                        <div class="pagination-pages" id="account-page-btns"></div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- ==================== 操作日志页 ==================== -->
+            <div class="tab-content" id="page-audit">
+                <div class="tab-inner">
+                    <div class="section-title"><span class="dot"></span>操作日志</div>
+
+                    <!-- 筛选栏 -->
+                    <div class="filter-bar">
+                        <label>时间范围</label>
+                        <input type="date" id="audit-date-from" onchange="filterAuditLog()">
+                        <span class="filter-sep">至</span>
+                        <input type="date" id="audit-date-to" onchange="filterAuditLog()">
+                        <label style="margin-left:8px;">操作类型</label>
+                        <select id="audit-optype" onchange="filterAuditLog()">
+                            <option value="">全部</option>
+                            <option value="新建">新建</option>
+                            <option value="修改">修改</option>
+                            <option value="删除">删除</option>
+                        </select>
+                        <label style="margin-left:8px;">操作人</label>
+                        <input type="text" id="audit-operator" placeholder="输入操作人" oninput="filterAuditLog()">
+                        <label style="margin-left:8px;">关键词</label>
+                        <input type="text" id="audit-keyword" placeholder="变更项/变更值搜索" oninput="filterAuditLog()">
+                        <button class="btn" onclick="filterAuditLog()" style="margin-left:auto;">搜索</button>
+                        <button class="btn" onclick="resetAuditFilter()">重置</button>
+                    </div>
+
+                    <!-- 结果计数 -->
+                    <div class="total-count" style="margin-bottom:12px;">
+                        共 <strong id="audit-total">0</strong> 条记录
+                    </div>
+
+                    <!-- 表格 -->
+                    <div class="table-wrapper">
+                        <table>
+                            <thead>
+                                <tr>
+                                    <th>时间</th>
+                                    <th>操作人</th>
+                                    <th>IP 地址</th>
+                                    <th>操作类型</th>
+                                    <th>变更项</th>
+                                    <th>变更前</th>
+                                    <th>变更后</th>
+                                </tr>
+                            </thead>
+                            <tbody id="audit-tbody">
+                            </tbody>
+                        </table>
+                        <div class="empty-state" id="audit-empty" style="display:none;">暂无匹配的操作记录</div>
+                    </div>
+
+                    <!-- 分页 -->
+                    <div class="pagination" id="audit-pagination">
+                        <div class="pagination-info">显示第 <span id="audit-range">0-0</span> 条</div>
+                        <div class="pagination-pages" id="audit-page-btns"></div>
+                    </div>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<!-- 新建/编辑邮箱账户弹窗 -->
+<div class="modal-overlay" id="account-modal">
+    <div class="modal">
+        <div class="modal-header">
+            <h3 id="account-modal-title">新建邮箱账户</h3>
+            <button class="modal-close" onclick="closeAccountModal()">&times;</button>
+        </div>
+        <div class="modal-body">
+            <div class="account-form-grid">
+                <div class="form-group">
+                    <label><span class="required">*</span>账户代码</label>
+                    <input type="text" id="acc-code" placeholder="请输入账户代码">
+                </div>
+                <div class="form-group">
+                    <label><span class="required">*</span>账户名称</label>
+                    <input type="text" id="acc-name" placeholder="请输入账户名称">
+                </div>
+                <div class="form-group">
+                    <label><span class="required">*</span>用户名</label>
+                    <input type="text" id="acc-username" placeholder="请输入用户名">
+                </div>
+                <div class="form-group">
+                    <label>密码</label>
+                    <div class="input-row">
+                        <input type="password" id="acc-password" placeholder="请输入密码" value="">
+                        <button class="password-toggle" onclick="togglePwd('acc-password', this)" title="显示/隐藏">👁</button>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label><span class="required">*</span>邮件服务器</label>
+                    <input type="text" id="acc-server" placeholder="请输入邮件服务器">
+                </div>
+                <div class="form-group">
+                    <label><span class="required">*</span>端口</label>
+                    <input type="number" id="acc-port" placeholder="请输入端口">
+                </div>
+                <div class="form-group">
+                    <label><span class="required">*</span>协议</label>
+                    <select id="acc-protocol">
+                        <option value="SMTP">SMTP</option>
+                        <option value="SMTPS">SMTPS</option>
+                    </select>
+                </div>
+                <div class="form-group">
+                    <label><span class="required">*</span>重试次数</label>
+                    <input type="number" id="acc-retry" placeholder="请输入重试次数" value="3">
+                </div>
+                <div class="form-group">
+                    <label><span class="required">*</span>发送人</label>
+                    <input type="text" id="acc-sender" placeholder="请输入发送人邮箱">
+                </div>
+                <div class="form-group" style="display:flex;align-items:center;flex-direction:row;gap:10px;padding-top:24px;">
+                    <label class="switch">
+                        <input type="checkbox" id="acc-enabled" checked>
+                        <span class="slider"></span>
+                    </label>
+                    <span class="switch-label">启用</span>
+                </div>
+                <div class="form-group full-width">
+                    <label>安全策略</label>
+                    <select id="acc-policy">
+                        <option value="">请选择安全策略</option>
+                        <option value="TLS">TLS</option>
+                        <option value="SSL">SSL</option>
+                        <option value="STARTTLS">STARTTLS</option>
+                        <option value="无">无</option>
+                    </select>
+                </div>
+                <div class="form-group full-width">
+                    <label style="color:red;">备注</label>
+                    <textarea id="acc-remark" rows="2" placeholder="请输入备注信息"></textarea>
+                </div>
+            </div>
+
+            <!-- SSL 属性 -->
+            <div class="ssl-section">
+                <div class="ssl-section-header">
+                    <span class="ssl-section-title">服务器配置项</span>
+                    <div class="ssl-section-actions">
+                        <button class="btn" onclick="addSSLProperty()">设置SSL属性</button>
+                        <button class="btn" onclick="addServerProperty()">新建服务器配置项</button>
+                    </div>
+                </div>
+                <table class="ssl-table">
+                    <thead>
+                        <tr>
+                            <th style="width:40%;">属性编码</th>
+                            <th style="width:50%;">属性值</th>
+                            <th style="width:10%;">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="ssl-tbody"></tbody>
+                </table>
+            </div>
+        </div>
+        <div class="modal-footer">
+            <button class="btn" onclick="closeAccountModal()">取消</button>
+            <button class="btn btn-primary" onclick="saveAccount()">保存</button>
+        </div>
+    </div>
+</div>
+
+<script>
+// 页面切换
+function switchPage(page) {
+    document.querySelectorAll('.tab').forEach((t, i) => {
+        t.classList.toggle('active', (page === 'email' && i === 0) || (page === 'audit' && i === 1));
+    });
+    document.querySelectorAll('.tab-content').forEach(el => el.classList.remove('active'));
+    document.getElementById('page-' + page).classList.add('active');
+}
+
+// 密码切换
+function togglePwd(inputId, btn) {
+    const input = document.getElementById(inputId);
+    if (input.type === 'password') {
+        input.type = 'text';
+        btn.textContent = '🙈';
+    } else {
+        input.type = 'password';
+        btn.textContent = '👁';
+    }
+}
+
+// Toast
+function showToast(msg, type) {
+    const toast = document.createElement('div');
+    toast.className = 'toast toast-' + type;
+    toast.textContent = msg;
+    document.body.appendChild(toast);
+    setTimeout(() => toast.remove(), 2500);
+}
+
+// ==================== 邮箱账户列表管理 ====================
+const accountPageSize = 10;
+let accountCurrentPage = 1;
+let accountFilteredData = [];
+let accountEditingCode = null;
+let currentSSLProps = [];
+
+// 默认示例数据（与图片一致）
+let accountData = [
+    {
+        code: 'HZERO.RECEIVER',
+        name: '平台默认接收配置',
+        username: 'receiver@sany.com.cn',
+        password: '',
+        server: 'egpophm.qiye.163.com',
+        port: 110,
+        protocol: 'SMTP',
+        retry: 3,
+        sender: 'receiver@sany.com.cn',
+        enabled: true,
+        policy: '无',
+        remark: '设备报表专用邮箱',
+        props: []
+    },
+    {
+        code: 'HZERO',
+        name: '平台默认发送配置',
+        username: 'noreply@sany.com.cn',
+        password: '',
+        server: '10.0.48.68',
+        port: 465,
+        protocol: 'SMTP',
+        retry: 3,
+        sender: 'noreply@sany.com.cn',
+        enabled: true,
+        policy: 'TLS',
+        remark: '系统通知专用邮箱',
+        props: []
+    }
+];
+
+function filterAccounts() {
+    const codeQ = document.getElementById('search-account-code').value.trim().toLowerCase();
+    const nameQ = document.getElementById('search-account-name').value.trim().toLowerCase();
+
+    accountFilteredData = accountData.filter(item => {
+        if (codeQ && !item.code.toLowerCase().includes(codeQ)) return false;
+        if (nameQ && !item.name.toLowerCase().includes(nameQ)) return false;
+        return true;
+    });
+
+    accountCurrentPage = 1;
+    renderAccountList();
+}
+
+function resetAccountSearch() {
+    document.getElementById('search-account-code').value = '';
+    document.getElementById('search-account-name').value = '';
+    filterAccounts();
+}
+
+function renderAccountList() {
+    const tbody = document.getElementById('account-tbody');
+    const empty = document.getElementById('account-empty');
+    const rangeEl = document.getElementById('account-range');
+    const pageBtns = document.getElementById('account-page-btns');
+
+    const total = accountFilteredData.length;
+    const totalPages = Math.ceil(total / accountPageSize);
+    if (accountCurrentPage > totalPages) accountCurrentPage = Math.max(1, totalPages);
+
+    const start = (accountCurrentPage - 1) * accountPageSize;
+    const pageData = accountFilteredData.slice(start, start + accountPageSize);
+
+    tbody.innerHTML = '';
+
+    if (total === 0) {
+        empty.style.display = 'block';
+        rangeEl.textContent = '0-0';
+        pageBtns.innerHTML = '';
+        return;
+    }
+
+    empty.style.display = 'none';
+    const end = Math.min(start + accountPageSize, total);
+    rangeEl.textContent = (start + 1) + '-' + end;
+
+    pageData.forEach(item => {
+        const statusHtml = item.enabled
+            ? '<span class="status-dot on"></span>启用'
+            : '<span class="status-dot off"></span>禁用';
+        const policyHtml = item.policy ? '<span class="policy-tag">' + item.policy + '</span>' : '—';
+
+        const remarkText = item.remark || '—';
+        tbody.innerHTML += '<tr>' +
+            '<td>' + item.code + '</td>' +
+            '<td>' + item.name + '</td>' +
+            '<td>' + item.server + '</td>' +
+            '<td>' + item.port + '</td>' +
+            '<td>' + policyHtml + '</td>' +
+            '<td style="color:red;">' + remarkText + '</td>' +
+            '<td>' + statusHtml + '</td>' +
+            '<td>' +
+                '<span class="op-link" onclick="openAccountModal(\'edit\', \'' + item.code + '\')">编辑</span>' +
+                '<span class="op-link danger" onclick="deleteAccount(\'' + item.code + '\')">删除</span>' +
+            '</td>' +
+        '</tr>';
+    });
+
+    let pagesHTML = '';
+    pagesHTML += '<button class="pagination-btn" onclick="goAccountPage(' + (accountCurrentPage - 1) + ')"' + (accountCurrentPage <= 1 ? ' disabled' : '') + '>上一页</button>';
+    for (let i = 1; i <= totalPages; i++) {
+        if (totalPages <= 7 || i === 1 || i === totalPages || Math.abs(i - accountCurrentPage) <= 2) {
+            pagesHTML += '<button class="pagination-btn' + (i === accountCurrentPage ? ' active' : '') + '" onclick="goAccountPage(' + i + ')">' + i + '</button>';
+        } else if (i === 2 && accountCurrentPage > 4) {
+            pagesHTML += '<span style="padding:0 4px;color:#ccc;">...</span>';
+        } else if (i === totalPages - 1 && accountCurrentPage < totalPages - 3) {
+            pagesHTML += '<span style="padding:0 4px;color:#ccc;">...</span>';
+        }
+    }
+    pagesHTML += '<button class="pagination-btn" onclick="goAccountPage(' + (accountCurrentPage + 1) + ')"' + (accountCurrentPage >= totalPages ? ' disabled' : '') + '>下一页</button>';
+    pageBtns.innerHTML = pagesHTML;
+}
+
+function goAccountPage(page) {
+    const totalPages = Math.ceil(accountFilteredData.length / accountPageSize);
+    if (page < 1 || page > totalPages) return;
+    accountCurrentPage = page;
+    renderAccountList();
+    document.getElementById('page-email').querySelector('.table-wrapper').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+function openAccountModal(mode, code) {
+    accountEditingCode = mode === 'edit' ? code : null;
+    document.getElementById('account-modal-title').textContent = mode === 'edit' ? '编辑邮箱账户' : '新建邮箱账户';
+
+    let data = {
+        code: '', name: '', username: '', password: '',
+        server: '', port: '', protocol: 'SMTP', retry: 3,
+        sender: '', enabled: true, policy: '', remark: '', props: []
+    };
+
+    if (mode === 'edit' && code) {
+        const found = accountData.find(a => a.code === code);
+        if (found) data = JSON.parse(JSON.stringify(found));
+    }
+
+    document.getElementById('acc-code').value = data.code;
+    document.getElementById('acc-code').disabled = (mode === 'edit');
+    document.getElementById('acc-name').value = data.name;
+    document.getElementById('acc-username').value = data.username;
+    document.getElementById('acc-password').value = data.password;
+    document.getElementById('acc-password').type = 'password';
+    document.getElementById('acc-server').value = data.server;
+    document.getElementById('acc-port').value = data.port;
+    document.getElementById('acc-protocol').value = data.protocol;
+    document.getElementById('acc-retry').value = data.retry;
+    document.getElementById('acc-sender').value = data.sender;
+    document.getElementById('acc-enabled').checked = data.enabled;
+    document.getElementById('acc-policy').value = data.policy;
+    document.getElementById('acc-remark').value = data.remark || '';
+
+    currentSSLProps = data.props && data.props.length ? JSON.parse(JSON.stringify(data.props)) : [];
+    renderSSLProps();
+
+    document.getElementById('account-modal').classList.add('show');
+}
+
+function closeAccountModal() {
+    document.getElementById('account-modal').classList.remove('show');
+    accountEditingCode = null;
+    currentSSLProps = [];
+}
+
+function saveAccount() {
+    const code = document.getElementById('acc-code').value.trim();
+    const name = document.getElementById('acc-name').value.trim();
+    const username = document.getElementById('acc-username').value.trim();
+    const server = document.getElementById('acc-server').value.trim();
+    const port = document.getElementById('acc-port').value.trim();
+    const protocol = document.getElementById('acc-protocol').value;
+    const retry = document.getElementById('acc-retry').value.trim();
+    const sender = document.getElementById('acc-sender').value.trim();
+
+    if (!code) { showToast('请输入账户代码', 'error'); return; }
+    if (!name) { showToast('请输入账户名称', 'error'); return; }
+    if (!username) { showToast('请输入用户名', 'error'); return; }
+    if (!server) { showToast('请输入邮件服务器', 'error'); return; }
+    if (!port) { showToast('请输入端口', 'error'); return; }
+    if (!retry) { showToast('请输入重试次数', 'error'); return; }
+    if (!sender) { showToast('请输入发送人', 'error'); return; }
+
+    const exists = accountData.find(a => a.code === code);
+    const newData = {
+        code, name, username,
+        password: document.getElementById('acc-password').value,
+        server, port: parseInt(port, 10), protocol, retry: parseInt(retry, 10),
+        sender, enabled: document.getElementById('acc-enabled').checked,
+        policy: document.getElementById('acc-policy').value,
+        remark: document.getElementById('acc-remark').value,
+        props: JSON.parse(JSON.stringify(currentSSLProps))
+    };
+
+    if (accountEditingCode) {
+        const idx = accountData.findIndex(a => a.code === accountEditingCode);
+        if (idx > -1) accountData[idx] = newData;
+        showToast('邮箱账户已更新', 'success');
+    } else {
+        if (exists) { showToast('账户代码已存在', 'error'); return; }
+        accountData.push(newData);
+        showToast('邮箱账户已创建', 'success');
+    }
+
+    closeAccountModal();
+    filterAccounts();
+}
+
+function deleteAccount(code) {
+    if (!confirm('确定删除该邮箱账户？')) return;
+    accountData = accountData.filter(a => a.code !== code);
+    showToast('邮箱账户已删除', 'success');
+    filterAccounts();
+}
+
+// ==================== SSL / 服务器配置项 ====================
+function renderSSLProps() {
+    const tbody = document.getElementById('ssl-tbody');
+    if (currentSSLProps.length === 0) {
+        tbody.innerHTML = '<tr><td colspan="3"><div class="ssl-empty">暂无数据</div></td></tr>';
+        return;
+    }
+    tbody.innerHTML = currentSSLProps.map((p, i) => {
+        const valCell = p.key === '邮箱类型'
+            ? '<select style="width:100%;height:36px;border:1px solid #d9d9d9;border-radius:6px;padding:0 10px;font-size:13px;" onchange="updateSSLProp(' + i + ', \'value\', this.value)">' +
+                '<option value="主邮箱"' + (p.value === '主邮箱' ? ' selected' : '') + '>主邮箱</option>' +
+                '<option value="备用邮箱"' + (p.value === '备用邮箱' ? ' selected' : '') + '>备用邮箱</option>' +
+              '</select>'
+            : '<input type="text" value="' + escapeAttr(p.value) + '" onchange="updateSSLProp(' + i + ', \'value\', this.value)">';
+        return '<tr>' +
+            '<td><input type="text" value="' + escapeAttr(p.key) + '" onchange="updateSSLProp(' + i + ', \'key\', this.value)"></td>' +
+            '<td>' + valCell + '</td>' +
+            '<td><span class="ssl-remove" onclick="removeSSLProp(' + i + ')">删除</span></td>' +
+        '</tr>';
+    }).join('');
+}
+
+function addSSLProperty() {
+    currentSSLProps.push({ key: 'mail.smtp.ssl.enable', value: 'true' });
+    renderSSLProps();
+}
+
+function addServerProperty() {
+    currentSSLProps.push({ key: '邮箱类型', value: '备用邮箱' });
+    renderSSLProps();
+}
+
+function updateSSLProp(index, field, value) {
+    currentSSLProps[index][field] = value;
+}
+
+function removeSSLProp(index) {
+    currentSSLProps.splice(index, 1);
+    renderSSLProps();
+}
+
+function escapeAttr(str) {
+    return String(str || '').replace(/&/g, '&amp;').replace(/"/g, '&quot;').replace(/'/g, '&#39;').replace(/</g, '&lt;').replace(/>/g, '&gt;');
+}
+
+// ==================== 操作日志 - 数据与逻辑 ====================
+const auditLogData = [
+    { time: '2026-07-17 14:30:25', operator: 'admin@sany.com.cn', ip: '192.168.1.100', type: '修改', item: '主通道 SMTP 地址', before: 'smtp.qq.com', after: 'smtp.exmail.qq.com' },
+    { time: '2026-07-17 11:20:18', operator: 'admin@sany.com.cn', ip: '192.168.1.100', type: '修改',
+        batch: true, itemCount: 3,
+        item: '批量添加备用通道(3项)',
+        before: '—', after: '—',
+        details: [
+            { item: '新增备用通道2 SMTP 服务器', before: '—', after: 'smtp.aliyun.com' },
+            { item: '新增备用通道2 端口/加密', before: '—', after: '465 / TLS' },
+            { item: '新增备用通道3 SMTP 服务器', before: '—', after: 'smtp.126.com' }
+        ]
+    },
+    { time: '2026-07-16 09:15:03', operator: 'admin@sany.com.cn', ip: '192.168.1.100', type: '修改', item: '备用通道启用', before: '—', after: 'smtp.163.com:465' },
+    { time: '2026-07-15 17:42:11', operator: 'admin@sany.com.cn', ip: '192.168.1.100', type: '修改', item: '主通道连接超时', before: '10', after: '5' },
+    { time: '2026-07-15 16:08:33', operator: 'zhangwei@sany.com.cn', ip: '10.0.5.201', type: '修改', item: '主通道发件人名称', before: 'SANY Platform', after: '三一设备管理平台' },
+    { time: '2026-07-15 11:22:40', operator: 'admin@sany.com.cn', ip: '192.168.1.100', type: '修改',
+        batch: true, itemCount: 4,
+        item: '批量修改主通道(4项)',
+        before: '—', after: '—',
+        details: [
+            { item: '主通道每日上限', before: '30000', after: '50000' },
+            { item: '主通道发送超时', before: '15', after: '30' },
+            { item: '主通道 SMTP 服务器', before: 'smtp.qq.com', after: 'smtp.exmail.qq.com' },
+            { item: '主通道发件人名称', before: 'SANY Platform', after: '三一设备管理平台' }
+        ]
+    },
+    { time: '2026-07-14 14:55:20', operator: 'admin@sany.com.cn', ip: '192.168.1.100', type: '修改', item: '主通道发件名称', before: 'SANY Platform', after: '三一设备管理平台' },
+    { time: '2026-07-14 08:00:12', operator: 'admin@sany.com.cn', ip: '192.168.1.100', type: '修改', item: '主通道加密方式', before: 'STARTTLS', after: 'TLS' },
+    { time: '2026-07-13 19:30:05', operator: 'admin@sany.com.cn', ip: '192.168.1.100', type: '删除', item: '备用通道2 完整配置', before: 'smtp.aliyun.com:465', after: '—' },
+    { time: '2026-07-13 18:10:42', operator: 'admin@sany.com.cn', ip: '192.168.1.100', type: '删除',
+        batch: true, itemCount: 2,
+        item: '批量删除备用通道(2项)',
+        before: '—', after: '—',
+        details: [
+            { item: '删除备用通道3 SMTP 服务器', before: 'smtp.126.com:465', after: '—' },
+            { item: '删除备用通道4 完整配置', before: 'smtp.qq.com:587', after: '—' }
+        ]
+    },
+    { time: '2026-07-13 16:45:30', operator: 'admin@sany.com.cn', ip: '192.168.1.100', type: '新建', item: '初始配置', before: '—', after: '主备通道初始化' },
+    { time: '2026-07-12 15:30:00', operator: 'lisi@sany.com.cn', ip: '10.0.8.55', type: '修改', item: '备用通道每日上限', before: '5000', after: '10000' },
+    { time: '2026-07-12 10:11:22', operator: 'admin@sany.com.cn', ip: '192.168.1.100', type: '修改', item: '主通道端口', before: '587', after: '465' },
+    { time: '2026-07-11 14:22:18', operator: 'wangwu@sany.com.cn', ip: '10.0.3.120', type: '修改', item: '备用通道加密方式', before: '无', after: 'TLS' },
+    { time: '2026-07-10 09:45:00', operator: 'admin@sany.com.cn', ip: '192.168.1.100', type: '新建',
+        batch: true, itemCount: 5,
+        item: '批量添加备用通道(5项)',
+        before: '—', after: '—',
+        details: [
+            { item: '新增备用通道2', before: '—', after: 'smtp.aliyun.com:465' },
+            { item: '新增备用通道3', before: '—', after: 'smtp.126.com:465' },
+            { item: '新增备用通道4', before: '—', after: 'smtp.qq.com:587' },
+            { item: '新增备用通道5', before: '—', after: 'smtp.gmail.com:587' },
+            { item: '新增备用通道6', before: '—', after: 'smtp.outlook.com:587' }
+        ]
+    },
+    { time: '2026-07-09 16:30:55', operator: 'zhangwei@sany.com.cn', ip: '10.0.5.201', type: '修改', item: '主通道 SMTP 用户名', before: 'report@sany.com.cn', after: 'noreply@sany.com.cn' },
+    { time: '2026-07-08 11:05:30', operator: 'admin@sany.com.cn', ip: '192.168.1.100', type: '修改', item: '备用通道连接超时', before: '10', after: '5' },
+    { time: '2026-07-07 08:30:00', operator: 'admin@sany.com.cn', ip: '192.168.1.100', type: '新建', item: '备用通道1 初始化', before: '—', after: 'smtp.163.com:465' },
+    { time: '2026-07-06 17:20:11', operator: 'lisi@sany.com.cn', ip: '10.0.8.55', type: '修改', item: '主通道每日上限', before: '20000', after: '50000' },
+    { time: '2026-07-05 13:15:44', operator: 'admin@sany.com.cn', ip: '192.168.1.100', type: '修改', item: '主通道发送超时', before: '30', after: '60' },
+    { time: '2026-07-04 10:40:00', operator: 'wangwu@sany.com.cn', ip: '10.0.3.120', type: '修改', item: '备用通道发件邮箱', before: 'backup@163.com', after: 'noreply-report@sany-backup.com' },
+    { time: '2026-07-02 09:00:00', operator: 'admin@sany.com.cn', ip: '192.168.1.100', type: '修改', item: '主通道启用', before: '—', after: 'smtp.exmail.qq.com:465' },
+    { time: '2026-06-30 16:50:00', operator: 'admin@sany.com.cn', ip: '192.168.1.100', type: '新建', item: '邮件服务初始配置', before: '—', after: '主通道初始化完成' },
+    { time: '2026-06-28 14:20:33', operator: 'zhangwei@sany.com.cn', ip: '10.0.5.201', type: '修改', item: '备用通道发送超时', before: '30', after: '45' },
+    { time: '2026-06-25 11:10:00', operator: 'admin@sany.com.cn', ip: '192.168.1.100', type: '修改', item: '主通道发件邮箱', before: 'admin@sany.com.cn', after: 'noreply@sany.com.cn' }
+];
+
+const auditPageSize = 10;
+let auditCurrentPage = 1;
+let auditFilteredData = [];
+
+function renderAuditLog() {
+    const tbody = document.getElementById('audit-tbody');
+    const empty = document.getElementById('audit-empty');
+    const totalEl = document.getElementById('audit-total');
+    const rangeEl = document.getElementById('audit-range');
+    const pageBtns = document.getElementById('audit-page-btns');
+
+    const total = auditFilteredData.length;
+    const totalPages = Math.ceil(total / auditPageSize);
+    if (auditCurrentPage > totalPages) auditCurrentPage = Math.max(1, totalPages);
+
+    const start = (auditCurrentPage - 1) * auditPageSize;
+    const pageData = auditFilteredData.slice(start, start + auditPageSize);
+
+    totalEl.textContent = total;
+    tbody.innerHTML = '';
+
+    if (total === 0) {
+        empty.style.display = 'block';
+        rangeEl.textContent = '0-0';
+        pageBtns.innerHTML = '';
+        return;
+    }
+
+    empty.style.display = 'none';
+    const end = Math.min(start + auditPageSize, total);
+    rangeEl.textContent = (start + 1) + '-' + end;
+
+    pageData.forEach((row, idx) => {
+        const globalIdx = start + idx;
+        let typeTag = '';
+        if (row.type === '新建') typeTag = '<span class="tag tag-green">新建</span>';
+        else if (row.type === '删除') typeTag = '<span class="tag tag-orange">删除</span>';
+        else typeTag = '<span class="tag tag-blue">修改</span>';
+
+        let itemCell = row.item;
+        let beforeCell = row.before === '—' ? '<span style="color:#ccc;">—</span>' : row.before;
+        let afterCell = row.after === '—' ? '<span style="color:#ccc;">—</span>' : '<span style="color:#E60012">' + row.after + '</span>';
+
+        if (row.batch) {
+            itemCell = '<span class="batch-detail-pop" id="batch-pop-' + globalIdx + '">' +
+                '<span class="batch-toggle" onclick="toggleBatchDetail(' + globalIdx + ', event)">' + row.item + ' ▼</span>' +
+                '<div class="batch-popover">' +
+                    '<button class="batch-popover-close" onclick="closeBatchPop(' + globalIdx + ', event)">✕</button>' +
+                    '<div class="batch-popover-title">变更明细（' + row.details.length + '项）</div>' +
+                    '<table>' +
+                        '<thead><tr><th>变更项</th><th>变更前</th><th>变更后</th></tr></thead>' +
+                        '<tbody>' +
+                            row.details.map(d => '<tr><td>' + d.item + '</td>' +
+                                '<td>' + (d.before === '—' ? '<span style="color:#ccc;">—</span>' : d.before) + '</td>' +
+                                '<td style="color:#E60012">' + (d.after === '—' ? '<span style="color:#ccc;">—</span>' : d.after) + '</td></tr>').join('') +
+                        '</tbody>' +
+                    '</table>' +
+                '</div>' +
+            '</span>';
+            beforeCell = '<span class="batch-toggle" onclick="toggleBatchDetail(' + globalIdx + ', event)">查看明细</span>';
+            afterCell = '<span class="batch-toggle" onclick="toggleBatchDetail(' + globalIdx + ', event)">查看明细</span>';
+        }
+
+        tbody.innerHTML += '<tr>' +
+            '<td>' + row.time + '</td>' +
+            '<td>' + row.operator + '</td>' +
+            '<td>' + row.ip + '</td>' +
+            '<td>' + typeTag + '</td>' +
+            '<td>' + itemCell + '</td>' +
+            '<td>' + beforeCell + '</td>' +
+            '<td>' + afterCell + '</td>' +
+        '</tr>';
+    });
+
+    let pagesHTML = '';
+    pagesHTML += '<button class="pagination-btn" onclick="goAuditPage(' + (auditCurrentPage - 1) + ')"' + (auditCurrentPage <= 1 ? ' disabled' : '') + '>上一页</button>';
+    for (let i = 1; i <= totalPages; i++) {
+        if (totalPages <= 7 || i === 1 || i === totalPages || Math.abs(i - auditCurrentPage) <= 2) {
+            pagesHTML += '<button class="pagination-btn' + (i === auditCurrentPage ? ' active' : '') + '" onclick="goAuditPage(' + i + ')">' + i + '</button>';
+        } else if (i === 2 && auditCurrentPage > 4) {
+            pagesHTML += '<span style="padding:0 4px;color:#ccc;">...</span>';
+        } else if (i === totalPages - 1 && auditCurrentPage < totalPages - 3) {
+            pagesHTML += '<span style="padding:0 4px;color:#ccc;">...</span>';
+        }
+    }
+    pagesHTML += '<button class="pagination-btn" onclick="goAuditPage(' + (auditCurrentPage + 1) + ')"' + (auditCurrentPage >= totalPages ? ' disabled' : '') + '>下一页</button>';
+    pageBtns.innerHTML = pagesHTML;
+}
+
+function filterAuditLog() {
+    const dateFrom = document.getElementById('audit-date-from').value;
+    const dateTo = document.getElementById('audit-date-to').value;
+    const opType = document.getElementById('audit-optype').value;
+    const operator = document.getElementById('audit-operator').value.toLowerCase();
+    const keyword = document.getElementById('audit-keyword').value.toLowerCase();
+
+    auditFilteredData = auditLogData.filter(row => {
+        if (dateFrom && row.time < dateFrom) return false;
+        if (dateTo && row.time > dateTo + ' 23:59:59') return false;
+        if (opType && row.type !== opType) return false;
+        if (operator && !row.operator.toLowerCase().includes(operator)) return false;
+        if (keyword) {
+            const searchStr = (row.item + ' ' + row.before + ' ' + row.after + ' ' + row.operator).toLowerCase();
+            if (row.batch && row.details) {
+                const detailStr = row.details.map(d => d.item + ' ' + d.before + ' ' + d.after).join(' ').toLowerCase();
+                if (!searchStr.includes(keyword) && !detailStr.includes(keyword)) return false;
+            } else {
+                if (!searchStr.includes(keyword)) return false;
+            }
+        }
+        return true;
+    });
+
+    auditCurrentPage = 1;
+    renderAuditLog();
+}
+
+function resetAuditFilter() {
+    document.getElementById('audit-date-from').value = '';
+    document.getElementById('audit-date-to').value = '';
+    document.getElementById('audit-optype').value = '';
+    document.getElementById('audit-operator').value = '';
+    document.getElementById('audit-keyword').value = '';
+    filterAuditLog();
+}
+
+function goAuditPage(page) {
+    const totalPages = Math.ceil(auditFilteredData.length / auditPageSize);
+    if (page < 1 || page > totalPages) return;
+    auditCurrentPage = page;
+    renderAuditLog();
+    document.getElementById('page-audit').querySelector('.table-wrapper').scrollIntoView({ behavior: 'smooth', block: 'start' });
+}
+
+// 批量明细展开/收起
+let activeBatchPop = null;
+function toggleBatchDetail(globalIdx, event) {
+    event.stopPropagation();
+    const pop = document.getElementById('batch-pop-' + globalIdx);
+    if (!pop) return;
+    if (activeBatchPop && activeBatchPop !== pop) {
+        activeBatchPop.classList.remove('show');
+    }
+    pop.classList.toggle('show');
+    activeBatchPop = pop.classList.contains('show') ? pop : null;
+}
+
+function closeBatchPop(globalIdx, event) {
+    event.stopPropagation();
+    const pop = document.getElementById('batch-pop-' + globalIdx);
+    if (pop) {
+        pop.classList.remove('show');
+        if (activeBatchPop === pop) activeBatchPop = null;
+    }
+}
+
+// 点击其他区域关闭 popover
+document.addEventListener('click', function() {
+    if (activeBatchPop) {
+        activeBatchPop.classList.remove('show');
+        activeBatchPop = null;
+    }
+});
+
+// 页面加载时初始化
+window.addEventListener('DOMContentLoaded', function() {
+    filterAccounts();
+    initAuditLog();
+});
+
+function initAuditLog() {
+    auditFilteredData = [...auditLogData];
+    renderAuditLog();
+}
+</script>
+</body>
+</html>

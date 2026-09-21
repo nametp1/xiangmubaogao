@@ -1,0 +1,292 @@
+<!DOCTYPE html>
+<!--
+  模版：电池充电参数报表（v2.0 · 三一风格）　维度：机群　周期：日 / 周 / 月　版式：A4 横向
+  后台配置方式：① 循环区域用 loop 注释标记包裹（只写一条行模板，引擎按数据行重复），行内变量为「表名_字段」（如 设备_工时），与后台「数据列配置」的每一列（列名 + 映射变量）一一对应；② 汇总行用「汇总_字段」，聚合值由引擎给出，模板不做计算；③ 进度条 / 环形 / 堆叠段 / 趋势柱的显示比例用「条_标签」「环_名称」「段_标签」「趋势_高度」，由引擎按数值换算回填。
+  适用机型：电池 / 充电字段族（28 个机型中 11 个可用：电动牵引车、电动装载机、汽车起重机、电动搅拌车、电动自卸车、电动挖掘机、自装卸车、履带吊起重机、电动堆高机、电动集卡、电动宽体车）
+  空值规则：字段无值时不显示 —— 单元格显示 --、行级/块级隐藏、机型不适用则不出本报表；机群合计与均值只统计「有该字段值」的设备，缺值设备该格留空。
+-->
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>电池充电参数报表（v2.0 · 三一风格）</title>
+<style>
+*{box-sizing:border-box}
+body{margin:0;background:#f2f3f5;color:#1a1a1a;font-size:12px;
+     font-family:"PingFang SC","Microsoft YaHei","Helvetica Neue",Arial,sans-serif}
+.report{width:297mm;min-height:210mm;margin:22px auto;padding:13mm 14mm 11mm;background:#fff;
+        border-radius:4px;box-shadow:0 6px 24px rgba(0,0,0,.07)}
+/* ---------- 工具栏（仅屏幕） ---------- */
+.toolbar{position:fixed;right:20px;top:20px;display:flex;gap:8px;align-items:center;z-index:9}
+.toolbar button{background:#E60012;color:#fff;border:0;border-radius:6px;padding:9px 16px;font-size:12px;
+                font-family:inherit;cursor:pointer;box-shadow:0 2px 8px rgba(230,0,18,.24)}
+.toolbar button:hover{background:#c50010}
+.toolbar span{background:#fff;border:1px solid #ececec;border-radius:6px;padding:8px 11px;color:#8c8c8c;font-size:11px}
+/* ---------- 头部 ---------- */
+.header{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;
+        border-bottom:4px solid #E60012;padding-bottom:14px}
+.logo{display:flex;align-items:center;gap:12px}
+.brand{background:#E60012;color:#fff;font-weight:900;font-size:26px;letter-spacing:2px;padding:6px 14px;border-radius:3px}
+.product{font-size:13px;color:#666;line-height:1.55}
+.report-title{text-align:right;max-width:64%}
+.report-title h1{margin:0;font-size:25px;letter-spacing:1px;font-weight:800}
+.report-title h1 .scope{margin-left:8px;vertical-align:middle;background:#fff2f2;color:#E60012;border:1px solid #f7ccd0;
+        font-size:11px;font-weight:700;letter-spacing:.5px;padding:2px 9px;border-radius:11px}
+.report-title p{margin:6px 0 0;font-size:13px;color:#666}
+.report-title .serial{font-weight:700;color:#1a1a1a}
+.period{display:inline-block;margin-top:8px;background:#E60012;color:#fff;font-size:12px;
+        padding:4px 13px;border-radius:12px;letter-spacing:.4px}
+/* ---------- 指标卡 ---------- */
+.metrics{margin-top:20px;display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
+.metric{background:#fff;border:1px solid #f0f0f0;border-top:4px solid #E60012;border-radius:6px;
+        padding:13px 16px 12px;box-shadow:0 1px 5px rgba(0,0,0,.05)}
+.metric .label{font-size:12px;color:#8c8c8c}
+.metric .number{margin-top:7px;font-size:26px;font-weight:800;color:#E60012;letter-spacing:-.5px}
+.metric .unit{font-size:11px;color:#9a9a9a;margin-top:2px}
+/* ---------- 版式 ---------- */
+.cols{display:grid;grid-template-columns:1fr 1fr;gap:22px;align-items:start}
+.section{margin-top:20px;background:#fff;border:1px solid #f0f0f0;border-radius:6px;padding:14px 16px 16px}
+.cols .section{margin-top:20px}
+.section-title{margin:0 0 12px;padding-left:10px;border-left:4px solid #E60012;
+        font-size:15px;font-weight:800;color:#1a1a1a;letter-spacing:.3px;line-height:1.3}
+.section-title small{font-weight:400;font-size:11px;color:#9a9a9a;margin-left:8px}
+/* ---------- 表格 ---------- */
+table{width:100%;border-collapse:collapse;font-size:12px}
+th{background:#d9000f;background:linear-gradient(180deg,#e8000f,#cc0010);color:#fff;padding:8px 9px;text-align:left;
+        font-weight:600;letter-spacing:.3px;white-space:nowrap}
+thead tr:first-child th:first-child{border-top-left-radius:4px}
+thead tr:first-child th:last-child{border-top-right-radius:4px}
+td{padding:7px 9px;border-bottom:1px solid #f2f2f2;vertical-align:top}
+tbody tr:nth-child(even) td{background:#fbfafa}
+tbody tr:hover td{background:#fff6f6}
+tfoot td,tr:last-child td{border-bottom:none}
+.num{text-align:right;font-variant-numeric:tabular-nums}
+.muted{color:#8c8c8c;font-size:11px}
+/* ---------- 可视化 ---------- */
+.bar-item{margin:10px 0}
+.bar-head{display:flex;justify-content:space-between;font-size:12px;margin-bottom:5px;color:#595959}
+.bar-head .val{font-weight:700;color:#1a1a1a}
+.bar{height:12px;background:#f4f4f4;border-radius:6px;overflow:hidden}
+.bar-fill{width:0;height:100%;background:#E60012;background:linear-gradient(90deg,#E60012,#ff5a63);border-radius:6px}
+.ring-row{display:flex;align-items:center;gap:20px}
+.ring{position:relative;width:132px;height:132px;flex-shrink:0}
+.ring-svg{width:100%;height:100%;transform:rotate(-90deg)}
+.ring-bg{fill:none;stroke:#f0f0f0;stroke-width:6}
+.ring-seg{fill:none;stroke-width:6}
+.ring-seg-main{stroke:#E60012}
+.ring-seg-sub{stroke:#f0a6ad}
+.ring-seg-gray{stroke:#d9d9d9}
+.ring .ring-label{position:absolute;top:0;right:0;bottom:0;left:0;display:flex;flex-direction:column;align-items:center;
+        justify-content:center;z-index:1;font-size:11px;color:#9a9a9a}
+.ring .ring-label b{font-size:21px;color:#E60012}
+.legend{flex:1}
+.legend .item{display:flex;justify-content:space-between;gap:10px;padding:7px 0;border-bottom:1px dashed #f0f0f0;font-size:12px}
+.legend .item:last-child{border-bottom:none}
+.legend .dot{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:8px}
+.legend .val{font-weight:700;white-space:nowrap}
+.stack{display:flex;height:26px;border-radius:6px;overflow:hidden;margin-top:12px;
+        box-shadow:inset 0 0 0 1px rgba(0,0,0,.03)}
+.stack span{display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;overflow:hidden;white-space:nowrap}
+.spark{display:flex;align-items:flex-end;gap:4px;height:74px;margin:10px 2px 0;
+        border-bottom:1px solid #f0f0f0;padding-bottom:2px}
+.spark i{flex:1;height:0;background:#E60012;background:linear-gradient(180deg,#ff5a63,#E60012);border-radius:3px 3px 0 0;display:block}
+.spark i.warn,.spark i.low{background:#f0a6ad;background:linear-gradient(180deg,#f7b7bc,#f0a6ad)}
+/* ---------- 标签 ---------- */
+.tag{display:inline-block;padding:2px 9px;border-radius:11px;font-size:11px;white-space:nowrap;line-height:1.5}
+.tag-red{background:#fdeaea;color:#E60012;font-weight:700}
+.tag-orange{background:#fff4e6;color:#D97706;font-weight:700}
+.tag-blue{background:#eaf0fd;color:#1d4ed8}
+.tag-green{background:#eaf6ee;color:#1a7f37}
+.tag-gray{background:#f2f2f2;color:#737373}
+/* ---------- 页脚 ---------- */
+.footer{margin-top:24px;padding-top:11px;border-top:2px solid #E60012;display:flex;
+        justify-content:space-between;align-items:center;gap:16px;color:#8c8c8c;font-size:10px}
+.footer .brand2{font-weight:800;color:#E60012;font-size:13px;letter-spacing:1px}
+/* ---------- 打印 / PDF ---------- */
+@page{size:A4 landscape;margin:9mm}
+@media print{
+  html,body{background:#fff}
+  .no-print{display:none!important}
+  .report{width:auto;min-height:0;margin:0;padding:0;border-radius:0;box-shadow:none}
+  body{-webkit-print-color-adjust:exact;print-color-adjust:exact}
+  .section,.metrics,.metric,.card,table{page-break-inside:avoid;break-inside:avoid}
+  .section{box-shadow:none;padding:10px 0 12px;border:0;border-bottom:1px solid #f0f0f0;border-radius:0}
+  .metric{box-shadow:none}
+  .section-title{page-break-after:avoid;break-after:avoid}
+  tr,thead{page-break-inside:avoid;break-inside:avoid}
+  thead{display:table-header-group}
+  .page-break{page-break-before:always;break-before:page}
+}
+</style>
+</head>
+<body>
+
+<div class="toolbar no-print">
+    <span>模版 · {{变量}} + #loop 循环 · PDF 需 Chromium 系引擎</span>
+    <button onclick="window.print()">导出 PDF</button>
+</div>
+
+<div class="report">
+
+    <div class="header">
+        <div class="logo">
+            <span class="brand">SANY</span>
+            <div class="product">三一智联系统<br>MySANY 设备管理平台</div>
+        </div>
+        <div class="report-title">
+            <h1>电池充电参数报表 <span class="scope">机群口径</span></h1>
+            <p class="serial">机群：{{机群名称}}（{{机群编号}}）· 在册设备 {{在册设备数}} 台</p>
+            <span class="period">统计周期：{{统计周期起}} 至 {{统计周期止}}（{{周期类型}}）</span>
+        </div>
+    </div>
+
+    <div class="metrics">
+        <div class="metric"><div class="label">期内充电次数</div><div class="number">{{充电次数}}</div><div class="unit">次</div></div>
+        <div class="metric"><div class="label">累计充入电量</div><div class="number">{{累计充入电量}}</div><div class="unit">kWh</div></div>
+        <div class="metric"><div class="label">平均单次充电时长</div><div class="number">{{平均单次充电时长}}</div><div class="unit">时:分</div></div>
+        <div class="metric"><div class="label">能量回收比例</div><div class="number">{{回收比例}}</div><div class="unit">%</div></div>
+    </div>
+
+    <div class="cols" style="margin-top:22px">
+        <div class="section" data-optional="1" style="margin-top:0">
+            <div class="section-title">电池状态（期末快照）</div>
+            <table>
+                <thead><tr><th>项目</th><th class="num">期末值</th><th class="num">规格 / 阈值</th></tr></thead>
+                <tbody>
+                    <tr><td>荷电状态（SOC）</td><td class="num">{{期末SOC}} %</td><td class="num">--</td></tr>
+                    <tr><td>电池健康度（SOH）</td><td class="num">{{电池健康度}} %</td><td class="num">--</td></tr>
+                    <tr><td>整车电压</td><td class="num">{{整车电压}} V</td><td class="num">--</td></tr>
+                    <tr><td>蓄电池电压</td><td class="num">{{蓄电池电压}} V</td><td class="num">--</td></tr>
+                    <tr><td>电池电流</td><td class="num">{{电池电流}} A</td><td class="num">--</td></tr>
+                    <tr><td>充电倍率</td><td class="num">{{充电倍率}} C</td><td class="num">--</td></tr>
+                    <tr><td>剩余充电时间</td><td class="num">{{剩余充电时间}}</td><td class="num">--</td></tr>
+                    <tr><td>最高允许充电电压</td><td class="num">{{最高允许充电电压}} V</td><td class="num">规格值</td></tr>
+                    <tr><td>最低允许放电电压</td><td class="num">{{最低允许放电电压}} V</td><td class="num">规格值</td></tr>
+                    <tr><td>最大允许放电功率</td><td class="num">{{最大允许放电功率}} kW</td><td class="num">规格值</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="section" data-optional="1" style="margin-top:0">
+            <div class="section-title">单体电压 / 温度</div>
+            <table>
+                <thead><tr><th>项目</th><th class="num">本期值</th><th class="num">阈值</th><th>状态</th><th>口径类型</th></tr></thead>
+                <tbody>
+                    <tr><td>最高单体电压</td><td class="num">{{最高单体电压}} V</td><td class="num">{{单体电压上限}} V</td><td><span class="tag tag-green">{{最高单体电压状态}}</span></td><td class="muted">期内极值</td></tr>
+                    <tr><td>最低单体电压</td><td class="num">{{最低单体电压}} V</td><td class="num">{{单体电压下限}} V</td><td><span class="tag tag-green">{{最低单体电压状态}}</span></td><td class="muted">期内极值</td></tr>
+                    <tr><td>单体压差</td><td class="num">{{单体压差}} V</td><td class="num">{{压差阈值}} V</td><td><span class="tag tag-orange">{{压差状态}}</span></td><td class="muted">期内极值</td></tr>
+                    <tr><td>单体平均电压</td><td class="num">{{单体平均电压}} V</td><td class="num">--</td><td><span class="tag tag-gray">--</span></td><td class="muted">周期内均值</td></tr>
+                    <tr><td>最高单体温度</td><td class="num">{{最高单体温度}} ℃</td><td class="num">{{单体温度阈值}} ℃</td><td><span class="tag tag-orange">{{最高单体温度状态}}</span></td><td class="muted">期内极值</td></tr>
+                    <tr><td>最低单体温度</td><td class="num">{{最低单体温度}} ℃</td><td class="num">--</td><td><span class="tag tag-green">{{最低单体温度状态}}</span></td><td class="muted">期内极值</td></tr>
+                    <tr><td>单体平均温度</td><td class="num">{{单体平均温度}} ℃</td><td class="num">--</td><td><span class="tag tag-gray">--</span></td><td class="muted">周期内均值</td></tr>
+                </tbody>
+            </table>
+            <div style="margin-top:14px">
+                <div class="bar-head"><span>期末 SOC</span><span class="val">{{期末SOC}} %</span></div>
+                <div class="soc"><span style="width:{{期末SOC}}%"></span><b>{{期末SOC}}%</b></div>
+            </div>
+        </div>
+    </div>
+
+    <div class="section" data-optional="1">
+        <div class="section-title">充电记录明细</div>
+        <table>
+            <thead>
+                <tr>
+                    <th>序号</th><th>充电开始时间</th><th>充电结束时间</th><th class="num">单次充电耗时</th>
+                    <th class="num">开始 SOC</th><th class="num">结束 SOC</th><th class="num">SOC 增量</th>
+                    <th class="num">充入电量（kWh）</th><th class="num">平均充电功率</th><th>分段时长（15–25 / 25–50 / 50–75 / 75–100%）</th>
+                </tr>
+            </thead>
+            <tbody>
+                <!-- #loop_充电记录 -->
+                <tr><td>{{记录_序号}}</td><td>{{记录_开始时间}}</td><td>{{记录_结束时间}}</td><td class="num">{{记录_耗时}}</td><td class="num">{{记录_开始SOC}} %</td><td class="num">{{记录_结束SOC}} %</td><td class="num">+{{记录_SOC增量}} %</td><td class="num">{{记录_充入电量}}</td><td class="num">{{记录_平均功率}} kW</td><td class="muted">{{记录_分段时长}}</td></tr>
+                <!-- /#loop_充电记录 -->
+                <tr><td><b>合计 / 平均</b></td><td>--</td><td>--</td><td class="num"><b>{{汇总_平均耗时}}</b></td><td class="num"><b>{{汇总_平均开始SOC}} %</b></td><td class="num"><b>{{汇总_平均结束SOC}} %</b></td><td class="num"><b>+{{汇总_平均增量}} %</b></td><td class="num"><b>{{汇总_充入电量}}</b></td><td class="num"><b>{{汇总_平均功率}} kW</b></td><td class="muted">--</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="cols">
+        <div class="section" data-optional="1">
+            <div class="section-title">分段荷电状态充电时长</div>
+            <!-- #loop_充电区间 -->
+            <div class="bar-item"><div class="bar-head"><span>{{区间_名称}}</span><span class="val">{{区间_时长}} · {{区间_占比}}%</span></div><div class="bar"><div class="bar-fill" style="width:{{区间_占比}}%"></div></div></div>
+            <!-- /#loop_充电区间 -->
+            <p class="muted" style="margin-top:10px">四区间合计 {{区间合计时长}} = 期内累计充电时长 {{累计充电时长}}</p>
+        </div>
+
+        <div class="section" data-optional="1">
+            <div class="section-title">充电频次与能量回收</div>
+            <table>
+                <thead><tr><th>项目</th><th class="num">本期值</th><th>口径类型</th></tr></thead>
+                <tbody>
+                    <tr><td>每日充电总次数（日均）</td><td class="num">{{日均充电次数}} 次</td><td class="muted">计数去重</td></tr>
+                    <tr><td>累计充电时长</td><td class="num">{{累计充电时长}}</td><td class="muted">期内累计</td></tr>
+                    <tr><td>充电循环累计</td><td class="num">{{充电循环累计}} 次</td><td class="muted">期内累计</td></tr>
+                    <tr><td>累计充电电量</td><td class="num">{{累计充入电量}}</td><td class="muted">期内累计</td></tr>
+                    <tr><td>累计放电电量</td><td class="num">{{累计放电电量}}</td><td class="muted">期内累计</td></tr>
+                    <tr><td>充放电量差</td><td class="num">{{充放电量差}}</td><td class="muted">期内累计</td></tr>
+                    <tr><td>回收能量</td><td class="num">{{回收能量}}</td><td class="muted">期内累计</td></tr>
+                    <tr><td>回收比例</td><td class="num">{{回收比例}} %</td><td class="muted">周期内均值</td></tr>
+                    <tr><td>日均回收能量</td><td class="num">{{日均回收能量}}</td><td class="muted">周期内均值</td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="section" data-optional="1">
+        <div class="section-title">分设备充电概览</div>
+        <table>
+            <thead><tr><th>设备编号</th><th>机型</th><th class="num">充电次数</th><th class="num">累计充入电量</th><th class="num">平均单次充电时长</th><th class="num">期末电量</th><th class="num">回收比例</th></tr></thead>
+            <tbody>
+                <!-- #loop_机群设备列表 -->
+                <tr><td>{{设备_编号}}</td><td>{{设备_机型}}</td><td class="num">{{设备_充电次数}}</td><td class="num">{{设备_充入电量}}</td><td class="num">{{设备_平均充电时长}}</td><td class="num">{{设备_期末SOC}}</td><td class="num">{{设备_回收比例}}</td></tr>
+                <!-- /#loop_机群设备列表 -->
+                <tr><td><b>合计 / 平均</b></td><td><b>{{在册设备数}} 台</b></td><td class="num"><b>{{汇总_充电次数}}</b></td><td class="num"><b>{{汇总_充入电量}}</b></td><td class="num"><b>{{汇总_平均充电时长}}</b></td><td class="num">--</td><td class="num"><b>{{回收比例}}%</b></td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="section">
+        <div class="section-title">字段与口径对照</div>
+        <table>
+            <thead><tr><th style="width:32%">字段</th><th style="width:16%">口径类型</th><th>计算方式</th></tr></thead>
+            <tbody>
+                <tr><td>荷电状态（SOC）/ 电池健康度 / 整车电压 / 蓄电池电压 / 电池电压 / 电池电流 / 倍率 / 剩余充电时间 / 最高允许充电电压 / 最低允许放电电压 / 最大允许放电功率</td><td>期末快照</td><td>日=取当日期末最新数据；周/月=取期内期末最新数据</td></tr>
+                <tr><td>最高/最低单体电压、最高/最低单体温度</td><td>期内极值</td><td>日=当日极值；周/月=期内极值</td></tr>
+                <tr><td>单体平均电压 / 单体平均温度</td><td>周期内均值</td><td>日=当日值；周/月=期内均值</td></tr>
+                <tr><td>累计充电电量 / 充电量 / 单次充电电量 / 累计放电电量 / 放电量 / 回收能量 / 回收电量</td><td>期内累计</td><td>日=当日累计；周/月=期内求和</td></tr>
+                <tr><td>充电时长 / 单次充电耗时</td><td>期内累计</td><td>充电结束时间 − 充电开始时间；周/月=期内累计</td></tr>
+                <tr><td>充电开始时间 / 充电结束时间 / 充电状态</td><td>仅日口径</td><td>日=逐次充电事件时刻／当日状态；周/月=不呈现</td></tr>
+                <tr><td>回收比例 / 日均回收能量</td><td>周期内均值</td><td>日=当日值；周/月=期内均值</td></tr>
+                <tr><td>各充电区间/分段荷电状态充电时长</td><td>期内累计</td><td>按 15–25% / 25–50% / 50–75% / 75–100% 分别累计充电时长</td></tr>
+                <tr><td>每日充电总次数</td><td>计数去重</td><td>按独立充电连接事件去重计数</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="section">
+        <div class="section-title">空值处理规则</div>
+        <table>
+            <thead><tr><th style="width:30%">情形</th><th>处理方式</th></tr></thead>
+            <tbody>
+                <tr><td>单元格级：该字段本期无值</td><td>显示 --（不留 0、不显示空白），不计入合计与均值</td></tr>
+                <tr><td>行级：某一行无值</td><td>隐藏该行（如某挡位无信号、某单体指标未上报、某日无数据）</td></tr>
+                <tr><td>块级：该机型无此字段族</td><td>隐藏该区块（如无档位信号的机型隐藏档位与作业模式区块）</td></tr>
+                <tr><td>整份：该机型不适用本报表</td><td>不出本报表（后台按机型适用性判断，适用机型见文件头注释）</td></tr>
+                <tr><td>机群汇总：某台设备缺该字段</td><td>该设备该格留空（--）；合计 / 均值只按「有该字段值」的设备计算，不按 0 计</td></tr>
+                <tr><td>单机对比表：机群均值无值</td><td>隐藏该行（如该机型不在机群内）</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="footer">
+        <div><span class="brand2">SANY</span>&nbsp;三一智联系统</div>
+        <div>{{生成时间}}</div>
+        <div>{{生成人}} · MySANY 设备管理平台 · {{报表编号}}</div>
+    </div>
+
+</div>
+</body>
+</html>

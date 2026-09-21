@@ -402,6 +402,121 @@
             to { opacity: 1; transform: translateX(-50%) translateY(0); }
         }
 
+        /* 需求列表上方的操作条（「添加候选报表」入口） */
+        .list-head {
+            display: flex;
+            align-items: center;
+            justify-content: flex-end;
+            margin-bottom: 10px;
+        }
+
+        /* 候选报表配置弹窗（维护 PC 端「我需要更多报表」的候选项） */
+        /* 用双类名提高权重：.confirm-dialog 的 420px 定义在后面，单类名会被它覆盖 */
+        .confirm-dialog.opt-dialog { width: 880px; }
+        .confirm-title.opt-title {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            gap: 12px;
+            padding-bottom: 0;
+        }
+        .opt-lang { font-size: 12px; font-weight: 400; color: #666; display: flex; align-items: center; gap: 6px; }
+        .opt-lang select {
+            height: 28px;
+            border: 1px solid #d9d9d9;
+            border-radius: 4px;
+            background: #fff;
+            font-family: inherit;
+            font-size: 12px;
+            color: #333;
+            padding: 0 6px;
+        }
+        .opt-lang select:focus { border-color: #E60012; outline: none; }
+        .opt-body { padding: 16px 20px 14px; max-height: 56vh; overflow-y: auto; }
+        .opt-row {
+            display: flex;
+            align-items: flex-start;
+            gap: 8px;
+            padding: 10px 0;
+            border-bottom: 1px dashed #f0f0f0;
+        }
+        .opt-idx {
+            width: 20px;
+            height: 20px;
+            flex-shrink: 0;
+            margin-top: 6px;
+            border-radius: 50%;
+            background: #f5f5f5;
+            color: #999;
+            font-size: 11px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+        .opt-row input, .opt-row select, .opt-row textarea {
+            border: 1px solid #d9d9d9;
+            border-radius: 4px;
+            font-family: inherit;
+            font-size: 12px;
+            color: #333;
+            padding: 5px 8px;
+            box-sizing: border-box;
+        }
+        .opt-row input:focus, .opt-row select:focus, .opt-row textarea:focus { border-color: #E60012; outline: none; }
+        .opt-name { width: 160px; flex-shrink: 0; }
+        .opt-tag { width: 96px; flex-shrink: 0; }
+        .opt-img { position: relative; flex-shrink: 0; width: 76px; }
+        .opt-img-box {
+            width: 76px;
+            height: 54px;
+            border: 1px dashed #d9d9d9;
+            border-radius: 4px;
+            background: #fafafa;
+            color: #bbb;
+            font-size: 16px;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            cursor: pointer;
+            overflow: hidden;
+        }
+        .opt-img-box:hover { border-color: #E60012; color: #E60012; }
+        .opt-img-box img { width: 100%; height: 100%; object-fit: cover; display: block; }
+        .opt-img-del {
+            position: absolute;
+            top: -6px;
+            right: -6px;
+            width: 18px;
+            height: 18px;
+            padding: 0;
+            border: none;
+            border-radius: 50%;
+            background: #E60012;
+            color: #fff;
+            font-size: 10px;
+            line-height: 1;
+            cursor: pointer;
+        }
+        .opt-desc { flex: 1; min-width: 0; min-height: 34px; line-height: 1.5; resize: vertical; }
+        .opt-del {
+            flex-shrink: 0;
+            margin-top: 4px;
+            width: 30px;
+            height: 30px;
+            border: 1px solid #d9d9d9;
+            background: #fff;
+            border-radius: 4px;
+            color: #999;
+            cursor: pointer;
+            font-size: 13px;
+            line-height: 1;
+        }
+        .opt-del:hover { border-color: #E60012; color: #E60012; }
+        .opt-empty { padding: 26px; text-align: center; color: #bbb; font-size: 13px; }
+        .opt-footer { justify-content: flex-start; flex-wrap: wrap; }
+        .opt-footer .opt-spacer { flex: 1; }
+        .opt-footer .opt-count { font-size: 12px; color: #999; align-self: center; }
+
         /* 状态变更二次确认弹窗 */
         .confirm-overlay {
             display: none;
@@ -766,6 +881,9 @@
             </div>
 
             <!-- 需求列表 -->
+            <div class="list-head">
+                <button class="btn" onclick="openOptionManager()">＋ 添加候选报表</button>
+            </div>
             <div class="table-wrapper">
                 <table>
                     <thead>
@@ -801,6 +919,27 @@
         <div class="confirm-footer">
             <button class="btn" onclick="closeStatusConfirm(true)">取消</button>
             <button class="btn btn-primary" onclick="confirmStatusChange()">确认变更</button>
+        </div>
+    </div>
+</div>
+
+<!-- 候选报表配置弹窗：后台维护 PC 端「报表模版」页「我需要更多报表」弹窗里的候选项 -->
+<div class="confirm-overlay" id="optModal">
+    <div class="confirm-dialog opt-dialog">
+        <div class="confirm-title opt-title">
+            <span>配置「我需要更多报表」候选报表</span>
+            <span class="opt-lang">语言
+                <select id="optLangSel" onchange="optSwitchLang(this.value)"></select>
+            </span>
+        </div>
+        <div class="opt-body" id="optBody"></div>
+        <input type="file" id="optFile" accept="image/*" style="display:none">
+        <div class="confirm-footer opt-footer">
+            <button class="btn" onclick="optAddRow()">＋ 添加一项</button>
+            <span class="opt-count" id="optCount"></span>
+            <span class="opt-spacer"></span>
+            <button class="btn" onclick="closeOptionManager()">取消</button>
+            <button class="btn btn-primary" onclick="optSaveAll()">保存配置</button>
         </div>
     </div>
 </div>
@@ -1094,6 +1233,268 @@ document.getElementById('statusConfirm').addEventListener('click', function (e) 
 });
 document.addEventListener('keydown', function (e) {
     if (e.key === 'Escape' && pendingStatus) closeStatusConfirm(true);
+});
+
+// ====================================================================
+// 候选报表清单：维护 PC 端「报表模版」页「我需要更多报表」弹窗的候选项
+// 数据来源：localStorage['mysany_more_report_options']
+// 与 V2/MysnayPC端V2/报表模版.html 共用同一 key（前端优先读这里，未配置时用内置默认）
+// ====================================================================
+const OPT_KEY = 'mysany_more_report_options';
+const OPT_TAG_TEXT = { planned: '已规划', apply: '可申请' };
+// 候选项支持的语言（与「邮件模版设置」的 LANG_CONFIG 对齐）
+const OPT_LANGS = [
+    { id: 'zh-CN', label: '简体中文' },
+    { id: 'en', label: 'English' },
+    { id: 'de', label: 'Deutsch' },
+    { id: 'id', label: 'Bahasa Indonesia' },
+    { id: 'es', label: 'Español' },
+    { id: 'pt', label: 'Português' },
+    { id: 'fr', label: 'Français' },
+    { id: 'th', label: 'ภาษาไทย' },
+    { id: 'ru', label: 'русский' },
+    { id: 'ar', label: 'العربية' },
+    { id: 'km', label: 'ភាសាខ្មែរ' },
+    { id: 'ko', label: '한국어' },
+    { id: 'it', label: 'Italiano' },
+    { id: 'ms', label: 'Bahasa Melayu' },
+    { id: 'vi', label: 'Tiếng Việt' }
+];
+// 内置默认清单：本地还没有配置时作为初始内容（name / desc 按语言存放，image = 预览图 dataURL）
+const DEFAULT_REPORT_OPTIONS = [
+    { tagType: 'planned', name: { 'zh-CN': '超时工作报表', en: 'Overtime Work Report' },
+      desc: { 'zh-CN': '统计设备超过设定工时阈值的时长、次数与占比，用于识别加班与合规风险。' } },
+    { tagType: 'planned', name: { 'zh-CN': '设备异常通知报表', en: 'Abnormal Notification Report' },
+      desc: { 'zh-CN': '汇总异常事件的即时通知记录与处理情况：异常类型、发生时间、通知对象与处理状态。' } },
+    { tagType: 'planned', name: { 'zh-CN': '电池电量报表', en: 'Battery Level Report' },
+      desc: { 'zh-CN': '统计设备 / 机群的电池荷电状态（SOC）与充电情况：期末 SOC、最低 SOC、充电次数与充电时长。' } },
+    { tagType: 'apply', name: { 'zh-CN': '碳排放报表' },
+      desc: { 'zh-CN': '把燃油 / 电能消耗折算为碳排放量，支持按项目、机型、周期统计，用于 ESG 与绿色施工汇报。' } },
+    { tagType: 'apply', name: { 'zh-CN': '驾驶员行为评分报表' },
+      desc: { 'zh-CN': '按急加速、急刹车、超速、怠速等事件给出机手的行为评分与排名，便于考核与培训。' } },
+    { tagType: 'apply', name: { 'zh-CN': '备件与保养消耗报表' },
+      desc: { 'zh-CN': '统计保养、维修产生的备件消耗与费用，按设备、项目与周期汇总。' } }
+];
+
+let optDraft = null;    // 弹窗打开期间的草稿（点「保存配置」才落盘）
+let optLang = 'zh-CN';  // 当前编辑语言
+let optPickIdx = -1;    // 正在上传预览图的行号
+
+// 转义：value="..." / <textarea> 用（esc() 只处理 & < >，不处理引号）
+function escAttr(v) {
+    return esc(v).replace(/"/g, '&quot;');
+}
+
+// 多语言文字：兼容旧的纯字符串写法（老配置的 name / desc 是字符串）
+function normOptionText(v) {
+    if (v == null) return {};
+    if (typeof v === 'string') return v.trim() ? { 'zh-CN': v } : {};
+    const out = {};
+    Object.keys(v).forEach(function (k) {
+        if (typeof v[k] === 'string' && v[k].trim()) out[k] = v[k];
+    });
+    return out;
+}
+
+function normOption(o, i) {
+    return {
+        id: o.id || ('opt_' + Date.now() + '_' + i),
+        tagType: o.tagType === 'apply' ? 'apply' : 'planned',
+        image: typeof o.image === 'string' ? o.image : '',
+        name: normOptionText(o.name),
+        desc: normOptionText(o.desc)
+    };
+}
+
+function readOptionsConfig() {
+    try {
+        const raw = localStorage.getItem(OPT_KEY);
+        const arr = raw ? JSON.parse(raw) : [];
+        if (!Array.isArray(arr)) return [];
+        return arr.filter(function (o) { return o && o.name; }).map(normOption);
+    } catch (e) { return []; }
+}
+
+function saveOptionsConfig(list) {
+    try { localStorage.setItem(OPT_KEY, JSON.stringify(list)); return true; } catch (e) { return false; }
+}
+
+function openOptionManager() {
+    const saved = readOptionsConfig();
+    optDraft = (saved.length ? saved : DEFAULT_REPORT_OPTIONS).map(normOption);
+    optLang = 'zh-CN';
+    renderOptLangSel();
+    renderOptRows();
+    document.getElementById('optModal').classList.add('show');
+}
+
+function renderOptLangSel() {
+    const sel = document.getElementById('optLangSel');
+    if (!sel) return;
+    sel.innerHTML = OPT_LANGS.map(function (l) {
+        return '<option value="' + l.id + '"' + (l.id === optLang ? ' selected' : '') + '>' + l.label + '</option>';
+    }).join('');
+}
+
+function optSwitchLang(lang) {
+    optLang = lang || 'zh-CN';
+    renderOptRows();
+}
+
+function closeOptionManager() {
+    document.getElementById('optModal').classList.remove('show');
+    optDraft = null;
+}
+
+function renderOptRows() {
+    const box = document.getElementById('optBody');
+    if (!box || !optDraft) return;
+    if (!optDraft.length) {
+        box.innerHTML = '<div class="opt-empty">清单为空，点左下角「＋ 添加一项」开始配置</div>';
+    } else {
+        box.innerHTML = optDraft.map(function (o, i) {
+            const tagOpts = ['planned', 'apply'].map(function (t) {
+                return '<option value="' + t + '"' + (o.tagType === t ? ' selected' : '') + '>' + OPT_TAG_TEXT[t] + '</option>';
+            }).join('');
+            const imgCell = '<div class="opt-img">'
+                + '<div class="opt-img-box" title="上传 / 替换预览图" onclick="optPickImage(' + i + ')">'
+                + (o.image ? '<img src="' + o.image + '" alt="">' : '<span>＋</span>')
+                + '</div>'
+                + (o.image ? '<button class="opt-img-del" title="移除预览图" onclick="optRemoveImage(' + i + ')">✕</button>' : '')
+                + '</div>';
+            return '<div class="opt-row">'
+                + '<span class="opt-idx">' + (i + 1) + '</span>'
+                + imgCell
+                + '<input class="opt-name" value="' + escAttr(o.name[optLang] || '') + '" placeholder="报表名称" oninput="optChange(' + i + ',\'name\',this.value)">'
+                + '<select class="opt-tag" onchange="optChange(' + i + ',\'tagType\',this.value)">' + tagOpts + '</select>'
+                + '<textarea class="opt-desc" placeholder="一句话描述（可留空）" oninput="optChange(' + i + ',\'desc\',this.value)">' + esc(o.desc[optLang] || '') + '</textarea>'
+                + '<button class="opt-del" title="删除该候选项" onclick="optDelRow(' + i + ')">✕</button>'
+                + '</div>';
+        }).join('');
+    }
+    const cnt = document.getElementById('optCount');
+    if (cnt) cnt.textContent = '共 ' + optDraft.length + ' 项';
+}
+
+// name / desc 按语言存放：写入当前语言，清空则该语言删除
+function optChange(i, key, value) {
+    if (!optDraft || !optDraft[i]) return;
+    if (key === 'name' || key === 'desc') {
+        if (String(value || '').trim()) optDraft[i][key][optLang] = value;
+        else delete optDraft[i][key][optLang];
+        return;
+    }
+    optDraft[i][key] = value;
+}
+
+function optAddRow() {
+    if (!optDraft) return;
+    optDraft.push({ id: 'opt_' + Date.now(), tagType: 'apply', image: '', name: {}, desc: {} });
+    renderOptRows();
+    const box = document.getElementById('optBody');
+    if (box) {
+        const inputs = box.querySelectorAll('.opt-name');
+        if (inputs.length) inputs[inputs.length - 1].focus();
+        box.scrollTop = box.scrollHeight;
+    }
+}
+
+function optDelRow(i) {
+    if (!optDraft || !optDraft[i]) return;
+    optDraft.splice(i, 1);
+    renderOptRows();
+}
+
+// ===== 预览图：上传后按最大宽度缩放、铺白底转 JPEG，避免 base64 撑爆 localStorage =====
+function optPickImage(i) {
+    optPickIdx = i;
+    const f = document.getElementById('optFile');
+    if (f) { f.value = ''; f.click(); }
+}
+
+function optApplyImageFile(file) {
+    if (!file || optPickIdx < 0 || !optDraft || !optDraft[optPickIdx]) return;
+    const idx = optPickIdx;
+    optPickIdx = -1;
+    const reader = new FileReader();
+    reader.onload = function () {
+        const im = new Image();
+        im.onload = function () {
+            const maxW = 640;
+            const scale = Math.min(1, maxW / (im.width || maxW));
+            const w = Math.max(1, Math.round((im.width || maxW) * scale));
+            const h = Math.max(1, Math.round((im.height || 1) * scale));
+            const cv = document.createElement('canvas');
+            cv.width = w;
+            cv.height = h;
+            const ctx = cv.getContext('2d');
+            ctx.fillStyle = '#fff';
+            ctx.fillRect(0, 0, w, h);
+            ctx.drawImage(im, 0, 0, w, h);
+            let out = '';
+            try { out = cv.toDataURL('image/jpeg', 0.82); } catch (e) { out = String(reader.result || ''); }
+            if (optDraft && optDraft[idx]) {
+                optDraft[idx].image = out;
+                renderOptRows();
+            }
+        };
+        im.onerror = function () { showToast('图片读取失败', 'error'); };
+        im.src = String(reader.result || '');
+    };
+    reader.onerror = function () { showToast('图片读取失败', 'error'); };
+    reader.readAsDataURL(file);
+}
+
+function optRemoveImage(i) {
+    if (!optDraft || !optDraft[i]) return;
+    optDraft[i].image = '';
+    renderOptRows();
+}
+
+document.getElementById('optFile').addEventListener('change', function () {
+    optApplyImageFile(this.files && this.files[0]);
+});
+
+function optSaveAll() {
+    if (!optDraft) return;
+    const list = [];
+    const seen = {};
+    for (let i = 0; i < optDraft.length; i++) {
+        const item = optDraft[i];
+        const zhName = String((item.name && item.name['zh-CN']) || '').trim();
+        if (!zhName) { showToast('第 ' + (i + 1) + ' 项缺少简体中文名称', 'error'); return; }
+        if (seen[zhName]) { showToast('报表名称重复：' + zhName, 'error'); return; }
+        seen[zhName] = true;
+        const name = {};
+        const desc = {};
+        Object.keys(item.name || {}).forEach(function (k) {
+            const v = String(item.name[k] || '').trim();
+            if (v) name[k] = v;
+        });
+        Object.keys(item.desc || {}).forEach(function (k) {
+            const v = String(item.desc[k] || '').trim();
+            if (v) desc[k] = v;
+        });
+        list.push({
+            id: item.id,
+            tagType: item.tagType === 'apply' ? 'apply' : 'planned',
+            image: item.image || '',
+            name: name,
+            desc: desc
+        });
+    }
+    if (!list.length) { showToast('至少保留 1 项候选报表', 'error'); return; }
+    if (!saveOptionsConfig(list)) { showToast('保存失败：本机存储不可用或空间不足', 'error'); return; }
+    closeOptionManager();
+    showToast('已保存 ' + list.length + ' 项候选报表', 'success');
+}
+
+// 点遮罩 / 按 Esc 等同取消
+document.getElementById('optModal').addEventListener('click', function (e) {
+    if (e.target === this) closeOptionManager();
+});
+document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && optDraft) closeOptionManager();
 });
 
 init();

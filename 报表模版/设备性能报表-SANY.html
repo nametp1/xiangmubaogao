@@ -1,0 +1,350 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>设备性能报表（v2.0 · 三一风格）</title>
+<style>
+* { box-sizing: border-box; }
+body {
+    margin: 0;
+    background: #f4f4f4;
+    font-family: "PingFang SC", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+    color: #1a1a1a;
+}
+.report {
+    width: 297mm;
+    min-height: 210mm;
+    margin: 20px auto;
+    padding: 14mm 16mm;
+    background: #ffffff;
+}
+/* ---------- 头部 ---------- */
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-start;
+    border-bottom: 4px solid #E60012;
+    padding-bottom: 12px;
+}
+.logo {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+}
+.logo .brand {
+    background: #E60012;
+    color: #fff;
+    font-weight: 900;
+    font-size: 26px;
+    padding: 6px 14px;
+    letter-spacing: 2px;
+    border-radius: 2px;
+}
+.logo .product {
+    font-size: 13px;
+    color: #666;
+    line-height: 1.5;
+}
+.report-title { text-align: right; }
+.report-title h1 { margin: 0; font-size: 24px; letter-spacing: 1px; }
+.report-title p { margin: 5px 0 0; font-size: 13px; color: #666; }
+.report-title .serial { font-weight: 700; color: #1a1a1a; }
+.period {
+    display: inline-block;
+    margin-top: 6px;
+    background: #E60012;
+    color: #fff;
+    font-size: 12px;
+    padding: 3px 12px;
+    border-radius: 12px;
+    letter-spacing: .5px;
+}
+/* ---------- 顶部指标卡 ---------- */
+.metrics {
+    margin-top: 18px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+}
+.metric {
+    padding: 14px 16px;
+    background: #fff;
+    border-top: 4px solid #E60012;
+    border-radius: 2px;
+    box-shadow: 0 1px 4px rgba(0,0,0,.06);
+}
+.metric .label { font-size: 12px; color: #888; letter-spacing: .5px; }
+.metric .number { margin-top: 6px; font-size: 26px; font-weight: 800; color: #E60012; }
+.metric .unit { font-size: 12px; color: #999; }
+/* ---------- 版式 ---------- */
+.cols { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.section { margin-top: 22px; }
+.section-title {
+    margin-bottom: 12px;
+    padding-left: 10px;
+    border-left: 4px solid #E60012;
+    font-size: 16px;
+    font-weight: 700;
+    color: #1a1a1a;
+    letter-spacing: .5px;
+}
+.sub-title {
+    margin: 14px 0 10px;
+    font-size: 14px;
+    font-weight: 700;
+    color: #333;
+}
+/* ---------- 环形图 ---------- */
+.ring-row { display: flex; align-items: center; gap: 18px; }
+.ring {
+    width: 130px; height: 130px;
+    border-radius: 50%;
+    background: conic-gradient(#E60012 0 99.2%, #eeeeee 99.2% 100%);
+    position: relative;
+    flex-shrink: 0;
+}
+.ring::after {
+    content: "";
+    position: absolute; inset: 22px;
+    background: #fff;
+    border-radius: 50%;
+}
+.ring .ring-label {
+    position: absolute; inset: 0;
+    display: flex; flex-direction: column;
+    align-items: center; justify-content: center;
+    z-index: 1;
+    font-size: 11px; color: #999;
+}
+.ring .ring-label b { font-size: 22px; color: #E60012; }
+.legend { flex: 1; }
+.legend .item { display: flex; justify-content: space-between; padding: 6px 0; border-bottom: 1px solid #f0f0f0; font-size: 13px; }
+.legend .item .dot { display: inline-block; width: 10px; height: 10px; border-radius: 2px; margin-right: 8px; }
+.legend .item .val { font-weight: 700; }
+/* ---------- 进度条 ---------- */
+.bar-item { margin: 10px 0; }
+.bar-head { display: flex; justify-content: space-between; font-size: 12px; margin-bottom: 4px; color: #555; }
+.bar-head .val { font-weight: 700; color: #1a1a1a; }
+.bar { height: 14px; background: #f2f2f2; border-radius: 7px; overflow: hidden; }
+.bar-fill { height: 100%; background: #E60012; border-radius: 7px; }
+/* ---------- 表格 ---------- */
+table { width: 100%; border-collapse: collapse; font-size: 12px; }
+th {
+    background: #E60012;
+    color: #fff;
+    padding: 8px;
+    text-align: left;
+    font-weight: 600;
+    letter-spacing: .5px;
+}
+td { padding: 7px 8px; border-bottom: 1px solid #f0f0f0; }
+tr:nth-child(even) td { background: #faf7f7; }
+td.num, th.num { text-align: right; }
+.desc { color: #888; font-size: 11px; }
+/* ---------- 页脚 ---------- */
+.footer {
+    margin-top: 26px;
+    padding-top: 10px;
+    border-top: 2px solid #E60012;
+    display: flex;
+    justify-content: space-between;
+    color: #888;
+    font-size: 10px;
+    align-items: center;
+    gap: 16px;
+}
+.footer .brand2 { font-weight: 800; color: #E60012; font-size: 13px; letter-spacing: 1px; }
+@page { size: A4 landscape; margin: 0; }
+@media print {
+    body { background: #fff; }
+    .report { margin: 0; width: 297mm; min-height: 210mm; box-shadow: none; }
+}
+</style>
+</head>
+<body>
+<div class="report">
+
+    <div class="header">
+        <div class="logo">
+            <span class="brand">SANY</span>
+            <div class="product">三一智联系统<br>MySANY 设备管理平台</div>
+        </div>
+        <div class="report-title">
+            <h1>设备性能报表</h1>
+            <p class="serial">设备编号：SY215C9CA01234</p>
+            <span class="period">统计周期：2017-07-01 至 2017-09-30</span>
+        </div>
+    </div>
+
+    <div class="metrics">
+        <div class="metric"><div class="label">工作时间</div><div class="number">284.4</div><div class="unit">小时</div></div>
+        <div class="metric"><div class="label">怠速时间</div><div class="number">2.3</div><div class="unit">小时</div></div>
+        <div class="metric"><div class="label">燃油消耗</div><div class="number">5,669.0</div><div class="unit">升</div></div>
+        <div class="metric"><div class="label">平均小时油耗</div><div class="number">19.9</div><div class="unit">升/小时</div></div>
+    </div>
+
+    <div class="cols">
+        <div class="section">
+            <div class="section-title">工作 / 怠速时间分布</div>
+            <div class="ring-row">
+                <div class="ring">
+                    <div class="ring-label"><b>284.4</b>工作小时</div>
+                </div>
+                <div class="legend">
+                    <div class="item"><span><span class="dot" style="background:#E60012"></span>工作时间</span><span class="val">99.2%</span></div>
+                    <div class="item"><span><span class="dot" style="background:#eeeeee"></span>怠速时间</span><span class="val">0.8%</span></div>
+                </div>
+            </div>
+            <table style="margin-top:14px">
+                <thead><tr><th>项目</th><th class="num">时长（小时）</th><th class="num">占周期比例</th></tr></thead>
+                <tbody>
+                    <tr><td>发动机停机时间</td><td class="num">1,923.6</td><td class="num">87.1%</td></tr>
+                    <tr><td>发动机运行时间</td><td class="num">284.4</td><td class="num">12.9%</td></tr>
+                    <tr><td>工作时间</td><td class="num">282.1</td><td class="num">99.2%</td></tr>
+                    <tr><td>怠速时间</td><td class="num">2.3</td><td class="num">0.8%</td></tr>
+                    <tr><td>发动机启动次数</td><td class="num">406</td><td class="num">--</td></tr>
+                    <tr><td>无运行天数</td><td class="num">20</td><td class="num">--</td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="section">
+            <div class="section-title">发动机利用率</div>
+            <table>
+                <thead><tr><th>功率段</th><th class="num">周期时长（小时）</th><th class="num">占工作时间比例</th></tr></thead>
+                <tbody>
+                    <tr><td>高功率段</td><td class="num">131.4</td><td class="num">46.6%</td></tr>
+                    <tr><td>中功率段</td><td class="num">48.8</td><td class="num">17.3%</td></tr>
+                    <tr><td>低功率段</td><td class="num">101.9</td><td class="num">36.1%</td></tr>
+                </tbody>
+            </table>
+            <div style="margin-top:12px">
+                <div class="bar-item">
+                    <div class="bar-head"><span>高功率段</span><span class="val">131.4 小时 · 46.6%</span></div>
+                    <div class="bar"><div class="bar-fill" style="width:100%"></div></div>
+                </div>
+                <div class="bar-item">
+                    <div class="bar-head"><span>中功率段</span><span class="val">48.8 小时 · 17.3%</span></div>
+                    <div class="bar"><div class="bar-fill" style="width:37.1%"></div></div>
+                </div>
+                <div class="bar-item">
+                    <div class="bar-head"><span>低功率段</span><span class="val">101.9 小时 · 36.1%</span></div>
+                    <div class="bar"><div class="bar-fill" style="width:77.6%"></div></div>
+                </div>
+            </div>
+            <div style="margin-top:14px">
+                <div class="bar-item">
+                    <div class="bar-head"><span>工作时间</span><span class="val">99.2%</span></div>
+                    <div class="bar"><div class="bar-fill" style="width:99.2%"></div></div>
+                </div>
+                <div class="bar-item">
+                    <div class="bar-head"><span>怠速时间</span><span class="val">0.8%</span></div>
+                    <div class="bar"><div class="bar-fill" style="width:0.8%"></div></div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="cols">
+        <div class="section">
+            <div class="section-title">燃油消耗明细</div>
+            <table>
+                <thead><tr><th>工况</th><th class="num">周期油耗（升）</th><th class="num">周期油耗（升/时）</th><th class="num">终身油耗（升/时）</th></tr></thead>
+                <tbody>
+                    <tr><td>怠速</td><td class="num">29.4</td><td class="num">12.9</td><td class="num">12.9</td></tr>
+                    <tr><td>低功率段</td><td class="num">562.1</td><td class="num">5.5</td><td class="num">5.5</td></tr>
+                    <tr><td>中功率段</td><td class="num">1,057.4</td><td class="num">21.6</td><td class="num">21.6</td></tr>
+                    <tr><td>高功率段</td><td class="num">3,918.2</td><td class="num">29.8</td><td class="num">29.8</td></tr>
+                    <tr><td><b>合计</b></td><td class="num"><b>5,669.0</b></td><td class="num">--</td><td class="num">--</td></tr>
+                    <tr><td><b>平均值</b></td><td class="num">--</td><td class="num"><b>19.9</b></td><td class="num"><b>16.9</b></td></tr>
+                </tbody>
+            </table>
+        </div>
+
+        <div class="section">
+            <div class="section-title">小时油耗水平（升/小时）</div>
+            <div class="bar-item">
+                <div class="bar-head"><span>高功率段</span><span class="val">29.8 升/小时</span></div>
+                <div class="bar"><div class="bar-fill" style="width:100%"></div></div>
+            </div>
+            <div class="bar-item">
+                <div class="bar-head"><span>中功率段</span><span class="val">21.6 升/小时</span></div>
+                <div class="bar"><div class="bar-fill" style="width:72.5%"></div></div>
+            </div>
+            <div class="bar-item">
+                <div class="bar-head"><span>怠速</span><span class="val">12.9 升/小时</span></div>
+                <div class="bar"><div class="bar-fill" style="width:43.3%"></div></div>
+            </div>
+            <div class="bar-item">
+                <div class="bar-head"><span>低功率段</span><span class="val">5.5 升/小时</span></div>
+                <div class="bar"><div class="bar-fill" style="width:18.5%"></div></div>
+            </div>
+            <p class="desc" style="margin-top:12px">周期平均油耗：<b>19.9 升/小时</b> &nbsp;·&nbsp; 终身平均油耗：<b>16.9 升/小时</b></p>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">作业模式与健康状态</div>
+        <div class="cols" style="gap:20px">
+            <table>
+                <thead><tr><th>作业模式</th><th class="num">周期时长（小时）</th><th class="num">占周期比例</th></tr></thead>
+                <tbody>
+                    <tr><td>L 模式</td><td class="num">10.5</td><td class="num">3.7%</td></tr>
+                    <tr><td>G 模式</td><td class="num">3.4</td><td class="num">1.2%</td></tr>
+                    <tr><td>H 模式</td><td class="num">251.5</td><td class="num">88.4%</td></tr>
+                    <tr><td>H+ 模式</td><td class="num">318.8</td><td class="num">112.1%</td></tr>
+                    <tr><td>行走时间</td><td class="num">23.7</td><td class="num">--</td></tr>
+                    <tr><td>回转时间</td><td class="num">125.8</td><td class="num">--</td></tr>
+                </tbody>
+            </table>
+            <table>
+                <thead><tr><th>健康状态（模式占比）</th><th class="num">占比</th></tr></thead>
+                <tbody>
+                    <tr><td>G 模式</td><td class="num">0.6%</td></tr>
+                    <tr><td>L 模式</td><td class="num">1.8%</td></tr>
+                    <tr><td>H 模式</td><td class="num">43.1%</td></tr>
+                    <tr><td>H+ 模式</td><td class="num">54.6%</td></tr>
+                </tbody>
+            </table>
+        </div>
+        <div style="margin-top:14px">
+            <div class="sub-title">生产率</div>
+            <table>
+                <thead><tr><th>项目</th><th class="num">报告周期</th><th class="num">累计终身</th></tr></thead>
+                <tbody>
+                    <tr><td>锤击滥用事件</td><td class="num">0</td><td class="num">0</td></tr>
+                    <tr><td class="desc">设备产生的锤击滥用事件次数</td><td class="num" colspan="2"></td></tr>
+                    <tr><td>锤击使用时长</td><td class="num">0.0 小时</td><td class="num">--</td></tr>
+                    <tr><td class="desc">锤击作业累计使用时长</td><td class="num" colspan="2"></td></tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+    <div class="section">
+        <div class="section-title">数据汇总</div>
+        <table>
+            <thead><tr><th style="width:28%">指标项</th><th class="num">报告周期</th><th class="num">累计终身</th><th>说明</th></tr></thead>
+            <tbody>
+                <tr><td>期初累计发动机时长</td><td class="num">0.0 小时</td><td class="num">--</td><td>报告周期开始时设备累计运行总时长</td></tr>
+                <tr><td>期末累计发动机时长</td><td class="num">284.4 小时</td><td class="num">--</td><td>报告周期结束时设备累计运行总时长</td></tr>
+                <tr><td>总燃油消耗量</td><td class="num">5,669.0 升</td><td class="num">6,453.0 升</td><td>设备在报告周期内消耗的燃油总量</td></tr>
+                <tr><td>作业燃油消耗量</td><td class="num">5,639.6 升</td><td class="num">6,423.6 升</td><td>有效工作状态下消耗的燃油量</td></tr>
+                <tr><td>怠速燃油消耗量</td><td class="num">29.4 升</td><td class="num">29.4 升</td><td>怠速状态下消耗的燃油量</td></tr>
+                <tr><td>期末燃油液位</td><td class="num">100%</td><td class="num">--</td><td>报告周期结束时油箱剩余油量占比</td></tr>
+                <tr><td>综合小时油耗</td><td class="num">19.9 升/小时</td><td class="num">19.2 升/小时</td><td>发动机每运行一小时的平均燃油消耗量</td></tr>
+                <tr><td>碳排放量（kgCO2e）</td><td class="num">15,122.6</td><td class="num">17,214.0</td><td>报告周期内产生的碳排放总量</td></tr>
+            </tbody>
+        </table>
+    </div>
+
+    <div class="footer">
+        <div><span class="brand2">SANY</span>&nbsp;三一智联系统</div>
+        <div>2017-10-03 04:42</div>
+        <div>报告生成人：Schuck（三一客户服务部）· MySANY 设备管理平台</div>
+    </div>
+
+</div>
+</body>
+</html>
