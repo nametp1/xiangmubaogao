@@ -157,8 +157,9 @@
         .form-group textarea { resize: vertical; min-height: 180px; line-height: 1.6; font-family: 'Consolas','Monaco','Courier New',monospace; font-size: 12px; }
         .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
         .form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
-        /* 基本信息第二行：启用开关（与输入框同高、垂直居中）+ 整体口径分段 */
-        .form-row-2.meta-row .form-group { margin-bottom: 8px; }
+        /* 基本信息第二行：启用开关 + 整体口径分段 + 统计时间维度（三列） */
+        .form-row-2.meta-row { grid-template-columns: 1fr 1fr 1fr; }
+        .form-row-2.meta-row .form-group { margin-bottom: 20px; }
         .form-row-2.meta-row .switch-wrap { height: 34px; }
         .switch-state { font-size: 13px; color: #666; }
         .form-select {
@@ -820,25 +821,10 @@
         .mode-switch button.active { background: #fff; color: #E60012; box-shadow: 0 1px 4px rgba(0,0,0,.1); }
         .mode-switch button:hover:not(.active) { color: #333; }
 
-        /* 设计器两栏（口径与时间维度在顶部工具栏 / 画布 / 组件参数） */
-        .designer-toolbar {
-            display: flex; align-items: center; gap: 10px; flex-wrap: wrap;
-            padding: 10px 12px; background: #fafafa; border: 1px solid #eee; border-radius: 8px 8px 0 0;
-        }
-        .designer-toolbar .tb-item { display: flex; align-items: center; gap: 8px; font-size: 12px; color: #666; }
-        .designer-toolbar .tb-lb { color: #999; white-space: nowrap; }
-        .designer-toolbar .tb-checks { display: flex; align-items: center; gap: 12px; }
-        .designer-toolbar .chk-inline { display: inline-flex; align-items: center; gap: 5px; font-size: 12px; color: #333; cursor: pointer; }
-        .designer-toolbar .chk-inline input[type="checkbox"] { width: 14px; height: 14px; accent-color: #E60012; cursor: pointer; }
-        .designer-toolbar .tb-item b { color: #1a1a1a; font-weight: 600; }
-        .designer-toolbar .tb-spacer { flex: 1; }
-        .designer-toolbar .tb-btn {
-            height: 30px; padding: 0 12px; border: 1px solid #d9d9d9; background: #fff; border-radius: 5px;
-            font-size: 12px; color: #333; cursor: pointer; font-family: inherit;
-        }
-        .designer-toolbar .tb-btn:hover { border-color: #E60012; color: #E60012; }
-        .designer-toolbar .tb-btn.primary { background: #E60012; border-color: #E60012; color: #fff; }
-        .designer-toolbar .tb-btn.primary:hover { background: #cc0010; color: #fff; }
+        /* 基本信息行第三列：统计时间维度（三个内联勾选，与同行输入框中心线对齐） */
+        .form-row-2.meta-row .time-dims { display: flex; align-items: center; gap: 14px; height: 34px; }
+        .chk-inline { display: inline-flex; align-items: center; gap: 5px; font-size: 13px; color: #333; cursor: pointer; }
+        .chk-inline input[type="checkbox"] { width: 14px; height: 14px; accent-color: #E60012; cursor: pointer; }
 
         .designer-body {
             display: grid; grid-template-columns: 1fr 268px;
@@ -951,9 +937,6 @@
         .prop-empty { padding: 26px 14px; text-align: center; color: #bbb; font-size: 12px; line-height: 1.7; }
         .prop-danger { width: 100%; height: 32px; border: 1px solid #f3c9cd; background: #fff; color: #E60012; border-radius: 5px; font-size: 12px; cursor: pointer; font-family: inherit; }
         .prop-danger:hover { background: #fff1f0; }
-        .designer-validate { margin: 0; padding: 8px 12px; font-size: 12px; line-height: 1.6; display: none; }
-        .designer-validate.active { display: block; }
-        .designer-validate.warn { background: #fffbe6; border-top: 1px solid #ffe58f; color: #d48806; }
 
         /* 字段库选择弹窗 */
         .pdfpick-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.35); display: none; align-items: center; justify-content: center; z-index: 70; }
@@ -1043,14 +1026,6 @@
         .pdfpick-btn.primary { background: #E60012; border-color: #E60012; color: #fff; }
         .pdfpick-btn.primary:hover { background: #cc0010; color: #fff; }
 
-        /* 发布 JSON 弹窗 */
-        .pdfd-json-overlay { position: fixed; inset: 0; background: rgba(0,0,0,.35); display: none; align-items: center; justify-content: center; z-index: 60; }
-        .pdfd-json-overlay.active { display: flex; }
-        .pdfd-json-box { width: 760px; max-height: 78vh; background: #fff; border-radius: 8px; overflow: hidden; display: flex; flex-direction: column; }
-        .pdfd-json-head { padding: 12px 16px; border-bottom: 1px solid #f0f0f0; font-size: 13px; font-weight: 700; display: flex; justify-content: space-between; align-items: center; }
-        .pdfd-json-head span.close { cursor: pointer; color: #999; font-size: 18px; line-height: 1; }
-        .pdfd-json-body { flex: 1; overflow: auto; background: #1e1e1e; color: #d4d4d4; padding: 14px 16px; font-family: ui-monospace, Menlo, monospace; font-size: 11.5px; line-height: 1.7; white-space: pre; margin: 0; }
-        .pdfd-json-foot { padding: 10px 16px; border-top: 1px solid #f0f0f0; display: flex; justify-content: flex-end; gap: 8px; }
 
         /* 预览与测试 */
         .preview-toolbar { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; margin-bottom: 12px; }
@@ -1236,6 +1211,15 @@
                         <button type="button" data-col="fleet" onclick="setEditScope('fleet')">机群（聚合）</button>
                     </div>
                 </div>
+                <!-- 统计时间维度：模版级设置（原在设计器工具栏，2026-09-23 移到「整体口径」之后） -->
+                <div class="form-group">
+                    <label>统计时间维度</label>
+                    <div class="time-dims">
+                        <label class="chk-inline"><input type="checkbox" data-td="day" checked onchange="pdfToggleTimeDim(this)"> 日报</label>
+                        <label class="chk-inline"><input type="checkbox" data-td="week" checked onchange="pdfToggleTimeDim(this)"> 周报</label>
+                        <label class="chk-inline"><input type="checkbox" data-td="month" checked onchange="pdfToggleTimeDim(this)"> 月报</label>
+                    </div>
+                </div>
             </div>
 
             <!-- 步骤向导：1 邮件正文（必填）· 2 XLSX/CSV 附件（可跳过）· 3 PDF 附件（可跳过） -->
@@ -1400,7 +1384,7 @@
                     <div class="pdfpick-box">
                         <div class="pdfpick-head">
                             <div class="pdfpick-head-l">
-                                <span class="pdfpick-title" id="pdfPickTitle">从模型字典选择</span>
+                                <span class="pdfpick-title" id="pdfPickTitle">选择指标（单选）</span>
                             </div>
                             <button type="button" class="pdfpick-x" onclick="pdfCloseFieldPicker()" title="关闭">×</button>
                         </div>
@@ -1426,18 +1410,6 @@
 
                 <!-- ===== v2.0 模式一：版式设计器 ===== -->
                 <div id="pdfDesignerMode">
-                    <div class="designer-toolbar">
-                        <div class="tb-item"><span class="tb-lb">统计时间维度</span>
-                            <div class="tb-checks">
-                                <label class="chk-inline"><input type="checkbox" data-td="day" onchange="pdfToggleTimeDim(this)"> 日报</label>
-                                <label class="chk-inline"><input type="checkbox" data-td="week" onchange="pdfToggleTimeDim(this)"> 周报</label>
-                                <label class="chk-inline"><input type="checkbox" data-td="month" onchange="pdfToggleTimeDim(this)"> 月报</label>
-                            </div>
-                        </div>
-                        <div class="tb-spacer"></div>
-                        <button type="button" class="tb-btn primary" onclick="publishPdfLayout()">查看 json</button>
-                    </div>
-
                     <div class="designer-body">
                         <!-- 中：画布 -->
                         <div class="designer-col">
@@ -1447,7 +1419,6 @@
                                     <div class="canvas-page" id="pdfCanvas"></div>
                                 </div>
                             </div>
-                            <div class="designer-validate" id="designerValidate"></div>
                         </div>
 
                         <!-- 右：组件参数配置 -->
@@ -1455,21 +1426,6 @@
                             <div class="designer-col-title">组件参数配置</div>
                             <div class="prop-panel" id="propPanel">
                                 <div class="prop-empty">点击画布上的某个组件<br>进行参数配置</div>
-                            </div>
-                        </div>
-                    </div>
-
-                    <!-- 发布 JSON 弹窗 -->
-                    <div class="pdfd-json-overlay" id="pdfdJsonOverlay" onclick="if(event.target===this)closePdfJson()">
-                        <div class="pdfd-json-box">
-                            <div class="pdfd-json-head">
-                                <span>版式配置 JSON（已写入模版，随模版保存）</span>
-                                <span class="close" onclick="closePdfJson()">×</span>
-                            </div>
-                            <pre class="pdfd-json-body" id="pdfdJsonBody"></pre>
-                            <div class="pdfd-json-foot">
-                                <button type="button" class="tb-btn" onclick="closePdfJson()">关闭</button>
-                                <button type="button" class="tb-btn primary" onclick="pdfCopyJson()">复制 JSON</button>
                             </div>
                         </div>
                     </div>
@@ -1893,6 +1849,7 @@ function clearFilters() {
 // ==================== 编辑弹窗 ====================// ==================== 编辑弹窗 ====================
 function openEditModal(index, isNew) {
     currentTemplateId = index;
+    addFlow = !!isNew;   // 新建入口 = 新增流程（保存不关弹窗、提示「添加成功」）
     currentEditLang = 'zh-CN';
     // 优先打开已有翻译的语言
     const langs = getConfiguredLangs(index);
@@ -2022,7 +1979,8 @@ function switchEditLang(lang) {
     attColLoaded = false;
     pdfColLoaded = false;
     switchStep(1);
-    loadEditForm();
+    // 沿用当前「新建 / 编辑」语义：新建流程里切语言不该把标题变成「编辑模版」、也不该丢掉「新建」状态
+    loadEditForm(editIsNew);
     scrollEditModalTop();
     [60, 160, 360].forEach(ms => setTimeout(scrollEditModalTop, ms));
 }
@@ -2063,10 +2021,12 @@ function saveEditToState() {
         }
     }
 
-    // ── 第 3 步：PDF 附件（字段绑定与版式存在 pdfDesignerJson 里，由「查看 json」落库）──
+    // ── 第 3 步：PDF 附件（字段绑定与版式存在 pdfDesignerJson 里，随模版保存落库）──
     if (!editStepSkip[3]) {
         const pdfFilenameEl = document.getElementById('pdf-attach-filename');
         trObj.pdfAttachmentFileName = pdfFilenameEl ? pdfFilenameEl.value.trim() : '';
+        // 原「查看 json」入口已移除：版式 JSON 改为保存时静默落库（否则重开设计器会丢版式）
+        if (pdfV3) trObj.pdfDesignerJson = JSON.stringify(pdfV3Payload());
     }
 
     t.machineTypes = getEditTypes();
@@ -2075,6 +2035,7 @@ function saveEditToState() {
 }
 
 function closeEditModal() {
+    addFlow = false;   // 关闭弹窗即结束「新增流程」
     document.getElementById('edit-modal').classList.remove('show');
     // 重置到步骤1
     switchStep(1);
@@ -2216,14 +2177,22 @@ function insertVarEdit(v) {
 function saveTemplate() {
     saveEditToState();
     const t = templates[currentTemplateId];
-    const zhTr = t.translations['zh-CN'];
-    if (!zhTr || !zhTr.name) { showToast('中文模版名称不能为空', 'error'); return; }
+    // 原型为单语言模式：切换「编辑语言」会重建该语言内容（其它语言被清掉），
+    // 所以必填校验按**当前编辑语言**判定，而不是固定中文
+    const curTr = getT(currentTemplateId, currentEditLang);
+    if (!curTr || !curTr.name) { showToast('模版名称不能为空', 'error'); return; }
     // 描述字段名为 description（兼容历史数据里的 desc）
-    if (!zhTr || !(zhTr.description || zhTr.desc)) { showToast('中文模版描述不能为空', 'error'); return; }
+    if (!curTr || !(curTr.description || curTr.desc)) { showToast('模版描述不能为空', 'error'); return; }
     if (!getTypes(t).length) { showToast('请选择适用范围', 'error'); return; }
-    if (!zhTr || !zhTr.body) { showToast('中文正文内容不能为空', 'error'); return; }
+    if (!curTr || !curTr.body) { showToast('正文内容不能为空', 'error'); return; }
     t.updatedAt = nowStr();
     renderTemplateTable();
+    // 新增模版：提交后不关闭弹窗，只提示「添加成功」，便于直接切换「编辑语言」继续添加其它语言
+    if (addFlow) {
+        scrollEditModalTop();
+        showToast('添加成功', 'success');
+        return;
+    }
     closeEditModal();
     showToast('模版保存成功', 'success');
 }
@@ -2291,8 +2260,10 @@ const PDFV3_TIME_DIMS = [{ id: 'day', name: '日报' }, { id: 'week', name: '周
 const PDF_DEFAULT_METRIC = '总油耗';
 
 /* ===== 指标绑定规则：按「组件类型 × 当前口径」决定可选几个指标 =====
+   单机：图表类（折线图 / 柱状图 / 环形图）统一只绑定 1 个指标 —— 单选（2026-09-23 用户要求
+        「整体口径 单机设备」下弹窗表头与交互都改成单选）；
    机群：折线图每台设备一条线、环形图看「单机贡献度」→ 只能 1 个指标（单选，再选自动替换）；
-   单机折线图、柱状图（单机 / 机群排行榜）、单机环形图：可按同一单位多指标并列（5 色循环，上限 5）；
+   机群柱状图（设备排行）仍可同单位多指标并排（5 色循环，上限 5）；
    指标卡 1 字段 1 张卡（≤6 张）；数据明细表一列一个指标（不限，各列单位可不同）。 */
 const PDF_PICK_METRIC_MAX = 5;
 function pdfMetricRule(type, scope) {
@@ -2300,9 +2271,9 @@ function pdfMetricRule(type, scope) {
     if (type === 'text_block') return { mode: 'none', max: 0 };
     if (type === 'data_table') return { mode: 'table', max: 0 };
     if (type === 'kpi_card') return { mode: 'kpi', max: PDF_PICK_KPI_MAX };
-    if (scope === 'fleet' && (type === 'line_chart' || type === 'doughnut_chart')) {
-        return { mode: 'single', max: 1 };
-    }
+    /* 单机口径：图表类一律单选 1 个指标 */
+    if (scope === 'single') return { mode: 'single', max: 1 };
+    if (type === 'line_chart' || type === 'doughnut_chart') return { mode: 'single', max: 1 };
     return { mode: 'multi', max: PDF_PICK_METRIC_MAX };
 }
 // 该规则下允许的最大指标数（0 = 不限）
@@ -2412,6 +2383,8 @@ function initPdfDesigner() {
     let saved = null;
     if (tr && tr.pdfDesignerJson) { try { saved = JSON.parse(tr.pdfDesignerJson); } catch (e) { saved = null; } }
     pdfV3 = saved ? pdfNormalizeState(saved) : pdfV3Defaults();
+    // 顶部「统计时间维度」可能在本步之前就被改过：新建版式（无已保存 JSON）时以 DOM 勾选为准
+    if (!saved) { const dom = readTimeDimsFromDom(); if (dom.length) pdfV3.timeDims = dom; }
     pdfV3SelectedId = (pdfModules()[0] || {}).id || null;
     pdfV3RenderAll();
 }
@@ -2423,12 +2396,11 @@ function pdfV3RenderAll() {
     if (nameView) nameView.textContent = pdfV3TplName();
     const scopeView = document.getElementById('pdfScopeView');
     if (scopeView) scopeView.textContent = pdfV3Scope() === 'fleet' ? '机群聚合' : '单机设备';
-    document.querySelectorAll('#pdfDesignerMode [data-td]').forEach(el => {
+    document.querySelectorAll('#edit-modal [data-td]').forEach(el => {
         el.checked = (pdfV3.timeDims || []).includes(el.dataset.td);
     });
     renderPdfCanvas();
     pdfV3RenderProps();
-    validatePdfLayout();
 }
 
 // 画布渲染（同时供「预览与测试」复用）
@@ -2503,9 +2475,19 @@ function pdfV3ComponentHTML(c, scope) {
         + ' ondragleave="pdfCompDragLeave(event)" ondrop="pdfCompDrop(event,\'' + c.id + '\')" ondragend="pdfCompDragEnd(event)">'
         + '<div class="pdfd-comp-head"><span class="pdfd-drag" title="按住拖动排序">⠿</span>'
         + '<span class="pdfd-comp-name">' + escapeAttr(c.title || pdfTypeName(c.type)) + '</span>'
-        + ((c.metrics || []).map(m => pdfFieldUnitConflict(m)).some(Boolean)
-            ? '<span class="pdfd-err" title="所选指标在不同设备类型下单位不一致，需要更换指标">⚠ 单位不一致</span>'
-            : '')
+        + (function () {
+            // 报表级报错：组件内字段两两匹配（单位 / 属性）——「属性错误」即用户要求的报表报错态
+            if (c.type !== 'text_block' && c.type !== 'data_table') {
+                const cf = pdfMetricsConflict(c.metrics);
+                if (cf) {
+                    return '<span class="pdfd-err" title="' + escapeAttr(cf.msg) + '">⚠ '
+                        + (cf.level === 'block' ? '单位不一致' : '属性错误') + '</span>';
+                }
+            }
+            return (c.metrics || []).map(m => pdfFieldUnitConflict(m)).some(Boolean)
+                ? '<span class="pdfd-err" title="所选指标在不同设备类型下单位不一致，需要更换指标">⚠ 单位不一致</span>'
+                : '';
+        })()
         + '</div>' + inner + '</div>' + brk;
 }
 
@@ -2565,6 +2547,14 @@ function pdfV3RenderProps() {
         html += '<div class="prop-group">'
             + (c.metrics.length
                 ? pdfMetricRowsHTML(c, isKpi)
+                    + (function () {
+                        if (c.type === 'text_block' || c.type === 'data_table') return '';
+                        const cf = pdfMetricsConflict(c.metrics);
+                        if (!cf) return '';
+                        return '<div style="font-size:11px;color:#cf1322;background:#fff1f0;border:1px solid #ffccc7;'
+                            + 'border-radius:4px;padding:4px 8px;margin-bottom:6px;">' + (cf.level === 'block' ? '⚠ ' : '⛔ ')
+                            + escapeAttr(cf.msg) + (cf.level === 'block' ? '，需更换指标' : '，报表将报「属性错误」') + '</div>';
+                    })()
                 : '<div style="font-size:11px;color:#b7791f;background:#fffbe6;border:1px solid #ffe58f;border-radius:4px;padding:4px 8px;margin-bottom:6px;">⚠ 尚未绑定字段，画布无法出图</div>')
             + '<div style="display:flex;gap:12px;align-items:center;margin-top:2px;">'
             + '<button type="button" class="metric-add"' + (capFull ? ' disabled style="opacity:.45;cursor:not-allowed" title="' + capTip + '"' : '')
@@ -2690,7 +2680,14 @@ function pdfRemoveMetric(i) {
     pdfV3RenderAll();
 }
 
+// 顶部「统计时间维度」在进入第 3 步之前就能勾选：此时设计器还没初始化，只留 DOM 状态，
+// 由 initPdfDesigner() 按 DOM 读取（否则会抛错、且用户的勾选会被默认值覆盖）
+function readTimeDimsFromDom() {
+    return [].filter.call(document.querySelectorAll('#edit-modal [data-td]'), el => el.checked)
+        .map(el => el.dataset.td);
+}
 function pdfToggleTimeDim(el) {
+    if (!pdfV3) return;
     const id = el.dataset.td;
     pdfV3.timeDims = pdfV3.timeDims || [];
     if (el.checked) { if (!pdfV3.timeDims.includes(id)) pdfV3.timeDims.push(id); }
@@ -2700,27 +2697,6 @@ function pdfToggleTimeDim(el) {
 // 注：口径切换在弹窗顶部基本信息行的「单机设备 / 机群（聚合）」分段按钮上（见 setEditScope），
 // 切换即切换到另一套数据模块与版式；设计器通过 pdfV3Scope() 读取 editScope 跟随显示。
 // 本步为哪些口径产出，由「在该口径里配置过」自动判定（见 bindStepDirty 的 mark）。
-
-function validatePdfLayout() {
-    const el = document.getElementById('designerValidate');
-    if (!el || !pdfV3) return;
-    const list = pdfModules();
-    const issues = [];
-    if (!list.length) issues.push('当前口径（' + (pdfV3Scope() === 'fleet' ? '机群' : '单机') + '）画布至少需要 1 个组件');
-    list.forEach((c, i) => {
-        if (!String(c.title || '').trim()) issues.push('第 ' + (i + 1) + ' 个组件缺少组件标题');
-        if (c.type !== 'text_block' && !(c.metrics || []).length) issues.push('第 ' + (i + 1) + ' 个组件（' + pdfTypeName(c.type) + '）未绑定指标');
-    });
-    if (!(pdfV3.timeDims || []).length) issues.push('未选择统计时间维度');
-    // 2026-09-23 用户要求删掉「✓ 校验通过…」那条：没问题就不显示，只有问题才弹黄色告警条
-    if (!issues.length) {
-        el.className = 'designer-validate';
-        el.innerHTML = '';
-        return;
-    }
-    el.className = 'designer-validate active warn';
-    el.innerHTML = '⚠ 校验未通过：' + issues.slice(0, 4).join('；') + (issues.length > 4 ? ' 等' : '');
-}
 
 function pdfV3Payload() {
     const dump = (list) => (list || []).map(c => ({
@@ -2743,38 +2719,6 @@ function pdfV3Payload() {
             fleet: dump(pdfV3.modules ? pdfV3.modules.fleet : [])
         }
     };
-}
-
-function publishPdfLayout() {
-    validatePdfLayout();
-    const el = document.getElementById('designerValidate');
-    if (el && el.className.indexOf('warn') > -1) { el.scrollIntoView({ block: 'center' }); return; }
-    const json = JSON.stringify(pdfV3Payload(), null, 2);
-    const tr = getT(currentTemplateId, currentEditLang);
-    if (tr) { tr.pdfDesignerJson = json; saveEditToState(); }
-    const body = document.getElementById('pdfdJsonBody');
-    if (body) body.textContent = json;
-    const ov = document.getElementById('pdfdJsonOverlay');
-    if (ov) ov.classList.add('active');
-}
-
-function pdfCopyJson() {
-    const body = document.getElementById('pdfdJsonBody');
-    if (!body) return;
-    const txt = body.textContent;
-    if (navigator.clipboard && navigator.clipboard.writeText) {
-        navigator.clipboard.writeText(txt).then(() => showToast('JSON 已复制', 'success'));
-    } else {
-        const ta = document.createElement('textarea');
-        ta.value = txt; document.body.appendChild(ta); ta.select();
-        try { document.execCommand('copy'); showToast('JSON 已复制', 'success'); } catch (e) {}
-        document.body.removeChild(ta);
-    }
-}
-
-function closePdfJson() {
-    const ov = document.getElementById('pdfdJsonOverlay');
-    if (ov) ov.classList.remove('active');
 }
 
 /* ==================== 数据列配置（模块化：按模块绑定字段，与画布共用 pdfV3） ==================== */
@@ -2842,6 +2786,52 @@ function pdfFieldUnit(name, cat) {
     if (u && /^电动/.test(cat || '')) u = u.replace(/L/g, 'kWh');   // 油车量纲 → 电车量纲
     return u;
 }
+/* ===== 字段属性（用于「同屏多字段」匹配校验）=====
+   判定顺序：① 有单位 → 数值类单位＝数值；「日期」＝时间；「文本」＝文本；② 无单位 → 按字段名兜底：
+   上电时间 / 最近定位时间 这类「时间」结尾且无时长语义的 ＝时间；工作时长类＝数值。 */
+const PDF_ATTR_BY_UNIT = { '日期': '时间', '时间': '时间', '文本': '文本' };
+const PDF_ATTR_DURATION_HINT = /(工作|怠速|运行|行驶|充电|超时|作业|停机|等待|挡位|档位|占比|率)/;
+function pdfFieldAttr(name, cat) {
+    const u = pdfFieldUnit(name, cat);
+    if (u) return PDF_ATTR_BY_UNIT[u] || '数值';
+    if (/时间$/.test(name)) return PDF_ATTR_DURATION_HINT.test(name) ? '数值' : '时间';
+    if (/(日期|时刻)$/.test(name)) return '时间';
+    if (/(状态|模式|开关|是否)/.test(name)) return '状态';
+    if (/(编号|号码|车牌|名称|机型|型号|地址|位置|VIN|文本)/.test(name)) return '文本';
+    return '数值';
+}
+/* 两个字段能否放进同一个组件（不区分单机 / 机群口径）：
+   ① 双方都有单位且不同 → 无法匹配（level=block：当场提示并阻止勾选）
+   ② 一方有单位、一方无单位 → 可以匹配（无单位视为不限量纲）
+   ③ 双方都无单位 → 比字段属性：属性不同 → level=report（允许添加，但报表直接报「属性错误」）
+   返回 null 表示可匹配 */
+function pdfMetricPairConflict(a, b, cat) {
+    const ua = pdfFieldUnit(a, cat), ub = pdfFieldUnit(b, cat);
+    if (ua && ub) {
+        if (ua !== ub) {
+            return { level: 'block', msg: '单位不一致：已选「' + a + '」（' + ua + '），本次选「' + b + '」（' + ub + '），两者无法匹配' };
+        }
+        return null;
+    }
+    if (!ua && !ub) {
+        const ka = pdfFieldAttr(a, cat), kb = pdfFieldAttr(b, cat);
+        if (ka !== kb) {
+            return { level: 'report', msg: '属性不一致：已选「' + a + '」（' + ka + '），本次选「' + b + '」（' + kb + '）' };
+        }
+    }
+    return null;
+}
+/* 组件内已绑定字段两两互查，返回第一个冲突（null = 没问题） */
+function pdfMetricsConflict(metrics) {
+    const list = (metrics || []).slice();
+    for (let i = 0; i < list.length; i++) {
+        for (let j = i + 1; j < list.length; j++) {
+            const cf = pdfMetricPairConflict(list[i], list[j], '');
+            if (cf) return cf;
+        }
+    }
+    return null;
+}
 // 同一指标跨设备类型是否量纲不一致（如 能耗：油车 L / 电车 kWh）→ 返回所有出现过的单位
 function pdfFieldUnitConflict(name) {
     const units = [];
@@ -2879,7 +2869,7 @@ function pdfOpenFieldPicker(compId) {
     const c = list.find(x => x.id === compId);
     if (!c) return;
     pdfPickState.compId = compId;
-    // 按「组件类型 × 当前口径」决定选项形态与上限（机群折线 / 环形只 1 个；单机图表可多选 ≤5）
+    // 按「组件类型 × 当前口径」决定选项形态与上限（单机图表、机群折线 / 环形 = 单选 1 个；机群柱状图可多选 ≤5）
     const rule = pdfMetricRule(c.type);
     pdfPickState.mode = rule.mode;
     pdfPickState.max = rule.max;
@@ -2898,7 +2888,7 @@ function pdfOpenFieldPicker(compId) {
     if (t) {
         t.textContent = (rule.mode === 'kpi') ? '添加指标卡'
             : (rule.mode === 'table' ? '选择明细列（可多选）'
-                : (rule.mode === 'multi' ? '选择指标（可多选）' : '从模型字典选择'));
+                : (rule.mode === 'multi' ? '选择指标（可多选）' : '选择指标（单选）'));
     }
     const s = document.getElementById('pdfPickSearch');
     if (s) s.value = '';
@@ -2974,16 +2964,15 @@ function pdfPickInputHTML(name, on, gid) {
         + ' onclick="pdfPickToggle(\'' + escapeAttr(name) + '\', ' + (on ? 'false' : 'true')
         + ', \'' + escapeAttr(gid || '') + '\')">';
 }
-// 同屏多指标必须单位一致（图表 / 环形图）：返回冲突说明，无冲突返回 null
-function pdfPickUnitMismatch(name) {
+/* 同屏字段匹配校验（不区分单机 / 机群口径）：与「已选的其他字段」逐个比对
+   —— 单位不同的直接拦下；一方无单位可匹配；双方都无单位但属性不同 → 允许添加、报表报属性错误 */
+function pdfPickMetricConflict(name) {
     const cat = pdfPickCurrentCat();
-    const u = pdfFieldUnit(name, cat);
-    if (!u) return null;
     const others = Object.keys(pdfPickState.selected || {})
         .filter(k => pdfPickState.selected[k] && k !== name && PDF_BASE_FIELD_NAMES.indexOf(k) < 0);
     for (let i = 0; i < others.length; i++) {
-        const u2 = pdfFieldUnit(others[i], cat);
-        if (u2 && u2 !== u) return '已选「' + others[i] + '」（' + u2 + '），本次选「' + name + '」（' + u + '）';
+        const cf = pdfMetricPairConflict(others[i], name, cat);
+        if (cf) return cf;
     }
     return null;
 }
@@ -3084,7 +3073,7 @@ function pdfRenderPickBody() {
                     ? '已选 <b id="pdfPickCount">' + n + '</b>' + maxTxt + ' 个 · 同单位多指标并排'
                     : '已选 <b id="pdfPickCount">' + n + '</b> 项'));
     }
-    // 全选只在明细表（多选列）下可用；指标卡有 6 张上限、图表有 1 个或 5 个上限，都用不上
+    // 全选只在明细表（多选列）下可用；指标卡有 6 张上限、单选 / 多选图表有 1 个或 5 个上限，都用不上
     const allWrap = document.getElementById('pdfPickAllWrap');
     if (allWrap) allWrap.style.display = pdfPickState.mode === 'table' ? '' : 'none';
     // 2026-09-23 用户要求删掉常驻的规则说明文案；拦截提示仍由各拦截处即时写入
@@ -3134,7 +3123,7 @@ function pdfPickToggle(name, on, gid) {
         return;
     }
     if (on) {
-        // ① 数量拦截：多选已达上限（单机图表 ≤5）→ 不勾选，先把原因告诉用户
+        // ① 数量拦截：多选已达上限（如机群柱状图 ≤5；单选口径不走这里）→ 不勾选，先把原因告诉用户
         const onCount = pdfPickSelectedCount();
         if (pdfPickState.max > 0 && pdfPickState.mode !== 'single'
             && onCount >= pdfPickState.max && !pdfPickState.selected[name]) {
@@ -3151,18 +3140,24 @@ function pdfPickToggle(name, on, gid) {
         if (conflict) {
             showToast('所选指标单位不一致：' + name + ' 在不同设备类型下为 ' + conflict.join(' / '), 'error');
         }
-        // ③ 同屏多指标必须单位一致（折线 / 柱状 / 环形）
-        if (pdfPickState.mode === 'multi') {
-            const mismatch = pdfPickUnitMismatch(name);
-            if (mismatch) {
-                const msg = '同屏多指标必须单位一致：' + mismatch + '，请换一个同单位指标。';
+        // ③ 同屏字段匹配校验（不区分口径）：单位不同的拦下；都无单位但属性不同 → 允许加、报表报属性错误
+        //    数据明细表（一列一个指标、各列单位可不同）与指标卡（一张卡一个字段）不参与该校验
+        if (pdfPickState.mode !== 'table' && pdfPickState.mode !== 'kpi') {
+            const cf = pdfPickMetricConflict(name);
+            if (cf && cf.level === 'block') {
+                const msg = cf.msg + '，请换一个同单位指标。';
                 showToast(msg, 'error');
                 pdfRenderPickBody();
                 pdfPickWarn(msg);
                 return;
             }
+            if (cf) {
+                // 属性冲突：不阻止添加，但明确告知报表会报错（报错同时挂在画布组件与校验条上）
+                showToast(cf.msg + '：报表将报「属性错误」', 'error');
+                pdfPickWarn(cf.msg + '：报表将报「属性错误」');
+            }
         }
-        // ④ 单选（机群折线 / 环形只 1 个指标）：选中新指标即替换原有的，并说明替换了什么
+        // ④ 单选（单机图表、机群折线 / 环形只 1 个指标）：选中新指标即替换原有的，并说明替换了什么
         if (pdfPickState.mode === 'single' && PDF_BASE_FIELD_NAMES.indexOf(name) < 0) {
             const prev = Object.keys(pdfPickState.selected)
                 .filter(k => pdfPickState.selected[k] && k !== name && PDF_BASE_FIELD_NAMES.indexOf(k) < 0);
@@ -3199,7 +3194,7 @@ function pdfConfirmFieldPicker() {
                 }
             }
         } else {
-            // 折线 / 柱状 / 环形：按「组件 × 口径」上限裁剪（机群折线 / 环形只留 1 个；单机最多 5 个）
+            // 折线 / 柱状 / 环形：按「组件 × 口径」上限裁剪（单选口径只留 1 个；机群柱状图最多 5 个）
             const max = pdfPickState.max > 0 ? pdfPickState.max : 0;
             c.metrics = max ? picked.slice(0, max) : picked.slice();
             if (!c.metrics.length && pdfPickState.mode === 'single') c.metrics = [];
@@ -3317,6 +3312,9 @@ function getTypes(t) {
 // 向导状态：步骤号 / 每步是否跳过 / 每步勾选的口径 / 每步是否被操作过（用于「已配置」标记）
 let editWizardStep = 1;
 let editIsNew = false;          // 新建 vs 编辑已有模版（新建时「已配置」只认用户操作）
+// 「新增流程」标记：从列表「新建模版」进入即置 true，直到关闭弹窗才复位。
+// 注意不能用 editIsNew —— 切换「编辑语言」会调 loadEditForm() 把它冲成 false）
+let addFlow = false;
 let editStepSkip = { 2: false, 3: false };
 let editScopeByStep = { 2: { single: true, fleet: true }, 3: { single: true, fleet: true } };
 let editStepTouched = { 2: false, 3: false };

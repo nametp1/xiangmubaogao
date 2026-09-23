@@ -194,6 +194,11 @@
 const LINE_COLORS = ['#E60012', '#F59E0B', '#0F766E', '#2563EB', '#7C3AED'];
 /* 低于均值的条形用中性灰 */
 const GRAY = '#94A3B8';
+/* 机群（最多 10 台）取色：色相按序号 36° 均分色环（360 / 10）+ 明暗与浓淡两档交叉
+   —— 图例与折线共用此函数，保证「同一序号 → 同一个颜色」 */
+function fleetColor(k) {
+    return 'hsl(' + ((k * 36) % 360) + ', ' + (55 + (k % 2) * 25) + '%, ' + (46 + (k % 3) * 9) + '%)';
+}
 let UID = 0;
 
 /* 模拟数据：逐点波动的聚合值 */
@@ -226,12 +231,14 @@ function lineChart(values, labels, opt) {
     const list = Array.isArray(values[0]) ? values : [values];
     const many = !!opt.many;
     const legend = opt.legend || [];
+    /* 机群：设备编号图例（颜色与线一一对应），单独占一行，故画布加高、上留白加大 */
+    const devLegend = (many && opt.devices) ? opt.devices : [];
     /* 节点多（> 10 个）时 X 轴刻度倾斜 40°，并加高画布避免刻度被裁 */
     const dense = labels.length > 10;
     /* 节点很多（> 24 个，如 30 天 × 3 班 ＝ 90 点）时刻度抽稀：数据点全部保留，只减少刻度，末点必有刻度 */
     const step = labels.length > 24 ? Math.ceil(labels.length / 12) : 1;
-    const H = dense ? 290 : 250, W = 960, padL = 56, padR = 18, padB = dense ? 76 : 36;
-    const padT = (legend.length ? 34 : 16) + (opt.topNote ? 16 : 0);
+    const H = (dense ? 290 : 250) + (devLegend.length ? 22 : 0), W = 960, padL = 56, padR = 18, padB = dense ? 76 : 36;
+    const padT = (devLegend.length ? 56 : (legend.length ? 34 : 16)) + (opt.topNote ? 16 : 0);
     const flat = arr => arr.reduce((a, b) => a.concat(b), []);
     const range = arr => {
         const mn = Math.min.apply(null, arr), mx = Math.max.apply(null, arr), d = (mx - mn) || 1;
@@ -254,9 +261,7 @@ function lineChart(values, labels, opt) {
         + '<g clip-path="url(#' + uid + ')">';
 
     list.forEach(function (vals, k) {
-        const c = many
-            ? 'hsl(' + Math.round((k * 137.5) % 360) + ', ' + (55 + (k % 2) * 25) + '%, ' + (46 + (k % 3) * 9) + '%)'
-            : LINE_COLORS[k % LINE_COLORS.length];
+        const c = many ? fleetColor(k) : LINE_COLORS[k % LINE_COLORS.length];
         const w = many ? '0.7' : '1.8';
         s += '<polyline points="' + vals.map((v, i) => X(i).toFixed(1) + ',' + Y(v, k).toFixed(1)).join(' ') + '"'
             + ' fill="none" stroke="' + c + '" stroke-width="' + w + '" stroke-linejoin="round"'
@@ -269,11 +274,22 @@ function lineChart(values, labels, opt) {
     });
     s += '</g>';
 
-    legend.forEach(function (t, k) {
-        const lx = padL + k * 150, ly = 16, c = LINE_COLORS[k % LINE_COLORS.length];
-        s += '<line x1="' + lx + '" y1="' + ly + '" x2="' + (lx + 16) + '" y2="' + ly + '" stroke="' + c + '" stroke-width="2"/>';
-        s += '<text x="' + (lx + 22) + '" y="' + (ly + 3.5) + '" font-size="14" fill="#7c8798">' + esc(t) + '</text>';
-    });
+    if (devLegend.length) {
+        /* 机群设备图例：色块颜色 = 该设备折线颜色（EX001…EX010，最多 10 台） */
+        const gap = Math.min(150, (W - padL - padR) / devLegend.length);
+        const ly = padT - 18;
+        devLegend.forEach(function (t, k) {
+            const lx = padL + k * gap, c = fleetColor(k);
+            s += '<line x1="' + lx + '" y1="' + ly + '" x2="' + (lx + 18) + '" y2="' + ly + '" stroke="' + c + '" stroke-width="2.5"/>';
+            s += '<text x="' + (lx + 24) + '" y="' + (ly + 3.5) + '" font-size="14" fill="#7c8798">' + esc(t) + '</text>';
+        });
+    } else {
+        legend.forEach(function (t, k) {
+            const lx = padL + k * 150, ly = 16, c = LINE_COLORS[k % LINE_COLORS.length];
+            s += '<line x1="' + lx + '" y1="' + ly + '" x2="' + (lx + 16) + '" y2="' + ly + '" stroke="' + c + '" stroke-width="2"/>';
+            s += '<text x="' + (lx + 22) + '" y="' + (ly + 3.5) + '" font-size="14" fill="#7c8798">' + esc(t) + '</text>';
+        });
+    }
     labels.forEach(function (t, i) {
         if (!t) return;
         if (step > 1 && (labels.length - 1 - i) % step !== 0) return;
@@ -288,7 +304,7 @@ function lineChart(values, labels, opt) {
         s += '<text x="' + lx + '" y="' + (H - 12) + '" text-anchor="' + anchor + '" font-size="14" fill="#7c8798">' + esc(t) + '</text>';
     });
     if (opt.note) {
-        s += '<text x="' + (W - padR) + '" y="' + (opt.topNote ? padT - 20 : (legend.length ? 16 : padT + 2)) + '"'
+        s += '<text x="' + (W - padR) + '" y="' + (opt.topNote ? padT - 20 : ((legend.length || devLegend.length) ? 16 : padT + 2)) + '"'
             + ' text-anchor="end" font-size="14" fill="#a9b2c0" stroke="#fff" stroke-width="2.5" paint-order="stroke">'
             + esc(opt.note) + '</text>';
     }
@@ -355,7 +371,7 @@ function colChart(labels, seriesList, opt) {
     return s;
 }
 
-/* 水平条形图（排行榜 · 多指标同图并排 · 全量不截断）
+/* 水平条形图（排行榜 · 多指标同图并排 · 机群最多前 10 台）
    series 顺序即排序依据：第 1 个为主指标，按它降序；各指标必须同单位 */
 function rankMulti(rows, series, opt) {
     opt = opt || {};
@@ -503,9 +519,16 @@ function tableHTML(headers, rows) {
         r1(series(7, 6).map(v => v / 12 + 1.2))
     ], days, { legend: ['工作时长 (h)', '怠速时长 (h)'], note: '同单位（h）' });
 
-    const fleet = [];
-    for (let d = 0; d < 100; d++) fleet.push(series(8, d + 1).map(v => Math.round(v * 6)));
-    const t3 = lineChart(fleet, weeks, { many: true, note: 'X 轴：周 · 100 台各一条线' });
+    /* 机群设备最多 10 台：示例资产给了 100 台，图上只画前 10 台（按设备编号升序） */
+    const fleetAll = [];
+    for (let d = 0; d < 100; d++) fleetAll.push(series(8, d + 1).map(v => Math.round(v * 6)));
+    const fleetTop = fleetAll.slice(0, 10);
+    /* 图例＝设备编号，颜色与折线一一对应（EX001…EX010） */
+    const fleetNames = fleetTop.map(function (_, i) { return 'EX' + String(i + 1).padStart(3, '0'); });
+    const t3 = lineChart(fleetTop, weeks, {
+        many: true, devices: fleetNames,
+        note: 'X 轴：周 · 10 台各一条线（颜色＝设备编号）'
+    });
 
     const t6 = lineChart(r1(series(12, 11).map(v => v * 6)), months, { note: 'X 轴：月 · 12 个节点' });
 
@@ -513,8 +536,8 @@ function tableHTML(headers, rows) {
             '最多 5 个指标，5 色循环（品牌红打头）；同单位（示例 °C）；8 小时制三班 08-16 / 16-24 / 00-08，按结束时间归属日期；90 个班次全部保留（不抽稀、不聚合），刻度抽稀到约 12 个并倾斜，末点必标。', { kind: 'single', text: '单机场景' })
         + card('日口径 · 工时类（工作时长 / 怠速时长）', '7 点 · 2 条线', t2,
             '同屏指标必须同单位（示例均为 h）；5 色循环按指标数量取色，一个指标一个颜色。', { kind: 'single', text: '单机场景' })
-        + card('周口径 · 近 8 周 · 100 台设备', '8 点 · 100 条线', t3,
-            '机群只能选 1 个指标，每台设备一条线；全部设备统一按同一规则淡色铺底，不做离群特殊处理。', { kind: 'fleet', text: '机群场景' })
+        + card('周口径 · 近 8 周 · 前 10 台设备', '8 点 · 10 条线', t3,
+            '机群只能选 1 个指标，每台设备一条线，<strong>最多显示前 10 台</strong>（示例资产 100 台，图上只出前 10 台）；折线<strong>按设备编号取固定色</strong>（色相 36° 均分色环 + 明暗/浓淡交叉），<strong>图例逐个标出「设备编号 ↔ 颜色」</strong>，同一台设备每次渲染同色；全部设备统一按同一规则淡色铺底，不做离群特殊处理。', { kind: 'fleet', text: '机群场景' })
         + card('月 · 月份对比', '12 点 · 1 月/点', t6, '每个节点＝1 个自然月的聚合值，刻度为月份。', { kind: 'plain', text: '时间口径（单机 / 机群通用）' });
     document.getElementById('bd-line').innerHTML = html;
 })();
@@ -537,7 +560,7 @@ function tableHTML(headers, rows) {
         { name: '怠速时长 (h)', values: r1(series(16, 3).map(v => v / 24 + 0.6)), color: LINE_COLORS[1] }
     ], {});
 
-    /* 机群排行：全量 100 台不截断，2 个指标同图并排（必须同单位）
+    /* 机群排行：最多前 10 台（示例资产 100 台，按第 1 个指标降序取前 10），2 个指标同图并排（必须同单位）
        排序依据＝第 1 个指标（工作时长 h）降序；怠速时长同为单位 h，仅作对照 */
     const fleetRank = [];
     for (let i = 0; i < 100; i++) {
@@ -546,13 +569,13 @@ function tableHTML(headers, rows) {
         fleetRank.push({ name: 'EX' + String(i + 1).padStart(3, '0'), values: [work, idle] });
     }
     fleetRank.sort(function (a, b) { return b.values[0] - a.values[0]; });
-    /* 水平排行：全量展示、不截断 —— 示例数据只给 10 台，所以图上就是 10 条 */
+    /* 水平排行：只取前 10 台 —— 示例资产给了 100 台，图上就是 10 条 */
     const g3 = rankMulti(fleetRank.slice(0, 10), [
         { name: '工作时长', unit: 'h', color: LINE_COLORS[0] },
         { name: '怠速时长', unit: 'h', color: LINE_COLORS[1] }
     ], {});
-    /* 垂直排布：只出一张图（不再按段重复渲染），示例数据取前 20 台 */
-    const g3vTop = fleetRank.slice(0, 20);
+    /* 垂直排布：只出一张图（不再按段重复渲染），同样只取前 10 台 */
+    const g3vTop = fleetRank.slice(0, 10);
     const g3v = colChart(g3vTop.map(function (r) { return r.name; }), [
         { name: '工作时长 (h)', values: g3vTop.map(function (r) { return r.values[0]; }), color: LINE_COLORS[0] },
         { name: '怠速时长 (h)', values: g3vTop.map(function (r) { return r.values[1]; }), color: LINE_COLORS[1] }
@@ -565,10 +588,10 @@ function tableHTML(headers, rows) {
 
     const html = card('垂直柱状图 · 班次口径（8 小时制）· 2 个指标并排', '16 组 · 2 个指标', g1b,
             '多指标并排不堆叠、单位必须一致（示例均为 h）；类目增多时 X 轴刻度倾斜 40°，柱体一根不少、<strong>不滚动、不分段重复</strong>（报表要转 PDF，动效/滚动都不作数）。', { kind: 'single', text: '单机场景' }, true)
-        + card('水平条形图 · 设备排行（全量展示）· 2 个指标', '10 条 · 2 个指标 · 示例数据 10 台', g3,
-            '机群有多少台就出多少条，<strong>不做前 N 名截断</strong>（示例数据只给 10 台，所以图上 10 条）；2 个指标在同一张图内并排、单位必须一致（示例均为 h），排序依据＝第 1 个指标（工作时长）降序；条形走 5 色循环，并列值按设备编号升序。', { kind: 'fleet', text: '机群场景' })
-        + card('垂直柱状图 · 设备排行（全量展示）· 2 个指标', '20 台 · 2 个指标 · 示例数据 20 台', g3v,
-            '同一组数据的<strong>垂直排布</strong>：机群有多少台就出多少根（示例数据只给 20 台，所以图上 20 组）；设备编号在 X 轴、2 个指标同组并排、单位必须一致（均为 h），排序依据＝第 1 个指标（工作时长）降序；不做轮播/滚动等动效（<strong>报表最终转 PDF，只有静态排版可用</strong>），也不按段重复渲染。', { kind: 'fleet', text: '机群场景' }, true)
+        + card('水平条形图 · 设备排行（前 10 台）· 2 个指标', '10 条 · 2 个指标 · 资产 100 台', g3,
+            '机群设备<strong>最多显示前 10 台</strong>：按第 1 个指标（工作时长）降序取前 10 条（示例资产 100 台，图上只出 10 条）；2 个指标在同一张图内并排、单位必须一致（示例均为 h）；条形走 5 色循环，并列值按设备编号升序。', { kind: 'fleet', text: '机群场景' })
+        + card('垂直柱状图 · 设备排行（前 10 台）· 2 个指标', '10 台 · 2 个指标 · 资产 100 台', g3v,
+            '同一组数据的<strong>垂直排布</strong>：同样<strong>最多 10 台</strong>（示例资产 100 台，图上只出 10 组）；设备编号在 X 轴、2 个指标同组并排、单位必须一致（均为 h），排序依据＝第 1 个指标（工作时长）降序；不做轮播/滚动等动效（<strong>报表最终转 PDF，只有静态排版可用</strong>），也不按段重复渲染。', { kind: 'fleet', text: '机群场景' }, true)
         + card('水平（时间序列 / 排行）', '分类在 Y 轴 · 数值在 X 轴', g4, '同一组数据换方向：用于分类标签是设备编号或长名称的场景，垂直排布放不下。', { kind: 'plain', text: '排布方向（同一组件两种排布）' });
     document.getElementById('bd-bar').innerHTML = html;
 })();
@@ -585,7 +608,7 @@ function tableHTML(headers, rows) {
     const fleet = [
         { name: 'EX001', value: 268.4 }, { name: 'EX002', value: 251.5 }, { name: 'EX003', value: 246.8 },
         { name: 'EX004', value: 232.1 }, { name: 'EX005', value: 218.6 },
-        { name: '其他 95 台', value: 367.2 }
+        { name: '其他 5 台', value: 367.2 }
     ];
 
     const d1 = shareChart(single, { donut: true, unit: 'h', centerValue: '24.0 h', centerLabel: '总计工作时长' });
@@ -597,7 +620,7 @@ function tableHTML(headers, rows) {
     const html = card('时间分配构成（工作 / 怠速 / 关机）· 日口径 9/19', '3 个扇区 · 合计 24.0 h', d1,
             '必须选择 1 个同单位指标（示例全部为时长 h）；单位不一致时配置器提示“配置单位错误”；中心留白放总计数值。环形图属“静态总值比较”，只展示当前所选周期的期末累加总值，不按天 / 周 / 月拆点。', { kind: 'single', text: '单机场景' })
         + card('机群工时贡献（前 5 台 + 其他）· 周口径 第 40 周', '6 个扇区 · 单指标', d2,
-            '机群只能选 1 个累计型指标，扇区＝单机贡献度；设备超过 5 台时尾部数据聚合成第 6 个中性灰的“其他”扇区（示例＝前 5 台 + 其他 95 台）。', { kind: 'fleet', text: '机群场景' });
+            '机群只能选 1 个累计型指标，扇区＝单机贡献度；设备超过 5 台时尾部数据聚合成第 6 个中性灰的“其他”扇区（示例＝前 5 台 + 其他 5 台）。', { kind: 'fleet', text: '机群场景' });
     document.getElementById('bd-doughnut').innerHTML = html;
 })();
 
@@ -640,7 +663,7 @@ function tableHTML(headers, rows) {
     const html = card('时间序列明细（日口径）', '7 行 · 5 列', tableHTML(singleHead, singleRows),
             '数据行＝时间序列、数据列＝所选指标；缺失数据严格输出 <code>-</code>，不补 0。', { kind: 'single', text: '单机场景' })
         + card('设备排行明细（周口径 · 第 40 周）', '10 行 · 5 列', tableHTML(fleetHead, fleetRows),
-            '行数恒等于设备数（示例 10 台 ＝ 10 行）；列数据聚合：口径内求和（如选“本周”，【油耗】列＝该设备周一到周日的 <code>SUM(油耗)</code>）。', { kind: 'fleet', text: '机群场景' });
+            '行数恒等于设备数、最多 10 行（机群设备上限 10 台，示例 10 台 ＝ 10 行）；列数据聚合：口径内求和（如选“本周”，【油耗】列＝该设备周一到周日的 <code>SUM(油耗)</code>）。', { kind: 'fleet', text: '机群场景' });
     document.getElementById('bd-table').innerHTML = html;
 })();
 
@@ -665,11 +688,12 @@ function kpiCards(items, note) {
     ], '一张卡只放 1 个指标；数值＝所选统计周期内的聚合值（累计类取合计、均值类取均值、峰值类取最大值），属“静态值数据”，不含时间序列。卡片顺序＝配置器里的勾选顺序，固定不变。');
 
     const fleet = kpiCards([
-        { name: '机群总工时', value: '2,076.6', unit: 'h' },
+        /* 口径＝所选设备（机群最多 10 台）；机群总工时与环形图同一批 10 台的合计保持一致 */
+        { name: '机群总工时', value: '1,584.6', unit: 'h' },
         { name: '机群总油耗', value: '34,476.5', unit: 'L' },
         { name: '平均利用率', value: '88.3', unit: '%' },
-        { name: '在线设备', value: '96', unit: '台' }
-    ], '机群卡只放可汇总的指标：累计型（时长、油耗、里程）取合计、比率类按整体重算；状态型（不适用）。');
+        { name: '日均运行时长', value: '22.6', unit: 'h' }
+    ], '机群卡只放可汇总的指标：累计型（时长、油耗、里程）取合计、比率类按整体重算；状态型不适用（如「在线设备数」这种台数类指标不出卡）。口径＝所选设备合计，机群最多 10 台。');
 
     document.getElementById('bd-kpi').innerHTML = card('单机关键指标（日口径 · 9/19）', '4 张卡 · 单行横排', single, null, { kind: 'single', text: '单机场景' })
         + card('机群汇总指标（周口径 · 第 40 周）', '4 张卡 · 单行横排', fleet, null, { kind: 'fleet', text: '机群场景' });
