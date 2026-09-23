@@ -1,0 +1,133 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>手机端 · 报表库（缺省页 · v2.0）</title>
+<style>
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    body {
+        font-family: "PingFang SC", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+        background: #f4f5f7; color: #1a1a1a; min-height: 100vh; display: flex; align-items: stretch;
+    }
+    .phone { flex: 1 1 auto; min-width: 0; min-height: 100vh; background: #f4f5f7; display: flex; flex-direction: column; }
+
+    /* ================= 顶部导航（三页统一：返回 + 页面标题＝当前 tab；三个 tab 可相互点击切换） ================= */
+    .topbar {
+        height: 52px; background: #fff; border-bottom: 1px solid #e8e8e8; flex-shrink: 0;
+        display: flex; align-items: center; padding: 0 12px;
+    }
+    .topbar-back {
+        width: 30px; height: 30px; flex-shrink: 0; border: none; background: transparent;
+        border-radius: 50%; color: #1a1a1a; font-size: 22px; line-height: 1; font-family: inherit;
+        display: flex; align-items: center; justify-content: center; cursor: pointer;
+    }
+    .topbar-back:hover { background: #f2f3f5; }
+    /* 多语言下 Tab 文案会变长：Tab 条自己横向滚动、Tab 不被压缩，返回键与右侧入口固定不被挤走 */
+    .top-tabs {
+        flex: 1 1 auto; min-width: 0; display: flex; align-items: center; gap: 20px; margin-left: 6px;
+        overflow-x: auto; scrollbar-width: none;
+        -webkit-overflow-scrolling: touch; overscroll-behavior-x: contain;
+    }
+    .top-tabs::-webkit-scrollbar { display: none; }
+    .top-tab {
+        position: relative; flex-shrink: 0; border: none; background: transparent; font-family: inherit; cursor: pointer;
+        height: 52px; padding: 0; font-size: 15px; color: #8b90a0; white-space: nowrap;
+    }
+    .top-tab:hover:not(.active) { color: #E60012; }
+    .top-tab.active { font-size: 17px; font-weight: 600; color: #161a2e; letter-spacing: .2px; cursor: default; }
+    .top-tab.active::after {
+        content: ''; position: absolute; left: 50%; transform: translateX(-50%); bottom: 8px;
+        width: 20px; height: 2px; border-radius: 2px; background: #E60012;
+    }
+
+    /* ================= 内容区 ================= */
+    .screen { flex: 1; overflow-y: auto; padding: 12px 14px 28px; display: flex; flex-direction: column; }
+
+    /* ================= 缺省页（报表库里没有报表） ================= */
+    .empty {
+        margin: auto; width: 100%; max-width: 320px; padding: 8px 4px;
+        display: flex; flex-direction: column; align-items: center; text-align: center;
+    }
+    .empty-ico {
+        width: 84px; height: 84px; border-radius: 26px;
+        background: linear-gradient(158deg, #ffffff 0%, #fdf3f4 100%);
+        border: 1px solid #f3e7e9; box-shadow: 0 10px 24px rgba(22,26,46,.06);
+        display: flex; align-items: center; justify-content: center;
+    }
+    .empty-hd { margin-top: 20px; font-size: 16px; font-weight: 600; color: #161a2e; letter-spacing: .2px; }
+    .empty-sub { margin-top: 9px; font-size: 12px; color: #8b90a0; line-height: 1.85; }
+    .empty-btn {
+        width: 100%; margin-top: 26px; padding: 12px 0; border: none; border-radius: 22px;
+        background: #E60012; color: #fff; font-family: inherit; font-size: 14px; font-weight: 500;
+        cursor: pointer; box-shadow: 0 6px 16px rgba(230,0,18,.24);
+        transition: background .16s, box-shadow .16s, transform .1s;
+    }
+    .empty-btn:hover { background: #c40011; box-shadow: 0 8px 20px rgba(230,0,18,.28); }
+    .empty-btn:active { transform: scale(.99); box-shadow: 0 3px 10px rgba(230,0,18,.22); }
+</style>
+</head>
+<body>
+
+<!-- ==================== 手机端：报表库（缺省页 · 无报表可展示） ==================== -->
+<div class="phone">
+    <!-- 顶部导航（三页统一）：返回 + 页面标题＝当前 tab，三个 tab 可点击互相切换 -->
+    <div class="topbar">
+        <button class="topbar-back" onclick="goBack()" aria-label="返回"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+        <div class="top-tabs">
+            <button class="top-tab" onclick="location.href='机群数据.html'">机群数据</button>
+            <button class="top-tab active">报表库</button>
+            <button class="top-tab" onclick="location.href='我的报表-缺省页.html'">我的报表</button>
+        </div>
+    </div>
+    <div class="screen" id="screen"></div>
+</div>
+
+<script>
+/* ========================================================================
+ * 缺省页：与 V2/app/报表库.html 同一套版式，仅报表清单为空
+ * ====================================================================== */
+const screenEl = document.getElementById('screen');
+
+/* ==================== 缺省状态：报表库里没有报表 ==================== */
+function emptyHTML() {
+    return '<div class="empty">'
+        + '<div class="empty-ico">'
+        + '<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round">'
+        + '<rect x="3" y="3.5" width="18" height="17" rx="3.2" stroke="#ccd2dd" stroke-width="1.6"/>'
+        + '<path d="M8 16.4V12.2" stroke="#E60012" stroke-width="2.2"/>'
+        + '<path d="M12 16.4V8.6" stroke="#ccd2dd" stroke-width="2.2"/>'
+        + '<path d="M16 16.4V10.6" stroke="#ccd2dd" stroke-width="2.2"/>'
+        + '</svg>'
+        + '</div>'
+        + '<div class="empty-hd">报表需求征集中</div>'
+        + '<div class="empty-sub">我们正在收集 App 端用户的报表需求<br>收集完成后陆续上线。</div>'
+        + '<button class="empty-btn" onclick="location.href=\'我需要更多报表.html\'">＋ 我需要更多报表</button>'
+        + '</div>';
+}
+
+function renderAll() {
+    screenEl.innerHTML = emptyHTML();
+}
+
+/* 返回上一页（无历史记录时只提示一下） */
+function goBack() {
+    if (history.length > 1) { history.back(); return; }
+    showToast('返回上一页');
+}
+
+function showToast(msg) {
+    const t = document.createElement('div');
+    t.textContent = msg;
+    t.style.cssText = 'position:fixed;left:50%;bottom:60px;transform:translateX(-50%);background:rgba(0,0,0,.78);color:#fff;'
+        + 'font-size:12px;padding:9px 16px;border-radius:18px;z-index:99;max-width:80%;text-align:center;';
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 1800);
+}
+
+/* ==================== 初始化 ==================== */
+renderAll();
+</script>
+
+</body>
+</html>

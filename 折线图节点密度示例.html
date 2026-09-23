@@ -1,0 +1,763 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>报表组件示例（按组件规则说明绘制）</title>
+<style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body {
+        font-family: "PingFang SC", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+        background: #f5f7fa; color: #1e293b;
+    }
+
+    /* ================= 顶部固定栏 ================= */
+    .topbar {
+        position: fixed; top: 0; left: 0; right: 0; height: 60px; z-index: 50;
+        display: flex; align-items: center; justify-content: space-between; padding: 0 24px;
+        background-image: linear-gradient(110deg, #22303f 0%, #0f172a 72%);
+        color: #fff; box-shadow: 0 10px 30px -22px rgba(15, 23, 42, .9);
+    }
+    .brand { display: flex; align-items: center; gap: 12px; }
+    .mark {
+        width: 30px; height: 30px; border-radius: 8px; background: #2563eb;
+        display: flex; align-items: center; justify-content: center; font-weight: 800; font-size: 16px;
+    }
+    .topbar h1 { font-size: 16px; font-weight: 700; letter-spacing: .3px; }
+    .chip {
+        font-size: 12px; color: #cbd5e1; background: #1e293b;
+        border: 1px solid #334155; border-radius: 6px; padding: 3px 9px;
+    }
+
+    /* ================= 左侧目录 ================= */
+    .layout { display: flex; padding-top: 60px; max-width: 1600px; margin: 0 auto; }
+    .side {
+        width: 240px; flex-shrink: 0; position: sticky; top: 60px; height: calc(100vh - 60px);
+        overflow-y: auto; background: #fff; border-right: 1px solid #e2e8f0; padding: 20px 16px;
+    }
+    .side h3 { font-size: 11px; font-weight: 700; color: #94a3b8; letter-spacing: 1px; margin-bottom: 12px; }
+    .side nav { display: flex; flex-direction: column; gap: 2px; }
+    .side a {
+        display: block; padding: 8px 10px; border-radius: 8px; text-decoration: none;
+        font-size: 14px; color: #475569; transition: background .16s, color .16s;
+    }
+    .side a.lv1 { font-weight: 700; color: #1e293b; margin-top: 8px; }
+    .side a.lv2 {
+        font-size: 13px; color: #64748b; padding-left: 18px;
+        overflow: hidden; text-overflow: ellipsis; white-space: nowrap;
+    }
+    .side a:hover { background: #eff6ff; color: #1d4ed8; }
+    .side a.on { background: #eff6ff; color: #1d4ed8; font-weight: 600; }
+    .side .note { margin-top: 18px; font-size: 11px; color: #94a3b8; line-height: 1.7; }
+    /* 锚点定位时避开固定顶栏 */
+    .sec, .card { scroll-margin-top: 76px; }
+
+    /* ================= 内容区 ================= */
+    main { flex: 1; min-width: 0; padding: 32px 40px 80px; }
+    .wrap { max-width: 1280px; margin: 0 auto; display: flex; flex-direction: column; gap: 40px; }
+
+    .sec { background: #fff; border: 1px solid #e2e8f0; border-radius: 16px; overflow: hidden; box-shadow: 0 1px 2px rgba(15, 23, 42, .04); }
+    .sec-hd {
+        padding: 16px 24px; display: flex; align-items: center; gap: 10px;
+        background-image: linear-gradient(112deg, #24313f 0%, #131c2b 78%); color: #fff;
+    }
+    .sec-hd h2 { font-size: 18px; font-weight: 700; letter-spacing: .3px; }
+    /* 示例卡一行两个 */
+    .sec-bd {
+        padding: 24px; display: grid; grid-template-columns: repeat(2, minmax(0, 1fr));
+        gap: 20px 18px; align-items: start;
+    }
+
+    .scene {
+        display: inline-flex; align-items: center; gap: 6px;
+        font-size: 13px; font-weight: 700; padding: 4px 12px; border-radius: 6px;
+    }
+    /* 卡片头里的场景标签（单机 / 机群 / 时间口径） */
+    .card-hd .scene { font-size: 11px; padding: 3px 9px; border-radius: 5px; }
+    .scene.single { background: #d1fae5; color: #065f46; }
+    .scene.fleet { background: #dbeafe; color: #1e40af; }
+    .scene.plain { background: #f1f5f9; color: #475569; }
+
+    .card { border: 1px solid #e6ebf2; border-radius: 14px; padding: 14px 18px 10px; }
+    /* 按段换行的长图卡：整行铺开，不受两列栅格限制 */
+    .card.wide { grid-column: 1 / -1; }
+    .card-hd { display: flex; align-items: baseline; gap: 10px; flex-wrap: wrap; margin-bottom: 8px; }
+    .card-t { font-size: 14px; font-weight: 700; }
+    .tag { font-size: 11px; border-radius: 999px; padding: 2px 9px; background: #eef4ff; color: #1d4ed8; }
+    .card-note { flex-basis: 100%; font-size: 12px; color: #64748b; line-height: 1.6; }
+
+    svg { display: block; width: 100%; height: auto; }
+
+    .tbl { width: 100%; border-collapse: collapse; font-size: 12.5px; }
+    .tbl th {
+        background: #f8fafc; color: #64748b; font-weight: 600; text-align: left;
+        padding: 9px 10px; border-bottom: 1px solid #e2e8f0; white-space: nowrap;
+    }
+    .tbl td { padding: 9px 10px; border-bottom: 1px solid #f1f5f9; color: #334155; }
+    .tbl td.num, .tbl th.num { text-align: right; font-variant-numeric: tabular-nums; }
+    .tbl tr:last-child td { border-bottom: none; }
+    .tbl tr.sum td { font-weight: 700; background: #fafbfc; }
+
+    /* ================= 指标卡 ================= */
+    .kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(132px, 1fr)); gap: 12px; }
+    .kpi { border: 1px solid #e6ebf2; border-radius: 14px; padding: 14px 16px; background: #fff; }
+    .kpi-name { font-size: 12px; color: #8b90a0; }
+    .kpi-val {
+        margin-top: 7px; font-size: 26px; font-weight: 700; color: #161a2e;
+        line-height: 1.2; font-variant-numeric: tabular-nums;
+    }
+    .kpi-val i { font-style: normal; font-size: 12px; font-weight: 500; color: #8b90a0; margin-left: 5px; }
+    .kpi-sub { margin-top: 5px; font-size: 11px; color: #b0b4bd; }
+
+    /* ================= 异常场景：错误提示（Toast 样式）/ 图注 ================= */
+    .toast-tip {
+        display: inline-flex; align-items: center; gap: 8px;
+        background: #161a2e; color: #fff; font-size: 13px;
+        padding: 9px 16px; border-radius: 10px;
+        box-shadow: 0 8px 20px rgba(15, 23, 42, .18);
+    }
+    .toast-tip .err-ico {
+        flex-shrink: 0; width: 16px; height: 16px; border-radius: 50%;
+        background: #E60012; color: #fff; font-size: 11px; font-weight: 700;
+        display: flex; align-items: center; justify-content: center;
+    }
+
+
+    @media (max-width: 1280px) {
+        .side { width: 208px; }
+        main { padding: 32px 28px 80px; }
+    }
+    @media (max-width: 900px) {
+        .side { display: none; }
+        main { padding: 20px 16px 60px; }
+        .sec-bd { grid-template-columns: 1fr; }
+    }
+</style>
+</head>
+<body>
+
+<header class="topbar">
+    <div class="brand">
+        <div class="mark">示</div>
+        <h1>报表组件示例（按组件规则说明绘制）</h1>
+    </div>
+    <div><span class="chip">v1.0</span></div>
+</header>
+
+<div class="layout">
+    <aside class="side">
+        <h3>定位导航</h3>
+        <nav id="nav"></nav>
+        <div class="note">示例数据为虚构机群，取值口径与《组件规则说明》一致。</div>
+    </aside>
+
+    <main>
+        <div class="wrap">
+            <section class="sec" id="sec-line">
+                <div class="sec-hd"><h2>1. 折线图示例</h2></div>
+                <div class="sec-bd" id="bd-line"></div>
+            </section>
+
+            <section class="sec" id="sec-bar">
+                <div class="sec-hd"><h2>2. 柱状图示例</h2></div>
+                <div class="sec-bd" id="bd-bar"></div>
+            </section>
+
+            <section class="sec" id="sec-doughnut">
+                <div class="sec-hd"><h2>3. 环形图示例</h2></div>
+                <div class="sec-bd" id="bd-doughnut"></div>
+            </section>
+
+            <section class="sec" id="sec-kpi">
+                <div class="sec-hd"><h2>4. 指标卡示例</h2></div>
+                <div class="sec-bd" id="bd-kpi"></div>
+            </section>
+
+            <section class="sec" id="sec-table">
+                <div class="sec-hd"><h2>5. 数据明细表示例</h2></div>
+                <div class="sec-bd" id="bd-table"></div>
+            </section>
+
+            <section class="sec" id="sec-error">
+                <div class="sec-hd"><h2>6. 异常场景错误示例</h2></div>
+                <div class="sec-bd" id="bd-error"></div>
+            </section>
+        </div>
+    </main>
+</div>
+
+<script>
+/* ============================================================================
+ * 通用：配色、模拟数据、工具
+ * ========================================================================== */
+/* 正常线 5 色循环：品牌红打头、冷暖交替（与《组件规则说明》一致） */
+const LINE_COLORS = ['#E60012', '#F59E0B', '#0F766E', '#2563EB', '#7C3AED'];
+/* 低于均值的条形用中性灰 */
+const GRAY = '#94A3B8';
+let UID = 0;
+
+/* 模拟数据：逐点波动的聚合值 */
+function series(n, seed) {
+    const a = [];
+    for (let i = 0; i < n; i++) {
+        const v = 42 + Math.sin((i + seed) * 0.62) * 13 + Math.sin((i + seed) * 1.9) * 4 + ((i * 37 + seed * 13) % 9) / 2.4;
+        a.push(Math.round(v * 10) / 10);
+    }
+    return a;
+}
+function r1(a) { return a.map(v => Math.round(v * 10) / 10); }
+function esc(s) {
+    return String(s == null ? '' : s).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+}
+function card(title, tag, body, note, scene, wide) {
+    return '<div class="card' + (wide ? ' wide' : '') + '"><div class="card-hd">'
+        + (scene ? '<span class="scene ' + scene.kind + '">' + esc(scene.text) + '</span>' : '')
+        + '<span class="card-t">' + esc(title) + '</span>'
+        + '<span class="tag">' + esc(tag) + '</span>'
+        + (note ? '<span class="card-note">' + note + '</span>' : '') + '</div>' + body + '</div>';
+}
+function money(n) { return n.toFixed(1).replace(/\B(?=(\d{3})+(?!\d))/g, ','); }
+
+/* ============================================================================
+ * 折线图：单机多指标（同单位）/ 机群多设备
+ * ========================================================================== */
+function lineChart(values, labels, opt) {
+    opt = opt || {};
+    const list = Array.isArray(values[0]) ? values : [values];
+    const many = !!opt.many;
+    const legend = opt.legend || [];
+    /* 节点多（> 10 个）时 X 轴刻度倾斜 40°，并加高画布避免刻度被裁 */
+    const dense = labels.length > 10;
+    /* 节点很多（> 24 个，如 30 天 × 3 班 ＝ 90 点）时刻度抽稀：数据点全部保留，只减少刻度，末点必有刻度 */
+    const step = labels.length > 24 ? Math.ceil(labels.length / 12) : 1;
+    const H = dense ? 290 : 250, W = 960, padL = 56, padR = 18, padB = dense ? 76 : 36;
+    const padT = (legend.length ? 34 : 16) + (opt.topNote ? 16 : 0);
+    const flat = arr => arr.reduce((a, b) => a.concat(b), []);
+    const range = arr => {
+        const mn = Math.min.apply(null, arr), mx = Math.max.apply(null, arr), d = (mx - mn) || 1;
+        return { lo: mn - d * 0.12, hi: mx + d * 0.12 };
+    };
+    const ra = range(flat(list));
+    const X = i => padL + (W - padL - padR) * (labels.length <= 1 ? 0 : i / (labels.length - 1));
+    const Y = v => padT + (H - padT - padB) * (1 - (v - ra.lo) / (ra.hi - ra.lo));
+
+    let s = '<svg viewBox="0 0 ' + W + ' ' + H + '" xmlns="http://www.w3.org/2000/svg">';
+    for (let g = 0; g <= 4; g++) {
+        const y = padT + (H - padT - padB) * g / 4;
+        s += '<line x1="' + padL + '" y1="' + y + '" x2="' + (W - padR) + '" y2="' + y + '" stroke="#eef2f7" stroke-width="1"/>';
+        s += '<text x="' + (padL - 8) + '" y="' + (y + 4) + '" text-anchor="end" font-size="14" fill="#b0b8c4">'
+            + (ra.hi - (ra.hi - ra.lo) * g / 4).toFixed(0) + '</text>';
+    }
+    const uid = 'cp' + (++UID);
+    s += '<defs><clipPath id="' + uid + '"><rect x="' + padL + '" y="' + padT + '" width="'
+        + (W - padL - padR) + '" height="' + (H - padT - padB) + '"/></clipPath></defs>'
+        + '<g clip-path="url(#' + uid + ')">';
+
+    list.forEach(function (vals, k) {
+        const c = many
+            ? 'hsl(' + Math.round((k * 137.5) % 360) + ', ' + (55 + (k % 2) * 25) + '%, ' + (46 + (k % 3) * 9) + '%)'
+            : LINE_COLORS[k % LINE_COLORS.length];
+        const w = many ? '0.7' : '1.8';
+        s += '<polyline points="' + vals.map((v, i) => X(i).toFixed(1) + ',' + Y(v, k).toFixed(1)).join(' ') + '"'
+            + ' fill="none" stroke="' + c + '" stroke-width="' + w + '" stroke-linejoin="round"'
+            + (many ? ' opacity="0.45"' : '') + '/>';
+        if (!many && vals.length <= 24) {
+            vals.forEach(function (v, i) {
+                s += '<circle cx="' + X(i).toFixed(1) + '" cy="' + Y(v, k).toFixed(1) + '" r="2.4" fill="#fff" stroke="' + c + '" stroke-width="1.5"/>';
+            });
+        }
+    });
+    s += '</g>';
+
+    legend.forEach(function (t, k) {
+        const lx = padL + k * 150, ly = 16, c = LINE_COLORS[k % LINE_COLORS.length];
+        s += '<line x1="' + lx + '" y1="' + ly + '" x2="' + (lx + 16) + '" y2="' + ly + '" stroke="' + c + '" stroke-width="2"/>';
+        s += '<text x="' + (lx + 22) + '" y="' + (ly + 3.5) + '" font-size="14" fill="#7c8798">' + esc(t) + '</text>';
+    });
+    labels.forEach(function (t, i) {
+        if (!t) return;
+        if (step > 1 && (labels.length - 1 - i) % step !== 0) return;
+        const lx = X(i).toFixed(1);
+        if (dense) {
+            const ly = (H - 48).toFixed(1);
+            s += '<text x="' + lx + '" y="' + ly + '" text-anchor="end" font-size="14" fill="#7c8798"'
+                + ' transform="rotate(-40 ' + lx + ' ' + ly + ')">' + esc(t) + '</text>';
+            return;
+        }
+        const anchor = (i === 0) ? 'start' : (i === labels.length - 1 ? 'end' : 'middle');
+        s += '<text x="' + lx + '" y="' + (H - 12) + '" text-anchor="' + anchor + '" font-size="14" fill="#7c8798">' + esc(t) + '</text>';
+    });
+    if (opt.note) {
+        s += '<text x="' + (W - padR) + '" y="' + (opt.topNote ? padT - 20 : (legend.length ? 16 : padT + 2)) + '"'
+            + ' text-anchor="end" font-size="14" fill="#a9b2c0" stroke="#fff" stroke-width="2.5" paint-order="stroke">'
+            + esc(opt.note) + '</text>';
+    }
+    return s + '</svg>';
+}
+
+/* ============================================================================
+ * 柱状图：垂直（多指标并排）/ 水平（设备排行）
+ * ========================================================================== */
+function colChart(labels, seriesList, opt) {
+    opt = opt || {};
+    /* 类目多（> 10 个）时 X 轴刻度倾斜 40°；> 24 个时再按步长抽稀，柱体全部保留 */
+    const dense = labels.length > 10;
+    const step = labels.length > 24 ? Math.ceil(labels.length / 12) : 1;
+    const H = dense ? 320 : 270, padL = 56, padR = 18, padT = 26, padB = dense ? 84 : 42;
+    const all = seriesList.reduce((a, x) => a.concat(x.values), []);
+    /* 刻度上限：默认按数据自适应，外部可传 opt.max 固定量程 */
+    const mx = opt.max || Math.max.apply(null, all) * 1.15;
+    /* 画布固定 960：一律单张出图，不横向滚动、不按段重复 */
+    const W = 960;
+    const band = (W - padL - padR) / labels.length;
+    /* 类目密集时压缩间隙，保证柱体仍然可见 */
+    const bw = Math.min(30, (band * (dense ? 0.74 : 0.6)) / seriesList.length);
+    const rectW = Math.max(1, bw * 0.74);
+    const Y = v => padT + (H - padT - padB) * (1 - v / mx);
+
+    let s = '<svg viewBox="0 0 ' + W + ' ' + H + '" xmlns="http://www.w3.org/2000/svg">';
+    for (let g = 0; g <= 4; g++) {
+        const y = padT + (H - padT - padB) * g / 4;
+        s += '<line x1="' + padL + '" y1="' + y + '" x2="' + (W - padR) + '" y2="' + y + '" stroke="#eef2f7" stroke-width="1"/>';
+        s += '<text x="' + (padL - 8) + '" y="' + (y + 4) + '" text-anchor="end" font-size="14" fill="#b0b8c4">' + (mx * (1 - g / 4)).toFixed(0) + '</text>';
+    }
+    labels.forEach(function (t, i) {
+        const start = padL + band * i + (band - bw * seriesList.length) / 2;
+        seriesList.forEach(function (ser, j) {
+            const x = start + bw * j + 1;
+            const y = Y(ser.values[i]);
+            const h = Math.max(1, H - padB - y);
+            s += '<rect x="' + x.toFixed(1) + '" y="' + y.toFixed(1) + '" width="' + rectW.toFixed(1) + '" height="' + h.toFixed(1) + '" fill="' + ser.color + '" rx="1.5"/>';
+            /* 柱顶数值：节点 ≤ 12 个才标；多指标并排时只标第 1 个指标、且组间距够宽才标，避免数值压叠 */
+            const showVal = labels.length <= 12 && (seriesList.length === 1 ? rectW >= 18 : (j === 0 && band >= 44));
+            if (showVal) {
+                s += '<text x="' + (x + rectW / 2).toFixed(1) + '" y="' + (y - 5).toFixed(1) + '" text-anchor="middle" font-size="14" fill="#7c8798">' + ser.values[i] + '</text>';
+            }
+        });
+        if (step > 1 && (labels.length - 1 - i) % step !== 0) return;
+        const cx = (padL + band * (i + 0.5)).toFixed(1);
+        if (dense) {
+            const ly = (H - 52).toFixed(1);
+            s += '<text x="' + cx + '" y="' + ly + '" text-anchor="end" font-size="14" fill="#7c8798"'
+                + ' transform="rotate(-40 ' + cx + ' ' + ly + ')">' + esc(t) + '</text>';
+            return;
+        }
+        s += '<text x="' + cx + '" y="' + (H - 14) + '" text-anchor="middle" font-size="14" fill="#7c8798">' + esc(t) + '</text>';
+    });
+    if (opt.legend !== false) {
+        seriesList.forEach(function (ser, j) {
+            const lx = padL + j * 170, ly = 14;
+            s += '<rect x="' + lx + '" y="' + (ly - 5) + '" width="16" height="9" rx="2" fill="' + ser.color + '"/>';
+            s += '<text x="' + (lx + 22) + '" y="' + (ly + 3.5) + '" font-size="14" fill="#7c8798">' + esc(ser.name) + '</text>';
+        });
+    }
+    s += '</svg>';
+    return s;
+}
+
+/* 水平条形图（排行榜 · 多指标同图并排 · 全量不截断）
+   series 顺序即排序依据：第 1 个为主指标，按它降序；各指标必须同单位 */
+function rankMulti(rows, series, opt) {
+    opt = opt || {};
+    const rowH = 22, W = 960, padL = 132, padR = 108, padT = 34, padB = 26;
+    const H = padT + rows.length * rowH + padB;
+    const all = [];
+    rows.forEach(function (r) { r.values.forEach(function (v) { all.push(v); }); });
+    const mx = Math.max.apply(null, all) * 1.06;
+    const BX = v => padL + (W - padL - padR) * v / mx;
+    const barH = 7, gap = 2, groupH = series.length * barH + (series.length - 1) * gap;
+
+    let s = '<svg viewBox="0 0 ' + W + ' ' + H + '" xmlns="http://www.w3.org/2000/svg">';
+    rows.forEach(function (r, i) {
+        const top = padT + i * rowH + (rowH - groupH) / 2;
+        s += '<text x="' + (padL - 10) + '" y="' + (top + groupH / 2 + 4).toFixed(1) + '" text-anchor="end" font-size="13" fill="#475569">'
+            + esc(r.name) + '</text>';
+        series.forEach(function (ser, j) {
+            const v = r.values[j];
+            const y = top + j * (barH + gap);
+            s += '<rect x="' + padL + '" y="' + y.toFixed(1) + '" width="' + Math.max(1, BX(v) - padL).toFixed(1)
+                + '" height="' + barH + '" fill="' + ser.color + '" rx="2"/>';
+            s += '<text x="' + (BX(v) + 7).toFixed(1) + '" y="' + (y + barH - 0.5).toFixed(1)
+                + '" font-size="12" fill="#7c8798">' + v + '</text>';
+        });
+    });
+    series.forEach(function (ser, j) {
+        const lx = padL + j * 190, ly = 14;
+        s += '<rect x="' + lx + '" y="' + (ly - 5) + '" width="16" height="9" rx="2" fill="' + ser.color + '"/>';
+        s += '<text x="' + (lx + 22) + '" y="' + (ly + 3.5) + '" font-size="14" fill="#7c8798">'
+            + esc(ser.name) + (ser.unit ? '（' + ser.unit + '）' : '') + '</text>';
+    });
+    return s + '</svg>';
+}
+
+function rankBar(rows, opt) {
+    opt = opt || {};
+    const rowH = 34, W = 960, padL = 132, padR = 96, padT = 34, padB = 28;
+    const H = padT + rows.length * rowH + padB;
+    const mx = Math.max.apply(null, rows.map(r => r.value)) * 1.08;
+    const mean = rows.reduce((a, r) => a + r.value, 0) / rows.length;
+    const BX = v => padL + (W - padL - padR) * v / mx;
+
+    let s = '<svg viewBox="0 0 ' + W + ' ' + H + '" xmlns="http://www.w3.org/2000/svg">';
+    rows.forEach(function (r, i) {
+        const y = padT + i * rowH;
+        const c = (opt.meanLine && r.value < mean) ? GRAY : (opt.color || LINE_COLORS[0]);
+        s += '<text x="' + (padL - 12) + '" y="' + (y + 13) + '" text-anchor="end" font-size="15" fill="#475569">' + esc(r.name) + '</text>';
+        s += '<rect x="' + padL + '" y="' + (y + 2) + '" width="' + (BX(r.value) - padL).toFixed(1) + '" height="16" fill="' + c + '" rx="3"/>';
+        s += '<text x="' + (BX(r.value) + 8).toFixed(1) + '" y="' + (y + 14) + '" font-size="15" fill="#475569">'
+            + r.value + (opt.unit ? ' ' + opt.unit : '') + '</text>';
+    });
+    if (opt.meanLine) {
+        const x = BX(mean);
+        s += '<line x1="' + x.toFixed(1) + '" y1="' + (padT - 6) + '" x2="' + x.toFixed(1) + '" y2="' + (H - padB + 4) + '" stroke="' + GRAY + '" stroke-width="1.4" stroke-dasharray="5 4"/>';
+        s += '<text x="' + x.toFixed(1) + '" y="' + (padT - 12) + '" text-anchor="middle" font-size="14" fill="#7c8798">'
+            + '机群均值 ' + mean.toFixed(1) + (opt.unit ? ' ' + opt.unit : '') + '</text>';
+    }
+    return s + '</svg>';
+}
+
+/* ============================================================================
+ * 环形图（饼 + 中心留白 + 总计数值）
+ * ========================================================================== */
+function polar(cx, cy, r, deg) {
+    const rad = (deg - 90) * Math.PI / 180;
+    return [cx + r * Math.cos(rad), cy + r * Math.sin(rad)];
+}
+function slicePath(cx, cy, r, from, to) {
+    if (to - from >= 359.9) {
+        return 'M ' + cx + ' ' + (cy - r) + ' A ' + r + ' ' + r + ' 0 1 1 ' + (cx - 0.01) + ' ' + (cy - r) + ' Z';
+    }
+    const p0 = polar(cx, cy, r, from), p1 = polar(cx, cy, r, to);
+    const large = (to - from) > 180 ? 1 : 0;
+    return 'M ' + cx + ' ' + cy + ' L ' + p0[0].toFixed(1) + ' ' + p0[1].toFixed(1)
+        + ' A ' + r + ' ' + r + ' 0 ' + large + ' 1 ' + p1[0].toFixed(1) + ' ' + p1[1].toFixed(1) + ' Z';
+}
+function shareChart(items, opt) {
+    opt = opt || {};
+    const W = 960, H = Math.max(240, 76 + items.length * 30);
+    const cx = 200, cy = H / 2, r = 92;
+    const total = items.reduce((a, i) => a + i.value, 0);
+    const colors = opt.colors || LINE_COLORS;
+
+    let s = '<svg viewBox="0 0 ' + W + ' ' + H + '" xmlns="http://www.w3.org/2000/svg">';
+    let a = 0;
+    items.forEach(function (it, k) {
+        const to = a + it.value / total * 360;
+        s += '<path d="' + slicePath(cx, cy, r, a, to) + '" fill="' + colors[k % colors.length] + '"/>';
+        a = to;
+    });
+    if (opt.donut) {
+        s += '<circle cx="' + cx + '" cy="' + cy + '" r="' + (r * 0.62).toFixed(1) + '" fill="#fff"/>';
+        s += '<text x="' + cx + '" y="' + (cy - 2) + '" text-anchor="middle" font-size="26" font-weight="700" fill="#161a2e">'
+            + esc(opt.centerValue) + '</text>';
+        s += '<text x="' + cx + '" y="' + (cy + 20) + '" text-anchor="middle" font-size="15" fill="#8b90a0">'
+            + esc(opt.centerLabel) + '</text>';
+    }
+    items.forEach(function (it, k) {
+        const y = 56 + k * 30;
+        s += '<rect x="392" y="' + (y - 10) + '" width="12" height="12" rx="3" fill="' + colors[k % colors.length] + '"/>';
+        s += '<text x="414" y="' + y + '" font-size="16" fill="#334155">' + esc(it.name) + '</text>';
+        s += '<text x="736" y="' + y + '" font-size="16" fill="#334155">' + esc(it.value) + (opt.unit ? ' ' + opt.unit : '') + '</text>';
+        s += '<text x="' + (W - 40) + '" y="' + y + '" text-anchor="end" font-size="16" fill="#8b90a0">'
+            + (it.value / total * 100).toFixed(1) + '%</text>';
+    });
+    return s + '</svg>';
+}
+
+/* ============================================================================
+ * 数据明细表
+ * ========================================================================== */
+function tableHTML(headers, rows) {
+    let s = '<table class="tbl"><thead><tr>' + headers.map(function (h) {
+        return '<th' + (h.num ? ' class="num"' : '') + '>' + esc(h.text) + '</th>';
+    }).join('') + '</tr></thead><tbody>';
+    rows.forEach(function (r) {
+        const sum = r.sum ? ' class="sum"' : '';
+        s += '<tr' + sum + '>' + r.cells.map(function (c, i) {
+            const v = (c === null || c === '' || typeof c === 'undefined') ? '-' : c;
+            return '<td' + (headers[i].num ? ' class="num"' : '') + '>' + esc(v) + '</td>';
+        }).join('') + '</tr>';
+    });
+    return s + '</tbody></table>';
+}
+
+/* ============================================================================
+ * 1. 折线图
+ * ========================================================================== */
+(function renderLine() {
+    const days = ['9/13', '9/14', '9/15', '9/16', '9/17', '9/18', '9/19'];
+    const weeks = []; for (let i = 0; i < 8; i++) weeks.push('第' + (33 + i) + '周');
+    const months = []; for (let i = 0; i < 12; i++) months.push((i + 1) + '月');
+    /* 8 小时制班次：每天 3 班（08-16 / 16-24 / 00-08），刻度＝「日号 + 结束时间」
+       近 30 天 × 3 班 ＝ 90 个班次：数据点全部保留，刻度自动抽稀 */
+    const shifts90 = [];
+    for (let i = 0; i < 90; i++) shifts90.push('9/' + (1 + Math.floor(i / 3)) + ' ' + ['16:00', '24:00', '08:00'][i % 3]);
+    const t1b = lineChart([
+        r1(series(90, 3).map(v => v + 40)),
+        r1(series(90, 5).map(v => v + 34)),
+        r1(series(90, 9).map(v => v + 4))
+    ], shifts90, { legend: ['水温 (°C)', '油温 (°C)', '进气温度 (°C)'], note: 'X 轴：班次结束时间 · 90 个节点' });
+
+    const t2 = lineChart([
+        r1(series(7, 2).map(v => v / 3 + 6)),
+        r1(series(7, 6).map(v => v / 12 + 1.2))
+    ], days, { legend: ['工作时长 (h)', '怠速时长 (h)'], note: '同单位（h）' });
+
+    const fleet = [];
+    for (let d = 0; d < 100; d++) fleet.push(series(8, d + 1).map(v => Math.round(v * 6)));
+    const t3 = lineChart(fleet, weeks, { many: true, note: 'X 轴：周 · 100 台各一条线' });
+
+    const t6 = lineChart(r1(series(12, 11).map(v => v * 6)), months, { note: 'X 轴：月 · 12 个节点' });
+
+    const html = card('班次口径（8 小时制）· 近 30 天 · 3 个指标', '90 点 · 3 条线', t1b,
+            '最多 5 个指标，5 色循环（品牌红打头）；同单位（示例 °C）；8 小时制三班 08-16 / 16-24 / 00-08，按结束时间归属日期；90 个班次全部保留（不抽稀、不聚合），刻度抽稀到约 12 个并倾斜，末点必标。', { kind: 'single', text: '单机场景' })
+        + card('日口径 · 工时类（工作时长 / 怠速时长）', '7 点 · 2 条线', t2,
+            '同屏指标必须同单位（示例均为 h）；5 色循环按指标数量取色，一个指标一个颜色。', { kind: 'single', text: '单机场景' })
+        + card('周口径 · 近 8 周 · 100 台设备', '8 点 · 100 条线', t3,
+            '机群只能选 1 个指标，每台设备一条线；全部设备统一按同一规则淡色铺底，不做离群特殊处理。', { kind: 'fleet', text: '机群场景' })
+        + card('月 · 月份对比', '12 点 · 1 月/点', t6, '每个节点＝1 个自然月的聚合值，刻度为月份。', { kind: 'plain', text: '时间口径（单机 / 机群通用）' });
+    document.getElementById('bd-line').innerHTML = html;
+})();
+
+/* ============================================================================
+ * 2. 柱状图
+ * ========================================================================== */
+(function renderBar() {
+    const months = ['4月', '5月', '6月', '7月', '8月', '9月'];
+    /* 8 小时制班次：近 31 天 × 3 班 ＝ 93 个班次（9/1 ~ 10/1） */
+    const shifts93 = [];
+    for (let i = 0; i < 93; i++) {
+        const d = 1 + Math.floor(i / 3);
+        shifts93.push((d <= 30 ? '9/' + d : '10/' + (d - 30)) + ' ' + ['16:00', '24:00', '08:00'][i % 3]);
+    }
+
+    /* 多指标并排：只出一张图（不再按段重复渲染），类目密集时靠刻度倾斜解决 */
+    const g1b = colChart(shifts93.slice(0, 16), [
+        { name: '工作时长 (h)', values: r1(series(16, 7).map(v => v / 12 + 4)), color: LINE_COLORS[0] },
+        { name: '怠速时长 (h)', values: r1(series(16, 3).map(v => v / 24 + 0.6)), color: LINE_COLORS[1] }
+    ], {});
+
+    /* 机群排行：全量 100 台不截断，2 个指标同图并排（必须同单位）
+       排序依据＝第 1 个指标（工作时长 h）降序；怠速时长同为单位 h，仅作对照 */
+    const fleetRank = [];
+    for (let i = 0; i < 100; i++) {
+        const work = Math.round((268.4 - i * 2.05 + (i % 5) * 1.7) * 10) / 10;
+        const idle = Math.round((work * (0.06 + (i % 7) * 0.014)) * 10) / 10;
+        fleetRank.push({ name: 'EX' + String(i + 1).padStart(3, '0'), values: [work, idle] });
+    }
+    fleetRank.sort(function (a, b) { return b.values[0] - a.values[0]; });
+    /* 水平排行：全量展示、不截断 —— 示例数据只给 10 台，所以图上就是 10 条 */
+    const g3 = rankMulti(fleetRank.slice(0, 10), [
+        { name: '工作时长', unit: 'h', color: LINE_COLORS[0] },
+        { name: '怠速时长', unit: 'h', color: LINE_COLORS[1] }
+    ], {});
+    /* 垂直排布：只出一张图（不再按段重复渲染），示例数据取前 20 台 */
+    const g3vTop = fleetRank.slice(0, 20);
+    const g3v = colChart(g3vTop.map(function (r) { return r.name; }), [
+        { name: '工作时长 (h)', values: g3vTop.map(function (r) { return r.values[0]; }), color: LINE_COLORS[0] },
+        { name: '怠速时长 (h)', values: g3vTop.map(function (r) { return r.values[1]; }), color: LINE_COLORS[1] }
+    ], {});
+    /* 排布方向：同一组件支持垂直 / 水平两种排布，这里用月口径燃油消耗演示水平排布 */
+    const monthValues = r1(series(6, 4).map(v => Math.round(v * 12)));
+    const monthRows = months.map(function (m, i) { return { name: m, value: monthValues[i] }; })
+        .sort(function (a, b) { return b.value - a.value; });
+    const g4 = rankBar(monthRows, { unit: 'L', color: LINE_COLORS[0] });
+
+    const html = card('垂直柱状图 · 班次口径（8 小时制）· 2 个指标并排', '16 组 · 2 个指标', g1b,
+            '多指标并排不堆叠、单位必须一致（示例均为 h）；类目增多时 X 轴刻度倾斜 40°，柱体一根不少、<strong>不滚动、不分段重复</strong>（报表要转 PDF，动效/滚动都不作数）。', { kind: 'single', text: '单机场景' }, true)
+        + card('水平条形图 · 设备排行（全量展示）· 2 个指标', '10 条 · 2 个指标 · 示例数据 10 台', g3,
+            '机群有多少台就出多少条，<strong>不做前 N 名截断</strong>（示例数据只给 10 台，所以图上 10 条）；2 个指标在同一张图内并排、单位必须一致（示例均为 h），排序依据＝第 1 个指标（工作时长）降序；条形走 5 色循环，并列值按设备编号升序。', { kind: 'fleet', text: '机群场景' })
+        + card('垂直柱状图 · 设备排行（全量展示）· 2 个指标', '20 台 · 2 个指标 · 示例数据 20 台', g3v,
+            '同一组数据的<strong>垂直排布</strong>：机群有多少台就出多少根（示例数据只给 20 台，所以图上 20 组）；设备编号在 X 轴、2 个指标同组并排、单位必须一致（均为 h），排序依据＝第 1 个指标（工作时长）降序；不做轮播/滚动等动效（<strong>报表最终转 PDF，只有静态排版可用</strong>），也不按段重复渲染。', { kind: 'fleet', text: '机群场景' }, true)
+        + card('水平（时间序列 / 排行）', '分类在 Y 轴 · 数值在 X 轴', g4, '同一组数据换方向：用于分类标签是设备编号或长名称的场景，垂直排布放不下。', { kind: 'plain', text: '排布方向（同一组件两种排布）' });
+    document.getElementById('bd-bar').innerHTML = html;
+})();
+
+/* ============================================================================
+ * 3. 环形图
+ * ========================================================================== */
+(function renderDoughnut() {
+    const single = [
+        { name: '工作', value: 18.6 },
+        { name: '怠速', value: 2.3 },
+        { name: '关机', value: 3.1 }
+    ];
+    const fleet = [
+        { name: 'EX001', value: 268.4 }, { name: 'EX002', value: 251.5 }, { name: 'EX003', value: 246.8 },
+        { name: 'EX004', value: 232.1 }, { name: 'EX005', value: 218.6 },
+        { name: '其他 95 台', value: 367.2 }
+    ];
+
+    const d1 = shareChart(single, { donut: true, unit: 'h', centerValue: '24.0 h', centerLabel: '总计工作时长' });
+    const d2 = shareChart(fleet, {
+        donut: true, unit: 'h', centerValue: '1,584.6 h', centerLabel: '机群总工时',
+        colors: ['#E60012', '#F59E0B', '#0F766E', '#2563EB', '#7C3AED', '#94A3B8']
+    });
+
+    const html = card('时间分配构成（工作 / 怠速 / 关机）· 日口径 9/19', '3 个扇区 · 合计 24.0 h', d1,
+            '必须选择 1 个同单位指标（示例全部为时长 h）；单位不一致时配置器提示“配置单位错误”；中心留白放总计数值。环形图属“静态总值比较”，只展示当前所选周期的期末累加总值，不按天 / 周 / 月拆点。', { kind: 'single', text: '单机场景' })
+        + card('机群工时贡献（前 5 台 + 其他）· 周口径 第 40 周', '6 个扇区 · 单指标', d2,
+            '机群只能选 1 个累计型指标，扇区＝单机贡献度；设备超过 5 台时尾部数据聚合成第 6 个中性灰的“其他”扇区（示例＝前 5 台 + 其他 95 台）。', { kind: 'fleet', text: '机群场景' });
+    document.getElementById('bd-doughnut').innerHTML = html;
+})();
+
+/* ============================================================================
+ * 5. 数据明细表
+ * ========================================================================== */
+(function renderTable() {
+    const singleHead = [
+        { text: '时间' }, { text: '工作时长 (h)', num: true }, { text: '怠速时长 (h)', num: true },
+        { text: '燃油消耗 (L)', num: true }, { text: '状态' }
+    ];
+    const singleRows = [
+        { cells: ['9/13', '18.6', '2.3', '312.4', '运行'] },
+        { cells: ['9/14', '19.2', '1.8', '326.8', '运行'] },
+        { cells: ['9/15', '16.4', '3.1', '288.5', '运行'] },
+        { cells: ['9/16', '20.1', '1.2', '341.2', '运行'] },
+        { cells: ['9/17', '17.8', '2.6', '305.9', '运行'] },
+        { cells: ['9/18', '12.4', '4.8', '216.3', '怠速'] },
+        { cells: ['9/19', null, null, null, null] }
+    ];
+
+    const fleetHead = [
+        { text: '设备编号' }, { text: '类型' }, { text: '工作时长 (h)', num: true },
+        { text: '燃油消耗 (L)', num: true }, { text: '状态' }
+    ];
+    const rank = [
+        ['EX001', '挖掘机', 268.4, 4520.6, '运行'],
+        ['EX002', '挖掘机', 251.5, 4185.2, '运行'],
+        ['EX003', '挖掘机', 246.8, 4092.4, '运行'],
+        ['EX004', '装载机', 232.1, 3864.8, '运行'],
+        ['EX005', '装载机', 218.6, 3612.5, '运行'],
+        ['EX006', '宽体车', 204.3, 3388.1, '怠速'],
+        ['EX007', '宽体车', 197.2, 3271.6, '运行'],
+        ['EX008', '汽车起重机', 186.4, 3086.2, '运行'],
+        ['EX009', '挖掘机', 142.8, 2348.7, '怠速'],
+        ['EX010', '挖掘机', 128.5, 2106.4, '离线']
+    ];
+    const fleetRows = rank.map(r => ({ cells: r }));
+
+    const html = card('时间序列明细（日口径）', '7 行 · 5 列', tableHTML(singleHead, singleRows),
+            '数据行＝时间序列、数据列＝所选指标；缺失数据严格输出 <code>-</code>，不补 0。', { kind: 'single', text: '单机场景' })
+        + card('设备排行明细（周口径 · 第 40 周）', '10 行 · 5 列', tableHTML(fleetHead, fleetRows),
+            '行数恒等于设备数（示例 10 台 ＝ 10 行）；列数据聚合：口径内求和（如选“本周”，【油耗】列＝该设备周一到周日的 <code>SUM(油耗)</code>）。', { kind: 'fleet', text: '机群场景' });
+    document.getElementById('bd-table').innerHTML = html;
+})();
+
+/* ============================================================================
+ * 4. 指标卡
+ * ========================================================================== */
+function kpiCards(items, note) {
+    return '<div class="kpi-grid">' + items.map(function (it) {
+        return '<div class="kpi"><div class="kpi-name">' + esc(it.name) + '</div>'
+            + '<div class="kpi-val">' + esc(it.value) + (it.unit ? '<i>' + esc(it.unit) + '</i>' : '') + '</div>'
+            + (it.sub ? '<div class="kpi-sub">' + esc(it.sub) + '</div>' : '')
+            + '</div>';
+    }).join('') + '</div>' + (note ? '<div class="card-note" style="margin-top:10px;">' + note + '</div>' : '');
+}
+
+(function renderKpi() {
+    const single = kpiCards([
+        { name: '工作时长', value: '268.4', unit: 'h' },
+        { name: '燃油消耗', value: '4,520.6', unit: 'L' },
+        { name: '平均利用率', value: '92.6', unit: '%' },
+        { name: '水温峰值', value: '96.2', unit: '°C' }
+    ], '一张卡只放 1 个指标；数值＝所选统计周期内的聚合值（累计类取合计、均值类取均值、峰值类取最大值），属“静态值数据”，不含时间序列。卡片顺序＝配置器里的勾选顺序，固定不变。');
+
+    const fleet = kpiCards([
+        { name: '机群总工时', value: '2,076.6', unit: 'h' },
+        { name: '机群总油耗', value: '34,476.5', unit: 'L' },
+        { name: '平均利用率', value: '88.3', unit: '%' },
+        { name: '在线设备', value: '96', unit: '台' }
+    ], '机群卡只放可汇总的指标：累计型（时长、油耗、里程）取合计、比率类按整体重算；状态型（不适用）。');
+
+    document.getElementById('bd-kpi').innerHTML = card('单机关键指标（日口径 · 9/19）', '4 张卡 · 单行横排', single, null, { kind: 'single', text: '单机场景' })
+        + card('机群汇总指标（周口径 · 第 40 周）', '4 张卡 · 单行横排', fleet, null, { kind: 'fleet', text: '机群场景' });
+})();
+
+/* ============================================================================
+ * 6. 异常场景错误
+ * ========================================================================== */
+(function renderError() {
+    /* ① 跨零点班次：按结束时间判定归属日 */
+    const shiftHead = [{ text: '班次' }, { text: '起止时间' }, { text: '结束时间' }, { text: '归属日' }];
+    const shiftRows = [
+        { cells: ['10/1 夜班', '10/1 19:00 ~ 10/2 07:00', '10/2 07:00', '10/2'] },
+        { cells: ['10/2 白班', '10/2 07:00 ~ 10/2 19:00', '10/2 19:00', '10/2'] }
+    ];
+    /* ② 指标量纲错配：配置阶段直接拦截，只弹一条轻提示（Toast） */
+    const errTip = '<div class="toast-tip"><span class="err-ico">!</span>配置单位错误，请检查所选指标单位</div>';
+
+    const html = card('跨零点班次：数据落到哪一天', '按结束时间归属', tableHTML(shiftHead, shiftRows),
+            '查询按班次聚合，以<strong>班次结束时间</strong>判定归属日：跨零点的那段（00:00 ~ 07:00）整段计入结束日，不拆到前一天。', { kind: 'plain', text: '异常场景错误' })
+        + card('指标量纲错配：错误提示', '配置阶段拦截', errTip,
+            '配置器比对【指标元数据字典】的 <code>unit</code>，不一致时弹一条 Toast 并撤销勾选；渲染引擎收到非法配置直接拦截。', { kind: 'plain', text: '异常场景错误' });
+    document.getElementById('bd-error').innerHTML = html;
+})();
+
+/* ============================================================================
+ * 左侧定位导航：按「栏目 → 卡片」自动生成两级目录，滚动时高亮当前位置
+ * ========================================================================== */
+(function buildNav() {
+    const nav = document.getElementById('nav');
+    const side = document.querySelector('.side');
+    if (!nav || !side) return;
+
+    const sections = Array.prototype.slice.call(document.querySelectorAll('main .sec'));
+    const items = [];
+    let html = '';
+
+    sections.forEach(function (sec, i) {
+        if (!sec.id) sec.id = 'sec-' + i;
+        const h2 = sec.querySelector('.sec-hd h2');
+        html += '<a class="lv1" href="#' + sec.id + '" data-id="' + sec.id + '">'
+            + esc(h2 ? h2.textContent : sec.id) + '</a>';
+        items.push({ id: sec.id, el: sec });
+
+        Array.prototype.slice.call(sec.querySelectorAll('.card')).forEach(function (c, j) {
+            const t = c.querySelector('.card-t');
+            const id = sec.id + '-c' + j;
+            c.id = id;
+            html += '<a class="lv2" href="#' + id + '" data-id="' + id + '">'
+                + esc(t ? t.textContent : '示例') + '</a>';
+            items.push({ id: id, el: c });
+        });
+    });
+    nav.innerHTML = html;
+
+    const links = {};
+    Array.prototype.slice.call(nav.querySelectorAll('a')).forEach(function (a) {
+        links[a.getAttribute('data-id')] = a;
+    });
+
+    function paint(activeId) {
+        Array.prototype.slice.call(nav.querySelectorAll('a')).forEach(function (a) { a.classList.remove('on'); });
+        const active = links[activeId];
+        if (!active) return;
+        active.classList.add('on');
+        /* 同时高亮所属栏目，便于看清当前位置 */
+        const secLink = links[activeId.replace(/-c\d+$/, '')];
+        if (secLink && secLink !== active) secLink.classList.add('on');
+        /* 让高亮项在导航内部可见 */
+        const top = active.offsetTop, bottom = top + active.offsetHeight;
+        if (top < side.scrollTop + 32) side.scrollTop = top - 32;
+        else if (bottom > side.scrollTop + side.clientHeight - 12) side.scrollTop = bottom - side.clientHeight + 12;
+    }
+
+    function update() {
+        const pos = window.scrollY + 120;
+        let cur = items.length ? items[0].id : null;
+        items.forEach(function (it) {
+            if (it.el.getBoundingClientRect().top + window.scrollY <= pos) cur = it.id;
+        });
+        paint(cur);
+    }
+
+    window.addEventListener('scroll', update, { passive: true });
+    window.addEventListener('resize', update);
+    update();
+})();
+</script>
+
+</body>
+</html>

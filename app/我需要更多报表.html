@@ -1,0 +1,388 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- 原型页：禁用缓存，改完刷新即生效（否则浏览器会用旧的 HTML/CSS） -->
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>手机端 · 我需要更多报表（v2.0）</title>
+<style>
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    /* 手机端：去掉双击缩放等待，点按即时响应 */
+    button, label, .thumb, #reportPreview { touch-action: manipulation; }
+    body {
+        font-family: "PingFang SC", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+        background: #f4f5f7; color: #1a1a1a; height: 100vh; overflow: hidden; display: flex; align-items: stretch;
+    }
+    .phone {
+        flex: 1 1 auto; min-width: 0; height: 100vh; background: #f4f5f7;
+        display: flex; flex-direction: column;
+    }
+
+    /* ================= 顶部导航（与 App 其他页统一：白底 + 圆形返回 + 页面标题） ================= */
+    .topbar {
+        height: 52px; background: #fff; border-bottom: 1px solid #e8e8e8; flex-shrink: 0;
+        display: flex; align-items: center; padding: 0 12px;
+    }
+    .topbar-back {
+        width: 30px; height: 30px; flex-shrink: 0; border: none; background: transparent;
+        border-radius: 50%; color: #1a1a1a; font-size: 22px; line-height: 1; font-family: inherit;
+        display: flex; align-items: center; justify-content: center; cursor: pointer;
+    }
+    .topbar-back:hover { background: #f2f3f5; }
+    /* 多语言标题可能变长：占满剩余宽度、超出省略号截断，不把返回键挤走 */
+    .page-title {
+        margin-left: 4px; flex: 1 1 auto; min-width: 0; font-size: 17px; font-weight: 600;
+        color: #161a2e; letter-spacing: .2px;
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+
+    /* ================= 内容区（唯一滚动容器，底部按钮因此不会被内容顶走） ================= */
+    .screen {
+        flex: 1; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch;
+        overscroll-behavior: contain; padding: 12px 14px 20px;
+    }
+    /* ================= 顶部说明（信息卡） ================= */
+    .intro {
+        display: flex; gap: 10px; background: #fff; border-radius: 16px; padding: 13px 14px;
+        margin-bottom: 18px; box-shadow: 0 1px 3px rgba(22,26,46,.05);
+    }
+    .intro-icon { flex-shrink: 0; width: 17px; height: 17px; color: #E60012; margin-top: 1px; }
+    .intro-txt { font-size: 12px; color: #8b90a0; line-height: 1.65; }
+
+    /* ================= 分组标题 ================= */
+    .section-title {
+        display: flex; align-items: center; gap: 7px;
+        font-size: 13px; font-weight: 700; color: #161a2e; margin: 0 2px 10px;
+    }
+    .section-title::before { content: ''; width: 3px; height: 12px; border-radius: 2px; background: #E60012; }
+    .section-title.spaced { margin-top: 22px; margin-bottom: 8px; }
+    .sel-count { margin-left: auto; font-size: 11px; font-weight: 400; color: #b0b4bd; }
+    .sel-count.on { color: #E60012; font-weight: 600; }
+    .field-hint { font-size: 11px; color: #a0a4ad; line-height: 1.5; margin: 0 2px 8px; }
+
+    /* ================= 候选项（整卡可点，选中 = 卡片染色） ================= */
+    .opt {
+        position: relative; display: flex; align-items: flex-start; gap: 11px; background: #fff;
+        border: 1.5px solid transparent; border-radius: 16px; padding: 12px; margin-bottom: 9px;
+        box-shadow: 0 1px 3px rgba(22,26,46,.05); cursor: pointer;
+        -webkit-user-select: none; user-select: none; touch-action: manipulation;
+        transition: background .16s, border-color .16s, box-shadow .16s, transform .1s;
+    }
+    .opt:active { transform: scale(.985); background: #fafbfc; }
+    .opt input { position: absolute; opacity: 0; width: 0; height: 0; }
+    .opt.checked { border-color: #f6a8ae; background: #fff7f7; box-shadow: 0 3px 14px rgba(230,0,18,.1); }
+    .thumb {
+        position: relative; width: 72px; height: 52px; flex-shrink: 0; border-radius: 10px;
+        overflow: hidden; background: #f2f2f2; cursor: zoom-in; border: 1px solid #eef0f3;
+    }
+    .thumb img { width: 100%; height: 100%; object-fit: cover; display: block; }
+    .thumb .zoom {
+        position: absolute; right: 3px; bottom: 3px; width: 20px; height: 20px; border-radius: 50%;
+        background: rgba(0,0,0,.55); color: #fff; display: flex; align-items: center; justify-content: center;
+    }
+    .opt-info { flex: 1; min-width: 0; }
+    .opt-name { font-size: 14px; font-weight: 600; color: #161a2e; line-height: 1.4; }
+    .opt-tag { display: inline-block; margin-left: 6px; font-size: 10px; font-weight: 400; border-radius: 999px; padding: 2px 8px; vertical-align: middle; }
+    .opt-tag.planned { background: #e6f4ff; color: #1890ff; }
+    .opt-tag.apply { background: #fdecee; color: #E60012; }
+    .opt-desc { font-size: 12px; color: #8b90a0; line-height: 1.6; margin-top: 5px; }
+
+    .note-input {
+        width: 100%; min-height: 104px; border: 1px solid #eef0f3; border-radius: 16px; background: #fff;
+        padding: 13px; font-family: inherit; font-size: 16px; color: #333; line-height: 1.6;
+        resize: vertical; outline: none; box-shadow: 0 1px 3px rgba(22,26,46,.05);
+        transition: border-color .16s, box-shadow .16s;
+    }
+    .note-input::placeholder { color: #b8bcc4; }
+    .note-input:focus { border-color: #f0a5ab; box-shadow: 0 0 0 3px rgba(230,0,18,.06); }
+    .form-tip { font-size: 12px; line-height: 1.6; margin-top: 10px; }
+    .form-tip.error { color: #E60012; }
+    .form-tip.success { color: #389e0d; }
+
+    /* ================= 底部按钮（固定在本屏底部，含 iPhone 安全区） ================= */
+    .foot-bar {
+        flex-shrink: 0; display: flex; gap: 10px; background: #fff; border-top: 1px solid #eef0f3;
+        padding: 10px 14px calc(14px + env(safe-area-inset-bottom));
+        box-shadow: 0 -2px 12px rgba(22,26,46,.05);
+    }
+    .foot-bar button { flex: 1; border-radius: 22px; font-family: inherit; font-size: 15px; padding: 13px 0; cursor: pointer; }
+    .btn-ghost { border: 1px solid #e3e5ea; background: #fff; color: #666; }
+    .btn-primary { border: none; background: #E60012; color: #fff; box-shadow: 0 2px 8px rgba(230,0,18,.22); }
+    .btn-primary:hover { background: #c40011; }
+
+    /* ================= 预览图放大 ================= */
+    #reportPreview {
+        position: fixed; inset: 0; background: rgba(0,0,0,.82); z-index: 80; display: none;
+        align-items: center; justify-content: center; cursor: zoom-out; padding: 16px;
+    }
+    #reportPreview.active { display: flex; }
+    #reportPreview img { max-width: 100%; max-height: 86vh; border-radius: 10px; display: block; }
+</style>
+</head>
+<body>
+
+<!-- ==================== 手机端：我需要更多报表 ==================== -->
+<div class="phone">
+    <!-- 顶部导航：与 App 其他页同一套（白底 52px + 圆形返回 + 页面标题） -->
+    <div class="topbar">
+        <button class="topbar-back" onclick="goBack()" aria-label="返回"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+        <span class="page-title">我需要更多报表</span>
+    </div>
+
+    <div class="screen">
+        <div class="intro">
+            <svg class="intro-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><line x1="12" y1="11" x2="12" y2="16"/><circle cx="12" cy="7.8" r="1" fill="currentColor" stroke="none"/></svg>
+            <div class="intro-txt">勾选你希望上线的报表，或直接描述你的诉求，我们会第一时间处理。</div>
+        </div>
+
+        <div class="section-title">候选报表（可多选）<span class="sel-count" id="selCount"></span></div>
+        <div id="options"></div>
+
+        <div class="section-title spaced">自定义诉求说明</div>
+        <div class="field-hint">建议写清：报表用途、统计周期、需要包含的字段。</div>
+        <textarea class="note-input" id="note" placeholder="例如：我希望有一份按周统计的「设备保养提醒报表」，需要包含下次保养时间、剩余小时数、所属项目…"></textarea>
+        <div class="form-tip" id="tip"></div>
+    </div>
+
+    <div class="foot-bar">
+        <button class="btn-ghost" onclick="cancelSubmit()">取消</button>
+        <button class="btn-primary" id="submitBtn" onclick="submit()">提交</button>
+    </div>
+</div>
+
+<!-- ==================== 预览图放大 ==================== -->
+<div id="reportPreview" onclick="hidePreview()">
+    <img id="previewImg" alt="" onerror="this.onerror=null;this.src=DEFAULT_PREVIEW_IMAGE;">
+</div>
+
+<script>
+/* ========================================================================
+ * 数据来源：V2/MysnayPC端V2/报表模版.html 的「我需要更多报表」弹窗
+ * 候选项优先读后台配置（localStorage: mysany_more_report_options），未配置用内置默认
+ * ====================================================================== */
+const MORE_REPORT_OPTIONS = [
+    { name: '超时工作报表', tag: '已规划', tagType: 'planned',
+      image: '预览图/超时工作报表.png',
+      desc: '统计设备超过设定工时阈值的时长、次数与占比，用于识别加班与合规风险。' },
+    { name: '设备异常通知报表', tag: '已规划', tagType: 'planned',
+      image: '预览图/设备异常通知报表.png',
+      desc: '汇总异常事件的即时通知记录与处理情况：异常类型、发生时间、通知对象与处理状态。' },
+    { name: '电池电量报表', tag: '已规划', tagType: 'planned',
+      image: '预览图/电池电量报表.png',
+      desc: '统计设备 / 机群的电池荷电状态（SOC）与充电情况：期末 SOC、最低 SOC、充电次数与充电时长。' },
+    { name: '碳排放报表', tag: '可申请', tagType: 'apply',
+      image: '预览图/碳排放报表.png',
+      desc: '把燃油 / 电能消耗折算为碳排放量，支持按项目、机型、周期统计，用于 ESG 与绿色施工汇报。' },
+    { name: '驾驶员行为评分报表', tag: '可申请', tagType: 'apply',
+      image: '预览图/驾驶员行为评分报表.png',
+      desc: '按急加速、急刹车、超速、怠速等事件给出机手的行为评分与排名，便于考核与培训。' },
+    { name: '备件与保养消耗报表', tag: '可申请', tagType: 'apply',
+      image: '预览图/备件与保养消耗报表.png',
+      desc: '统计保养、维修产生的备件消耗与费用，按设备、项目与周期汇总。' }
+];
+
+const REPORT_OPTIONS_KEY = 'mysany_more_report_options';
+// PC 端的预览图相对 V2/MysnayPC端V2/ 存放，本页在 V2/app/，需补前缀
+const IMG_BASE = '../MysnayPC端V2/';
+const DEFAULT_PREVIEW_IMAGE = IMG_BASE + '预览图/默认预览.png';
+
+const OPT_TAG_LABEL = {
+    planned: { 'zh-CN': '已规划', en: 'Planned' },
+    apply: { 'zh-CN': '可申请', en: 'On request' }
+};
+
+const optionsBox = document.getElementById('options');
+const noteInput = document.getElementById('note');
+const tipEl = document.getElementById('tip');
+const selCountEl = document.getElementById('selCount');
+const submitBtn = document.getElementById('submitBtn');
+
+/* 已选数量反馈：卡片染色 + 分组标题右侧 + 提交按钮文案 */
+function updateSelCount() {
+    let n = 0;
+    optionsBox.querySelectorAll('.opt').forEach(function (label) {
+        const input = label.querySelector('input');
+        const on = !!(input && input.checked);
+        if (on) n++;
+        label.classList.toggle('checked', on);
+    });
+    selCountEl.textContent = n ? '已选 ' + n + ' 项' : '';
+    selCountEl.className = 'sel-count' + (n ? ' on' : '');
+    submitBtn.textContent = n ? '提交（' + n + '）' : '提交';
+}
+
+/* 当前界面语言（站点写入过 mysany_lang 时按其展示，否则简体中文） */
+function currentUiLang() {
+    try { return localStorage.getItem('mysany_lang') || 'zh-CN'; } catch (e) { return 'zh-CN'; }
+}
+
+/* 多语言取值：当前语言 → 简体中文 → 任一有值的语言（兼容旧的纯字符串写法） */
+function pickLangText(v) {
+    if (v == null) return '';
+    if (typeof v === 'string') return v;
+    const order = [currentUiLang(), 'zh-CN'];
+    for (let i = 0; i < order.length; i++) {
+        const s = v[order[i]];
+        if (s && String(s).trim()) return String(s);
+    }
+    const keys = Object.keys(v);
+    for (let j = 0; j < keys.length; j++) {
+        const s = v[keys[j]];
+        if (s && String(s).trim()) return String(s);
+    }
+    return '';
+}
+
+function readConfiguredReportOptions() {
+    try {
+        const raw = localStorage.getItem(REPORT_OPTIONS_KEY);
+        if (!raw) return null;
+        const arr = JSON.parse(raw);
+        if (!Array.isArray(arr)) return null;
+        const list = arr.map(function (o) {
+            if (!o) return null;
+            const tagType = (o.tagType === 'apply') ? 'apply' : 'planned';
+            return {
+                name: pickLangText(o.name),
+                desc: pickLangText(o.desc),
+                tag: o.tag || pickLangText(OPT_TAG_LABEL[tagType]),
+                tagType: tagType,
+                image: (typeof o.image === 'string' ? o.image : '')
+            };
+        }).filter(function (o) { return o && o.name; });
+        return list.length ? list : null;
+    } catch (e) { return null; }
+}
+
+/* 图片路径：dataURL / 绝对路径原样用；后台配置里的相对路径按 PC 端目录解析 */
+function imgSrc(p) {
+    if (!p) return DEFAULT_PREVIEW_IMAGE;
+    return /^(data:|https?:|\.\.\/|\/)/.test(p) ? p : IMG_BASE + p;
+}
+
+function safe(v) {
+    return String(v == null ? '' : v).replace(/[&<>"]/g, function (c) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+    });
+}
+
+/* ==================== 渲染候选项 ==================== */
+function renderOptions() {
+    // 优先取后台配置的清单，未配置时用内置默认
+    const list = readConfiguredReportOptions() || MORE_REPORT_OPTIONS;
+    optionsBox.innerHTML = list.map(function (o) {
+        return '<label class="opt">'
+            + '<input type="checkbox" value="' + safe(o.name) + '" onchange="updateSelCount()">'
+            + '<div class="thumb" onclick="showPreview(event, this)" title="点击查看大图">'
+            + '<img src="' + safe(imgSrc(o.image)) + '" alt="" onerror="this.onerror=null;this.src=DEFAULT_PREVIEW_IMAGE;">'
+            + '<span class="zoom"><svg width="11" height="11" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><line x1="16.5" y1="16.5" x2="21" y2="21"></line></svg></span>'
+            + '</div>'
+            + '<div class="opt-info">'
+            + '<div class="opt-name">' + safe(o.name)
+            + '<span class="opt-tag ' + (o.tagType === 'apply' ? 'apply' : 'planned') + '">' + safe(o.tag) + '</span></div>'
+            + '<div class="opt-desc">' + safe(o.desc) + '</div>'
+            + '</div></label>';
+    }).join('');
+}
+
+/* 预览图放大：点缩略图直接出大图（要阻止冒泡到 label，否则会连带勾选复选框） */
+function showPreview(e, el) {
+    if (e) { e.preventDefault(); e.stopPropagation(); }
+    const img = el && el.querySelector ? el.querySelector('img') : null;
+    if (!img) return;
+    document.getElementById('previewImg').src = img.getAttribute('src');
+    document.getElementById('reportPreview').classList.add('active');
+}
+
+function hidePreview() {
+    document.getElementById('reportPreview').classList.remove('active');
+    document.getElementById('previewImg').src = '';
+}
+
+document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && document.getElementById('reportPreview').classList.contains('active')) hidePreview();
+});
+
+/* ==================== 提交 ==================== */
+function submit() {
+    const checked = Array.prototype.slice
+        .call(optionsBox.querySelectorAll('input:checked'))
+        .map(function (c) { return c.value; });
+    const note = noteInput.value.trim();
+
+    if (!checked.length && !note) {
+        tipEl.className = 'form-tip error';
+        tipEl.textContent = '请至少勾选一张候选报表，或填写自定义诉求说明';
+        return;
+    }
+
+    saveReportRequest('报表模版', checked, note);
+
+    tipEl.className = 'form-tip success';
+    tipEl.textContent = '已提交诉求'
+        + (checked.length ? '（勾选 ' + checked.length + ' 张：' + checked.join('、') + '）' : '（自定义 1 条）')
+        + '，我们会第一时间处理。';
+
+    setTimeout(resetForm, 1500);
+}
+
+function resetForm() {
+    optionsBox.querySelectorAll('input:checked').forEach(function (c) { c.checked = false; });
+    noteInput.value = '';
+    tipEl.className = 'form-tip';
+    tipEl.textContent = '';
+    updateSelCount();
+}
+
+function cancelSubmit() {
+    resetForm();
+    showToast('已取消提交');
+}
+
+/* 写入诉求（后台 V2/mysany后台V2/机群需求反馈.html 读取同一个 localStorage key） */
+function saveReportRequest(source, reports, note) {
+    try {
+        const KEY = 'mysany_report_requests';
+        const now = new Date();
+        const p2 = function (n) { return String(n).padStart(2, '0'); };
+        const time = now.getFullYear() + '-' + p2(now.getMonth() + 1) + '-' + p2(now.getDate())
+            + ' ' + p2(now.getHours()) + ':' + p2(now.getMinutes());
+        const list = JSON.parse(localStorage.getItem(KEY) || '[]');
+        list.unshift({
+            id: 'REQ-' + now.getTime(),
+            time: time,
+            user: 'Schuck',
+            source: source,
+            reports: reports,
+            note: note,
+            status: '待评估'
+        });
+        localStorage.setItem(KEY, JSON.stringify(list));
+    } catch (e) { /* 演示环境忽略存储异常 */ }
+}
+
+/* 返回上一页（无历史记录时只提示一下） */
+function goBack() {
+    if (history.length > 1) { history.back(); return; }
+    showToast('返回上一页');
+}
+
+function showToast(msg) {
+    const t = document.createElement('div');
+    t.textContent = msg;
+    t.style.cssText = 'position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom));transform:translateX(-50%);'
+        + 'background:rgba(0,0,0,.78);color:#fff;'
+        + 'font-size:12px;padding:9px 16px;border-radius:18px;z-index:99;max-width:80%;text-align:center;';
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 1800);
+}
+
+/* ==================== 初始化 ==================== */
+renderOptions();
+updateSelCount();
+</script>
+</body>
+</html>

@@ -599,6 +599,7 @@
 
         .tab-item {
             flex: 1;
+            min-width: 0;
             display: flex;
             flex-direction: column;
             align-items: center;
@@ -611,6 +612,16 @@
             position: relative;
             font-family: inherit;
             font-size: 10px
+        }
+
+        /* 多语言下底部导航文案变长：单行省略号，不撑破底栏 */
+        .tab-item > span {
+            max-width: 100%;
+            min-width: 0;
+            white-space: nowrap;
+            overflow: hidden;
+            text-overflow: ellipsis;
+            text-align: center
         }
 
         .tab-item.active {
@@ -776,6 +787,139 @@
             outline: 2px solid var(--primary);
             outline-offset: 2px
         }
+
+        /* ================= 上新引导（每次刷新页面出现一次） ================= */
+        .nf-mask {
+            position: fixed;
+            inset: 0;
+            z-index: 600;
+            display: none;
+            align-items: center;
+            justify-content: center;
+            padding: 0 24px;
+            background: rgba(15, 18, 32, .55);
+            -webkit-backdrop-filter: blur(2px);
+            backdrop-filter: blur(2px)
+        }
+
+        .nf-mask.show {
+            display: flex
+        }
+
+        .nf-card {
+            width: 100%;
+            max-width: 320px;
+            background: var(--bg-card);
+            border-radius: 20px;
+            padding: 26px 22px 18px;
+            text-align: center;
+            box-shadow: 0 20px 48px rgba(0, 0, 0, .28);
+            animation: nfIn .28s cubic-bezier(.16, 1, .3, 1)
+        }
+
+        @keyframes nfIn {
+            from {
+                opacity: 0;
+                transform: translateY(14px) scale(.96)
+            }
+
+            to {
+                opacity: 1;
+                transform: none
+            }
+        }
+
+        .nf-ico {
+            width: 76px;
+            height: 76px;
+            margin: 0 auto;
+            border-radius: 24px;
+            background: linear-gradient(158deg, #FFFFFF 0%, var(--primary-light) 100%);
+            border: 1px solid #F3E7E9;
+            display: flex;
+            align-items: center;
+            justify-content: center
+        }
+
+        .nf-badge {
+            display: inline-block;
+            margin-top: 16px;
+            padding: 3px 10px;
+            border-radius: 100px;
+            background: var(--primary-light);
+            color: var(--primary);
+            font-size: 11px;
+            font-weight: 600
+        }
+
+        .nf-title {
+            margin-top: 10px;
+            font-size: 17px;
+            font-weight: 700;
+            color: var(--text-primary)
+        }
+
+        .nf-desc {
+            margin-top: 9px;
+            font-size: 13px;
+            line-height: 1.7;
+            color: var(--text-secondary)
+        }
+
+        .nf-btn {
+            width: 100%;
+            margin-top: 22px;
+            padding: 13px 0;
+            border: none;
+            border-radius: 24px;
+            background: var(--primary);
+            color: #fff;
+            font-family: inherit;
+            font-size: 15px;
+            font-weight: 600;
+            cursor: pointer;
+            box-shadow: 0 6px 16px rgba(230, 0, 18, .24);
+            transition: background var(--transition-fast)
+        }
+
+        .nf-btn:hover {
+            background: var(--primary-hover)
+        }
+
+        .nf-btn:active {
+            transform: scale(.99)
+        }
+
+        .nf-later {
+            width: 100%;
+            margin-top: 4px;
+            padding: 10px 0;
+            border: none;
+            background: transparent;
+            color: var(--text-muted);
+            font-family: inherit;
+            font-size: 13px;
+            cursor: pointer
+        }
+
+        /* 新功能提示小圆点：挂在对应入口的图标右上角 */
+        .quick-icon.new-flag,
+        .menu-icon.new-flag {
+            position: relative
+        }
+
+        .quick-icon.new-flag::after,
+        .menu-icon.new-flag::after {
+            content: '';
+            position: absolute;
+            top: -1px;
+            right: -1px;
+            width: 8px;
+            height: 8px;
+            border-radius: 50%;
+            background: var(--primary);
+            box-shadow: 0 0 0 2px var(--bg-card)
+        }
     </style>
 </head>
 
@@ -883,7 +1027,7 @@
                 <span class="quick-label">设备预警</span>
             </div>
             <div class="quick-item" onclick="goFleetReport()">
-                <div class="quick-icon green">
+                <div class="quick-icon green new-flag">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <line x1="18" y1="20" x2="18" y2="10" />
                         <line x1="12" y1="20" x2="12" y2="4" />
@@ -950,7 +1094,7 @@
         <!-- Quick Menu Group 2: 服务 -->
         <div class="menu-card">
             <div class="menu-item" onclick="goFleetReport()">
-                <div class="menu-icon blue"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                <div class="menu-icon blue new-flag"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"
                         stroke="#2563EB" stroke-width="2">
                         <path d="M3 3v18h18" />
                         <path d="M18.7 8l-5.1 5.2-2.8-2.7L6 15.2" />
@@ -1085,6 +1229,26 @@
     <!-- Toast -->
     <div class="toast" id="toast"></div>
 
+    <!-- 上新引导：机群报表功能预告（每次刷新出现一次，点遮罩/稍后再说可关闭） -->
+    <div class="nf-mask" id="newFeatureMask" onclick="if(event.target===this)closeNewFeatureGuide()">
+        <div class="nf-card">
+            <div class="nf-ico">
+                <svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke-linecap="round"
+                    stroke-linejoin="round">
+                    <rect x="3" y="3.5" width="18" height="17" rx="3.2" stroke="#CCD2DD" stroke-width="1.6" />
+                    <path d="M8 16.4V12.2" stroke="#E60012" stroke-width="2.2" />
+                    <path d="M12 16.4V8.6" stroke="#CCD2DD" stroke-width="2.2" />
+                    <path d="M16 16.4V10.6" stroke="#CCD2DD" stroke-width="2.2" />
+                </svg>
+            </div>
+            <div class="nf-badge">上线预告</div>
+            <div class="nf-title">机群报表，即将上线</div>
+            <div class="nf-desc">App 端正在准备机群报表功能，现正征集大家的报表需求。<br>欢迎参与，告诉我们你想要什么。</div>
+            <button class="nf-btn" onclick="goNewFeatureApply()">＋ 参与需求征集</button>
+            <button class="nf-later" onclick="closeNewFeatureGuide()">稍后再说</button>
+        </div>
+    </div>
+
     <script>
         // ===== 日历条渲染 =====
         (function buildCalendar() {
@@ -1113,7 +1277,7 @@
         // ===== 跳转 =====
         function goSubscribe() { window.location.href = '版本选购页.html'; }
         function goMySubscription() { window.location.href = '我的订阅管理页.html'; }
-        function goFleetReport() { window.location.href = '机群报表.html'; }
+        function goFleetReport() { window.location.href = '机群数据.html'; }
 
         function showToast(msg) {
             const t = document.getElementById('toast');
@@ -1231,6 +1395,21 @@
             setTimeout(() => showNotification(nextNotification()), 3200); // 第 3 条
         }, 1200);
         setInterval(() => showNotification(nextNotification()), 6000);
+
+        // ===== 上新引导：机群报表功能预告（刷新页面时出现一次）=====
+        (function showNewFeatureGuide() {
+            const mask = document.getElementById('newFeatureMask');
+            if (!mask) return;
+            setTimeout(() => mask.classList.add('show'), 400);
+        })();
+
+        function closeNewFeatureGuide() {
+            document.getElementById('newFeatureMask').classList.remove('show');
+        }
+
+        function goNewFeatureApply() {
+            window.location.href = '我需要更多报表.html';
+        }
     </script>
 </body>
 

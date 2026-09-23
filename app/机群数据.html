@@ -1,0 +1,571 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>手机端 · 机群数据（v2.0）</title>
+<style>
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    body {
+        font-family: "PingFang SC", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+        background: #eef0f3; color: #1a1a1a; height: 100vh; overflow: hidden;
+        display: flex; flex-direction: column;
+    }
+    /* ================= 顶部导航（三页统一：返回 + 页面标题＝当前 tab；三个 tab 可相互点击切换） ================= */
+    .topbar {
+        height: 52px; background: #fff; border-bottom: 1px solid #e8e8e8; flex-shrink: 0;
+        display: flex; align-items: center; padding: 0 12px;
+    }
+    .topbar-back {
+        width: 30px; height: 30px; flex-shrink: 0; border: none; background: transparent;
+        border-radius: 50%; color: #1a1a1a; font-size: 22px; line-height: 1; font-family: inherit;
+        display: flex; align-items: center; justify-content: center; cursor: pointer;
+    }
+    .topbar-back:hover { background: #f2f3f5; }
+    /* 多语言下 Tab 文案会变长：Tab 条自己横向滚动、Tab 不被压缩，返回键与右侧入口固定不被挤走 */
+    .top-tabs {
+        flex: 1 1 auto; min-width: 0; display: flex; align-items: center; gap: 20px; margin-left: 6px;
+        overflow-x: auto; scrollbar-width: none;
+        -webkit-overflow-scrolling: touch; overscroll-behavior-x: contain;
+    }
+    .top-tabs::-webkit-scrollbar { display: none; }
+    .top-tab {
+        position: relative; flex-shrink: 0; border: none; background: transparent; font-family: inherit; cursor: pointer;
+        height: 52px; padding: 0; font-size: 15px; color: #8b90a0; white-space: nowrap;
+    }
+    .top-tab:hover:not(.active) { color: #E60012; }
+    .top-tab.active { font-size: 17px; font-weight: 600; color: #161a2e; letter-spacing: .2px; cursor: default; }
+    .top-tab.active::after {
+        content: ''; position: absolute; left: 50%; transform: translateX(-50%); bottom: 8px;
+        width: 20px; height: 2px; border-radius: 2px; background: #E60012;
+    }
+    /* 引导文案（可点）：只在需要「申请更多报表」的视图里，居中显示 */
+    .view-hint {
+        flex-shrink: 0; background: #fffaf0; color: #ad6800; font-size: 12px; line-height: 1.6;
+        padding: 9px 24px; border-bottom: 1px solid #f5ecd8;
+        text-align: center; cursor: pointer;
+    }
+    .view-hint:hover { background: #fff5e0; }
+    .view-hint b { color: #E60012; font-weight: 600; }
+    /* ================= 机群数据内容（铺满，内部自己滚） ================= */
+    .phone {
+        flex: 1 1 auto; min-width: 0; min-height: 0; background: #f4f5f7;
+        display: flex; flex-direction: column;
+    }
+    /* ================= 顶部区块（设备 + 周期 + 日期，统一白底） ================= */
+    .top-block { background: #fff; border-bottom: 1px solid #eef0f3; flex-shrink: 0; }
+    .app-header { padding: 6px 16px 0; }
+    .app-header-top { display: flex; align-items: center; gap: 8px; height: 42px; }
+    .app-title { font-size: 19px; font-weight: 600; color: #161a2e; letter-spacing: .2px; }
+    .app-title-caret { font-size: 10px; color: #8b90a0; cursor: pointer; }
+    /* 顶部右上角：报表需求征集快速入口（多语言文案过长时省略号截断，不挤压 Tab） */
+    .quick-more {
+        margin-left: auto; flex-shrink: 0; font-family: inherit; white-space: nowrap;
+        max-width: 42%; overflow: hidden; text-overflow: ellipsis;
+        background: #fdecee; color: #E60012; border: 1px solid #f8d5d9; border-radius: 14px;
+        font-size: 12px; font-weight: 600; padding: 4px 10px; cursor: pointer;
+        transition: background .16s, border-color .16s, transform .1s;
+    }
+    .quick-more:hover { background: #fbdde1; border-color: #f2bcc2; }
+    .quick-more:active { transform: scale(.97); }
+    /* ================= 周期 Tab ================= */
+    .period-tabs {
+        margin: 4px 14px 0; display: grid; grid-template-columns: repeat(3, 1fr); gap: 8px;
+    }
+    .period-tab {
+        border: none; background: #f4f5f7; padding: 9px 0; border-radius: 20px;
+        font-size: 14px; color: #666; font-family: inherit; cursor: pointer; transition: all .18s;
+    }
+    .period-tab.active { background: #161a2e; color: #fff; font-weight: 600; }
+    .period-tab:hover:not(.active) { background: #fdecee; color: #E60012; }
+    /* ================= 日期行 ================= */
+    .date-row {
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 10px 14px 12px;
+    }
+    .date-nav {
+        width: 32px; height: 32px; border: none; background: transparent;
+        font-size: 21px; color: #333; cursor: pointer; font-family: inherit;
+    }
+    .date-nav:hover:not(:disabled) { color: #E60012; }
+    .date-nav:disabled { color: #d2d5db; cursor: not-allowed; }
+    .date-main { font-size: 17px; font-weight: 700; letter-spacing: .2px; cursor: pointer; }
+    .date-main .caret { font-size: 10px; margin-left: 6px; color: #666; }
+    /* ================= 内容区 ================= */
+    .screen { flex: 1; overflow-y: auto; padding: 12px 14px 28px; }
+    .card {
+        background: #fff; border-radius: 16px; padding: 16px 15px; margin-bottom: 12px;
+        box-shadow: 0 1px 3px rgba(22,26,46,.05);
+    }
+    .card-title {
+        display: flex; align-items: center; gap: 7px;
+        font-size: 15px; font-weight: 700; color: #161a2e; margin-bottom: 14px;
+    }
+    .card-title::before { content: ''; width: 3px; height: 13px; border-radius: 2px; background: #E60012; }
+
+    /* 三列指标 */
+    .kpi-strip {
+        display: grid; grid-template-columns: repeat(3, 1fr);
+        background: #fff; border-radius: 16px; padding: 18px 0; margin-bottom: 12px;
+        box-shadow: 0 1px 3px rgba(22,26,46,.05);
+    }
+    .kpi { text-align: center; border-right: 1px solid #f2f3f6; }
+    .kpi:last-child { border-right: none; }
+    .kpi-value { font-size: 24px; font-weight: 800; color: #161a2e; line-height: 1.1; }
+    .kpi-value small { font-size: 12px; font-weight: 500; color: #8b90a0; margin-left: 3px; }
+    .kpi-label { font-size: 11px; color: #8b90a0; margin-top: 7px; }
+
+    /* 设备运行日历 */
+    .cal-week { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+    .cal-head { font-size: 11px; color: #8b90a0; text-align: center; padding-bottom: 8px; }
+    .cal-cell { border-radius: 10px; padding: 6px 0 7px; text-align: center; background: #f7f8fa; }
+    .cal-cell.lv1 { background: #fdeced; }
+    .cal-cell.lv2 { background: #fef7e2; }
+    .cal-cell.lv3 { background: #eef4fe; }
+    .cal-day { font-size: 13px; color: #333; line-height: 20px; }
+    .cal-cell.sel .cal-day { background: #E60012; color: #fff; width: 20px; height: 20px; border-radius: 50%; margin: 0 auto; }
+    .cal-cell.empty .cal-day { color: #c3c7cf; }
+    .cal-h, .cal-l { font-size: 10px; color: #6b7280; margin-top: 2px; }
+    .cal-cell.empty .cal-h, .cal-cell.empty .cal-l { color: #c8ccd4; }
+    .cal-legend { margin-top: 14px; display: flex; flex-direction: column; gap: 9px; }
+    .cal-legend div { font-size: 11px; color: #8b90a0; display: flex; align-items: center; gap: 8px; }
+    .cal-legend i { width: 16px; height: 10px; border-radius: 3px; display: inline-block; }
+
+    /* 开机时段分析 */
+    .seg-axis { display: flex; align-items: center; gap: 8px; margin-bottom: 8px; }
+    .seg-axis-lb { width: 22px; text-align: right; font-size: 11px; color: #8b90a0; }
+    .seg-axis-ticks { flex: 1; display: flex; justify-content: space-between; font-size: 10px; color: #a0a4ad; }
+    .seg-row { display: flex; align-items: center; gap: 8px; padding: 3px 0; }
+    .seg-day { width: 22px; text-align: right; font-size: 11px; color: #8b90a0; }
+    .seg-track { flex: 1; height: 14px; border-radius: 3px; background: #eef0f3; overflow: hidden; display: flex; }
+    .seg-blue { height: 100%; background: #2f6fe4; }
+    .seg-yellow { height: 100%; background: #f5c33b; }
+    .seg-legend { display: flex; flex-wrap: wrap; gap: 16px; margin-top: 14px; }
+    .seg-legend div { display: flex; align-items: center; gap: 6px; font-size: 11px; color: #8b90a0; }
+    .seg-legend i { width: 12px; height: 12px; border-radius: 2px; display: inline-block; }
+
+    /* 燃油分析 */
+    .fuel-chart { display: grid; grid-template-columns: repeat(7, 1fr); gap: 8px; align-items: end; height: 132px; }
+    .fuel-col { display: flex; flex-direction: column; align-items: center; justify-content: flex-end; height: 100%; }
+    .fuel-val { font-size: 10px; color: #8b90a0; margin-bottom: 4px; }
+    .fuel-bar { width: 58%; background: #2f6fe4; border-radius: 5px 5px 0 0; min-height: 2px; }
+    .fuel-bar.sel { background: #E60012; }
+    .fuel-day { font-size: 10px; color: #a0a4ad; margin-top: 6px; }
+    .fuel-total { font-size: 12px; color: #8b90a0; margin-top: 14px; }
+    .fuel-total b { font-size: 16px; color: #161a2e; margin-right: 2px; }
+
+    .list-block { background: #fff; border-radius: 12px; overflow: hidden; }
+    .list-head {
+        display: grid; font-size: 11px; color: #8b90a0; padding: 10px 12px; background: #f7f8fa;
+        border-bottom: 1px solid #f0f1f4; gap: 4px;
+    }
+    .list-row {
+        display: grid; font-size: 12px; padding: 11px 12px; border-bottom: 1px solid #f6f6f6; color: #444; gap: 4px;
+    }
+    .list-row:last-child { border-bottom: none; }
+    .list-row .num, .list-head .num { text-align: right; }
+    .list-more {
+        display: block; width: 100%; border: none; background: #fafafa; color: #E60012;
+        font-size: 12px; padding: 11px 0; cursor: pointer; font-family: inherit;
+    }
+    .empty-wrap { flex: 1; display: flex; flex-direction: column; align-items: center; justify-content: center; padding: 60px 24px; text-align: center; }
+    .empty-link { color: #2b6cff; font-size: 14px; margin-top: 18px; cursor: pointer; }
+</style>
+</head>
+<body>
+
+<!-- ==================== 顶部导航（三页统一）：返回 + 页面标题＝当前 tab，三个 tab 可点击互相切换 ==================== -->
+<div class="topbar">
+    <button class="topbar-back" onclick="goBack()" aria-label="返回"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+    <div class="top-tabs">
+        <button class="top-tab active">机群数据</button>
+        <button class="top-tab" onclick="location.href='报表库-缺省页.html'">报表库</button>
+        <button class="top-tab" onclick="location.href='我的报表-缺省页.html'">我的报表</button>
+    </div>
+    <button class="quick-more" title="提交报表需求" onclick="location.href='我需要更多报表.html'">＋ 提需求</button>
+</div>
+
+<!-- 引导（可点）：没找到合适的报表时怎么申请，居中显示 -->
+<div class="view-hint" onclick="location.href='我需要更多报表.html'">没找到需要的报表？<b>点这里申请</b>，我们会第一时间处理</div>
+
+<!-- ==================== 机群数据（设备报表数据） ==================== -->
+<div class="phone">
+    <!-- 顶部区块：设备 + 周期 + 日期（同一张白底） -->
+    <div class="top-block">
+        <div class="app-header">
+            <div class="app-header-top">
+                <span class="app-title" id="pageTitle">EX003</span>
+                <span class="app-title-caret" onclick="pickMachine()">▼</span>
+            </div>
+        </div>
+
+        <div class="period-tabs">
+            <button class="period-tab active" data-period="day" onclick="switchPeriod('day')">日报</button>
+            <button class="period-tab" data-period="week" onclick="switchPeriod('week')">周报</button>
+            <button class="period-tab" data-period="month" onclick="switchPeriod('month')">月报</button>
+        </div>
+
+        <div class="date-row">
+            <button class="date-nav" id="navPrev" onclick="shiftDate(-1)">‹</button>
+            <span class="date-main" id="dateMain">2026-09-19<span class="caret">▼</span></span>
+            <button class="date-nav" id="navNext" onclick="shiftDate(1)">›</button>
+        </div>
+    </div>
+
+    <div class="screen" id="screen"></div>
+</div>
+
+<script>
+/* ========================================================================
+ * 统一模板（一份配置 → 手机端适配器渲染）
+ * ====================================================================== */
+const TEMPLATE = {
+    id: 'tpl_device_report',
+    name: '设备报表 · 统一模板',
+    dataLatencyHours: 48,
+    machineType: '挖掘机',
+    sourceDoc: '用户需求/日周月报表字段聚合表.md §2.1',
+    blocks: ['kpi', 'calendar', 'runtime_segments', 'fuel', 'list']
+};
+
+/* ==================== 字段与周期可用性（严格取自字段聚合表） ==================== */
+/* avail: { day|week|month : 'show' | 'required' | 'noStat' | 'hidden' } */
+const FIELDS = {
+    /* 挖掘机 §2.1 */
+    date:        { label: '日期', unit: '—', type: 'meta', avail: { day: 'noStat', week: 'noStat', month: 'show' }, agg: { month: 'NONE' }, calc: '月报明细键，不参与计算' },
+    serialNo:    { label: '设备序列号', unit: '—', type: 'meta', avail: { day: 'noStat', week: 'noStat', month: 'show' }, agg: { month: 'NONE' }, calc: '月报明细键，不参与计算' },
+    idleFuelDaily: { label: '每日怠速燃油或动力消耗', unit: '升', type: 'atomic', key: 'G', avail: { day: 'show', week: 'noStat', month: 'noStat' }, agg: { day: 'SUM' }, calc: '日=当日怠速段消耗累计（= G）' },
+    totalFuelDaily: { label: '燃油或动力总消耗', unit: '升', type: 'derived', parts: ['G', 'H'], avail: { day: 'show', week: 'noStat', month: 'noStat' }, agg: { day: 'SUM' }, calc: '日=怠速 + 运行消耗（= G + H）' },
+    idleA:       { label: '怠速时长（A）', unit: '小时', type: 'atomic', key: 'A', avail: { day: 'show', week: 'show', month: 'show' }, agg: { day: 'SUM', week: 'SUM', month: 'SUM' }, calc: '日=当日累计；周/月=期内累计' },
+    attachB:     { label: '前端属具作业时长（B）', unit: '小时', type: 'atomic', key: 'B', avail: { day: 'noStat', week: 'noStat', month: 'show' }, agg: { month: 'SUM' }, calc: '月=期内累计' },
+    slewC:       { label: '回转时长（C）', unit: '小时', type: 'atomic', key: 'C', avail: { day: 'noStat', week: 'noStat', month: 'show' }, agg: { month: 'SUM' }, calc: '月=期内累计' },
+    travelD:     { label: '行走时长（D）', unit: '小时', type: 'atomic', key: 'D', avail: { day: 'noStat', week: 'noStat', month: 'show' }, agg: { month: 'SUM' }, calc: '月=期内累计' },
+    totalWork:   { label: '当日总工作时长 [A+B+C+D]', unit: '小时', type: 'derived', parts: ['A', 'B', 'C', 'D'], avail: { day: 'noStat', week: 'noStat', month: 'required' }, agg: { month: 'SUM' }, calc: '派生：A、B、C、D 分别累计后相加' },
+    attachRatio: { label: '前端属具作业占比', unit: '%', type: 'recalc', n: 'B', d: 'ABCD', avail: { day: 'noStat', week: 'noStat', month: 'show' }, agg: { month: 'RECALC' }, calc: 'B ÷（A+B+C+D）' },
+    slewRatio:   { label: '回转时长占比', unit: '%', type: 'recalc', n: 'C', d: 'ABCD', avail: { day: 'noStat', week: 'noStat', month: 'show' }, agg: { month: 'RECALC' }, calc: 'C ÷（A+B+C+D）' },
+    runTime:     { label: '总运行时长（B+C+D）', unit: '小时', type: 'derived', parts: ['B', 'C', 'D'], avail: { day: 'noStat', week: 'noStat', month: 'show' }, agg: { month: 'SUM' }, calc: '派生：B、C、D 分别累计后相加' },
+    runFuelH:    { label: '运行燃油或动力消耗（H）', unit: '升', type: 'atomic', key: 'H', avail: { day: 'noStat', week: 'noStat', month: 'show' }, agg: { month: 'SUM' }, calc: '月=期内运行段累计' },
+    idleFuelG:   { label: '怠速燃油或动力消耗（G）', unit: '升', type: 'atomic', key: 'G', avail: { day: 'noStat', week: 'noStat', month: 'show' }, agg: { month: 'SUM' }, calc: '月=期内怠速段累计' },
+    totalFuelGH: { label: '燃油或动力总消耗 [G+H]', unit: '升', type: 'derived', parts: ['G', 'H'], avail: { day: 'noStat', week: 'noStat', month: 'show' }, agg: { month: 'SUM' }, calc: '派生：G、H 分别累计后相加' },
+    avgFuel:     { label: '平均燃油或动力消耗', unit: '升/小时', type: 'recalc', n: 'GH', d: 'ABCD', avail: { day: 'noStat', week: 'noStat', month: 'show' }, agg: { month: 'RECALC' }, calc: '（G+H）÷（A+B+C+D）' }
+};
+
+/* 各周期的展示配置：明细列随周期变化（字段可用性见 FIELDS.avail） */
+const PERIOD_VIEW = {
+    day:   { name: '日报', listCols: ['idleFuelDaily', 'totalFuelDaily', 'idleA'] },
+    week:  { name: '周报', listCols: ['idleA'] },
+    month: { name: '月报', listCols: ['totalWork', 'runTime', 'totalFuelGH', 'avgFuel'] }
+};
+
+/* ==================== 模拟数据（按天生成，30 天） ==================== */
+const MACHINES = [
+    { id: 'EX003', model: 'SY215C10', seed: 3 },
+    { id: 'EX007', model: 'SY365H', seed: 7 },
+    { id: 'EX012', model: 'SY485H', seed: 12 },
+    { id: 'EX018', model: 'SY215C10', seed: 18 },
+    { id: 'EX021', model: 'SY305H', seed: 21 },
+    { id: 'EX026', model: 'SY135C10', seed: 26 },
+    { id: 'EX031', model: 'SY550H', seed: 31 }
+];
+const DAYS = 30;
+
+function buildDailyData(seed) {
+    const arr = [];
+    for (let d = 0; d < DAYS; d++) {
+        const A = +(1.0 + ((seed + d * 2) % 14) / 10).toFixed(2);        // 怠速 A
+        const B = +(3.0 + ((seed * 2 + d * 3) % 40) / 10).toFixed(2);    // 属具 B
+        const C = +(1.5 + ((seed + d * 5) % 25) / 10).toFixed(2);        // 回转 C
+        const D = +(0.4 + ((seed * 3 + d) % 15) / 10).toFixed(2);        // 行走 D
+        const G = +(A * 5.2).toFixed(2);                                 // 怠速消耗 G
+        const H = +(B * 6.8 + C * 5.4).toFixed(2);                       // 运行消耗 H
+        arr.push({ A: A, B: B, C: C, D: D, G: G, H: H });
+    }
+    return arr;
+}
+
+const DATA = {};
+MACHINES.forEach(m => { DATA[m.id] = buildDailyData(m.seed); });
+
+/* ==================== 聚合引擎（与 PRD 4.9 一致） ==================== */
+function periodDays(period) {
+    if (period === 'day') return 1;
+    if (period === 'week') return 7;
+    return DAYS;
+}
+
+function periodRows(machineId, period, endIndex) {
+    const all = DATA[machineId] || [];
+    const n = Math.min(periodDays(period), endIndex + 1);
+    return all.slice(endIndex - n + 1, endIndex + 1);
+}
+
+/* 期间求和：按组成字母（A/B/C/D/G/H）对每日数据求和 */
+function sumParts(parts, rows) {
+    return parts.reduce((s, p) => s + rows.reduce((s2, r) => s2 + (r[p] || 0), 0), 0);
+}
+
+function aggregate(machineId, fieldKey, period, endIndex) {
+    const def = FIELDS[fieldKey];
+    if (!def) return null;
+    const state = def.avail[period];
+    if (!state || state === 'noStat' || state === 'hidden') return null;
+
+    const rows = periodRows(machineId, period, endIndex);
+    if (rows.length === 0) return null;
+    const method = (def.agg && def.agg[period]) || 'SUM';
+
+    switch (def.type) {
+        case 'atomic':
+            return rows.reduce((s, r) => s + (r[def.key] || 0), 0);
+        case 'derived':
+            return sumParts(def.parts, rows);
+        case 'recalc': {
+            const num = def.n === 'GH' ? sumParts(['G', 'H'], rows) : sumParts([def.n], rows);
+            const den = def.d === 'ABCD' ? sumParts(['A', 'B', 'C', 'D'], rows) : sumParts([def.d], rows);
+            return den === 0 ? null : num / den;
+        }
+        case 'meta':
+            return method === 'NONE' ? (rows.length > 0 ? rows.length + ' 天记录' : null) : null;
+        default:
+            return null;
+    }
+}
+
+function fmt(v, decimals) {
+    if (v === null || v === undefined) return '--';
+    const n = Number(v).toFixed(decimals === undefined ? 1 : decimals);
+    return n.replace(/\B(?=(\d{3})+(?!\d))/g, ',');
+}
+
+/* ==================== 页面状态 ==================== */
+let state = {
+    period: 'day',
+    machineId: 'EX003',
+    endIndex: DAYS - 1,
+    pageState: 'data',
+    listExpanded: false
+};
+
+/* ==================== 日期与周期标签 ==================== */
+function dateOf(idx) {
+    // 数据窗口 30 天，最后一天为 2026-09-19（周六）→ 最近 7 天正好是 09-13（周日）～09-19（周六）一个自然周
+    return new Date(2026, 8, 19 - (DAYS - 1 - idx));
+}
+
+function periodLabel() {
+    const d = dateOf(state.endIndex);
+    const ym = d.getFullYear() + '-' + String(d.getMonth() + 1).padStart(2, '0');
+    if (state.period === 'day') return ym + '-' + String(d.getDate()).padStart(2, '0');
+    if (state.period === 'week') return ym + ' 第' + ['一', '二', '三', '四', '五'][Math.ceil(d.getDate() / 7) - 1] + '周';
+    return ym;
+}
+
+/* ==================== 渲染：手机端适配器 ==================== */
+const DOW = ['周日', '周一', '周二', '周三', '周四', '周五', '周六'];
+const SEG_TICKS = [0, 2, 4, 6, 8, 10, 12, 14, 16, 18, 20, 22];
+
+function hoursOf(idx) {
+    const r = (DATA[state.machineId] || [])[idx];
+    return r ? r.A + r.B + r.C + r.D : null;
+}
+
+function fuelOf(idx) {
+    const r = (DATA[state.machineId] || [])[idx];
+    return r ? r.G + r.H : null;
+}
+
+/* 本周期内的日期索引 */
+function periodIdxs() {
+    const n = Math.min(periodDays(state.period), state.endIndex + 1);
+    const out = [];
+    for (let i = state.endIndex - n + 1; i <= state.endIndex; i++) out.push(i);
+    return out;
+}
+
+/* 所选日期所在周（周日 → 周六）的 7 个索引，越界表示该天无数据 */
+function weekIdxs() {
+    const start = state.endIndex - dateOf(state.endIndex).getDay();
+    return Array.from({ length: 7 }, (_, k) => start + k);
+}
+
+function calCell(idx) {
+    const h = hoursOf(idx);
+    const has = h !== null && h > 0;
+    const lv = !has ? ' empty' : (h >= 10 ? ' lv1' : (h > 6 ? ' lv2' : (h >= 0.5 ? ' lv3' : '')));
+    return `<div class="cal-cell${lv}${idx === state.endIndex ? ' sel' : ''}">
+        <div class="cal-day">${dateOf(idx).getDate()}</div>
+        <div class="cal-h">${has ? fmt(h, 2) + 'h' : '-h'}</div>
+        <div class="cal-l">${has ? fmt(fuelOf(idx), 1) + 'L' : '-L'}</div>
+    </div>`;
+}
+
+function segRowHTML(idx) {
+    const r = DATA[state.machineId][idx];
+    return `<div class="seg-row">
+        <span class="seg-day">${dateOf(idx).getDate()}</span>
+        <div class="seg-track">
+            <div class="seg-blue" style="width:${((r.B + r.C + r.D) / 24 * 100).toFixed(2)}%"></div>
+            <div class="seg-yellow" style="width:${(r.A / 24 * 100).toFixed(2)}%"></div>
+        </div>
+    </div>`;
+}
+
+function render() {
+    document.getElementById('pageTitle').textContent = state.machineId;
+    document.getElementById('dateMain').innerHTML = periodLabel() + '<span class="caret">▼</span>';
+    document.getElementById('navNext').disabled = state.endIndex >= DAYS - 1;
+
+    document.querySelectorAll('.period-tab').forEach(t => t.classList.toggle('active', t.dataset.period === state.period));
+
+    const screen = document.getElementById('screen');
+
+    if (state.pageState === 'empty') {
+        screen.innerHTML = `
+            <div class="empty-wrap">
+                <svg width="140" height="120" viewBox="0 0 140 120" fill="none" xmlns="http://www.w3.org/2000/svg">
+                    <rect x="18" y="66" width="104" height="34" rx="4" fill="#e9ebee"/>
+                    <rect x="24" y="60" width="92" height="10" rx="3" fill="#f3f4f6"/>
+                    <rect x="46" y="24" width="14" height="16" rx="2" fill="#d7dae0"/>
+                    <path d="M60 40c6 0 10 4 10 9v8h-8v-6" stroke="#c3c8d1" stroke-width="3" fill="none" stroke-linecap="round"/>
+                    <circle cx="98" cy="40" r="3" fill="#d7dae0"/>
+                    <path d="M84 46c4 2 7 5 8 8" stroke="#c3c8d1" stroke-width="2" fill="none"/>
+                </svg>
+                <div class="empty-link" onclick="showToast('跳转绑定设备流程')">立即绑定设备，开启智能管理</div>
+            </div>`;
+        return;
+    }
+
+    const idxs = periodIdxs();
+    const rows = idxs.map(i => DATA[state.machineId][i]);
+    const html = [];
+
+    /* 1. 三列指标 */
+    const workDays = rows.filter(r => (r.A + r.B + r.C + r.D) > 0).length;
+    const runHours = rows.reduce((s, r) => s + r.A + r.B + r.C + r.D, 0);
+    const fuelTotal = rows.reduce((s, r) => s + r.G + r.H, 0);
+    html.push(`<div class="kpi-strip">
+        <div class="kpi"><div class="kpi-value">${workDays}<small>d</small></div><div class="kpi-label">开机天数</div></div>
+        <div class="kpi"><div class="kpi-value">${fmt(runHours, 2)}<small>h</small></div><div class="kpi-label">发动机运行时长</div></div>
+        <div class="kpi"><div class="kpi-value">${fmt(fuelTotal, 1)}<small>L</small></div><div class="kpi-label">燃油消耗</div></div>
+    </div>`);
+
+    /* 2. 设备运行日历（所选日期所在周） */
+    html.push(`<div class="card">
+        <div class="card-title">设备运行日历</div>
+        <div class="cal-week">
+            ${DOW.map(d => `<div class="cal-head">${d}</div>`).join('')}
+            ${weekIdxs().map(calCell).join('')}
+        </div>
+        <div class="cal-legend">
+            <div><i style="background:#fdeced"></i>每日工作时间 ≥ 10 小时</div>
+            <div><i style="background:#fef7e2"></i>6 小时 &lt; 每日工作时间 &lt; 10 小时</div>
+            <div><i style="background:#eef4fe"></i>0.5 小时 ≤ 每日工作时间 ≤ 6 小时</div>
+            <div><i style="background:#f7f8fa;border:1px solid #e8eaee"></i>每日工作时间 ≤ 0.5 小时</div>
+        </div>
+    </div>`);
+
+    /* 3. 开机时段分析（本周期内有开机的日期，最多 7 行） */
+    const segIdxs = idxs.filter(i => (hoursOf(i) || 0) > 0).slice(-7);
+    html.push(`<div class="card">
+        <div class="card-title">开机时段分析</div>
+        <div class="seg-axis">
+            <span class="seg-axis-lb">天</span>
+            <div class="seg-axis-ticks">${SEG_TICKS.map(t => `<span>${t}</span>`).join('')}</div>
+        </div>
+        ${segIdxs.map(segRowHTML).join('')}
+        <div class="seg-legend">
+            <div><i style="background:#2f6fe4"></i>实际操作时长</div>
+            <div><i style="background:#f5c33b"></i>无动作时长</div>
+            <div><i style="background:#eef0f3"></i>关机时长</div>
+        </div>
+    </div>`);
+
+    /* 4. 燃油分析（本周每日燃油消耗，L） */
+    const week = weekIdxs();
+    const maxFuel = Math.max.apply(null, week.map(i => fuelOf(i) || 0).concat([1]));
+    html.push(`<div class="card">
+        <div class="card-title">燃油分析</div>
+        <div class="fuel-chart">
+            ${week.map(i => {
+                const f = fuelOf(i);
+                return `<div class="fuel-col">
+                    <span class="fuel-val">${f ? fmt(f, 1) : '--'}</span>
+                    ${f ? `<div class="fuel-bar${i === state.endIndex ? ' sel' : ''}" style="height:${Math.max(4, f / maxFuel * 100).toFixed(0)}%"></div>` : ''}
+                    <span class="fuel-day">${dateOf(i).getDate()}</span>
+                </div>`;
+            }).join('')}
+        </div>
+        <div class="fuel-total">合计 <b>${fmt(fuelTotal, 1)}</b> L</div>
+    </div>`);
+
+    /* 5. 设备明细（列随周期变化；点某台设备即切换为它的报表） */
+    const cols = PERIOD_VIEW[state.period].listCols;
+    const shown = state.listExpanded ? MACHINES : MACHINES.slice(0, 5);
+    const grid = `grid-template-columns: 1fr repeat(${cols.length}, .9fr);`;
+    html.push(`<div class="card" style="padding:16px 14px 12px;">
+        <div class="card-title">设备明细</div>
+        <div class="list-block" style="border:1px solid #f0f1f4;">
+            <div class="list-head" style="${grid}">
+                <span>设备</span>
+                ${cols.map(c => `<span class="num">${FIELDS[c].label.replace(/（[A-H]）|\[.*?\]/g, '')}</span>`).join('')}
+            </div>
+            ${shown.map(m => `<div class="list-row" style="${grid};cursor:pointer;" onclick="pickMachine('${m.id}')">
+                <span>${m.id}<div style="font-size:10px;color:#aaa;">${m.model}</div></span>
+                ${cols.map(c => `<span class="num">${fmt(aggregate(m.id, c, state.period, state.endIndex), 1)}</span>`).join('')}
+            </div>`).join('')}
+            <button class="list-more" onclick="toggleList()">${state.listExpanded ? '收起' : '查看全部 ' + MACHINES.length + ' 台设备'}</button>
+        </div>
+    </div>`);
+
+    screen.innerHTML = html.join('');
+}
+
+/* ==================== 交互 ==================== */
+function switchPeriod(p) { state.period = p; state.endIndex = DAYS - 1; render(); }
+
+function shiftDate(delta) {
+    const step = state.period === 'day' ? 1 : (state.period === 'week' ? 7 : DAYS);
+    state.endIndex = Math.min(DAYS - 1, Math.max(0, state.endIndex + delta * step));
+    render();
+}
+
+/* 切换设备：传 id 直接切，不传则轮换到下一台 */
+function pickMachine(id) {
+    if (id) {
+        state.machineId = id;
+    } else {
+        const i = MACHINES.findIndex(m => m.id === state.machineId);
+        state.machineId = MACHINES[(i + 1) % MACHINES.length].id;
+    }
+    state.listExpanded = false;
+    render();
+    if (!id) {
+        const m = MACHINES.filter(x => x.id === state.machineId)[0];
+        showToast('当前设备：' + state.machineId + '（' + m.model + '）');
+    }
+}
+
+function setState(s) { state.pageState = s; render(); }
+function toggleList() { state.listExpanded = !state.listExpanded; render(); }
+
+/* 统一返回：三页行为一致 —— 有上一页就真返回，没有则提示 */
+function goBack() {
+    if (history.length > 1) { history.back(); return; }
+    showToast('返回上一页');
+}
+
+function showToast(msg) {
+    const t = document.createElement('div');
+    t.textContent = msg;
+    t.style.cssText = 'position:fixed;left:50%;bottom:60px;transform:translateX(-50%);background:rgba(0,0,0,.78);color:#fff;'
+        + 'font-size:12px;padding:9px 16px;border-radius:18px;z-index:99;';
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 1800);
+}
+
+/* ==================== 初始化 ==================== */
+render();
+</script>
+
+</body>
+</html>

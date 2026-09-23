@@ -1,0 +1,349 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>手机端 · 我的报表（缺省页 · v2.0）</title>
+<style>
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    body {
+        font-family: "PingFang SC", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+        background: #f4f5f7; color: #1a1a1a; min-height: 100vh; display: flex; align-items: stretch;
+    }
+    .phone { flex: 1 1 auto; min-width: 0; min-height: 100vh; background: #f4f5f7; display: flex; flex-direction: column; }
+
+    /* ================= 顶部导航（三页统一：返回 + 页面标题＝当前 tab；三个 tab 可相互点击切换） ================= */
+    .topbar {
+        height: 52px; background: #fff; border-bottom: 1px solid #e8e8e8; flex-shrink: 0;
+        display: flex; align-items: center; padding: 0 12px;
+    }
+    .topbar-back {
+        width: 30px; height: 30px; flex-shrink: 0; border: none; background: transparent;
+        border-radius: 50%; color: #1a1a1a; font-size: 22px; line-height: 1; font-family: inherit;
+        display: flex; align-items: center; justify-content: center; cursor: pointer;
+    }
+    .topbar-back:hover { background: #f2f3f5; }
+    /* 多语言下 Tab 文案会变长：Tab 条自己横向滚动、Tab 不被压缩，返回键与右侧入口固定不被挤走 */
+    .top-tabs {
+        flex: 1 1 auto; min-width: 0; display: flex; align-items: center; gap: 20px; margin-left: 6px;
+        overflow-x: auto; scrollbar-width: none;
+        -webkit-overflow-scrolling: touch; overscroll-behavior-x: contain;
+    }
+    .top-tabs::-webkit-scrollbar { display: none; }
+    .top-tab {
+        position: relative; flex-shrink: 0; border: none; background: transparent; font-family: inherit; cursor: pointer;
+        height: 52px; padding: 0; font-size: 15px; color: #8b90a0; white-space: nowrap;
+    }
+    .top-tab:hover:not(.active) { color: #E60012; }
+    .top-tab.active { font-size: 17px; font-weight: 600; color: #161a2e; letter-spacing: .2px; cursor: default; }
+    .top-tab.active::after {
+        content: ''; position: absolute; left: 50%; transform: translateX(-50%); bottom: 8px;
+        width: 20px; height: 2px; border-radius: 2px; background: #E60012;
+    }
+
+    /* ================= 内容区 ================= */
+    .screen { flex: 1; overflow-y: auto; padding: 12px 14px 28px; display: flex; flex-direction: column; }
+    .card {
+        background: #fff; border-radius: 16px; padding: 14px 15px; margin-bottom: 10px;
+        box-shadow: 0 1px 3px rgba(22,26,46,.05);
+    }
+    .card.is-expired { background: #fafbfc; box-shadow: none; }
+    .rc-head { display: flex; align-items: flex-start; gap: 10px; }
+    .rc-name { flex: 1; min-width: 0; font-size: 15px; font-weight: 600; color: #161a2e; line-height: 1.4; }
+    .card.is-expired .rc-name { color: #9aa0ad; }
+    .badge { flex-shrink: 0; font-size: 10px; border-radius: 999px; padding: 2px 8px; border: 1px solid transparent; }
+    .badge.normal { background: #f0faf5; color: #389e0d; border-color: #b7eb8f; }
+    .badge.overdue, .badge.partial { background: #fff7e6; color: #d46b08; border-color: #ffd591; }
+    .badge.expired { background: #f5f5f5; color: #999; border-color: #d9d9d9; }
+    .badge.overdue, .badge.partial, .badge.expired { cursor: help; }
+    .rc-type { font-size: 12px; color: #6b7280; margin-top: 4px; }
+    .rc-foot { display: flex; align-items: center; gap: 10px; margin-top: 13px; padding-top: 12px; border-top: 1px solid #f4f5f7; }
+    .switch { position: relative; width: 40px; height: 22px; flex-shrink: 0; }
+    .switch input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; }
+    .switch .track { position: absolute; inset: 0; background: #e0e3e8; border-radius: 11px; transition: background .18s; }
+    .switch .track::after {
+        content: ''; position: absolute; top: 2px; left: 2px; width: 18px; height: 18px; background: #fff;
+        border-radius: 50%; box-shadow: 0 1px 2px rgba(0,0,0,.2); transition: transform .18s;
+    }
+    .switch input:checked + .track { background: #E60012; }
+    .switch input:checked + .track::after { transform: translateX(18px); }
+    .switch input:disabled + .track { opacity: .45; }
+    .switch-label { font-size: 11px; color: #8b90a0; }
+    .rc-actions { margin-left: auto; }
+    .link { font-size: 12px; color: #8b90a0; cursor: pointer; }
+    .link:hover { color: #E60012; }
+
+    /* ================= 缺省页操作按钮 ================= */
+    .empty-btn {
+        width: 100%; margin-top: 26px; padding: 12px 0; border: none; border-radius: 22px;
+        background: #E60012; color: #fff; font-family: inherit; font-size: 14px; font-weight: 500;
+        cursor: pointer; box-shadow: 0 6px 16px rgba(230,0,18,.24);
+        transition: background .16s, box-shadow .16s, transform .1s;
+    }
+    .empty-btn:hover { background: #c40011; box-shadow: 0 8px 20px rgba(230,0,18,.28); }
+    .empty-btn:active { transform: scale(.99); box-shadow: 0 3px 10px rgba(230,0,18,.22); }
+
+    /* ================= 缺省页（一条报表都没有） ================= */
+    .empty {
+        margin: auto; width: 100%; max-width: 320px; padding: 8px 4px;
+        display: flex; flex-direction: column; align-items: center; text-align: center;
+    }
+    .empty-ico {
+        width: 84px; height: 84px; border-radius: 26px;
+        background: linear-gradient(158deg, #ffffff 0%, #fdf3f4 100%);
+        border: 1px solid #f3e7e9; box-shadow: 0 10px 24px rgba(22,26,46,.06);
+        display: flex; align-items: center; justify-content: center;
+    }
+    .empty-hd { margin-top: 20px; font-size: 16px; font-weight: 600; color: #161a2e; letter-spacing: .2px; }
+    .empty-sub { margin-top: 9px; font-size: 12px; color: #8b90a0; line-height: 1.85; }
+
+    /* ================= 详情面板（底部弹出） ================= */
+    .sheet-mask { position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 60; display: none; align-items: flex-end; justify-content: center; }
+    .sheet-mask.active { display: flex; }
+    .sheet {
+        width: 100%; max-width: 520px; max-height: 84vh; background: #fff;
+        border-radius: 18px 18px 0 0; display: flex; flex-direction: column; overflow: hidden;
+    }
+    .sheet-head { display: flex; align-items: center; gap: 10px; padding: 16px 18px 14px; border-bottom: 1px solid #f2f3f6; }
+    .sheet-title { flex: 1; min-width: 0; font-size: 16px; font-weight: 700; color: #161a2e; line-height: 1.4; }
+    .sheet-close { font-size: 16px; color: #b0b4bd; cursor: pointer; line-height: 1; }
+    .sheet-body { padding: 2px 18px 16px; overflow-y: auto; }
+    .sheet-sub { font-size: 12px; font-weight: 700; color: #161a2e; padding: 18px 0 4px; }
+    .kv-row { display: flex; align-items: flex-start; gap: 12px; padding: 11px 0; border-bottom: 1px solid #f5f6f8; font-size: 12px; }
+    .kv-row:last-child { border-bottom: none; }
+    .kv-k { width: 78px; flex-shrink: 0; color: #8b90a0; line-height: 1.5; }
+    .kv-v { flex: 1; min-width: 0; color: #333; line-height: 1.5; word-break: break-all; }
+    .sheet-foot { display: flex; gap: 10px; padding: 12px 18px 18px; }
+    .sheet-foot button { flex: 1; border-radius: 22px; font-family: inherit; font-size: 14px; padding: 12px 0; cursor: pointer; }
+    .btn-ghost { border: 1px solid #dcdcdc; background: #fff; color: #555; }
+    .btn-danger { border: none; background: #E60012; color: #fff; }
+    .btn-danger:hover { background: #c40011; }
+</style>
+</head>
+<body>
+
+<!-- ==================== 手机端：我的报表（缺省页 · 无报表数据） ==================== -->
+<div class="phone">
+    <!-- 顶部导航（三页统一）：返回 + 页面标题＝当前 tab，三个 tab 可点击互相切换 -->
+    <div class="topbar">
+        <button class="topbar-back" onclick="goBack()" aria-label="返回"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+        <div class="top-tabs">
+            <button class="top-tab" onclick="location.href='机群数据.html'">机群数据</button>
+            <button class="top-tab" onclick="location.href='报表库-缺省页.html'">报表库</button>
+            <button class="top-tab active">我的报表</button>
+        </div>
+    </div>
+    <div class="screen" id="screen"></div>
+</div>
+
+<!-- ==================== 报表详情 ==================== -->
+<div class="sheet-mask" id="detailSheet" onclick="closeDetail()">
+    <div class="sheet" onclick="event.stopPropagation()">
+        <div class="sheet-head">
+            <span class="sheet-title" id="detailTitle"></span>
+            <span class="badge normal" id="detailBadge"></span>
+            <span class="sheet-close" onclick="closeDetail()">✕</span>
+        </div>
+        <div class="sheet-body" id="detailBody"></div>
+        <div class="sheet-foot">
+            <button class="btn-ghost" onclick="editReport()">编辑</button>
+            <button class="btn-danger" onclick="deleteReport()">删除</button>
+        </div>
+    </div>
+</div>
+
+<script>
+/* ========================================================================
+ * 缺省页：与 V2/app/我的报表.html 同一套版式，仅数据为空
+ * ====================================================================== */
+let reportList = [];
+
+const STATUS_TEXT = {
+    normal: '正常',
+    expired: '已失效',
+    overdue: '已过期',
+    partial: '部分失效'
+};
+
+// 异常状态说明（点状态标签查看，文案取自 PC 端提示）
+const STATUS_HELP = {
+    overdue: '订阅的报表已超过截止日期，推送已停止。请重新设置有效期后恢复。',
+    expired: '订阅中的设备已被解绑或权限已变更，报表推送已失效。请重新选择设备后恢复。',
+    partial: '部分设备已被解绑或权限已变更，报表数据可能不完整。'
+};
+
+const screenEl = document.getElementById('screen');
+let detailId = null;
+
+function safe(v) {
+    return String(v == null ? '' : v).replace(/[&<>"]/g, function (c) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+    });
+}
+
+function statusOf(r) {
+    return r.overdue ? 'overdue' : (r.expired ? 'expired' : (r.partial ? 'partial' : 'normal'));
+}
+
+function rangeText(r) {
+    const start = r.startDate || (r.datetime && r.datetime !== '-' ? r.datetime.split(' ')[0] : '');
+    const end = (r.endDate && r.endDate !== '-') ? r.endDate : '';
+    if (start && end) return start + ' ~ ' + end;
+    if (start) return start + ' 起';
+    if (end) return '至 ' + end;
+    return '-';
+}
+
+function receiveTimeText(r) {
+    return r.timezone ? r.timezone + (r.deliveryTime ? ' ' + r.deliveryTime : '') : '-';
+}
+
+/* ==================== 渲染：报表列表 ==================== */
+function renderCard(r) {
+    const st = statusOf(r);
+    const locked = (st === 'overdue' || st === 'expired');
+    return `
+        <div class="card report-card${locked ? ' is-expired' : ''}">
+            <div class="rc-head">
+                <div class="rc-name">${safe(r.name)}</div>
+                <span class="badge ${st}"${st === 'normal' ? '' : ' onclick="explainStatus(event, \'' + st + '\')"'}>${STATUS_TEXT[st]}</span>
+            </div>
+            <div class="rc-type">${safe(r.type)}</div>
+            <div class="rc-foot">
+                <label class="switch">
+                    <input type="checkbox" ${r.enabled ? 'checked' : ''} ${locked ? 'disabled' : ''} onchange="toggleEnabled(${r.id}, this.checked)">
+                    <span class="track"></span>
+                </label>
+                <span class="switch-label">${r.enabled ? '开启' : '关闭'}</span>
+                <div class="rc-actions">
+                    <span class="link" onclick="openDetail(${r.id})">查看详情 ›</span>
+                </div>
+            </div>
+        </div>`;
+}
+
+/* ==================== 缺省状态：一条报表都没有 ==================== */
+function emptyHTML() {
+    return '<div class="empty">'
+        + '<div class="empty-ico">'
+        + '<svg width="40" height="40" viewBox="0 0 24 24" fill="none" stroke-linecap="round" stroke-linejoin="round">'
+        + '<rect x="3" y="3.5" width="18" height="17" rx="3.2" stroke="#ccd2dd" stroke-width="1.6"/>'
+        + '<path d="M8 16.4V12.2" stroke="#E60012" stroke-width="2.2"/>'
+        + '<path d="M12 16.4V8.6" stroke="#ccd2dd" stroke-width="2.2"/>'
+        + '<path d="M16 16.4V10.6" stroke="#ccd2dd" stroke-width="2.2"/>'
+        + '</svg>'
+        + '</div>'
+        + '<div class="empty-hd">报表需求征集中</div>'
+        + '<div class="empty-sub">我们正在收集 App 端用户的报表需求<br>收集完成后陆续上线。</div>'
+        + '<button class="empty-btn" onclick="location.href=\'我需要更多报表.html\'">＋ 我需要更多报表</button>'
+        + '</div>';
+}
+
+function renderAll() {
+    if (!reportList.length) {
+        screenEl.innerHTML = emptyHTML();
+        return;
+    }
+    screenEl.innerHTML = reportList.map(renderCard).join('');
+}
+
+/* ==================== 交互 ==================== */
+function explainStatus(e, st) {
+    if (e) e.stopPropagation();
+    showToast(STATUS_HELP[st] || '');
+}
+
+function toggleEnabled(id, checked) {
+    const r = reportList.filter(function (x) { return x.id === id; })[0];
+    if (!r) return;
+    r.enabled = checked;
+    renderAll();
+    showToast(checked ? '已开启推送：' + r.name : '已关闭推送：' + r.name);
+}
+
+/* ==================== 详情面板 ==================== */
+function openDetail(id) {
+    const r = reportList.filter(function (x) { return x.id === id; })[0];
+    if (!r) return;
+    detailId = id;
+    const isProject = r.dimension === 'project';
+    const st = statusOf(r);
+    const recipients = String(r.recipients || '').split(';').map(function (s) { return s.trim(); }).filter(Boolean);
+
+    const info = [
+        { label: '报表类型', value: r.type },
+        { label: '报表维度', value: isProject ? '项目维度' : '设备维度' },
+        { label: '频率', value: r.frequency },
+        { label: '格式', value: r.format },
+        { label: '统计口径', value: r.caliber || '自然日' },
+        { label: '数据范围', value: r.duration || '-' },
+        { label: '邮件主题', value: r.subject },
+        { label: '接收时间', value: receiveTimeText(r) },
+        { label: '生效区间', value: rangeText(r) },
+        { label: isProject ? '涉及项目' : '涉及资产', value: r.assets }
+    ];
+
+    const rowsHTML = function (arr) {
+        return '<div class="kv">' + arr.map(function (it) {
+            return '<div class="kv-row"><span class="kv-k">' + it.label + '</span><span class="kv-v">' + safe(it.value) + '</span></div>';
+        }).join('') + '</div>';
+    };
+
+    document.getElementById('detailTitle').textContent = r.name;
+    const badge = document.getElementById('detailBadge');
+    badge.className = 'badge ' + st;
+    badge.textContent = STATUS_TEXT[st];
+    badge.onclick = (st === 'normal') ? null : function () { showToast(STATUS_HELP[st] || ''); };
+
+    document.getElementById('detailBody').innerHTML = '<div class="sheet-sub">基本信息</div>'
+        + rowsHTML(info)
+        + '<div class="sheet-sub">收件人信息</div>'
+        + rowsHTML([
+            { label: '收件人数量', value: recipients.length + ' 人' },
+            { label: '收件人列表', value: r.recipients }
+        ]);
+
+    document.getElementById('detailSheet').classList.add('active');
+}
+
+function closeDetail() {
+    document.getElementById('detailSheet').classList.remove('active');
+    detailId = null;
+}
+
+function editReport() {
+    showToast('编辑向导暂未在手机端开放');
+}
+
+/* ==================== 删除 ==================== */
+function askDelete(id) {
+    const r = reportList.filter(function (x) { return x.id === id; })[0];
+    if (!r) return;
+    if (!confirm('确定要删除报表「' + r.name + '」（' + r.type + '）吗？删除后不可恢复。')) return;
+    reportList = reportList.filter(function (x) { return x.id !== id; });
+    if (detailId === id) closeDetail();
+    renderAll();
+    showToast('报表已删除');
+}
+
+/* 返回上一页（无历史记录时只提示一下） */
+function goBack() {
+    if (history.length > 1) { history.back(); return; }
+    showToast('返回上一页');
+}
+
+function showToast(msg) {
+    const t = document.createElement('div');
+    t.textContent = msg;
+    t.style.cssText = 'position:fixed;left:50%;bottom:60px;transform:translateX(-50%);background:rgba(0,0,0,.78);color:#fff;'
+        + 'font-size:12px;padding:9px 16px;border-radius:18px;z-index:99;max-width:80%;text-align:center;';
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 1800);
+}
+
+/* ==================== 初始化 ==================== */
+renderAll();
+</script>
+
+</body>
+</html>

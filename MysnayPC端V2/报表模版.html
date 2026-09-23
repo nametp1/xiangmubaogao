@@ -615,11 +615,22 @@
         }
         .more-option + .more-option { margin-top: 10px; }
         .more-option:hover { border-color: #E60012; background: #fffafa; }
-        .more-option input {
-            margin: 3px 0 0;
-            flex-shrink: 0;
-            accent-color: #E60012;
-            cursor: pointer;
+        /* 整卡可点：隐藏原生复选框，选中 = 卡片淡红底 + 红边 */
+        .more-option {
+            position: relative;
+            user-select: none;
+            -webkit-user-select: none;
+            touch-action: manipulation;
+        }
+        .more-option:active { background: #fafbfc; }
+        .more-option input { position: absolute; opacity: 0; width: 0; height: 0; }
+        .more-option.checked { border-color: #f6a8ae; background: #fff7f7; }
+        /* 分组标题行右侧「已选 N 项」 */
+        .more-section-title { display: flex; align-items: center; justify-content: space-between; }
+        .more-section-title .sel-count {
+            font-size: 12px;
+            font-weight: 400;
+            color: #E60012;
         }
         .more-option-name {
             font-size: 13px;
@@ -948,6 +959,203 @@
         .preview-table .cell-tag.good { background: #f6ffed; color: #52c41a; }
         .preview-table .cell-tag.warn { background: #fff7e6; color: #fa8c16; }
         .preview-table .cell-tag.bad  { background: #fff2f0; color: #ff4d4f; }
+
+        /* PDF 版式预览（导出 PDF 的效果示意） */
+        .pdf-stage {
+            background: #eceef1;
+            border-radius: 10px;
+            padding: 18px;
+        }
+
+        .pdf-page {
+            width: 100%;
+            max-width: 860px;
+            margin: 0 auto;
+            background: #fff;
+            border-radius: 3px;
+            box-shadow: 0 6px 24px rgba(0, 0, 0, 0.12);
+            padding: 30px 34px 22px;
+            color: #1a1a1a;
+        }
+
+        .pdf-head {
+            display: flex;
+            align-items: flex-start;
+            justify-content: space-between;
+            gap: 18px;
+            border-bottom: 4px solid #E60012;
+            padding-bottom: 12px;
+        }
+
+        .pdf-brand { display: flex; align-items: center; gap: 10px; }
+
+        .pdf-logo {
+            background: #E60012;
+            color: #fff;
+            font-weight: 900;
+            font-size: 20px;
+            letter-spacing: 2px;
+            padding: 5px 12px;
+            border-radius: 3px;
+        }
+
+        .pdf-co { font-size: 12px; color: #666; line-height: 1.5; }
+
+        .pdf-title { text-align: right; }
+
+        .pdf-title h1 { margin: 0; font-size: 20px; font-weight: 800; letter-spacing: 0.5px; }
+
+        .pdf-scope {
+            margin-left: 8px;
+            vertical-align: middle;
+            background: #fff2f2;
+            color: #E60012;
+            border: 1px solid #f7ccd0;
+            font-size: 10px;
+            font-weight: 700;
+            padding: 2px 8px;
+            border-radius: 10px;
+        }
+
+        .pdf-period {
+            display: inline-block;
+            margin-top: 8px;
+            background: #E60012;
+            color: #fff;
+            font-size: 11px;
+            padding: 3px 12px;
+            border-radius: 12px;
+        }
+
+        .pdf-cards {
+            display: grid;
+            grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+            gap: 10px;
+            margin-top: 16px;
+        }
+
+        .pdf-card {
+            border: 1px solid #e6ebf2;
+            border-radius: 12px;
+            padding: 10px 12px;
+        }
+
+        .pdf-card .pc-name { font-size: 11px; color: #8b90a0; }
+        .pdf-card .pc-val { font-size: 18px; font-weight: 700; color: #161a2e; margin-top: 4px; }
+
+        .pdf-block-title {
+            margin: 18px 0 8px;
+            font-size: 13px;
+            font-weight: 700;
+            padding-left: 9px;
+            border-left: 3px solid #E60012;
+        }
+
+        .pdf-table { width: 100%; border-collapse: collapse; font-size: 11px; }
+
+        .pdf-table th {
+            background: #f5f6f8;
+            color: #4a4f5c;
+            font-weight: 600;
+            padding: 7px 9px;
+            text-align: left;
+            border-bottom: 1px solid #e6ebf2;
+            white-space: nowrap;
+        }
+
+        .pdf-table td { padding: 7px 9px; border-bottom: 1px solid #f0f2f5; }
+
+        .pdf-foot {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-top: 18px;
+            padding-top: 10px;
+            border-top: 1px solid #e6ebf2;
+            font-size: 10px;
+            color: #a0a6b4;
+            letter-spacing: 0.5px;
+        }
+
+        /* 预览弹窗顶部工具栏（口径 / 格式） */
+        .pv-bar {
+            position: sticky;
+            top: 0;
+            z-index: 3;
+            display: flex;
+            align-items: center;
+            gap: 14px;
+            flex-wrap: wrap;
+            padding: 12px 24px;
+            background: #fff;
+            border-bottom: 1px solid #eef0f3;
+        }
+
+        .pv-group { display: inline-flex; align-items: center; gap: 8px; }
+
+        .pv-label { font-size: 12px; color: #8b90a0; }
+
+        .pv-seg {
+            display: inline-flex;
+            padding: 3px;
+            background: #f4f5f7;
+            border-radius: 9px;
+        }
+
+        .pv-seg-btn {
+            border: none;
+            background: transparent;
+            color: #4a4f5c;
+            font-family: inherit;
+            font-size: 13px;
+            padding: 6px 18px;
+            border-radius: 7px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .pv-seg-btn:hover { color: #161a2e; }
+
+        .pv-seg-btn.active {
+            background: #fff;
+            color: #161a2e;
+            font-weight: 600;
+            box-shadow: 0 1px 3px rgba(22, 26, 46, 0.12);
+        }
+
+        .pv-divider { width: 1px; height: 20px; background: #eef0f3; }
+
+        .pv-switch { display: inline-flex; gap: 6px; }
+
+        .pv-switch-btn {
+            display: inline-flex;
+            align-items: center;
+            gap: 6px;
+            padding: 6px 12px;
+            border: 1px solid #e6ebf2;
+            border-radius: 8px;
+            background: #fff;
+            color: #4a4f5c;
+            font-family: inherit;
+            font-size: 12px;
+            cursor: pointer;
+            transition: all 0.15s;
+        }
+
+        .pv-switch-btn svg { width: 14px; height: 14px; }
+
+        .pv-switch-btn:hover { border-color: #f6a8ae; color: #E60012; }
+
+        .pv-switch-btn.active {
+            background: #fdecee;
+            border-color: #f6a8ae;
+            color: #E60012;
+            font-weight: 600;
+        }
+
+        .pv-note { margin-left: auto; font-size: 11px; color: #b0b5c0; }
+
+        .pv-body { padding: 16px 24px 20px; }
 
         .tag {
             display: inline-block;
@@ -1456,8 +1664,26 @@
 
         .badge-single { background: #e6f7ff; color: #1890ff; }
         .badge-fleet  { background: #fff7e6; color: #fa8c16; }
-    </style>
 
+        /* 嵌入预览模式（?embed=1）：只留内容区，隐藏左侧菜单与新手引导 */
+        html.embed .sidebar { display: none; }
+        html.embed .main-content { padding: 16px 20px 24px; }
+        /* 外层已有「报表模版 / 管理报表」切换条，页内重复的 Tab 隐藏（右侧按钮保留） */
+        html.embed .tabs .tab { display: none; }
+    </style>
+    <script>
+        /* 被 App 端页面以 iframe 嵌入预览时（?embed=1）：隐藏左侧菜单、不弹引导，并让页内跳转继续保持嵌入 */
+        (function () {
+            if (!/[?&]embed=1/.test(location.search)) return;
+            document.documentElement.classList.add('embed');
+            document.addEventListener('DOMContentLoaded', function () {
+                document.querySelectorAll('a[href$=".html"]').forEach(function (a) {
+                    var h = a.getAttribute('href');
+                    if (h.indexOf('embed=1') < 0) a.setAttribute('href', h + (h.indexOf('?') < 0 ? '?' : '&') + 'embed=1');
+                });
+            });
+        })();
+    </script>
 </head>
 <body>
     <div class="app-wrapper">
@@ -1602,7 +1828,7 @@
                 </button>
             </div>
             <div class="modal-body" style="padding:0;">
-                <div class="preview-table-wrap" id="previewTableContainer" style="padding:16px 24px 20px;">
+                <div class="preview-table-wrap" id="previewTableContainer" style="padding:0;">
                     <div style="text-align:center;color:#bbb;padding:60px 0">正在加载预览...</div>
                 </div>
             </div>
@@ -1626,8 +1852,8 @@
                 </button>
             </div>
             <div class="modal-body" style="padding:20px 28px;">
-                <div style="font-size:12px;color:#888;line-height:1.7;margin-bottom:18px;">勾选你希望上线的报表，或直接描述你的诉求。提交后我们会评估排期，并将结果通知给你。</div>
-                <div class="more-section-title">候选报表（可多选）</div>
+                <div style="font-size:12px;color:#888;line-height:1.7;margin-bottom:18px;">勾选你希望上线的报表，或直接描述你的诉求，我们会第一时间处理。</div>
+                <div class="more-section-title">候选报表（可多选）<span class="sel-count" id="moreSelCount">已选 0 项</span></div>
                 <div id="moreReportOptions"></div>
                 <div class="more-section-title" style="margin-top:20px;">自定义诉求说明</div>
                 <textarea class="more-note-input" id="moreReportNote" placeholder="例如：我希望有一份按周统计的「设备保养提醒报表」，需要包含下次保养时间、剩余小时数、所属项目…"></textarea>
@@ -1635,7 +1861,7 @@
             </div>
             <div class="modal-footer">
                 <button class="btn" type="button" onclick="closeMoreReportsModal()">取消</button>
-                <button class="btn btn-primary" type="button" onclick="submitMoreReports()">提交</button>
+                <button class="btn btn-primary" type="button" id="moreReportSubmitBtn" onclick="submitMoreReports()">提交</button>
             </div>
         </div>
     </div>
@@ -1780,7 +2006,7 @@
         // 状态与 DOM 引用
         // ====================================================================
         let currentViewMode = 'grid'; // 'grid' | 'list'
-        let previewState = { key: reports[0].key, view: 'single' };
+        let previewState = { key: reports[0].key, view: 'single', format: 'table' }; // format: 'table' | 'pdf'
         const searchInput = document.getElementById('templateSearch');
         const templateContent = document.getElementById('templateContent');
 
@@ -1840,7 +2066,7 @@
                                 <div class="card-subtitle">${rep.group} · ${rep.desc}</div>
                             </div>
                         </div>
-                        ${rep.metrics.length ? '' : '<div class="fields-row"><span class="field-chip" style="color:#b8b8b8;background:#f2f2f2;">数据源未接入 · 本期不实现</span></div>'}
+                        ${rep.metrics.length ? '' : '<div class="fields-row"><span class="field-chip" style="color:#b8b8b8;background:#f2f2f2;">正在开发</span></div>'}
                     </div>
                     <div class="card-footer">
                         <div style="display:flex;gap:8px;margin-left:auto;">
@@ -1861,7 +2087,7 @@
                         <div class="list-desc">${rep.group} · ${rep.desc}</div>
                     </div>
                     <div class="list-fields">
-                        ${rep.metrics.length ? '' : '<span class="field-chip" style="color:#b8b8b8;background:#f2f2f2;">数据源未接入 · 本期不实现</span>'}
+                        ${rep.metrics.length ? '' : '<span class="field-chip" style="color:#b8b8b8;background:#f2f2f2;">正在开发</span>'}
                     </div>
                     <div class="list-actions">
                         <button class="btn-link" data-action="preview" data-key="${rep.key}">预览</button>
@@ -1963,10 +2189,107 @@
         function openPreviewModal(key, view) {
             const rep = reports.filter(function (r) { return r.key === key; })[0];
             if (!rep) return;
-            previewState = { key: key, view: view || 'single' };
+            previewState = { key: key, view: view || 'single', format: previewState.format || 'table' };
             renderPreviewContent();
             previewModal.classList.add('active');
             document.body.style.overflow = 'hidden';
+        }
+
+        // ====================================================================
+        // PDF 版式预览：按导出 PDF 的版式渲染（页眉 / 指标卡 / 图表 / 明细表 / 页脚）
+        // 数据仍为同一份示例数据，仅示意「报表模版 + 字段」在 PDF 里的样子
+        // ====================================================================
+        function pdfNum(v) {
+            const n = parseFloat(String(v).replace(/[^0-9.\-]/g, ''));
+            return isNaN(n) ? NaN : n;
+        }
+
+        // 机群口径：多个设备按列合计（整数列取整）
+        function pdfScale(rows, ci, rep, metricIndex) {
+            const nums = rows.map(function (r) { return pdfNum(r[ci]); }).filter(function (n) { return !isNaN(n); });
+            if (!nums.length) return rows[0][ci];
+            const sum = nums.reduce(function (a, b) { return a + b; }, 0);
+            return (rep.intCols || []).indexOf(metricIndex) >= 0 ? String(Math.round(sum)) : sum.toFixed(1);
+        }
+
+        // 简版柱状图（内联 SVG，PDF 安全子集：只用 rect / line / text）
+        function pdfBarChart(values, labels) {
+            const W = 700, H = 170, padL = 44, padR = 10, padT = 16, padB = 28;
+            const max = Math.max.apply(null, values) || 1;
+            const band = (W - padL - padR) / values.length;
+            const bw = Math.min(40, band * 0.52);
+            let s = '<svg viewBox="0 0 ' + W + ' ' + H + '" style="width:100%;height:auto;display:block">';
+            s += '<line x1="' + padL + '" y1="' + (H - padB) + '" x2="' + (W - padR) + '" y2="' + (H - padB) + '" stroke="#e6ebf2"/>';
+            values.forEach(function (v, i) {
+                const h = Math.max(2, (H - padT - padB) * (v / max));
+                const x = padL + band * i + (band - bw) / 2;
+                const y = H - padB - h;
+                s += '<rect x="' + x.toFixed(1) + '" y="' + y.toFixed(1) + '" width="' + bw.toFixed(1) + '" height="' + h.toFixed(1) + '" rx="3" fill="#E60012"/>';
+                s += '<text x="' + (x + bw / 2).toFixed(1) + '" y="' + (y - 6).toFixed(1) + '" font-size="11" fill="#161a2e" text-anchor="middle">' + (Math.round(v * 10) / 10) + '</text>';
+                s += '<text x="' + (x + bw / 2).toFixed(1) + '" y="' + (H - padB + 16) + '" font-size="11" fill="#8b90a0" text-anchor="middle">' + labels[i] + '</text>';
+            });
+            s += '</svg>';
+            return s;
+        }
+
+        function renderPdfPreview(rep, view) {
+            const t = buildTable(rep, view);
+            const base = view === 'single' ? 3 : 2;
+            const metricNames = t.cols.slice(base);
+            const idCol = base - 1;
+            const scope = view === 'single' ? '单机口径' : '机群口径';
+
+            let cards = '';
+            metricNames.slice(0, 4).forEach(function (n, i) {
+                const val = view === 'single' ? t.rows[0][base + i] : pdfScale(t.rows, base + i, rep, i);
+                cards += '<div class="pdf-card"><div class="pc-name">' + n + '</div><div class="pc-val">' + val + '</div></div>';
+            });
+
+            // 图表：机群 = 各设备取首个数值指标对比；单机 = 近 7 天趋势（示意）
+            let chartIdx = -1;
+            for (let i = 0; i < metricNames.length; i++) {
+                if (!isNaN(pdfNum(t.rows[0][base + i]))) { chartIdx = i; break; }
+            }
+            let chartHTML = '';
+            if (chartIdx >= 0) {
+                const ci = base + chartIdx;
+                let values = [], labels = [], chartTitle = '';
+                if (view === 'fleet') {
+                    values = t.rows.map(function (r) { const n = pdfNum(r[ci]); return isNaN(n) ? 0 : n; });
+                    labels = t.rows.map(function (r) { return r[idCol]; });
+                    chartTitle = '设备对比 · ' + metricNames[chartIdx];
+                } else {
+                    const bv = pdfNum(t.rows[0][ci]) || 1;
+                    labels = ['09-24', '09-25', '09-26', '09-27', '09-28', '09-29', '09-30'];
+                    values = labels.map(function (d, i) { return bv * (0.84 + 0.045 * ((i * 3) % 5)); });
+                    chartTitle = '近 7 天趋势 · ' + metricNames[chartIdx];
+                }
+                chartHTML = '<div class="pdf-block-title">' + chartTitle + '</div>' + pdfBarChart(values, labels);
+            }
+
+            let pdfTableHTML = '<table class="pdf-table"><thead><tr>';
+            t.cols.forEach(function (c) { pdfTableHTML += '<th>' + c + '</th>'; });
+            pdfTableHTML += '</tr></thead><tbody>';
+            t.rows.forEach(function (row) {
+                pdfTableHTML += '<tr>';
+                row.forEach(function (cell) { pdfTableHTML += '<td>' + cell + '</td>'; });
+                pdfTableHTML += '</tr>';
+            });
+            pdfTableHTML += '</tbody></table>';
+
+            return '<div class="pdf-stage"><div class="pdf-page">'
+                + '<div class="pdf-head">'
+                + '<div class="pdf-brand"><span class="pdf-logo">SANY</span>'
+                + '<span class="pdf-co">三一智联系统<br>MySANY 设备管理平台</span></div>'
+                + '<div class="pdf-title"><h1>' + rep.name + '<span class="pdf-scope">' + scope + '</span></h1>'
+                + '<span class="pdf-period">统计周期：' + PERIOD + '</span></div>'
+                + '</div>'
+                + '<div class="pdf-cards">' + cards + '</div>'
+                + chartHTML
+                + '<div class="pdf-block-title">数据明细</div>'
+                + pdfTableHTML
+                + '<div class="pdf-foot"><span>SANY CONFIDENTIAL</span><span>第 1 页</span></div>'
+                + '</div></div>';
         }
 
         function renderPreviewContent() {
@@ -1977,9 +2300,10 @@
             if (!rep.metrics.length) {
                 // 2026-09-17 调整：同样不再展示 副标题（分组 · 英文名）与报表说明段
                 previewTableContainer.innerHTML =
-                    '<div style="border:1px dashed #e0e0e0;border-radius:8px;padding:28px;text-align:center;color:#bbb;font-size:12px;">'
+                    '<div class="pv-body">'
+                    + '<div style="border:1px dashed #e0e0e0;border-radius:8px;padding:28px;text-align:center;color:#bbb;font-size:12px;">'
                     + '该报表所需数据源尚未接入，本期不实现，暂无示例数据'
-                    + '</div>';
+                    + '</div></div>';
                 var useBtn = document.getElementById('useReportBtn');
                 if (useBtn) useBtn.style.display = 'none';
                 return;
@@ -2004,23 +2328,46 @@
 
             function seg(v, label) {
                 const on = previewState.view === v;
-                return '<button data-view="' + v + '" style="padding:6px 14px;border:none;background:' + (on ? '#fff' : 'transparent')
-                    + ';color:' + (on ? '#E60012' : '#666') + ';font-weight:' + (on ? '600' : '400')
-                    + ';border-radius:5px;cursor:pointer;font-family:inherit;font-size:12px;">' + label + '</button>';
+                return '<button class="pv-seg-btn' + (on ? ' active' : '') + '" data-view="' + v + '">' + label + '</button>';
             }
 
-            // 2026-09-17 调整：预览弹窗只保留「视图切换 + 示例数据标 + 表格」
+            const iconTable = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'
+                + '<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M9 10v10"/></svg>';
+            const iconPdf = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'
+                + '<path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><path d="M14 2v6h6"/></svg>';
+
+            function segFmt(v, label, icon) {
+                const on = previewState.format === v;
+                return '<button class="pv-switch-btn' + (on ? ' active' : '') + '" data-format="' + v + '">' + icon + label + '</button>';
+            }
+
+            // 预览弹窗：顶部工具栏（口径分段 + 格式切换，吸顶）+ 内容区
             // 不再展示 报表副标题（分组 · 英文名）/ 报表说明段 /「同一套字段」说明块
-            previewTableContainer.innerHTML =
-                '<div style="display:flex;align-items:center;gap:10px;flex-wrap:wrap;margin-bottom:12px;">'
-                + '<div style="display:inline-flex;padding:3px;background:#f2f2f2;border-radius:7px;">' + seg('single', '单机视图') + seg('fleet', '机群视图') + '</div>'
-                + '<span style="font-size:12px;color:#bbb;margin-left:auto;">示例数据，仅示意展示效果</span>'
-                + '</div>'
-                + tableHTML;
+            const pvBarHTML =
+                '<div class="pv-bar">'
+                + '<div class="pv-group"><span class="pv-label">口径</span>'
+                + '<div class="pv-seg">' + seg('single', '单机') + seg('fleet', '机群') + '</div></div>'
+                + '<span class="pv-divider"></span>'
+                + '<div class="pv-group"><span class="pv-label">格式</span>'
+                + '<div class="pv-switch">' + segFmt('table', '表格', iconTable) + segFmt('pdf', 'PDF', iconPdf) + '</div></div>'
+                + '<span class="pv-note">示例数据，仅示意展示效果</span>'
+                + '</div>';
+
+            previewTableContainer.innerHTML = pvBarHTML
+                + '<div class="pv-body">'
+                + (previewState.format === 'pdf' ? renderPdfPreview(rep, previewState.view) : tableHTML)
+                + '</div>';
 
             Array.prototype.slice.call(previewTableContainer.querySelectorAll('button[data-view]')).forEach(function (btn) {
                 btn.addEventListener('click', function () {
                     previewState.view = btn.dataset.view;
+                    renderPreviewContent();
+                });
+            });
+
+            Array.prototype.slice.call(previewTableContainer.querySelectorAll('button[data-format]')).forEach(function (btn) {
+                btn.addEventListener('click', function () {
+                    previewState.format = btn.dataset.format;
                     renderPreviewContent();
                 });
             });
@@ -2065,8 +2412,8 @@
               desc: '统计保养、维修产生的备件消耗与费用，按设备、项目与周期汇总。' }
         ];
 
-        // 2026-09-21 新增：候选报表可由后台「报表需求反馈」页配置
-        // 数据来源：localStorage['mysany_more_report_options']（与 V2/mysany后台V2/报表需求反馈.html 共用同一 key）
+        // 2026-09-21 新增：候选报表可由后台「机群需求反馈」页配置
+        // 数据来源：localStorage['mysany_more_report_options']（与 V2/mysany后台V2/机群需求反馈.html 共用同一 key）
         // 无配置 / 配置异常时回落到上面的内置默认清单
         const REPORT_OPTIONS_KEY = 'mysany_more_report_options';
 
@@ -2152,7 +2499,24 @@
                     + '<div class="more-option-desc">' + safe(o.desc) + '</div>'
                     + '</div></label>';
             }).join('');
+            updateSelCount();
         }
+
+        // 勾选联动：卡片选中态 + 「已选 N 项」+ 提交按钮「提交（N）」
+        function updateSelCount() {
+            let n = 0;
+            Array.prototype.forEach.call(moreReportsOptionsBox.querySelectorAll('.more-option'), function (label) {
+                const input = label.querySelector('input');
+                const on = !!(input && input.checked);
+                if (on) n++;
+                label.classList.toggle('checked', on);
+            });
+            const countEl = document.getElementById('moreSelCount');
+            if (countEl) countEl.textContent = '已选 ' + n + ' 项';
+            const submitBtn = document.getElementById('moreReportSubmitBtn');
+            if (submitBtn) submitBtn.textContent = n > 0 ? '提交（' + n + '）' : '提交';
+        }
+        moreReportsOptionsBox.addEventListener('change', updateSelCount);
 
         // 预览图放大：点击缩略图直接出大图（要阻止事件冒泡到 label，否则会连带勾选复选框）
         function showReportPreview(e, el) {
@@ -2205,17 +2569,17 @@
                 return;
             }
 
-            // 2026-09-17 调整：诉求写入 localStorage，供后台「报表需求反馈」页展示
+            // 2026-09-17 调整：诉求写入 localStorage，供后台「机群需求反馈」页展示
             saveReportRequest('报表模版', checked, note);
 
             moreReportsTip.className = 'more-form-tip success';
             moreReportsTip.textContent = '已提交诉求'
                 + (checked.length ? '（勾选 ' + checked.length + ' 张：' + checked.join('、') + '）' : '（自定义 1 条）')
-                + '，可在后台「报表需求反馈」查看处理进度。';
+                + '，我们会第一时间处理。';
             setTimeout(closeMoreReportsModal, 1400);
         }
 
-        // 写入诉求（后台 V2/mysany后台V2/报表需求反馈.html 读取同一个 localStorage key）
+        // 写入诉求（后台 V2/mysany后台V2/机群需求反馈.html 读取同一个 localStorage key）
         function saveReportRequest(source, reports, note) {
             try {
                 const KEY = 'mysany_report_requests';
@@ -2255,6 +2619,7 @@
 
         // ======== 新手引导 - 红框高亮真实按钮 ========
         (function initOnboarding() {
+            if (/[?&]embed=1/.test(location.search)) return;   // 嵌入预览时不弹新手引导
             const steps = [
                 {
                     selector: '.sidebar-link.active',

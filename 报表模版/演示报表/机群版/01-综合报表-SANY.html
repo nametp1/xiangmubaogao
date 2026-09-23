@@ -2,7 +2,8 @@
 <!--
   模版：机群综合报表（v2.0 · 三一风格）　维度：机群　周期：日 / 周 / 月　版式：A4 横向
   后台配置方式：① 循环区域用 loop 注释标记包裹（只写一条行模板，引擎按数据行重复），行内变量为「表名_字段」（如 设备_工时），与后台「数据列配置」的每一列（列名 + 映射变量）一一对应；② 汇总行用「汇总_字段」，聚合值由引擎给出，模板不做计算；③ 进度条 / 环形 / 堆叠段 / 趋势柱的显示比例用「条_标签」「环_名称」「段_标签」「趋势_高度」，由引擎按数值换算回填。
-  适用机型：工时 / 能耗 / 里程 字段族（28 个机型中 27 个可用；仅「牵引车」字段不足，需人工确认）
+  适用机型：机群口径纳入全部机型——某台设备缺该字段族时该格留 --，不计入合计 / 均值；只有整份报表的字段族在全部机型上都缺失才不出本报表。字段族覆盖（字段总表「线上字段库」20 个机型口径）：工时族 19 个、里程族 13 个（缺 履带吊起重机、挖掘机、旋挖钻、燃油装载机、牵引车、电动挖掘机、电动装载机）、能耗族 19 个（缺 电动挖掘机）
+  单位口径：油耗按 L / L·h⁻¹ / L·100km⁻¹，电耗按 kWh / kWh·h⁻¹ / kWh·100km⁻¹，同一列 / 同一环形图不混 L 与 kWh；「平均能耗」分母不同的机型（每 100km 与每小时）只在同分母内合并
   空值规则：字段无值时不显示 —— 单元格显示 --、行级/块级隐藏、机型不适用则不出本报表；机群合计与均值只统计「有该字段值」的设备，缺值设备该格留空。
 -->
 <html lang="zh-CN">
@@ -37,12 +38,12 @@ body{margin:0;background:#f2f3f5;color:#1a1a1a;font-size:12px;
 .period{display:inline-block;margin-top:8px;background:#E60012;color:#fff;font-size:12px;
         padding:4px 13px;border-radius:12px;letter-spacing:.4px}
 /* ---------- 指标卡 ---------- */
-.metrics{margin-top:20px;display:grid;grid-template-columns:repeat(4,1fr);gap:14px}
-.metric{background:#fff;border:1px solid #f0f0f0;border-top:4px solid #E60012;border-radius:6px;
+.metrics{margin-top:20px;display:grid;grid-template-columns:repeat(5,1fr);gap:14px}
+.metric{background:#fff;border:1px solid #e6ebf2;border-radius:14px;
         padding:13px 16px 12px;box-shadow:0 1px 5px rgba(0,0,0,.05)}
-.metric .label{font-size:12px;color:#8c8c8c}
-.metric .number{margin-top:7px;font-size:26px;font-weight:800;color:#E60012;letter-spacing:-.5px}
-.metric .unit{font-size:11px;color:#9a9a9a;margin-top:2px}
+.metric .label{font-size:12px;color:#8b90a0}
+.metric .number{margin-top:7px;font-size:26px;font-weight:800;color:#161a2e;letter-spacing:-.5px}
+.metric .unit{font-size:11px;color:#8b90a0;margin-top:2px}
 /* ---------- 版式 ---------- */
 .cols{display:grid;grid-template-columns:1fr 1fr;gap:22px;align-items:start}
 .section{margin-top:20px;background:#fff;border:1px solid #f0f0f0;border-radius:6px;padding:14px 16px 16px}
@@ -74,8 +75,8 @@ tfoot td,tr:last-child td{border-bottom:none}
 .ring-bg{fill:none;stroke:#f0f0f0;stroke-width:6}
 .ring-seg{fill:none;stroke-width:6}
 .ring-seg-main{stroke:#E60012}
-.ring-seg-sub{stroke:#f0a6ad}
-.ring-seg-gray{stroke:#d9d9d9}
+.ring-seg-sub{stroke:#F59E0B}
+.ring-seg-3{stroke:#0F766E}
 .ring .ring-label{position:absolute;top:0;right:0;bottom:0;left:0;display:flex;flex-direction:column;align-items:center;
         justify-content:center;z-index:1;font-size:11px;color:#9a9a9a}
 .ring .ring-label b{font-size:21px;color:#E60012}
@@ -84,13 +85,22 @@ tfoot td,tr:last-child td{border-bottom:none}
 .legend .item:last-child{border-bottom:none}
 .legend .dot{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:8px}
 .legend .val{font-weight:700;white-space:nowrap}
+/* ---------- 折线图 / 柱状图（配置器组件：折线图 / 柱状图） ---------- */
+.chart svg{width:100%;display:block}
+.chart-legend{display:flex;flex-wrap:wrap;gap:12px;margin-top:8px;font-size:11px;color:#595959}
+.chart-legend i{display:inline-block;width:14px;height:3px;border-radius:2px;margin-right:5px;vertical-align:middle}
+.hbar{display:flex;align-items:center;gap:8px;margin:7px 0;font-size:12px}
+.hbar .n{width:120px;color:#595959;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.hbar .t{flex:1;height:14px;background:#f4f4f4;border-radius:3px;overflow:hidden}
+.hbar .t b{display:block;height:100%;background:#E60012;border-radius:3px}
+.hbar .v{width:72px;text-align:right;font-weight:700;color:#1a1a1a}
 .stack{display:flex;height:26px;border-radius:6px;overflow:hidden;margin-top:12px;
         box-shadow:inset 0 0 0 1px rgba(0,0,0,.03)}
 .stack span{display:flex;align-items:center;justify-content:center;color:#fff;font-size:11px;overflow:hidden;white-space:nowrap}
 .spark{display:flex;align-items:flex-end;gap:4px;height:74px;margin:10px 2px 0;
         border-bottom:1px solid #f0f0f0;padding-bottom:2px}
 .spark i{flex:1;height:0;background:#E60012;background:linear-gradient(180deg,#ff5a63,#E60012);border-radius:3px 3px 0 0;display:block}
-.spark i.warn,.spark i.low{background:#f0a6ad;background:linear-gradient(180deg,#f7b7bc,#f0a6ad)}
+.spark i.warn,.spark i.low{background:#F59E0B;background:linear-gradient(180deg,#FCD34D,#F59E0B)}
 /* ---------- 标签 ---------- */
 .tag{display:inline-block;padding:2px 9px;border-radius:11px;font-size:11px;white-space:nowrap;line-height:1.5}
 .tag-red{background:#fdeaea;color:#E60012;font-weight:700}
@@ -141,39 +151,31 @@ tfoot td,tr:last-child td{border-bottom:none}
     </div>
 
     <div class="metrics">
-        <div class="metric"><div class="label">在册设备 / 开工设备</div><div class="number">{{在册设备数}} / {{开工设备数}}</div><div class="unit">台</div></div>
+        <div class="metric"><div class="label">在册设备</div><div class="number">{{在册设备数}}</div><div class="unit">台</div></div>
+        <div class="metric"><div class="label">开工设备</div><div class="number">{{开工设备数}}</div><div class="unit">台</div></div>
         <div class="metric"><div class="label">设备总工时</div><div class="number">{{总工时}}</div><div class="unit">时:分</div></div>
         <div class="metric"><div class="label">总里程</div><div class="number">{{总里程}}</div><div class="unit">公里</div></div>
         <div class="metric"><div class="label">工时利用率</div><div class="number">{{工时利用率}}</div><div class="unit">%</div></div>
     </div>
 
     <div class="cols" style="margin-top:22px">
+        <!-- 组件：指标卡 · 动力结构（2 张，单指标/卡） -->
         <div class="section" data-optional="1" style="margin-top:0">
             <div class="section-title">机群动力结构</div>
-            <div class="ring-row">
-                <div class="ring">
-                    <svg class="ring-svg" viewBox="0 0 42 42">
-                        <circle class="ring-bg" cx="21" cy="21" r="15.9"></circle>
-                        <circle class="ring-seg ring-seg-main" cx="21" cy="21" r="15.9"
-                                stroke-dasharray="{{环_电动占比}} 100" stroke-dashoffset="0"></circle>
-                    </svg>
-                    <div class="ring-label"><b>{{电动设备数}} / {{在册设备数}}</b>电动设备</div>
-                </div>
-                <div class="legend">
-                    <div class="item"><span><span class="dot" style="background:#E60012"></span>电动设备</span><span class="val">{{电动设备数}} 台 · {{电动台数占比}}%</span></div>
-                    <div class="item"><span><span class="dot" style="background:#f0a6ad"></span>燃油设备</span><span class="val">{{燃油设备数}} 台 · {{燃油台数占比}}%</span></div>
-                    <div class="item"><span>工时占比（电动 / 燃油）</span><span class="val">{{电动工时占比}}% / {{燃油工时占比}}%</span></div>
-                    <div class="item"><span>电动设备工时 / 燃油设备工时</span><span class="val">{{电动设备工时}} / {{燃油设备工时}}</span></div>
-                </div>
+            <div class="metrics" style="margin-top:0;grid-template-columns:repeat(2,1fr)">
+                <div class="metric"><div class="label">电动设备</div><div class="number">{{电动设备数}}</div><div class="unit">台</div></div>
+                <div class="metric"><div class="label">燃油设备</div><div class="number">{{燃油设备数}}</div><div class="unit">台</div></div>
+                <div class="metric"><div class="label">电动工时占比</div><div class="number">{{电动工时占比}}</div><div class="unit">%</div></div>
+                <div class="metric"><div class="label">燃油工时占比</div><div class="number">{{燃油工时占比}}</div><div class="unit">%</div></div>
             </div>
+            <div class="muted" style="margin-top:8px">回收比例 {{回收比例}}% · 净电耗 {{净电耗}} kWh</div>
         </div>
 
+        <!-- 组件：折线图 · X=时间（日口径）· 指标=工时 h · 机群只 1 指标，每台设备一条线（色相 =(序号×137.5°)%360） -->
         <div class="section" data-optional="1" style="margin-top:0">
-            <div class="section-title">机群工时构成</div>
-            <div class="bar-item"><div class="bar-head"><span>工作工时（去除怠速）</span><span class="val">{{工作工时}} · {{工作工时占比}}%</span></div><div class="bar"><div class="bar-fill" style="width:{{条_工作工时}}%"></div></div></div>
-            <div class="bar-item"><div class="bar-head"><span>怠速工时</span><span class="val">{{怠速工时合计}} · {{怠速工时占比}}%</span></div><div class="bar"><div class="bar-fill" style="width:{{条_怠速工时}}%"></div></div></div>
-            <div class="bar-item"><div class="bar-head"><span>无动作时间</span><span class="val">{{无动作时间合计}} · {{无动作占比}}%</span></div><div class="bar"><div class="bar-fill" style="width:{{条_无动作时间}}%"></div></div></div>
-            <div class="bar-item"><div class="bar-head"><span>停机时长（按日历时长）</span><span class="val">{{停机时长}} · {{停机占比}}%</span></div><div class="bar"><div class="bar-fill" style="width:{{条_停机时长}}%;background:#f0a6ad"></div></div></div>
+            <div class="section-title">工时趋势（按日）</div>
+            <div class="chart"><svg viewBox="0 0 600 214" xmlns="http://www.w3.org/2000/svg"><line x1="36" y1="12" x2="588" y2="12" stroke="#f0f0f0"/><line x1="36" y1="70" x2="588" y2="70" stroke="#f0f0f0"/><line x1="36" y1="128" x2="588" y2="128" stroke="#f0f0f0"/><line x1="36" y1="186" x2="588" y2="186" stroke="#f0f0f0"/><text x="30" y="16" text-anchor="end" font-size="10" fill="#b0b8c4">60</text><text x="30" y="74" text-anchor="end" font-size="10" fill="#b0b8c4">40</text><text x="30" y="132" text-anchor="end" font-size="10" fill="#b0b8c4">20</text><text x="30" y="190" text-anchor="end" font-size="10" fill="#b0b8c4">0</text><polyline points="36,64.2 128,46.8 220,38.1 312,72.9 404,26.5 496,49.7 588,58.4" fill="none" stroke="hsl(137.5,80%,55%)" stroke-width="1.8" stroke-linejoin="round"/><polyline points="36,81.6 128,90.3 220,67.1 312,58.4 404,75.8 496,70.0 588,72.9" fill="none" stroke="hsl(275,55%,64%)" stroke-width="1.8" stroke-linejoin="round"/><polyline points="36,104.8 128,96.1 220,110.6 312,99.0 404,90.3 496,101.9 588,107.7" fill="none" stroke="hsl(52.5,80%,46%)" stroke-width="1.8" stroke-linejoin="round"/><polyline points="36,133.8 128,122.2 220,139.6 312,128.0 404,116.4 496,130.9 588,125.1" fill="none" stroke="hsl(190,55%,55%)" stroke-width="1.8" stroke-linejoin="round"/><text x="36" y="204" text-anchor="middle" font-size="10" fill="#7c8798">9/15</text><text x="128" y="204" text-anchor="middle" font-size="10" fill="#7c8798">9/16</text><text x="220" y="204" text-anchor="middle" font-size="10" fill="#7c8798">9/17</text><text x="312" y="204" text-anchor="middle" font-size="10" fill="#7c8798">9/18</text><text x="404" y="204" text-anchor="middle" font-size="10" fill="#7c8798">9/19</text><text x="496" y="204" text-anchor="middle" font-size="10" fill="#7c8798">9/20</text><text x="588" y="204" text-anchor="middle" font-size="10" fill="#7c8798">9/21</text></svg></div>
+            <div class="chart-legend"><span><i style="background:hsl(137.5,80%,55%)"></i>EX001</span><span><i style="background:hsl(275,55%,64%)"></i>EX002</span><span><i style="background:hsl(52.5,80%,46%)"></i>EX003</span><span><i style="background:hsl(190,55%,55%)"></i>EX004</span></div>
         </div>
     </div>
 
@@ -196,77 +198,66 @@ tfoot td,tr:last-child td{border-bottom:none}
         </table>
     </div>
 
+    <!-- 组件：环形图（机群）· 指标=工时 · 扇区=单机贡献度（数值降序，前 5 台 + 第 6 个「其他」中性灰）、中心放总计 -->
     <div class="cols">
         <div class="section" data-optional="1">
-            <div class="section-title">机群能耗构成</div>
-            <table>
-                <thead><tr><th>能源类型</th><th class="num">期内消耗</th><th class="num">台数</th><th class="num">单位工时消耗</th></tr></thead>
-                <tbody>
-                    <tr><td>电能</td><td class="num">{{总电耗}}</td><td class="num">{{电动设备数}} 台</td><td class="num">{{电动单位消耗}} kWh/h</td></tr>
-                    <tr><td>柴油</td><td class="num">{{总油耗}}</td><td class="num">{{燃油设备数}} 台</td><td class="num">{{燃油单位消耗}} L/h</td></tr>
-                    <tr><td>能量回收</td><td class="num">{{回收能量}}</td><td class="num">--</td><td class="num">回收比例 {{回收比例}}%</td></tr>
-                    <tr><td><b>净电耗（扣回收）</b></td><td class="num"><b>{{净电耗}}</b></td><td class="num">{{电动设备数}} 台</td><td class="num">{{净电单位消耗}} kWh/h</td></tr>
-                </tbody>
-            </table>
-            <div class="section-title" style="margin-top:20px">机群状态</div>
-            <table>
-                <thead><tr><th>指标</th><th class="num">本期值</th></tr></thead>
-                <tbody>
-                    <tr><td>平均单机工时</td><td class="num">{{平均单机工时}}</td></tr>
-                    <tr><td>平均单机里程</td><td class="num">{{平均单机里程}} km</td></tr>
-                    <tr><td>开工天数（平均）</td><td class="num">{{平均开工天数}} 天</td></tr>
-                    <tr><td>发生异常的设备</td><td class="num">{{异常设备数}} 台</td></tr>
-                    <tr><td>预警事件（去重后）</td><td class="num">{{预警事件合计}} 起</td></tr>
-                </tbody>
-            </table>
+            <div class="section-title">工时贡献（前 5 台 + 其他）</div>
+            <div class="ring-row">
+                <div class="ring">
+                    <svg class="ring-svg" viewBox="0 0 42 42">
+                        <circle class="ring-bg" cx="21" cy="21" r="15.9"></circle>
+                    <circle class="ring-seg ring-seg-main" cx="21" cy="21" r="15.9" stroke-dasharray="28 100" stroke-dashoffset="-0"></circle>
+                    <circle class="ring-seg ring-seg-sub" cx="21" cy="21" r="15.9" stroke-dasharray="22 100" stroke-dashoffset="-28"></circle>
+                    <circle class="ring-seg ring-seg-3" cx="21" cy="21" r="15.9" stroke-dasharray="18 100" stroke-dashoffset="-50"></circle>
+                    <circle class="ring-seg" style="stroke:#2563EB" cx="21" cy="21" r="15.9" stroke-dasharray="12 100" stroke-dashoffset="-68"></circle>
+                    <circle class="ring-seg" style="stroke:#7C3AED" cx="21" cy="21" r="15.9" stroke-dasharray="8 100" stroke-dashoffset="-80"></circle>
+                    <circle class="ring-seg" style="stroke:#94A3B8" cx="21" cy="21" r="15.9" stroke-dasharray="12 100" stroke-dashoffset="-88"></circle>
+                    </svg>
+                    <div class="ring-label"><b>{{总工时}}</b>时:分</div>
+                </div>
+                <div class="legend">
+                    <div class="item"><span><span class="dot" style="background:#E60012"></span>SY-EX001</span><span class="val">75:12 · 28%</span></div>
+                    <div class="item"><span><span class="dot" style="background:#F59E0B"></span>SY-EX002</span><span class="val">59:03 · 22%</span></div>
+                    <div class="item"><span><span class="dot" style="background:#0F766E"></span>SY-EX003</span><span class="val">48:27 · 18%</span></div>
+                    <div class="item"><span><span class="dot" style="background:#2563EB"></span>SY-EX004</span><span class="val">32:11 · 12%</span></div>
+                    <div class="item"><span><span class="dot" style="background:#7C3AED"></span>SY-EX005</span><span class="val">21:30 · 8%</span></div>
+                    <div class="item"><span><span class="dot" style="background:#94A3B8"></span>其他</span><span class="val">32:09 · 12%</span></div>
+                </div>
+            </div>
         </div>
 
-        <div class="section" data-optional="1">
-            <div class="section-title">预警摘要</div>
-            <table>
-                <thead><tr><th>预警类型</th><th class="num">次数</th><th class="num">涉及设备</th><th class="num">未闭环</th><th>最高等级</th></tr></thead>
-                <tbody>
-                    <!-- #loop_预警摘要 -->
-                    <tr><td>{{预警_类型}}</td><td class="num">{{预警_次数}}</td><td class="num">{{预警_设备数}}</td><td class="num">{{预警_未闭环}}</td><td><span class="tag {{预警_等级样式}}">{{预警_等级}}</span></td></tr>
-                    <!-- /#loop_预警摘要 -->
-                    <tr><td><b>合计</b></td><td class="num"><b>{{预警事件合计}}</b></td><td class="num"><b>{{异常设备数}}</b></td><td class="num"><b>{{未闭环合计}}</b></td><td>--</td></tr>
-                </tbody>
-            </table>
+        <!-- 组件：柱状图（水平）· Y=设备编号 · X=怠速工时 h · 全量不截断、数值降序 -->
+        <div class="section">
+            <div class="section-title">怠速工时排行</div>
+            <div class="hbar"><span class="n">SY-EX007</span><span class="t"><b style="width:100%"></b></span><span class="v">32:40</span></div>
+            <div class="hbar"><span class="n">SY-EX002</span><span class="t"><b style="width:88%"></b></span><span class="v">28:45</span></div>
+            <div class="hbar"><span class="n">SY-EX005</span><span class="t"><b style="width:79%"></b></span><span class="v">25:50</span></div>
+            <div class="hbar"><span class="n">SY-EX009</span><span class="t"><b style="width:70%"></b></span><span class="v">22:52</span></div>
+            <div class="hbar"><span class="n">SY-EX001</span><span class="t"><b style="width:64%"></b></span><span class="v">20:54</span></div>
+            <div class="hbar"><span class="n">SY-EX004</span><span class="t"><b style="width:56%"></b></span><span class="v">18:17</span></div>
+            <div class="hbar"><span class="n">SY-EX008</span><span class="t"><b style="width:49%"></b></span><span class="v">16:01</span></div>
+            <div class="hbar"><span class="n">SY-EX003</span><span class="t"><b style="width:42%"></b></span><span class="v">13:44</span></div>
+            <div class="hbar"><span class="n">SY-EX010</span><span class="t"><b style="width:35%"></b></span><span class="v">11:26</span></div>
+            <div class="hbar"><span class="n">SY-EX006</span><span class="t"><b style="width:28%"></b></span><span class="v">9:09</span></div>
         </div>
     </div>
 
-    <div class="section">
-        <div class="section-title">字段与口径对照</div>
-        <table>
-            <thead><tr><th style="width:26%">字段</th><th style="width:16%">口径类型</th><th style="width:14%">字段总表归类</th><th>计算方式</th></tr></thead>
-            <tbody>
-                <tr><td>工时 / 总工作时间 / 怠速工时 / 总无动作时间</td><td>期内累计</td><td>超时工作报表</td><td>日=当日累计时长（时:分）；周/月=期内累计时长（时:分）</td></tr>
-                <tr><td>里程 / 总里程</td><td>期内累计</td><td>设备移动里程报表</td><td>日=当日行驶里程累计（公里）；周/月=期内累计</td></tr>
-                <tr><td>运载趟数</td><td>期内累计</td><td>设备移动里程报表</td><td>周/月=期内行程次数累计</td></tr>
-                <tr><td>电耗 / 总能耗（电）</td><td>期内累计</td><td>设备能耗报表</td><td>日=当日消耗累计；周/月=期内累计</td></tr>
-                <tr><td>油耗 / 总油耗</td><td>期内累计</td><td>设备能耗报表</td><td>日=当日消耗累计量；周/月=期内累计量</td></tr>
-                <tr><td>平均能耗 / 平均油耗 / 每小时油耗</td><td>按整体重算</td><td>设备能耗报表</td><td>期内总消耗 ÷ 期内总工时（不取各期均值）</td></tr>
-                <tr><td>回收能量 / 回收比例</td><td>期内累计 / 周期内均值</td><td>电池充电参数报表</td><td>日期内累计回收电量；比例为期内均值</td></tr>
-                <tr><td>工时利用率</td><td>按整体重算</td><td>超时工作报表</td><td>期内总工时 ÷ 期历时长</td></tr>
-                <tr><td>开工天数</td><td>期内累计</td><td>超时工作报表</td><td>日=当日累计；周/月=期内求和</td></tr>
-                <tr><td>预警次数 / 涉及设备 / 未闭环</td><td>计数去重</td><td>设备异常通知报表</td><td>按告警 ID 去重后计数</td></tr>
-            </tbody>
-        </table>
-    </div>
 
+    <!-- 组件：指标卡 · 单行最多 6 张、超出拆第二行；一张卡只放 1 个指标、各卡单位独立 -->
     <div class="section">
-        <div class="section-title">空值处理规则</div>
-        <table>
-            <thead><tr><th style="width:30%">情形</th><th>处理方式</th></tr></thead>
-            <tbody>
-                <tr><td>单元格级：该字段本期无值</td><td>显示 --（不留 0、不显示空白），不计入合计与均值</td></tr>
-                <tr><td>行级：某一行无值</td><td>隐藏该行（如某挡位无信号、某单体指标未上报、某日无数据）</td></tr>
-                <tr><td>块级：该机型无此字段族</td><td>隐藏该区块（如无档位信号的机型隐藏档位与作业模式区块）</td></tr>
-                <tr><td>整份：该机型不适用本报表</td><td>不出本报表（后台按机型适用性判断，适用机型见文件头注释）</td></tr>
-                <tr><td>机群汇总：某台设备缺该字段</td><td>该设备该格留空（--）；合计 / 均值只按「有该字段值」的设备计算，不按 0 计</td></tr>
-                <tr><td>单机对比表：机群均值无值</td><td>隐藏该行（如该机型不在机群内）</td></tr>
-            </tbody>
-        </table>
+        <div class="section-title">机群关键指标</div>
+        <div class="metrics" style="margin-top:0">
+        <div class="metric"><div class="label">平均单机工时</div><div class="number">{{平均单机工时}}</div><div class="unit">时:分</div></div>
+        <div class="metric"><div class="label">平均单机里程</div><div class="number">{{平均单机里程}}</div><div class="unit">公里</div></div>
+        <div class="metric"><div class="label">平均开工天数</div><div class="number">{{平均开工天数}}</div><div class="unit">天</div></div>
+        <div class="metric"><div class="label">异常设备</div><div class="number">{{异常设备数}}</div><div class="unit">台</div></div>
+        <div class="metric"><div class="label">预警事件</div><div class="number">{{预警事件合计}}</div><div class="unit">起</div></div>
+        <div class="metric"><div class="label">总电耗</div><div class="number">{{总电耗}}</div><div class="unit">kWh</div></div>
+        <div class="metric"><div class="label">总油耗</div><div class="number">{{总油耗}}</div><div class="unit">L</div></div>
+        <div class="metric"><div class="label">回收能量</div><div class="number">{{回收能量}}</div><div class="unit">kWh</div></div>
+        <div class="metric"><div class="label">净电耗</div><div class="number">{{净电耗}}</div><div class="unit">kWh</div></div>
+        <div class="metric"><div class="label">回收比例</div><div class="number">{{回收比例}}</div><div class="unit">%</div></div>
+        </div>
     </div>
 
     <div class="footer">

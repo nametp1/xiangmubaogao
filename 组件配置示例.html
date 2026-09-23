@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>卡特彼勒 - 工业设备报表配置后台</title>
+    <title>三一 - 工业设备报表配置后台</title>
     
     <!-- 引入 Tailwind CSS 进行页面排版和样式控制 -->
     <script src="https://cdn.tailwindcss.com"></script>
@@ -45,7 +45,7 @@
             { id: 'text_block', name: '富文本/导言', icon: 'fas fa-align-left' },
         ];
 
-        // ===== 默认版式（还原「卡特彼勒_机群_燃油与能耗报表」5 个组件；重置时复用） =====
+        // ===== 默认版式（还原「三一_机群_燃油与能耗报表」5 个组件；重置时复用） =====
         const DEFAULT_COMPONENTS = [
             {
                 id: 'comp_1',
@@ -111,19 +111,30 @@
             }
         ];
         const DEFAULT_GLOBAL = {
-            templateName: '卡特彼勒_机群_燃油与能耗报表',
+            templateName: '三一_机群_燃油与能耗报表',
             scope: 'fleet',
             watermark: true,
             logoHeader: true
         };
         const cloneDefaults = () => DEFAULT_COMPONENTS.map(c => ({ ...c, metrics: [...c.metrics] }));
 
+        // 品牌迁移：历史本地数据 / 外部导入 JSON 里残留的「卡特彼勒 / CATERPILLAR」统一换成三一
+        const migrateBrandText = (v) => String(v == null ? '' : v)
+            .replace(/卡特彼勒/g, '三一')
+            .replace(/CATERPILLAR/gi, 'SANY');
+        // 全局设置：补默认值 + 品牌迁移
+        const normalizeGlobal = (gc) => {
+            const out = { ...DEFAULT_GLOBAL, ...(gc || {}) };
+            out.templateName = migrateBrandText(out.templateName) || DEFAULT_GLOBAL.templateName;
+            return out;
+        };
+
         // 统一补全组件字段，兼容外部 JSON 缺字段的情况
         const normalizeComponent = (c, i) => ({
             id: c.id || `comp_${Date.now()}_${i}`,
             type: CHART_TYPES.some(t => t.id === c.type) ? c.type : 'bar_chart',
-            title: String(c.title || `组件 ${i + 1}`),
-            metrics: Array.isArray(c.metrics) ? c.metrics.map(m => String(m)) : [],
+            title: migrateBrandText(c.title) || `组件 ${i + 1}`,
+            metrics: Array.isArray(c.metrics) ? c.metrics.map(m => migrateBrandText(m)) : [],
             pdfWidth: c.pdfWidth === '50%' ? '50%' : '100%',
             pageBreak: !!c.pageBreak,
             xAxis: c.xAxis === 'equipment' ? 'equipment' : 'time',
@@ -367,7 +378,7 @@
                 }
                 if (!layout.length) { notify('componentsLayout 不能为空数组', 'err'); return false; }
                 const comps = layout.map(normalizeComponent);
-                setGlobalConfig({ ...DEFAULT_GLOBAL, ...gc });
+                setGlobalConfig(normalizeGlobal(gc));
                 setComponents(comps);
                 setSelectedCompId(comps[0].id);
                 setJsonModal(false);
@@ -410,7 +421,7 @@
                             : (Array.isArray(d.components) ? d.components : null);
                         if (gc && layout && layout.length) {
                             const comps = layout.map(normalizeComponent);
-                            setGlobalConfig({ ...DEFAULT_GLOBAL, ...gc });
+                            setGlobalConfig(normalizeGlobal(gc));
                             setComponents(comps);
                             setSelectedCompId(comps[0].id);
                             const at = d.savedAt || storage.get(STORAGE_AT_KEY);
@@ -538,7 +549,7 @@
                             {globalConfig.watermark && (
                                 <div className="fixed inset-0 pointer-events-none flex items-center justify-center opacity-[0.04] z-0 overflow-hidden">
                                     <div className="text-7xl font-black transform -rotate-45 whitespace-nowrap text-slate-900">
-                                        CATERPILLAR CONFIDENTIAL
+                                        SANY CONFIDENTIAL
                                     </div>
                                 </div>
                             )}
@@ -548,8 +559,8 @@
                                 
                                 {/* 纸张页眉 */}
                                 {globalConfig.logoHeader && (
-                                    <div className="h-20 border-b-[3px] border-amber-400 flex items-center px-10 mb-8 pt-4">
-                                        <div className="w-10 h-10 bg-amber-400 font-black flex items-center justify-center text-slate-900 rounded-sm mr-4 text-xl tracking-tighter">CAT</div>
+                                    <div className="h-20 border-b-[3px] border-[#E60012] flex items-center px-10 mb-8 pt-4">
+                                        <div className="w-10 h-10 bg-[#E60012] font-black flex items-center justify-center text-white rounded-sm mr-4 text-[12px] tracking-tighter">SANY</div>
                                         <div className="text-2xl font-bold text-slate-800 tracking-wide">{globalConfig.templateName}</div>
                                     </div>
                                 )}

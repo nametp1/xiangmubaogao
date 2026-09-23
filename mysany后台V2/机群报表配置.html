@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>MySANY 管理后台 - 邮件模版设置（v2.0）</title>
+    <title>MySANY 管理后台 - 机群报表配置（v2.0）</title>
     <style>
         * { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -886,7 +886,6 @@
         .pdfd-comp:hover .pdfd-drag { color: #E60012; }
         .pdfd-comp-head { display: flex; align-items: center; gap: 8px; padding-bottom: 8px; border-bottom: 1px solid #f2f2f2; margin-bottom: 10px; }
         .pdfd-comp-name { font-size: 12px; font-weight: 700; color: #333; }
-        .pdfd-key { font-family: ui-monospace, Menlo, monospace; font-size: 11px; background: #f5f5f5; border: 1px solid #eee; color: #666; padding: 1px 6px; border-radius: 3px; }
         .pdfd-ph { height: 148px; border: 1px dashed #e5e5e5; border-radius: 5px; background: #fcfcfc; display: flex; align-items: center; justify-content: center; flex-direction: column; gap: 8px; color: #bbb; font-size: 12px; }
         .pdfd-axis { display: flex; gap: 8px; background: #fff; border: 1px solid #eee; border-radius: 4px; padding: 3px 8px; font-size: 11px; }
         .pdfd-axis .k { color: #999; }
@@ -896,6 +895,12 @@
         .pdfd-tbl td { border-bottom: 1px solid #f5f5f5; padding: 4px; background: #fafafa; }
         .pdfd-tbl td.i { background: #fff2f2; }
         .pdfd-text span { display: block; height: 7px; background: #eee; border-radius: 3px; margin-bottom: 6px; }
+        /* 指标卡组件预览：每张卡 = 指标名 + 数值 + 单位 */
+        .pdfd-kpi-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(96px, 1fr)); gap: 8px; width: 100%; }
+        .pdfd-kpi { border: 1px solid #eee; border-radius: 6px; background: #fff; padding: 8px 10px; text-align: left; }
+        .pdfd-kpi .n { font-size: 10px; color: #999; }
+        .pdfd-kpi .v { margin-top: 4px; font-size: 17px; font-weight: 800; color: #E60012; }
+        .pdfd-kpi .v span { font-size: 10px; font-weight: 600; color: #bbb; margin-left: 3px; }
         .pdfd-iw { text-align: center; font-size: 10px; color: #aaa; font-family: ui-monospace, Menlo, monospace; margin-top: 8px; }
         .pdfd-break { display: flex; align-items: center; gap: 10px; margin: 0 0 14px; }
         .pdfd-break .ln { flex: 1; border-top: 2px dashed #f7a6a6; }
@@ -921,10 +926,27 @@
         .prop-badge-box.blue .hd { color: #1d4ed8; }
         .prop-badge-box.amber { background: #fffaf0; border: 1px solid #f6e3bd; }
         .prop-badge-box.amber .hd { color: #b7791f; }
+        /* 柱状图排布方向：两枚互斥按钮 */
+        .prop-seg { display: flex; gap: 8px; }
+        .prop-seg button {
+            flex: 1; padding: 6px 0; font-size: 11px; font-family: inherit; cursor: pointer;
+            border: 1px solid #d9d9d9; background: #fff; color: #666; border-radius: 4px; transition: all .16s;
+        }
+        .prop-seg button:hover { border-color: #1d4ed8; color: #1d4ed8; }
+        .prop-seg button.on { background: #1d4ed8; border-color: #1d4ed8; color: #fff; font-weight: 600; }
         .chk-row { display: flex; align-items: center; gap: 7px; font-size: 12px; color: #333; margin: 6px 0; cursor: pointer; }
         .metric-row { display: flex; align-items: center; gap: 6px; background: #fafafa; border: 1px solid #eee; border-radius: 4px; padding: 4px 8px; font-size: 11px; margin-bottom: 5px; }
         .metric-row span { flex: 1; font-family: ui-monospace, Menlo, monospace; color: #555; }
         .metric-row button { border: none; background: transparent; color: #E60012; cursor: pointer; font-size: 12px; }
+        /* 指标单位不一致：右栏指标行错误态 */
+        .metric-row.err { background: #fff1f0; border-color: #ffa39e; }
+        .metric-row.err span { color: #b42318; }
+        .metric-err { margin: -3px 0 6px; font-size: 11px; color: #E60012; line-height: 1.5; }
+        /* 指标单位不一致：画布组件卡角标 */
+        .pdfd-err {
+            margin-left: auto; font-size: 10.5px; font-weight: 600; color: #E60012;
+            background: #fff1f0; border: 1px solid #ffa39e; border-radius: 3px; padding: 0 6px; line-height: 17px;
+        }
         .metric-add { font-size: 12px; color: #E60012; font-weight: 600; background: none; border: none; cursor: pointer; font-family: inherit; padding: 2px 0; }
         .prop-textarea {
             width: 100%; box-sizing: border-box; height: 88px; border: 1px solid #d9d9d9; border-radius: 4px;
@@ -969,6 +991,12 @@
             padding: 0 10px; font-size: 12px; font-family: inherit; color: #333; background: #fafafa;
         }
         .pdfpick-search input:focus { border-color: #E60012; background: #fff; outline: none; }
+        /* 指标卡超限等提示条（弹窗内显示，避免被遮罩挡住） */
+        .pdfpick-warn {
+            display: none; margin: 10px 16px 0; padding: 7px 12px; font-size: 12px;
+            background: #fff1f0; color: #E60012; border: 1px solid #ffa39e; border-radius: 4px;
+        }
+        .pdfpick-warn.show { display: block; }
         .pdfpick-body { flex: 1; overflow: auto; padding: 8px 16px 14px; }
         .pick-group { margin-bottom: 12px; }
         .pick-cat {
@@ -1007,9 +1035,11 @@
         .pick-item { display: flex; align-items: center; gap: 8px; padding: 5px 8px; border-radius: 4px; cursor: pointer; font-size: 12px; }
         .pick-item:hover { background: #faf7f7; }
         .pick-item.on { background: #fff2f2; }
-        .pick-item input[type="checkbox"] { width: 14px; height: 14px; accent-color: #E60012; cursor: pointer; }
+        .pick-item.off { opacity: .5; cursor: not-allowed; color: #aaa; }
+        .pick-item.off:hover { background: transparent; }
+        .pick-item input[type="checkbox"], .pick-item input[type="radio"] { width: 14px; height: 14px; accent-color: #E60012; cursor: pointer; }
         .pick-name { flex: 1; color: #333; }
-        .pick-tag { font-family: ui-monospace, Menlo, monospace; font-size: 11px; color: #aaa; }
+        .pick-unit { font-size: 11px; color: #8c93a3; background: #f5f7fa; border: 1px solid #eceff4; border-radius: 3px; padding: 0 6px; line-height: 17px; }
         .pick-empty { padding: 28px; text-align: center; color: #bbb; font-size: 12px; }
         .pdfpick-foot {
             padding: 10px 16px; border-top: 1px solid #f0f0f0; background: #fafafa;
@@ -1109,22 +1139,22 @@
                         <span class="sidebar-icon">
                             <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
                         </span>
-                        系统设置
+                        机群报表订阅
                     </a>
                     <ul class="sidebar-submenu">
-                        <li class="sidebar-item"><a class="sidebar-link" href="邮件服务配置.html">
+                        <li class="sidebar-item"><a class="sidebar-link" href="机群邮件设置.html">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
-                            邮件服务配置
+                            机群邮件设置
                         </a></li>
                         <li class="sidebar-item active"><a class="sidebar-link active">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-                            邮件模版设置
+                            机群报表配置
                         </a></li>
-                        <li class="sidebar-item"><a class="sidebar-link" href="设备报告触发日志.html">
+                        <li class="sidebar-item"><a class="sidebar-link" href="机群订阅记录.html">
                             <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
-                            触发日志
+                            机群订阅记录
                         </a></li>
-                        <li class="sidebar-item"><a class="sidebar-link" href="报表需求反馈.html"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6v6H9z"/><path d="M5 9h14a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2z"/><line x1="7" y1="14" x2="17" y2="14"/><line x1="7" y1="17" x2="13" y2="17"/></svg>报表需求反馈</a></li>
+                        <li class="sidebar-item"><a class="sidebar-link" href="机群需求反馈.html"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6v6H9z"/><path d="M5 9h14a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2z"/><line x1="7" y1="14" x2="17" y2="14"/><line x1="7" y1="17" x2="13" y2="17"/></svg>机群需求反馈</a></li>
                     </ul>
                 </li>
             </ul>
@@ -1134,8 +1164,8 @@
         <main class="main-content">
             <div class="page-header">
                 <div>
-                    <h2>邮件模版设置</h2>
-                    <div class="breadcrumb" style="margin-top:4px">系统设置 / <span>邮件模版设置</span></div>
+                    <h2>机群报表配置</h2>
+                    <div class="breadcrumb" style="margin-top:4px">机群报表订阅 / <span>机群报表配置</span></div>
                 </div>
                 <button class="btn btn-primary" onclick="createAndEdit()">+ 新建模版</button>
             </div>
@@ -1165,7 +1195,7 @@
                 <div class="table-card-header"><h3>模版列表</h3><span style="font-size:12px;color:#999" id="tpl-count">共 5 个模版</span></div>
                 <div style="overflow-x:auto;">
                     <table>
-                        <thead><tr><th style="width:50px;">图标</th><th>模版名称</th><th>适用范围</th><th>报告维度</th><th>PDF 版式</th><th>模版描述</th><th>语言</th><th>启用</th><th>最近更新</th><th>操作</th></tr></thead>
+                        <thead><tr><th style="width:50px;">图标</th><th>模版名称</th><th>模版描述</th><th>语言</th><th>启用</th><th>最近更新</th><th>操作</th></tr></thead>
                         <tbody id="template-table-body"></tbody>
                     </table>
                 </div>
@@ -1366,32 +1396,29 @@
                     <div class="pdfpick-box">
                         <div class="pdfpick-head">
                             <div class="pdfpick-head-l">
-                                <span class="pdfpick-title" id="pdfPickTitle">从字段库选择</span>
+                                <span class="pdfpick-title" id="pdfPickTitle">从模型字典选择</span>
                                 <span class="pdfpick-sub" id="pdfPickSub"></span>
                             </div>
                             <button type="button" class="pdfpick-x" onclick="pdfCloseFieldPicker()" title="关闭">×</button>
                         </div>
                         <div class="pdfpick-search">
-                            <input type="text" id="pdfPickSearch" placeholder="搜索字段名或模板变量，如：能耗 / {{能耗}}" oninput="pdfRenderPickBody()">
+                            <input type="text" id="pdfPickSearch" placeholder="搜索字段名或单位，如：能耗 / kWh" oninput="pdfRenderPickBody()">
                         </div>
+                        <div class="pdfpick-warn" id="pdfPickWarn"></div>
                         <div class="pdfpick-body" id="pdfPickBody"></div>
                         <div class="pdfpick-foot">
-                            <span class="cnt">已选 <b id="pdfPickCount">0</b> 项 · 字段来源：报表模版数据词典</span>
+                            <span class="cnt" id="pdfPickCntText">已选 <b id="pdfPickCount">0</b> 项 · 字段来源：报表模版数据词典</span>
                             <span>
-                                <button type="button" class="pdfpick-btn" onclick="pdfPickSelectAll(false)">取消全选</button>
-                                <button type="button" class="pdfpick-btn" onclick="pdfPickSelectAll(true)">全选当前模型</button>
-                                <span style="display:inline-block;width:1px;height:18px;background:#e8e8e8;margin:0 6px;vertical-align:middle;"></span>
+                                <span id="pdfPickAllWrap">
+                                    <button type="button" class="pdfpick-btn" onclick="pdfPickSelectAll(false)">取消全选</button>
+                                    <button type="button" class="pdfpick-btn" onclick="pdfPickSelectAll(true)">全选当前模型</button>
+                                    <span style="display:inline-block;width:1px;height:18px;background:#e8e8e8;margin:0 6px;vertical-align:middle;"></span>
+                                </span>
                                 <button type="button" class="pdfpick-btn" onclick="pdfCloseFieldPicker()">取消</button>
                                 <button type="button" class="pdfpick-btn primary" onclick="pdfConfirmFieldPicker()">确定</button>
                             </span>
                         </div>
                     </div>
-                </div>
-
-                <!-- 版式设计（同一套模块的画布预览与 PDF 物理排版） -->
-                <div style="margin-top:18px;">
-                    <div class="section-title">PDF 版式与数据模块</div>
-                    <p style="font-size:11px;color:#999;margin:0 0 8px 0;">顶部选口径与时间维度 → 中间画布点选模块 → 右侧配置该模块的字段、维度与排版；「查看 json」可查看发布内容</p>
                 </div>
 
                 <!-- ===== v2.0 模式一：版式设计器 ===== -->
@@ -1767,14 +1794,14 @@ const templates = [
         }
     },
     {
-        id: 6, machineTypes: ['单机', '机群'], dimension: '项目', pdfLayout: '标准版', emailLayout: 'digest',
+        id: 6, machineTypes: ['单机', '机群'], emailLayout: 'digest',
         enabled: true, updatedAt: '2026-09-14 09:20', icon: TPL_ICONS.monthly,
         translations: {
             'zh-CN': { name: '项目生产日报模版（按行程）', description: '按项目统计行程明细与产出，PDF 正文内嵌核心指标', body: defaultBodyReport(), attachmentFileName: '{{模版名称}}_{{项目名称}}_{{发送日期}}' }
         }
     },
     {
-        id: 7, machineTypes: ['单机', '机群'], dimension: '项目', pdfLayout: '机群对比版', emailLayout: 'notification',
+        id: 7, machineTypes: ['单机', '机群'], emailLayout: 'notification',
         enabled: false, updatedAt: '2026-09-14 09:35', icon: TPL_ICONS.daily,
         translations: {
             'zh-CN': { name: '项目能耗周报模版', description: '按项目汇总能耗与单位运输能耗，周报推送', body: defaultBodyReport(), attachmentFileName: '项目能耗_{{发送日期}}' }
@@ -1823,7 +1850,7 @@ function renderTemplateTable() {
     document.getElementById('tpl-count').textContent = '共 ' + totalCount + ' 个模版' + (shownCount < totalCount ? '（筛选后 ' + shownCount + ' 个）' : '');
 
     if (filtered.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="10" style="text-align:center;color:#bbb;padding:40px 0;">无匹配模版</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#bbb;padding:40px 0;">无匹配模版</td></tr>';
         return;
     }
 
@@ -1836,19 +1863,9 @@ function renderTemplateTable() {
         const langLabel = langCfg ? langCfg.label : (primaryLang || '-');
         const delDisabled = templates.length <= 1 ? 'style="color:#bbb;cursor:not-allowed;" title="至少保留一个模版"' : '';
         const iconHtml = t.icon ? `<img class="tpl-icon" src="${t.icon}" alt="">` : '<span style="color:#ccc;font-size:18px;">📄</span>';
-        const dimLabel = t.dimension || '设备';
-        const dimTag = dimLabel === '项目'
-            ? '<span class="tag" style="background:#fdecee;color:#E60012;border:1px solid #ffd6da;">项目</span>'
-            : '<span class="tag tag-gray">设备</span>';
-        const tplTypes = getTypes(t);
-        const pdfLayout = t.pdfLayout || ((tplTypes.length === 1 && tplTypes[0] === '机群') ? '机群对比版' : '标准版');
-        const pdfTag = `<span class="tag" style="background:#f0f7ff;color:#1d5fa8;border:1px solid #c9e0ff;">${pdfLayout}</span>`;
         return `<tr>
             <td style="text-align:center;">${iconHtml}</td>
             <td><strong>${zhTr.name || '(未命名)'}</strong></td>
-            <td>${tplTypes.map(ty => `<span class="tag tag-orange" style="margin-right:4px;">${ty}</span>`).join('')}</td>
-            <td>${dimTag}</td>
-            <td>${pdfTag}</td>
             <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${zhTr.description || ''}</td>
             <td><span class="tag tag-blue">${langLabel}</span></td>
             <td><span class="tag ${t.enabled ? 'tag-green' : 'tag-gray'}">${t.enabled ? '已启用' : '已停用'}</span></td>
@@ -2257,12 +2274,14 @@ function confirmDeleteTemplate() {
 const PDFV3_TYPES = [
     { id: 'line_chart', name: '折线图' },
     { id: 'bar_chart', name: '柱状图' },
-    { id: 'pie_chart', name: '饼状图' },
     { id: 'doughnut_chart', name: '环形图' },
-    { id: 'data_table', name: '数据明细表' },
-    { id: 'text_block', name: '富文本段落' }
+    { id: 'kpi_card', name: '指标卡' },
+    { id: 'data_table', name: '数据明细' },
+    { id: 'text_block', name: '文本段落' }
 ];
 const PDFV3_TIME_DIMS = [{ id: 'day', name: '日报' }, { id: 'week', name: '周报' }, { id: 'month', name: '月报' }];
+// 数据组件默认自带 1 个指标（未手动绑定时用它，避免组件空着出不了图）
+const PDF_DEFAULT_METRIC = '总油耗';
 
 function pdfTypeMeta(id) { return PDFV3_TYPES.find(t => t.id === id) || PDFV3_TYPES[0]; }
 function pdfTypeName(id) { return pdfTypeMeta(id).name; }
@@ -2275,14 +2294,16 @@ let pdfV3SelectedId = null;
 function pdfV3DefaultComponents() {
     return [
         {
-            id: 'comp_1', type: 'line_chart', titleKey: 'chart.fuel_trend_comparison',
-            metrics: ['总油耗', '总电耗'], pdfWidth: '100%', pageBreak: false,
-            xAxis: 'time', groupBy: 'equipment', rowDimension: 'equipment', colDimension: 'metrics'
+            id: 'comp_1', type: 'line_chart', title: '油耗与电耗趋势', titleKey: 'chart.fuel_trend_comparison',
+            metrics: ['总油耗'], pdfWidth: '100%', pageBreak: false,
+            xAxis: 'time', groupBy: 'equipment', rowDimension: 'equipment', colDimension: 'metrics',
+            barDirection: 'vertical'
         },
         {
-            id: 'comp_2', type: 'data_table', titleKey: 'table.equipment_details',
-            metrics: ['总油耗', '工作工时', '怠速工时'], pdfWidth: '100%', pageBreak: false,
-            xAxis: 'time', groupBy: 'metric', rowDimension: 'equipment', colDimension: 'metrics'
+            id: 'comp_2', type: 'data_table', title: '设备运行明细', titleKey: 'table.equipment_details',
+            metrics: ['总油耗'], pdfWidth: '100%', pageBreak: false,
+            xAxis: 'time', groupBy: 'metric', rowDimension: 'equipment', colDimension: 'metrics',
+            barDirection: 'vertical'
         }
     ];
 }
@@ -2290,7 +2311,9 @@ function pdfV3Defaults() {
     return {
         // 单机 / 机群 各自独立的模块集：切换口径 = 换另一套（数据模块 + 画布 + 右侧属性）
         modules: { single: pdfV3DefaultComponents(), fleet: pdfV3DefaultComponents() },
-        logoHeader: true, watermark: true, timeDims: ['day', 'month']
+        logoHeader: true, watermark: true,
+        // 统计时间维度默认三项全选（日报 / 周报 / 月报）
+        timeDims: ['day', 'week', 'month']
     };
 }
 
@@ -2330,13 +2353,29 @@ function pdfNormalizeState(raw) {
     }
     ['single', 'fleet'].forEach(k => {
         if (!modules[k].length) modules[k] = pdfV3DefaultComponents();
+        // 旧数据迁移：饼状图已下线按环形图渲染；柱状图补齐排布方向；组件标题缺省用类型名
+        modules[k].forEach(c => {
+            if (!c) return;
+            if (c.type === 'pie_chart') c.type = 'doughnut_chart';
+            if (c.barDirection !== 'horizontal') c.barDirection = 'vertical';
+            if (!String(c.title || '').trim()) c.title = pdfTypeName(c.type);
+            // 指标：明细表 = 多个指标列（不裁）；指标卡 ≤6 张；图表 / 环形图只 1 个
+            // 基础维度字段不进指标；为空时补默认指标
+            if (c.type !== 'text_block') {
+                const all = (Array.isArray(c.metrics) ? c.metrics : [])
+                    .filter(n => PDF_BASE_FIELD_NAMES.indexOf(n) < 0);
+                const max = c.type === 'kpi_card' ? PDF_PICK_KPI_MAX : (c.type === 'data_table' ? 0 : 1);
+                const ms = max ? all.slice(0, max) : all;
+                c.metrics = ms.length ? ms : [PDF_DEFAULT_METRIC];
+            }
+        });
     });
     const dims = st.timeDimensions || st.timeDims;
     return {
         modules: modules,
         logoHeader: st.logoHeader !== false,
         watermark: !!st.watermark,
-        timeDims: Array.isArray(dims) && dims.length ? dims.slice() : ['day', 'month']
+        timeDims: Array.isArray(dims) && dims.length ? dims.slice() : ['day', 'week', 'month']
     };
 }
 
@@ -2389,29 +2428,44 @@ function pdfV3ComponentHTML(c, scope) {
     } else if (c.type === 'data_table') {
         const r0 = c.rowDimension === 'equipment' ? '设备名称' : '时间日期';
         const cols = c.colDimension === 'metrics'
-            ? [c.metrics[0] || '指标1', c.metrics[1] || '指标2', c.metrics[2] || '指标3']
+            ? (c.metrics.length ? c.metrics.slice(0, 6) : ['指标1', '指标2', '指标3'])
             : (c.colDimension === 'equipment' ? ['设备 A', '设备 B', '设备 C'] : ['日期 1', '日期 2', '日期 3']);
         inner = '<div class="pdfd-ph" style="height:auto;padding:8px;align-items:stretch">'
             + '<table class="pdfd-tbl"><thead><tr><th>' + escapeAttr(r0) + '</th>'
             + cols.map(t => '<th>' + escapeAttr(t) + '</th>').join('') + '</tr></thead><tbody>'
-            + [1, 2, 3].map(() => '<tr><td class="i"></td><td></td><td></td><td></td></tr>').join('')
+            + [1, 2, 3].map(() => '<tr><td class="i"></td>'
+                + cols.map(() => '<td></td>').join('') + '</tr>').join('')
             + '</tbody></table></div>';
-    } else if (c.type === 'pie_chart' || c.type === 'doughnut_chart') {
-        const inner2 = c.type === 'doughnut_chart' ? '<circle cx="21" cy="21" r="8.6" fill="#fcfcfc"></circle>' : '';
+    } else if (c.type === 'doughnut_chart') {
         inner = '<div class="pdfd-ph"><svg width="112" height="112" viewBox="0 0 42 42">'
             + '<circle cx="21" cy="21" r="15.9" fill="none" stroke="#f0f0f0" stroke-width="6"></circle>'
             + '<circle cx="21" cy="21" r="15.9" fill="none" stroke="#E60012" stroke-width="6" stroke-dasharray="35 100" transform="rotate(-90 21 21)"></circle>'
             + '<circle cx="21" cy="21" r="15.9" fill="none" stroke="#f0a6ad" stroke-width="6" stroke-dasharray="35 100" stroke-dashoffset="-35" transform="rotate(-90 21 21)"></circle>'
             + '<circle cx="21" cy="21" r="15.9" fill="none" stroke="#d9d9d9" stroke-width="6" stroke-dasharray="30 100" stroke-dashoffset="-70" transform="rotate(-90 21 21)"></circle>'
-            + inner2 + '</svg><div class="pdfd-iw">指标占比示意（' + (c.metrics.length || 3) + ' 项）</div></div>';
+            + '<circle cx="21" cy="21" r="8.6" fill="#fcfcfc"></circle>'
+            + '</svg><div class="pdfd-iw">指标：' + escapeAttr(c.metrics[0] || '未绑定') + ' 的占比示意</div></div>';
+    } else if (c.type === 'kpi_card') {
+        const empty = !c.metrics.length;
+        const names = (empty ? ['未绑定指标'] : c.metrics).slice(0, PDF_PICK_KPI_MAX);
+        inner = '<div class="pdfd-ph" style="height:auto;padding:12px;align-items:stretch">'
+            + '<div class="pdfd-kpi-grid">'
+            + names.map(m => '<div class="pdfd-kpi"><div class="n">' + escapeAttr(m) + '</div>'
+                + '<div class="v">1,234.5<span>h</span></div></div>').join('')
+            + '</div><div class="pdfd-iw">' + names.length + ' / ' + PDF_PICK_KPI_MAX + ' 张 · 一个字段一张卡</div></div>';
     } else {
+        const dir = c.barDirection === 'horizontal' ? '水平（设备排行）' : '垂直（时间序列）';
+        const dirSeg = c.type === 'bar_chart'
+            ? '<span style="color:#ddd">|</span><span><span class="k">排布:</span> <span class="v">' + dir + '</span></span>'
+            : '';
         const axis = scope === 'fleet'
             ? '<div class="pdfd-axis"><span><span class="k">X轴:</span> <span class="v">' + (c.xAxis === 'equipment' ? '设备' : '时间')
               + '</span></span><span style="color:#ddd">|</span><span><span class="k">分组:</span> <span class="v">'
-              + (c.groupBy === 'equipment' ? '按设备对比' : '按指标分布') + '</span></span></div>'
-            : '<div class="pdfd-axis"><span class="k">单机：按时间序列渲染</span></div>';
-        inner = '<div class="pdfd-ph"><span style="font-size:26px;letter-spacing:2px">' + (c.type === 'bar_chart' ? '▮▮▮' : '⟋⟋⟋') + '</span>'
-            + axis + '<div class="pdfd-iw">绑定指标 ' + c.metrics.length + ' 项：' + escapeAttr(c.metrics.join('、') || '未绑定') + '</div></div>';
+              + (c.groupBy === 'equipment' ? '按设备对比' : '按指标分布') + '</span></span>' + dirSeg + '</div>'
+            : '<div class="pdfd-axis"><span class="k">单机：按时间序列渲染</span>' + dirSeg + '</div>';
+        const glyph = c.type === 'bar_chart' ? (c.barDirection === 'horizontal' ? '≡≡≡' : '▮▮▮') : '⟋⟋⟋';
+        inner = '<div class="pdfd-ph"><span style="font-size:26px;letter-spacing:2px">' + glyph + '</span>'
+            + axis + '<div class="pdfd-iw">指标：' + escapeAttr(c.metrics[0] || '未绑定')
+            + (c.metrics.length > 1 ? '（共 ' + c.metrics.length + ' 项）' : '') + '</div></div>';
     }
     const brk = c.pageBreak
         ? '<div class="pdfd-break"><span class="ln"></span><span class="lb">✂ PDF 换页线</span><span class="ln"></span></div>'
@@ -2420,8 +2474,25 @@ function pdfV3ComponentHTML(c, scope) {
         + ' ondragstart="pdfCompDragStart(event,\'' + c.id + '\')" ondragover="pdfCompDragOver(event,\'' + c.id + '\')"'
         + ' ondragleave="pdfCompDragLeave(event)" ondrop="pdfCompDrop(event,\'' + c.id + '\')" ondragend="pdfCompDragEnd(event)">'
         + '<div class="pdfd-comp-head"><span class="pdfd-drag" title="按住拖动排序">⠿</span>'
-        + '<span class="pdfd-comp-name">' + pdfTypeName(c.type) + '</span>'
-        + '<span class="pdfd-key">' + escapeAttr(c.titleKey) + '</span></div>' + inner + '</div>' + brk;
+        + '<span class="pdfd-comp-name">' + escapeAttr(c.title || pdfTypeName(c.type)) + '</span>'
+        + ((c.metrics || []).map(m => pdfFieldUnitConflict(m)).some(Boolean)
+            ? '<span class="pdfd-err" title="所选指标在不同设备类型下单位不一致，需要更换指标">⚠ 单位不一致</span>'
+            : '')
+        + '</div>' + inner + '</div>' + brk;
+}
+
+// 右栏指标行：绑定的指标若单位不一致（同一指标跨设备类型量纲不同）→ 整行错误态 + 提示
+function pdfMetricRowsHTML(c, isKpi) {
+    return (c.metrics || []).map((m, i) => {
+        const conflict = pdfFieldUnitConflict(m);
+        const row = '<div class="metric-row' + (conflict ? ' err' : '') + '"><span>'
+            + (isKpi ? '第 ' + (i + 1) + ' 张 · ' : '') + escapeAttr(m) + '</span>'
+            + '<button type="button" title="移除" onclick="pdfRemoveMetric(' + i + ')">✖</button></div>';
+        return conflict
+            ? row + '<div class="metric-err">⚠ 单位不一致：不同设备类型下为 '
+              + escapeAttr(conflict.join(' / ')) + '，需更换指标</div>'
+            : row;
+    }).join('');
 }
 
 // 右侧组件参数面板
@@ -2434,39 +2505,37 @@ function pdfV3RenderProps() {
     const typeOpts = PDFV3_TYPES.map(t => '<option value="' + t.id + '"' + (t.id === c.type ? ' selected' : '') + '>' + t.name + '</option>').join('');
     let html = ''
         + '<div class="prop-head">基础形态</div>'
-        + '<div class="prop-group"><label>可视化类型</label><select onchange="pdfUpdateSelected(\'type\', this.value)">' + typeOpts + '</select></div>'
-        + '<div class="prop-group"><label>国际化标题 Key（i18n）</label><input type="text" value="' + escapeAttr(c.titleKey) + '" oninput="pdfUpdateSelected(\'titleKey\', this.value)"></div>';
+        + '<div class="prop-group"><label>组件标题</label><input type="text" value="' + escapeAttr(c.title || '') + '" placeholder="' + escapeAttr(pdfTypeName(c.type)) + '" oninput="pdfUpdateSelected(\'title\', this.value)"></div>'
+        + '<div class="prop-group"><label>可视化类型</label><select onchange="pdfUpdateSelected(\'type\', this.value)">' + typeOpts + '</select></div>';
+
+    /* 柱状图专有：横竖排布方向（自动适配长文本标签） */
+    if (c.type === 'bar_chart') {
+        const hor = c.barDirection === 'horizontal';
+        html += '<div class="prop-badge-box blue" style="margin-top:-6px">'
+            + '<div class="hd">柱状图排布方向（自动适配长文本标签）</div>'
+            + '<div class="prop-seg">'
+            + '<button type="button" class="' + (hor ? '' : 'on') + '" onclick="pdfUpdateSelected(\'barDirection\',\'vertical\')">▥ 垂直（时间序列）</button>'
+            + '<button type="button" class="' + (hor ? 'on' : '') + '" onclick="pdfUpdateSelected(\'barDirection\',\'horizontal\')">≡ 水平（设备排行）</button>'
+            + '</div></div>';
+    }
 
     if (c.type !== 'text_block') {
         html += '<div class="prop-head">数据透视与维度</div>';
-        if (scope === 'fleet' && c.type !== 'data_table') {
-            html += '<div class="prop-badge-box blue"><div class="hd">机群透视规则</div>'
-                + '<div class="prop-group"><label>X 轴（主分类）</label><select onchange="pdfUpdateSelected(\'xAxis\', this.value)">'
-                + '<option value="time"' + (c.xAxis === 'time' ? ' selected' : '') + '>按时间序列</option>'
-                + '<option value="equipment"' + (c.xAxis === 'equipment' ? ' selected' : '') + '>按不同设备</option></select></div>'
-                + '<div class="prop-group" style="margin-bottom:0"><label>图例分组（对比项）</label><select onchange="pdfUpdateSelected(\'groupBy\', this.value)">'
-                + '<option value="metric"' + (c.groupBy === 'metric' ? ' selected' : '') + '>对比不同指标</option>'
-                + '<option value="equipment"' + (c.groupBy === 'equipment' ? ' selected' : '') + '>对比不同设备</option></select></div></div>';
-        }
-        if (scope === 'fleet' && c.type === 'data_table') {
-            html += '<div class="prop-badge-box amber"><div class="hd">二维表格透视</div>'
-                + '<div class="prop-group"><label>表头（列）展示什么？</label><select onchange="pdfUpdateSelected(\'colDimension\', this.value)">'
-                + '<option value="metrics"' + (c.colDimension === 'metrics' ? ' selected' : '') + '>各项业务指标</option>'
-                + '<option value="equipment"' + (c.colDimension === 'equipment' ? ' selected' : '') + '>各台设备数据</option>'
-                + '<option value="time"' + (c.colDimension === 'time' ? ' selected' : '') + '>时间序列（日期）</option></select></div>'
-                + '<div class="prop-group" style="margin-bottom:0"><label>行（逐行）展示什么？</label><select onchange="pdfUpdateSelected(\'rowDimension\', this.value)">'
-                + '<option value="equipment"' + (c.rowDimension === 'equipment' ? ' selected' : '') + '>按设备罗列</option>'
-                + '<option value="time"' + (c.rowDimension === 'time' ? ' selected' : '') + '>按时间罗列</option></select></div></div>';
-        }
-        html += '<div class="prop-group"><label>绑定字段（业务指标）</label>'
+        const isKpi = c.type === 'kpi_card';
+        const kpiFull = isKpi && c.metrics.length >= PDF_PICK_KPI_MAX;
+        html += '<div class="prop-group">'
             + (c.metrics.length
-                ? c.metrics.map((m, i) => '<div class="metric-row"><span>' + escapeAttr(m) + '</span>'
-                    + '<button type="button" title="移除" onclick="pdfRemoveMetric(' + i + ')">✖</button></div>').join('')
+                ? pdfMetricRowsHTML(c, isKpi)
                 : '<div style="font-size:11px;color:#b7791f;background:#fffbe6;border:1px solid #ffe58f;border-radius:4px;padding:4px 8px;margin-bottom:6px;">⚠ 尚未绑定字段，画布无法出图</div>')
             + '<div style="display:flex;gap:12px;align-items:center;margin-top:2px;">'
-            + '<button type="button" class="metric-add" onclick="pdfAddMetric()">＋ 手动输入</button>'
-            + '<button type="button" class="metric-add" onclick="pdfOpenFieldPicker(\'' + c.id + '\')">＋ 从字段库选择</button></div>'
-            + '<div style="font-size:10px;color:#999;margin-top:6px;line-height:1.5;">字段库 = 基础字段 + 各设备类型物模型字段，支持搜索多选</div></div>';
+            + '<button type="button" class="metric-add"' + (kpiFull ? ' disabled style="opacity:.45;cursor:not-allowed"' : '')
+            + ' onclick="' + (kpiFull ? '' : 'pdfOpenFieldPicker(\'' + c.id + '\')') + '">'
+            + (isKpi ? '＋ 添加指标卡' : '＋ 从模型字典选择') + '</button>'
+            + (isKpi ? '<span style="font-size:11px;color:#999">' + c.metrics.length + ' / ' + PDF_PICK_KPI_MAX + ' 张</span>'
+                : (c.type === 'data_table' ? '<span style="font-size:11px;color:#999">' + c.metrics.length + ' 列</span>' : ''))
+            + '</div>'
+            + (kpiFull ? '<div style="font-size:11px;color:#b7791f;margin-top:6px;">已达上限 ' + PDF_PICK_KPI_MAX + ' 张，先移除一张再加。</div>' : '')
+            + '</div>';
     } else {
         html += '<div class="prop-group"><label>段落内容</label>'
             + '<textarea class="prop-textarea" onchange="pdfUpdateSelected(\'textContent\', this.value)" placeholder="输入报表的文字说明、导言或总结分析...">' + escapeHtml(c.textContent || '') + '</textarea></div>';
@@ -2536,9 +2605,9 @@ function pdfCompDragEnd(e) {
 function pdfAddComponent() {
     const id = 'comp_' + Date.now();
     pdfModules().push({
-        id: id, type: 'bar_chart', titleKey: 'new.component.title', metrics: ['新指标'],
+        id: id, type: 'bar_chart', title: '新组件', titleKey: 'new.component.title', metrics: [PDF_DEFAULT_METRIC],
         pdfWidth: '100%', pageBreak: false, xAxis: 'time', groupBy: 'metric',
-        rowDimension: 'time', colDimension: 'metrics'
+        rowDimension: 'time', colDimension: 'metrics', barDirection: 'vertical'
     });
     pdfV3SelectedId = id;
     pdfV3RenderAll();
@@ -2560,14 +2629,13 @@ function pdfUpdateSelected(key, value) {
     if (!c) return;
     if (key === 'titleKey') value = String(value || '');
     c[key] = value;
-    if (key === 'type' && (value === 'text_block' || value === 'data_table')) c.pageBreak = c.pageBreak;
-    pdfV3RenderAll();
-}
-
-function pdfAddMetric() {
-    const c = pdfV3Selected();
-    if (!c) return;
-    c.metrics.push('newMetricKey');
+    // 切成指标卡：默认只保留一张卡（原多指标图表的字段不整批搬过来），上限 6 张
+    if (key === 'type' && value === 'kpi_card' && Array.isArray(c.metrics) && c.metrics.length > 1) {
+        if (c.metrics.length > 1) {
+            showToast('指标卡一个字段一张卡，默认保留第 1 张，其余请按需添加', 'error');
+        }
+        c.metrics = c.metrics.slice(0, 1);
+    }
     pdfV3RenderAll();
 }
 
@@ -2596,7 +2664,7 @@ function validatePdfLayout() {
     const issues = [];
     if (!list.length) issues.push('当前口径（' + (pdfV3Scope() === 'fleet' ? '机群' : '单机') + '）画布至少需要 1 个组件');
     list.forEach((c, i) => {
-        if (!String(c.titleKey || '').trim()) issues.push('第 ' + (i + 1) + ' 个组件缺少国际化标题 Key');
+        if (!String(c.title || '').trim()) issues.push('第 ' + (i + 1) + ' 个组件缺少组件标题');
         if (c.type !== 'text_block' && !(c.metrics || []).length) issues.push('第 ' + (i + 1) + ' 个组件（' + pdfTypeName(c.type) + '）未绑定指标');
     });
     if (!(pdfV3.timeDims || []).length) issues.push('未选择统计时间维度');
@@ -2610,8 +2678,9 @@ function validatePdfLayout() {
 
 function pdfV3Payload() {
     const dump = (list) => (list || []).map(c => ({
-        id: c.id, type: c.type, titleKey: c.titleKey, metrics: (c.metrics || []).slice(),
+        id: c.id, type: c.type, title: c.title, titleKey: c.titleKey, metrics: (c.metrics || []).slice(),
         xAxis: c.xAxis, groupBy: c.groupBy, rowDimension: c.rowDimension, colDimension: c.colDimension,
+        barDirection: c.barDirection === 'horizontal' ? 'horizontal' : 'vertical',
         pdfWidth: c.pdfWidth, pageBreak: !!c.pageBreak
     }));
     return {
@@ -2663,7 +2732,9 @@ function closePdfJson() {
 }
 
 /* ==================== 数据列配置（模块化：按模块绑定字段，与画布共用 pdfV3） ==================== */
-let pdfPickState = { compId: null, selected: {} };
+let pdfPickState = { compId: null, selected: {}, kpi: false, groupFields: {} };
+// 指标卡：一个字段一张卡，单行最多 6 张
+const PDF_PICK_KPI_MAX = 6;
 
 // 字段库：按「报表模版 · 数据列配置方案」（相关资料信息/报表模版.md）的数据词典组织
 // —— 基础字段 + 4 张报表的机群版共性字段 + 各设备类型的单机版字段（三级联动同源）
@@ -2694,6 +2765,48 @@ const PDF_FIELD_DICT = {
 
 const PDF_FIELD_KIND_LABEL = { base: '通用', fleet: '机群版', single: '单机版' };
 
+// ===== 字段单位（口径取自《相关资料信息/统计报表字段.md》：油车按 L / L·h⁻¹ 写，电车由 pdfFieldUnit 换成 kWh）=====
+const PDF_FIELD_UNITS = {
+    '统计周期': '日期', '设备机型': '文本', '设备编号': '文本',
+    '工时': 'h', '怠速工时': 'h', '运行时长': 'h', '行驶时长': 'h', '怠速时长': 'h',
+    '日均行驶时长': 'h', '日均怠速时长': 'h', '日均运行时长': 'h',
+    '底盘发动机工作时间': 'h', '上车工作时间': 'h', '发动机工作时间': 'h',
+    '周期工时': 'h', '周期挡位时间分布': 'h',
+    '开工率': '%', '怠速占比': '%',
+    '开工天数': '天',
+    '里程': 'km', '日均里程': 'km', '行驶里程': 'km', '平均车速': 'km/h',
+    '吊载次数': '次', '平均每小时吊载次数': '次/h', '吊箱数量': '个',
+    '能耗': 'L', '怠速能耗': 'L', '日均能耗': 'L', '回收能耗': 'kWh', '日均回收能耗': 'kWh',
+    '平均能耗': 'L/h', '单箱能耗': 'L/pc', '平均每小时能耗': 'L/h',
+    '百公里平均能耗': 'L/100km', '日均百公里平均能耗': 'L/100km',
+    '底盘发动机油耗': 'L', '上车油耗': 'L', '发动机油耗': 'L', '周期油耗': 'L',
+    '平均每小时油耗': 'L/h', '周期油耗/小时': 'L/h'
+};
+// 同名指标在不同设备类型下量纲不同（按《统计报表字段》逐类型口径修正）
+const PDF_FIELD_UNIT_BY_TYPE = {
+    '电动集卡|平均能耗': 'kWh/100km',
+    '电动搅拌车|平均能耗': 'kWh/100km',
+    '燃油搅拌车|平均能耗': 'L/100km'
+};
+// 取单位：cat = 设备类型（机群 / 报表分组不给设备类型，走通用口径）
+function pdfFieldUnit(name, cat) {
+    const byType = PDF_FIELD_UNIT_BY_TYPE[(cat || '') + '|' + name];
+    if (byType) return byType;
+    let u = PDF_FIELD_UNITS[name] || '';
+    if (u && /^电动/.test(cat || '')) u = u.replace(/L/g, 'kWh');   // 油车量纲 → 电车量纲
+    return u;
+}
+// 同一指标跨设备类型是否量纲不一致（如 能耗：油车 L / 电车 kWh）→ 返回所有出现过的单位
+function pdfFieldUnitConflict(name) {
+    const units = [];
+    (typeof SINGLE_MACHINE_VARS !== 'undefined' ? SINGLE_MACHINE_VARS : []).forEach(g => {
+        if (!(g.vars || []).some(v => v[0] === name)) return;
+        const u = pdfFieldUnit(name, g.cat);
+        if (u && units.indexOf(u) < 0) units.push(u);
+    });
+    return units.length > 1 ? units : null;
+}
+
 function pdfFieldLibrary() {
     const groups = [];
     const toFields = (arr) => (arr || []).map(v => ({ name: v[0], tag: v[1] }));
@@ -2720,17 +2833,29 @@ function pdfOpenFieldPicker(compId) {
     const c = list.find(x => x.id === compId);
     if (!c) return;
     pdfPickState.compId = compId;
+    // 指标卡：一个字段 = 一张卡，最多 6 张（单选累加式，不走全选/不限量）
+    pdfPickState.kpi = c.type === 'kpi_card';
+    // 数据明细：指标 = 表格的列，可多选；图表 / 环形图只 1 个指标，指标卡 ≤6 张
+    pdfPickState.multi = c.type === 'data_table';
     pdfPickState.selected = {};
-    (c.metrics || []).forEach(m => { pdfPickState.selected[m] = true; });
-    // 标题用友好名称（可视化类型 + 第 N 个模块），i18n key 放副标题里做成小字代码样式
+    pdfPickState.groupFields = {};
+    pdfPickState.bound = (c.metrics || []).slice();
+    // 基础维度字段已置灰不可选，回显时也不再勾上；指标卡是「再加一张」，不回显已加的
+    if (pdfPickState.multi || !pdfPickState.kpi) {
+        pdfPickState.bound.forEach(m => {
+            if (PDF_BASE_FIELD_NAMES.indexOf(m) < 0) pdfPickState.selected[m] = true;
+        });
+    }
+    // 副标题显示组件标题 + 模块序号，不再暴露技术 key
     const t = document.getElementById('pdfPickTitle');
-    if (t) t.textContent = '从字段库选择';
+    if (t) {
+        t.textContent = pdfPickState.kpi ? '添加指标卡' : (pdfPickState.multi ? '选择明细列（可多选）' : '从模型字典选择');
+    }
     const sub = document.getElementById('pdfPickSub');
     if (sub) {
         const idx = list.findIndex(x => x.id === compId) + 1;
-        sub.innerHTML = '<b>' + escapeHtml(pdfTypeName(c.type)) + '</b><span>· 第 ' + idx + ' 个模块 · '
-            + (pdfV3Scope() === 'fleet' ? '机群口径' : '单机口径') + '</span>'
-            + (c.titleKey ? '<code>' + escapeHtml(c.titleKey) + '</code>' : '');
+        sub.innerHTML = '<b>' + escapeHtml(c.title || pdfTypeName(c.type)) + '</b><span>· 第 ' + idx + ' 个模块 · '
+            + (pdfV3Scope() === 'fleet' ? '机群口径' : '单机口径') + '</span>';
     }
     const s = document.getElementById('pdfPickSearch');
     if (s) s.value = '';
@@ -2741,7 +2866,8 @@ function pdfOpenFieldPicker(compId) {
 
 // 三栏级联数据：设备类型列 = 「机群（共性字段）」+ 14 个设备类型
 function pdfPickTypes() {
-    const types = [{ key: 'fleet', label: '机群（共性字段）', note: '取各设备类型的共性字段（数据词典「机群版」）' }];
+    // 「机群（共性字段）」入口已按用户要求删除：设备类型列只列 14 种设备类型
+    const types = [];
     (typeof SINGLE_MACHINE_VARS !== 'undefined' ? SINGLE_MACHINE_VARS : []).forEach((g, i) => {
         types.push({ key: 'g' + i, label: g.cat, note: PDF_FIELD_DICT.typeNotes[g.cat] || '', group: g });
     });
@@ -2756,14 +2882,44 @@ function pdfPickModelsOf(ti) {
     }
     return ((ti.group && ti.group.models) || []).map(m => ({ key: m.key, label: m.name, fields: base.concat((ti.group.vars || [])) }));
 }
-// 字段行（勾选）
-function pdfPickFieldRows(fields) {
+// 当前弹窗正在展示的字段列表（用于「每个物模型下单选 1 个字段」的判定）
+function pdfPickCurrentFields() {
+    const types = pdfPickTypes();
+    if (!types.length) return [];
+    if (typeof pdfPickState.typeIdx !== 'number' || !types[pdfPickState.typeIdx]) pdfPickState.typeIdx = 0;
+    const ti = types[pdfPickState.typeIdx];
+    const models = pdfPickModelsOf(ti);
+    const mi = models.find(m => m.key === pdfPickState.modelKey) || models[0];
+    return (mi && mi.fields) ? mi.fields : [];
+}
+// 基础维度字段（统计周期 / 设备机型 / 设备编号）不占「单选 1 个指标」的名额
+const PDF_BASE_FIELD_NAMES = (PDF_FIELD_DICT.base || []).map(f => f[0]);
+
+// 字段行：右侧显示单位（不再显示 {{模板变量}}）
+// 指标用单选框（同组互斥）；基础维度字段（统计周期/设备机型/设备编号）与指标卡用复选框
+function pdfPickFieldRows(fields, cat, gid) {
+    pdfPickState.groupFields = pdfPickState.groupFields || {};
+    if (gid) pdfPickState.groupFields[gid] = (fields || []).map(f => f[0]);
     return (fields || []).map(f => {
-        const on = !!pdfPickState.selected[f[0]];
-        return '<label class="pick-item' + (on ? ' on' : '') + '">'
-            + '<input type="checkbox"' + (on ? ' checked' : '') + ' onclick="pdfPickToggle(\'' + escapeAttr(f[0]) + '\', this.checked)">'
-            + '<span class="pick-name">' + escapeHtml(f[0]) + '</span>'
-            + '<span class="pick-tag">' + escapeHtml(f[1]) + '</span></label>';
+        const name = f[0];
+        const on = !!pdfPickState.selected[name];
+        const unit = pdfFieldUnit(name, cat);
+        // 置灰不可选：基础维度字段（统计周期/设备机型/设备编号），以及指标卡里已经加过的指标
+        const off = PDF_BASE_FIELD_NAMES.indexOf(name) >= 0
+            || (pdfPickState.kpi && (pdfPickState.bound || []).indexOf(name) >= 0);
+        // 明细表：复选框，可多选（一个指标 = 一列）；图表 / 环形图：单选框，再点一次取消；指标卡：复选框累加
+        const input = off
+            ? '<input type="radio" disabled>'
+            : (pdfPickState.multi
+                ? '<input type="checkbox"' + (on ? ' checked' : '')
+                  + ' onclick="pdfPickToggle(\'' + escapeAttr(name) + '\', this.checked, \'' + escapeAttr(gid || '') + '\')">'
+                : '<input type="radio" name="pdfpick_one"' + (on ? ' checked' : '')
+                  + ' title="再次点击可取消"'
+                  + ' onclick="pdfPickToggle(\'' + escapeAttr(name) + '\', ' + (on ? 'false' : 'true')
+                  + ', \'' + escapeAttr(gid || '') + '\')">');
+        return '<label class="pick-item' + (on && !off ? ' on' : '') + (off ? ' off' : '') + '">' + input
+            + '<span class="pick-name">' + escapeHtml(name) + '</span>'
+            + '<span class="pick-unit">' + escapeHtml(unit || '—') + '</span></label>';
     }).join('');
 }
 // 三栏级联主体
@@ -2784,9 +2940,13 @@ function pdfRenderPickCascade() {
         + models.map(m => '<div class="pick-row' + (m.key === pdfPickState.modelKey ? ' on' : '')
             + '" onclick="pdfPickSetModel(\'' + escapeAttr(m.key) + '\')" title="' + escapeAttr(m.label) + '">' + escapeHtml(m.label) + '</div>').join('')
         + '</div>'
-        + '<div class="pick-col pick-col-fields"><div class="pick-col-hd">字段（可多选）'
+        + '<div class="pick-col pick-col-fields"><div class="pick-col-hd">'
+        + (pdfPickState.kpi ? '字段（每次选 1 个 · 加 1 张卡）'
+            : (pdfPickState.multi ? '字段（可多选 · 一个指标一列）' : '字段（单选 1 个）'))
         + '<span class="pick-col-hd-r">' + ((mi && mi.fields) ? mi.fields.length : 0) + ' 个</span></div>'
-        + ((mi && mi.fields && mi.fields.length) ? pdfPickFieldRows(mi.fields) : '<div class="pick-empty">该模型暂无字段</div>')
+        + ((mi && mi.fields && mi.fields.length)
+            ? pdfPickFieldRows(mi.fields, ti.label, 'c_' + ti.key + '_' + ((mi && mi.key) || ''))
+            : '<div class="pick-empty">该模型暂无字段</div>')
         + '</div></div>'
         + (ti.note ? '<div class="pick-note" style="margin-top:8px;">' + escapeHtml(ti.note) + '</div>' : '');
 }
@@ -2795,18 +2955,33 @@ function pdfRenderPickFlat(kw) {
     const box = document.getElementById('pdfPickBody');
     let html = '';
     pdfFieldLibrary().forEach(g => {
-        const items = g.fields.filter(f => !kw || f.name.indexOf(kw) >= 0 || String(f.tag).indexOf(kw) >= 0);
+        const items = g.fields.filter(f => !kw
+            || f.name.indexOf(kw) >= 0
+            || String(pdfFieldUnit(f.name, g.cat)).indexOf(kw) >= 0);
         if (!items.length) return;
         html += '<div class="pick-group"><div class="pick-cat">' + escapeHtml(g.cat)
             + (g.kind ? '<span class="pick-kind pick-kind-' + g.kind + '">' + (PDF_FIELD_KIND_LABEL[g.kind] || '') + '</span>' : '')
             + '<em>· ' + items.length + ' 个字段</em></div>'
             + (g.note ? '<div class="pick-note">' + escapeHtml(g.note) + '</div>' : '');
+        pdfPickState.groupFields = pdfPickState.groupFields || {};
+        pdfPickState.groupFields['f_' + g.cat] = g.fields.map(f => f.name);
         items.forEach(f => {
             const on = !!pdfPickState.selected[f.name];
-            html += '<label class="pick-item' + (on ? ' on' : '') + '">'
-                + '<input type="checkbox"' + (on ? ' checked' : '') + ' onclick="pdfPickToggle(\'' + escapeAttr(f.name) + '\', this.checked)">'
+            const unit = pdfFieldUnit(f.name, g.cat);
+            const off = PDF_BASE_FIELD_NAMES.indexOf(f.name) >= 0
+                || (pdfPickState.kpi && (pdfPickState.bound || []).indexOf(f.name) >= 0);
+            const input = off
+                ? '<input type="radio" disabled>'
+                : (pdfPickState.multi
+                    ? '<input type="checkbox"' + (on ? ' checked' : '')
+                      + ' onclick="pdfPickToggle(\'' + escapeAttr(f.name) + '\', this.checked, \'f_' + escapeAttr(g.cat) + '\')">'
+                    : '<input type="radio" name="pdfpick_one"' + (on ? ' checked' : '')
+                      + ' title="再次点击可取消"'
+                      + ' onclick="pdfPickToggle(\'' + escapeAttr(f.name) + '\', ' + (on ? 'false' : 'true')
+                      + ', \'f_' + escapeAttr(g.cat) + '\')">');
+            html += '<label class="pick-item' + (on && !off ? ' on' : '') + (off ? ' off' : '') + '">' + input
                 + '<span class="pick-name">' + escapeHtml(f.name) + '</span>'
-                + '<span class="pick-tag">' + escapeHtml(f.tag) + '</span></label>';
+                + '<span class="pick-unit">' + escapeHtml(unit || '—') + '</span></label>';
         });
         html += '</div>';
     });
@@ -2819,8 +2994,30 @@ function pdfRenderPickBody() {
     const el = document.getElementById('pdfPickSearch');
     const kw = (el && el.value ? el.value : '').trim();
     if (kw) pdfRenderPickFlat(kw); else pdfRenderPickCascade();
+    const n = Object.keys(pdfPickState.selected).filter(k => pdfPickState.selected[k]).length;
     const cnt = document.getElementById('pdfPickCount');
-    if (cnt) cnt.textContent = Object.keys(pdfPickState.selected).filter(k => pdfPickState.selected[k]).length;
+    if (cnt) cnt.textContent = n;
+    const cntText = document.getElementById('pdfPickCntText');
+    if (cntText) {
+        cntText.innerHTML = pdfPickState.kpi
+            ? '已选 <b id="pdfPickCount">' + n + '</b> 项 · 指标卡已加 ' + (pdfPickState.bound || []).length
+              + ' / ' + PDF_PICK_KPI_MAX + ' 张'
+            : (pdfPickState.multi
+                ? '已选 <b id="pdfPickCount">' + n + '</b> 列 · 一列一个指标（明细表可多选）'
+                : '已选 <b id="pdfPickCount">' + n + '</b> 项 · 字段来源：报表模版数据词典');
+    }
+    // 全选只在明细表（多选列）下可用；指标卡有 6 张上限、图表只 1 个指标，都用不上
+    const allWrap = document.getElementById('pdfPickAllWrap');
+    if (allWrap) allWrap.style.display = pdfPickState.multi ? '' : 'none';
+    pdfPickWarn('');
+}
+
+// 弹窗内的提示条
+function pdfPickWarn(msg) {
+    const w = document.getElementById('pdfPickWarn');
+    if (!w) return;
+    if (msg) { w.textContent = msg; w.classList.add('show'); }
+    else { w.textContent = ''; w.classList.remove('show'); }
 }
 
 // 级联交互
@@ -2828,6 +3025,16 @@ function pdfPickSetType(i) { pdfPickState.typeIdx = i; pdfPickState.modelKey = n
 function pdfPickSetModel(key) { pdfPickState.modelKey = key; pdfRenderPickBody(); }
 // 全选 / 取消全选当前模型（或当前报表）的字段
 function pdfPickSelectAll(on) {
+    // 指标卡：一个字段一张卡，全选无意义，且必须控制在上限内
+    if (pdfPickState.kpi && on) {
+        pdfPickWarn('指标卡每次只能选 1 个字段，请逐个点选（最多 ' + PDF_PICK_KPI_MAX + ' 张）。');
+        return;
+    }
+    // 图表 / 环形图：只允许 1 个指标，全选会直接违反规则；明细表可全选
+    if (on && !pdfPickState.multi) {
+        pdfPickWarn('图表 / 环形图只能选 1 个指标，请逐个点选。');
+        return;
+    }
     const types = pdfPickTypes();
     const ti = types[pdfPickState.typeIdx];
     const models = pdfPickModelsOf(ti);
@@ -2837,7 +3044,29 @@ function pdfPickSelectAll(on) {
     pdfRenderPickBody();
 }
 
-function pdfPickToggle(name, on) {
+function pdfPickToggle(name, on, gid) {
+    // 明细表：多选列，直接累加，不做互斥与单位校验（每列可各自带单位）
+    if (pdfPickState.multi) {
+        if (on) pdfPickState.selected[name] = true; else delete pdfPickState.selected[name];
+        pdfRenderPickBody();
+        return;
+    }
+    if (on) {
+        // 单位校验：同一指标跨设备类型量纲不同（如 能耗 油车 L / 电车 kWh）→ 提示报错
+        const conflict = pdfFieldUnitConflict(name);
+        if (conflict) {
+            showToast('所选指标单位不一致：' + name + ' 在不同设备类型下为 ' + conflict.join(' / '), 'error');
+        }
+        // 指标值只保留 1 个：选中新指标时取消其它已选指标（含换设备类型后选的）
+        // 基础维度字段（统计周期 / 设备机型 / 设备编号）已置灰不可点，正常不会进来
+        if (PDF_BASE_FIELD_NAMES.indexOf(name) < 0) {
+            Object.keys(pdfPickState.selected).forEach(k => {
+                if (k === name || !pdfPickState.selected[k]) return;
+                if (PDF_BASE_FIELD_NAMES.indexOf(k) >= 0) return;
+                delete pdfPickState.selected[k];
+            });
+        }
+    }
     if (on) pdfPickState.selected[name] = true;
     else delete pdfPickState.selected[name];
     pdfRenderPickBody();
@@ -2846,7 +3075,28 @@ function pdfPickToggle(name, on) {
 function pdfConfirmFieldPicker() {
     const c = pdfModuleList().find(x => x.id === pdfPickState.compId);
     if (c) {
-        c.metrics = Object.keys(pdfPickState.selected).filter(k => pdfPickState.selected[k]);
+        // 基础维度字段（统计周期 / 设备机型 / 设备编号）不进指标绑定
+        let picked = Object.keys(pdfPickState.selected)
+            .filter(k => pdfPickState.selected[k] && PDF_BASE_FIELD_NAMES.indexOf(k) < 0);
+        if (pdfPickState.multi) {
+            c.metrics = picked.slice();          // 明细表：指标 = 列，允许多选
+        } else if (pdfPickState.kpi) {
+            // 指标卡：每次选的这 1 个指标「追加」成一张新卡，最多 6 张
+            if (picked.length) {
+                const next = (c.metrics || []).slice();
+                if (next.length >= PDF_PICK_KPI_MAX) {
+                    showToast('指标卡最多 ' + PDF_PICK_KPI_MAX + ' 张，请先移除一张再加', 'error');
+                } else if (next.indexOf(picked[picked.length - 1]) >= 0) {
+                    showToast('该指标已在卡片里了', 'error');
+                } else {
+                    next.push(picked[picked.length - 1]);
+                    c.metrics = next;
+                }
+            }
+        } else {
+            // 图表 / 环形图：指标值只保留 1 个
+            c.metrics = picked.length ? [picked[picked.length - 1]] : [];
+        }
         pdfV3SelectedId = c.id;
     }
     pdfCloseFieldPicker();

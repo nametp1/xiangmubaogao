@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>手机端 · 我的报表（v2.0）</title>
+<style>
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    body {
+        font-family: "PingFang SC", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+        background: #f4f5f7; color: #1a1a1a; min-height: 100vh; display: flex; align-items: stretch;
+    }
+    .phone { flex: 1 1 auto; min-width: 0; min-height: 100vh; background: #f4f5f7; display: flex; flex-direction: column; }
+
+    /* ================= 顶部导航（三页统一：返回 + 页面标题＝当前 tab；三个 tab 可相互点击切换） ================= */
+    .topbar {
+        height: 52px; background: #fff; border-bottom: 1px solid #e8e8e8; flex-shrink: 0;
+        display: flex; align-items: center; padding: 0 12px;
+    }
+    .topbar-back {
+        width: 30px; height: 30px; flex-shrink: 0; border: none; background: transparent;
+        border-radius: 50%; color: #1a1a1a; font-size: 22px; line-height: 1; font-family: inherit;
+        display: flex; align-items: center; justify-content: center; cursor: pointer;
+    }
+    .topbar-back:hover { background: #f2f3f5; }
+    /* 多语言下 Tab 文案会变长：Tab 条自己横向滚动、Tab 不被压缩，返回键与右侧入口固定不被挤走 */
+    .top-tabs {
+        flex: 1 1 auto; min-width: 0; display: flex; align-items: center; gap: 20px; margin-left: 6px;
+        overflow-x: auto; scrollbar-width: none;
+        -webkit-overflow-scrolling: touch; overscroll-behavior-x: contain;
+    }
+    .top-tabs::-webkit-scrollbar { display: none; }
+    .top-tab {
+        position: relative; flex-shrink: 0; border: none; background: transparent; font-family: inherit; cursor: pointer;
+        height: 52px; padding: 0; font-size: 15px; color: #8b90a0; white-space: nowrap;
+    }
+    .top-tab:hover:not(.active) { color: #E60012; }
+    .top-tab.active { font-size: 17px; font-weight: 600; color: #161a2e; letter-spacing: .2px; cursor: default; }
+    .top-tab.active::after {
+        content: ''; position: absolute; left: 50%; transform: translateX(-50%); bottom: 8px;
+        width: 20px; height: 2px; border-radius: 2px; background: #E60012;
+    }
+    /* 页面表头：返回与标题统一在 .topbar，这里只放本页的搜索与新建入口 */
+    .app-header {
+        background: #fff; padding: 12px 14px; flex-shrink: 0;
+        border-bottom: 1px solid #eef0f3; display: flex; align-items: center; gap: 10px;
+    }
+    /* 顶部右上角：报表需求征集快速入口（多语言文案过长时省略号截断，不挤压 Tab） */
+    .quick-more {
+        margin-left: auto; flex-shrink: 0; font-family: inherit; white-space: nowrap;
+        max-width: 42%; overflow: hidden; text-overflow: ellipsis;
+        background: #fdecee; color: #E60012; border: 1px solid #f8d5d9; border-radius: 14px;
+        font-size: 12px; font-weight: 600; padding: 4px 10px; cursor: pointer;
+        transition: background .16s, border-color .16s, transform .1s;
+    }
+    .quick-more:hover { background: #fbdde1; border-color: #f2bcc2; }
+    .quick-more:active { transform: scale(.97); }
+    .search-wrap { position: relative; flex: 1; min-width: 0; }
+    .search-input {
+        width: 100%; height: 36px; border: none; border-radius: 18px; background: #f4f5f7;
+        padding: 0 14px 0 34px; font-size: 13px; font-family: inherit; color: #1a1a1a; outline: none;
+    }
+    .search-input::placeholder { color: #b0b4bd; }
+    .search-icon { position: absolute; left: 12px; top: 50%; transform: translateY(-50%); color: #b0b4bd; display: flex; pointer-events: none; }
+    .add-btn {
+        flex-shrink: 0; border: none; background: #E60012; color: #fff; font-family: inherit;
+        font-size: 12px; padding: 9px 14px; border-radius: 18px; cursor: pointer; white-space: nowrap;
+        box-shadow: 0 2px 8px rgba(230,0,18,.22);
+    }
+    .add-btn:hover { background: #c40011; }
+
+    /* ================= 内容区 ================= */
+    .screen { flex: 1; overflow-y: auto; padding: 12px 14px 28px; }
+    .card {
+        background: #fff; border-radius: 16px; padding: 14px 15px; margin-bottom: 10px;
+        box-shadow: 0 1px 3px rgba(22,26,46,.05);
+    }
+    .card.is-expired { background: #fafbfc; box-shadow: none; }
+    .rc-head { display: flex; align-items: flex-start; gap: 10px; }
+    .rc-name { flex: 1; min-width: 0; font-size: 15px; font-weight: 600; color: #161a2e; line-height: 1.4; }
+    .card.is-expired .rc-name { color: #9aa0ad; }
+    .badge { flex-shrink: 0; font-size: 10px; border-radius: 999px; padding: 2px 8px; border: 1px solid transparent; }
+    .badge.normal { background: #f0faf5; color: #389e0d; border-color: #b7eb8f; }
+    .badge.overdue, .badge.partial { background: #fff7e6; color: #d46b08; border-color: #ffd591; }
+    .badge.expired { background: #f5f5f5; color: #999; border-color: #d9d9d9; }
+    .badge.overdue, .badge.partial, .badge.expired { cursor: help; }
+    .rc-type { font-size: 12px; color: #6b7280; margin-top: 4px; }
+    .rc-foot { display: flex; align-items: center; gap: 10px; margin-top: 13px; padding-top: 12px; border-top: 1px solid #f4f5f7; }
+    .switch { position: relative; width: 40px; height: 22px; flex-shrink: 0; }
+    .switch input { position: absolute; inset: 0; opacity: 0; margin: 0; cursor: pointer; }
+    .switch .track { position: absolute; inset: 0; background: #e0e3e8; border-radius: 11px; transition: background .18s; }
+    .switch .track::after {
+        content: ''; position: absolute; top: 2px; left: 2px; width: 18px; height: 18px; background: #fff;
+        border-radius: 50%; box-shadow: 0 1px 2px rgba(0,0,0,.2); transition: transform .18s;
+    }
+    .switch input:checked + .track { background: #E60012; }
+    .switch input:checked + .track::after { transform: translateX(18px); }
+    .switch input:disabled + .track { opacity: .45; }
+    .switch-label { font-size: 11px; color: #8b90a0; }
+    .rc-actions { margin-left: auto; }
+    .link { font-size: 12px; color: #8b90a0; cursor: pointer; }
+    .link:hover { color: #E60012; }
+
+    /* 引导文案（可点，与机群数据页一致）：没找到合适的报表时怎么申请，居中显示 */
+    .view-hint {
+        flex-shrink: 0; background: #fffaf0; color: #ad6800; font-size: 12px; line-height: 1.6;
+        padding: 9px 24px; border-bottom: 1px solid #f5ecd8;
+        text-align: center; cursor: pointer;
+    }
+    .view-hint:hover { background: #fff5e0; }
+    .view-hint b { color: #E60012; font-weight: 600; }
+
+    .empty-wrap { padding: 54px 20px; text-align: center; }
+    .empty-title { font-size: 14px; color: #8b90a0; }
+    .empty-sub { font-size: 12px; color: #b0b4bd; margin-top: 7px; line-height: 1.6; }
+    .empty-wrap .guide-btns { margin-top: 18px; }
+
+    /* ================= 详情面板（底部弹出） ================= */
+    .sheet-mask { position: fixed; inset: 0; background: rgba(0,0,0,.45); z-index: 60; display: none; align-items: flex-end; justify-content: center; }
+    .sheet-mask.active { display: flex; }
+    .sheet {
+        width: 100%; max-width: 520px; max-height: 84vh; background: #fff;
+        border-radius: 18px 18px 0 0; display: flex; flex-direction: column; overflow: hidden;
+    }
+    .sheet-head { display: flex; align-items: center; gap: 10px; padding: 16px 18px 14px; border-bottom: 1px solid #f2f3f6; }
+    .sheet-title { flex: 1; min-width: 0; font-size: 16px; font-weight: 700; color: #161a2e; line-height: 1.4; }
+    .sheet-close { font-size: 16px; color: #b0b4bd; cursor: pointer; line-height: 1; }
+    .sheet-body { padding: 2px 18px 16px; overflow-y: auto; }
+    .sheet-sub { font-size: 12px; font-weight: 700; color: #161a2e; padding: 18px 0 4px; }
+    .kv-row { display: flex; align-items: flex-start; gap: 12px; padding: 11px 0; border-bottom: 1px solid #f5f6f8; font-size: 12px; }
+    .kv-row:last-child { border-bottom: none; }
+    .kv-k { width: 78px; flex-shrink: 0; color: #8b90a0; line-height: 1.5; }
+    .kv-v { flex: 1; min-width: 0; color: #333; line-height: 1.5; word-break: break-all; }
+    .sheet-foot { display: flex; gap: 10px; padding: 12px 18px 18px; }
+    .sheet-foot button { flex: 1; border-radius: 22px; font-family: inherit; font-size: 14px; padding: 12px 0; cursor: pointer; }
+    .btn-ghost { border: 1px solid #dcdcdc; background: #fff; color: #555; }
+    .btn-danger { border: none; background: #E60012; color: #fff; }
+    .btn-danger:hover { background: #c40011; }
+</style>
+</head>
+<body>
+
+<!-- ==================== 手机端：我的报表 ==================== -->
+<div class="phone">
+    <!-- 顶部导航（三页统一）：返回 + 页面标题＝当前 tab，三个 tab 可点击互相切换 -->
+    <div class="topbar">
+        <button class="topbar-back" onclick="goBack()" aria-label="返回"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+        <div class="top-tabs">
+            <button class="top-tab" onclick="location.href='机群数据.html'">机群数据</button>
+            <button class="top-tab" onclick="location.href='报表库-缺省页.html'">报表库</button>
+            <button class="top-tab active">我的报表</button>
+        </div>
+        <button class="quick-more" title="提交报表需求" onclick="location.href='我需要更多报表.html'">＋ 提需求</button>
+    </div>
+    <!-- 引导（可点）：没找到合适的报表时怎么申请，居中显示 -->
+    <div class="view-hint" onclick="location.href='我需要更多报表.html'">没找到需要的报表？<b>点这里申请</b>，我们会第一时间处理</div>
+
+    <div class="app-header">
+        <div class="search-wrap">
+            <span class="search-icon">
+                <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><line x1="16.5" y1="16.5" x2="21" y2="21"></line></svg>
+            </span>
+            <input class="search-input" id="searchInput" type="search" placeholder="搜索报表名称 / 类型 / 收件人" oninput="renderAll()">
+        </div>
+        <button class="add-btn" onclick="location.href='报表库.html'">＋ 添加报表</button>
+    </div>
+    <div class="screen" id="screen"></div>
+</div>
+
+<!-- ==================== 报表详情 ==================== -->
+<div class="sheet-mask" id="detailSheet" onclick="closeDetail()">
+    <div class="sheet" onclick="event.stopPropagation()">
+        <div class="sheet-head">
+            <span class="sheet-title" id="detailTitle"></span>
+            <span class="badge normal" id="detailBadge"></span>
+            <span class="sheet-close" onclick="closeDetail()">✕</span>
+        </div>
+        <div class="sheet-body" id="detailBody"></div>
+        <div class="sheet-foot">
+            <button class="btn-ghost" onclick="editReport()">编辑</button>
+            <button class="btn-danger" onclick="deleteReport()">删除</button>
+        </div>
+    </div>
+</div>
+
+<script>
+/* ========================================================================
+ * 数据来源：V2/MysnayPC端V2/管理报表.html（同一份报表订阅 mock 数据）
+ * ====================================================================== */
+let reportList = [
+    {
+        id: 6,
+        name: '梅溪湖项目生产报表',
+        type: '项目生产报表（按行程）',
+        dimension: 'project',
+        owner: 'Admin',
+        frequency: '每日',
+        duration: '前一天',
+        caliber: '自然日',
+        deliveryDate: '-',
+        deliveryTime: '08:00',
+        startDate: '2026-09-14',
+        format: 'PDF',
+        pdfLayout: '标准版',
+        recipients: 'alice.chen@sany.com.cn',
+        filters: '项目',
+        subject: '梅溪湖项目生产日报',
+        datetime: '2026-09-14 08:00',
+        endDate: '-',
+        timezone: 'UTC+8',
+        enabled: true,
+        assets: '长沙梅溪湖工地, 挖掘机车队',
+        projects: '长沙梅溪湖工地, 挖掘机车队',
+        projCaliber: '按行程',
+        createTime: '2026-09-14 08:00'
+    },
+    {
+        id: 7,
+        name: 'Jakarta 项目能耗报表',
+        type: '项目能耗报表',
+        dimension: 'project',
+        owner: 'Admin',
+        frequency: '每周',
+        duration: '上周',
+        caliber: '自然日',
+        deliveryDate: '星期一',
+        deliveryTime: '09:00',
+        startDate: '2026-09-14',
+        format: 'PDF',
+        pdfLayout: '机群对比版',
+        recipients: 'brian@centralatlantatractor.com',
+        filters: '项目',
+        subject: 'Jakarta North Quarry 项目能耗周报',
+        datetime: '2026-09-14 09:00',
+        endDate: '2026-12-31',
+        timezone: 'UTC+7',
+        enabled: true,
+        assets: 'Jakarta North Quarry',
+        projects: 'Jakarta North Quarry',
+        projCaliber: '按设备',
+        createTime: '2026-09-01 09:00'
+    },
+    {
+        id: 2,
+        name: '设备机群运行日报',
+        type: '机群作业状态报表',
+        owner: 'Admin',
+        caliber: '班次 07:00–19:00',
+        frequency: '每日',
+        duration: '前一天',
+        deliveryDate: '-',
+        deliveryTime: '08:30',
+        startDate: '2026-07-16',
+        format: 'XLSX',
+        dimension: 'device',
+        recipients: 'brian@centralatlantatractor.com',
+        filters: '全部',
+        subject: '机群运行日报 每日 报表',
+        content: '每日设备运行状态报表',
+        datetime: '2026-07-16 08:30',
+        endDate: '-',
+        timezone: 'UTC+8',
+        enabled: true,
+        assets: 'F3S01395, 000036, 000048, 000049, 000101, 000215',
+        createTime: '2026-07-16 08:30'
+    },
+    {
+        id: 3,
+        name: 'G002发电机状态监控',
+        type: '设备事件统计报表',
+        owner: 'Admin',
+        frequency: '每日',
+        duration: '前一天',
+        caliber: '自然日',
+        deliveryDate: '-',
+        deliveryTime: '08:00',
+        startDate: '2026-07-10',
+        format: 'XLSX',
+        dimension: 'device',
+        recipients: 'david.johnson@example.com',
+        filters: '动力设备',
+        subject: 'G002 每日运行报表',
+        content: 'G002发电机每日运行数据汇总',
+        datetime: '2026-07-10 08:00',
+        endDate: '-',
+        timezone: 'UTC+8',
+        enabled: true,
+        assets: 'G002',
+        expired: true,
+        createTime: '2026-07-10 08:00'
+    },
+    {
+        id: 4,
+        name: '挖掘机月度能耗统计',
+        type: '机群燃油效率报表',
+        owner: 'Admin',
+        frequency: '每月',
+        duration: '上个月',
+        caliber: '自然日',
+        deliveryDate: '1',
+        deliveryTime: '09:00',
+        startDate: '2026-05-01',
+        format: 'XLSX',
+        dimension: 'device',
+        recipients: 'aubrey_lancaster@yanceybros.com',
+        filters: '挖掘类设备',
+        subject: '挖掘机月度能耗统计',
+        content: '所有挖掘机设备月度油耗与电耗汇总',
+        datetime: '2026-05-01 09:00',
+        endDate: '2026-06-30',
+        timezone: 'UTC+8',
+        enabled: false,
+        assets: 'F3S01395, 000036, 000048',
+        overdue: true,
+        createTime: '2026-05-01 09:00'
+    },
+    {
+        id: 5,
+        name: '装载机车队日报',
+        type: '机群作业状态报表',
+        owner: 'Admin',
+        frequency: '每日',
+        duration: '前一天',
+        caliber: '自然日',
+        deliveryDate: '-',
+        deliveryTime: '08:00',
+        startDate: '2026-07-20',
+        format: 'XLSX',
+        dimension: 'device',
+        recipients: 'alex@example.com',
+        filters: '轮式装载机',
+        subject: '装载机车队每日运行报表',
+        content: '所有轮式装载机每日运行数据',
+        datetime: '2026-07-20 08:00',
+        endDate: '-',
+        timezone: 'UTC+8',
+        enabled: true,
+        assets: 'F3S01395, 000036, 000048, 000101',
+        partial: true,
+        createTime: '2026-07-20 08:00'
+    }
+];
+
+const STATUS_TEXT = {
+    normal: '正常',
+    expired: '已失效',
+    overdue: '已过期',
+    partial: '部分失效'
+};
+
+// 异常状态说明（点状态标签查看，文案取自 PC 端提示）
+const STATUS_HELP = {
+    overdue: '订阅的报表已超过截止日期，推送已停止。请重新设置有效期后恢复。',
+    expired: '订阅中的设备已被解绑或权限已变更，报表推送已失效。请重新选择设备后恢复。',
+    partial: '部分设备已被解绑或权限已变更，报表数据可能不完整。'
+};
+
+const searchInput = document.getElementById('searchInput');
+const screenEl = document.getElementById('screen');
+let detailId = null;
+
+function safe(v) {
+    return String(v == null ? '' : v).replace(/[&<>"]/g, function (c) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+    });
+}
+
+function statusOf(r) {
+    return r.overdue ? 'overdue' : (r.expired ? 'expired' : (r.partial ? 'partial' : 'normal'));
+}
+
+function rangeText(r) {
+    const start = r.startDate || (r.datetime && r.datetime !== '-' ? r.datetime.split(' ')[0] : '');
+    const end = (r.endDate && r.endDate !== '-') ? r.endDate : '';
+    if (start && end) return start + ' ~ ' + end;
+    if (start) return start + ' 起';
+    if (end) return '至 ' + end;
+    return '-';
+}
+
+function receiveTimeText(r) {
+    return r.timezone ? r.timezone + (r.deliveryTime ? ' ' + r.deliveryTime : '') : '-';
+}
+
+/* ==================== 渲染：报表列表 ==================== */
+function renderCard(r) {
+    const st = statusOf(r);
+    const locked = (st === 'overdue' || st === 'expired');
+    return `
+        <div class="card report-card${locked ? ' is-expired' : ''}">
+            <div class="rc-head">
+                <div class="rc-name">${safe(r.name)}</div>
+                <span class="badge ${st}"${st === 'normal' ? '' : ' onclick="explainStatus(event, \'' + st + '\')"'}>${STATUS_TEXT[st]}</span>
+            </div>
+            <div class="rc-type">${safe(r.type)}</div>
+            <div class="rc-foot">
+                <label class="switch">
+                    <input type="checkbox" ${r.enabled ? 'checked' : ''} ${locked ? 'disabled' : ''} onchange="toggleEnabled(${r.id}, this.checked)">
+                    <span class="track"></span>
+                </label>
+                <span class="switch-label">${r.enabled ? '开启' : '关闭'}</span>
+                <div class="rc-actions">
+                    <span class="link" onclick="openDetail(${r.id})">查看详情 ›</span>
+                </div>
+            </div>
+        </div>`;
+}
+
+/* ==================== 渲染：报表列表 ==================== */
+function renderAll() {
+    const kw = searchInput.value.trim().toLowerCase();
+    const list = reportList.filter(function (r) {
+        if (!kw) return true;
+        return [r.name, r.type, r.owner, r.recipients, r.subject, r.assets].some(function (v) {
+            return String(v || '').toLowerCase().indexOf(kw) >= 0;
+        });
+    });
+
+    if (!list.length) {
+        screenEl.innerHTML = '<div class="empty-wrap">'
+            + '<div class="empty-title">未找到匹配的报表</div>'
+            + '<div class="empty-sub">换个关键词试试</div>'
+            + '</div>';
+        return;
+    }
+    screenEl.innerHTML = list.map(renderCard).join('');
+}
+
+/* ==================== 交互 ==================== */
+function explainStatus(e, st) {
+    if (e) e.stopPropagation();
+    showToast(STATUS_HELP[st] || '');
+}
+
+function toggleEnabled(id, checked) {
+    const r = reportList.filter(function (x) { return x.id === id; })[0];
+    if (!r) return;
+    r.enabled = checked;
+    renderAll();
+    showToast(checked ? '已开启推送：' + r.name : '已关闭推送：' + r.name);
+}
+
+/* ==================== 详情面板 ==================== */
+function openDetail(id) {
+    const r = reportList.filter(function (x) { return x.id === id; })[0];
+    if (!r) return;
+    detailId = id;
+    const isProject = r.dimension === 'project';
+    const st = statusOf(r);
+    const recipients = String(r.recipients || '').split(';').map(function (s) { return s.trim(); }).filter(Boolean);
+
+    const info = [
+        { label: '报表类型', value: r.type },
+        { label: '报表维度', value: isProject ? '项目维度' : '设备维度' },
+        { label: '频率', value: r.frequency },
+        { label: '格式', value: r.format },
+        { label: '统计口径', value: r.caliber || '自然日' },
+        { label: '数据范围', value: r.duration || '-' },
+        { label: '邮件主题', value: r.subject },
+        { label: '接收时间', value: receiveTimeText(r) },
+        { label: '生效区间', value: rangeText(r) },
+        { label: isProject ? '涉及项目' : '涉及资产', value: r.assets }
+    ];
+
+    const rowsHTML = function (arr) {
+        return '<div class="kv">' + arr.map(function (it) {
+            return '<div class="kv-row"><span class="kv-k">' + it.label + '</span><span class="kv-v">' + safe(it.value) + '</span></div>';
+        }).join('') + '</div>';
+    };
+
+    document.getElementById('detailTitle').textContent = r.name;
+    const badge = document.getElementById('detailBadge');
+    badge.className = 'badge ' + st;
+    badge.textContent = STATUS_TEXT[st];
+    badge.onclick = (st === 'normal') ? null : function () { showToast(STATUS_HELP[st] || ''); };
+
+    document.getElementById('detailBody').innerHTML = '<div class="sheet-sub">基本信息</div>'
+        + rowsHTML(info)
+        + '<div class="sheet-sub">收件人信息</div>'
+        + rowsHTML([
+            { label: '收件人数量', value: recipients.length + ' 人' },
+            { label: '收件人列表', value: r.recipients }
+        ]);
+
+    document.getElementById('detailSheet').classList.add('active');
+}
+
+function closeDetail() {
+    document.getElementById('detailSheet').classList.remove('active');
+    detailId = null;
+}
+
+function editReport() {
+    showToast('编辑向导暂未在手机端开放');
+}
+
+/* ==================== 删除 ==================== */
+function askDelete(id) {
+    const r = reportList.filter(function (x) { return x.id === id; })[0];
+    if (!r) return;
+    if (!confirm('确定要删除报表「' + r.name + '」（' + r.type + '）吗？删除后不可恢复。')) return;
+    reportList = reportList.filter(function (x) { return x.id !== id; });
+    if (detailId === id) closeDetail();
+    renderAll();
+    showToast('报表已删除');
+}
+
+/* 返回上一页（无历史记录时只提示一下） */
+function goBack() {
+    if (history.length > 1) { history.back(); return; }
+    showToast('返回上一页');
+}
+
+function showToast(msg) {
+    const t = document.createElement('div');
+    t.textContent = msg;
+    t.style.cssText = 'position:fixed;left:50%;bottom:60px;transform:translateX(-50%);background:rgba(0,0,0,.78);color:#fff;'
+        + 'font-size:12px;padding:9px 16px;border-radius:18px;z-index:99;max-width:80%;text-align:center;';
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 1800);
+}
+
+/* ==================== 初始化 ==================== */
+renderAll();
+</script>
+
+</body>
+</html>
