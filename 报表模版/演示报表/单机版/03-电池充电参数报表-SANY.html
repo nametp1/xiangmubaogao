@@ -1,6 +1,6 @@
 <!DOCTYPE html>
 <!--
-  模版：电池充电参数报表（v2.0 · 三一风格）　维度：单机　周期：日 / 周 / 月　版式：A4 横向
+  模版：电池充电参数报表（v2.0 · 三一风格）　维度：单机　周期：日 / 周 / 月　版式：A4 纵向
   后台配置方式：① 循环区域用 loop 注释标记包裹（只写一条行模板，引擎按数据行重复），行内变量为「表名_字段」（如 设备_工时），与后台「数据列配置」的每一列（列名 + 映射变量）一一对应；② 汇总行用「汇总_字段」，聚合值由引擎给出，模板不做计算；③ 进度条 / 环形 / 堆叠段 / 趋势柱的显示比例用「条_标签」「环_名称」「段_标签」「趋势_高度」，由引擎按数值换算回填。
   适用机型：电池 / 充电字段族（字段总表「线上字段库」20 个机型中 10 个可用：搅拌车、汽车起重机、电动堆高机、电动宽体车、电动挖掘机、电动搅拌车、电动牵引车、电动自卸车、电动装载机、电动集卡；其余机型不出本报表）
   空值规则：字段无值时不显示 —— 单元格显示 --、行级/块级隐藏、机型不适用则不出本报表；单机合计与均值只统计「有该字段值」的设备，缺值设备该格留空。
@@ -14,7 +14,7 @@
 *{box-sizing:border-box}
 body{margin:0;background:#f2f3f5;color:#1a1a1a;font-size:12px;
      font-family:"PingFang SC","Microsoft YaHei","Helvetica Neue",Arial,sans-serif}
-.report{width:297mm;min-height:210mm;margin:22px auto;padding:13mm 14mm 11mm;background:#fff;
+.report{width:210mm;min-height:297mm;margin:22px auto;padding:13mm 14mm 11mm;background:#fff;
         border-radius:4px;box-shadow:0 6px 24px rgba(0,0,0,.07)}
 /* ---------- 工具栏（仅屏幕） ---------- */
 .toolbar{position:fixed;right:20px;top:20px;display:flex;gap:8px;align-items:center;z-index:9}
@@ -51,9 +51,9 @@ body{margin:0;background:#f2f3f5;color:#1a1a1a;font-size:12px;
         font-size:15px;font-weight:800;color:#1a1a1a;letter-spacing:.3px;line-height:1.3}
 .section-title small{font-weight:400;font-size:11px;color:#9a9a9a;margin-left:8px}
 /* ---------- 表格 ---------- */
-table{width:100%;border-collapse:collapse;font-size:12px}
+table{width:100%;max-width:100%;table-layout:fixed;border-collapse:collapse;font-size:12px}
 th{background:#d9000f;background:linear-gradient(180deg,#e8000f,#cc0010);color:#fff;padding:8px 9px;text-align:left;
-        font-weight:600;letter-spacing:.3px;white-space:nowrap}
+        font-weight:600;letter-spacing:.3px;white-space:normal; word-break:break-word;}
 thead tr:first-child th:first-child{border-top-left-radius:4px}
 thead tr:first-child th:last-child{border-top-right-radius:4px}
 td{padding:7px 9px;border-bottom:1px solid #f2f2f2;vertical-align:top}
@@ -116,7 +116,7 @@ tfoot td,tr:last-child td{border-bottom:none}
         justify-content:space-between;align-items:center;gap:16px;color:#8c8c8c;font-size:10px}
 .footer .brand2{font-weight:800;color:#E60012;font-size:13px;letter-spacing:1px}
 /* ---------- 打印 / PDF ---------- */
-@page{size:A4 landscape;margin:9mm}
+@page{size:A4 portrait;margin:9mm}
 @media print{
   html,body{background:#fff}
   .no-print{display:none!important}

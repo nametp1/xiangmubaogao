@@ -206,6 +206,7 @@
                     
                     <div class="h-px bg-slate-100 my-4"></div>
                     <h3 class="text-xs font-bold text-slate-400 uppercase tracking-widest mb-4">系统防呆规范</h3>
+                    <a href="#sec-config-guard" class="flex items-center gap-2 px-3 py-2 text-blue-700 bg-blue-50 rounded-md border border-blue-100 transition-colors"><i class="ph-fill ph-lock-key text-lg text-blue-500"></i> 配置器指标数量防呆</a>
                     <a href="#sec-closed-loop" class="flex items-center gap-2 px-3 py-2 text-amber-700 bg-amber-50 rounded-md border border-amber-100 transition-colors"><i class="ph-fill ph-shield-warning text-lg text-amber-500"></i> 异常场景错误</a>
                 </nav>
             </div>
@@ -242,7 +243,8 @@
                             <div class="prd-block">
                                 <div class="prd-title">【指标选择限制】</div>
                                 <div class="warning-box">
-                                    ⚠️ 严格限制：最多允许选择 <strong>5 个指标</strong>。超过数量会导致多条折线交叉混叠，使报表完全失去可读性。
+                                    ⚠️ 严格限制：最多允许选择 <strong>5 个指标</strong>。超过数量会导致多条折线交叉混叠，使报表完全失去可读性。<br/>
+                                    <strong>配置器（单机）：</strong>选择控件＝<strong>复选框</strong>，列头写「可多选 · 最多 5 个」，底部实时显示「已选 N / 5 个」；<strong>选满 5 个后其余字段自动置灰不可点</strong>（点击也拦截），右栏「＋ 从模型字典选择」同步置灰并提示「已达上限 5 个，先移除一个再加」。同屏指标必须单位一致，不一致时<strong>直接拦截不勾选</strong>。
                                 </div>
                             </div>
                         </div>
@@ -269,7 +271,8 @@
                                 <div class="prd-title">【指标选择限制】</div>
                                 <div class="warning-box">
                                     ⚠️ 强制拦截规则：<strong>只能选择 1 个指标！</strong><br/>
-                                    原理：若允许 10台设备 × 3个指标，会在同一张图上生成 30 条折线，系统必须在前端配置器直接禁用复选框，变更为单选框 。
+                                    原理：若允许 10台设备 × 3个指标，会在同一张图上生成 30 条折线，系统必须在前端配置器直接禁用复选框，变更为单选框 。<br/>
+                                    <strong>配置器（机群）：</strong>与单机口径不同 —— 选择控件由复选框<strong>退化为单选框</strong>，绑定第 2 个指标时<strong>自动替换</strong>原有指标并提示「只支持 1 个指标：「工时」已替换为「能耗」」；「全选当前模型」按钮隐藏。这也是单机（≤5 个）与机群（仅 1 个）的核心差异。
                                 </div>
                             </div>
                             <div class="prd-block">
@@ -331,7 +334,8 @@
                             <div class="prd-block">
                                 <div class="prd-title">【指标选择限制】</div>
                                 <div class="warning-box">
-                                    ⚠️ 多指标限制：允许选择多个指标，同一时间块内<strong>并排显示</strong>。所选指标必须单位完全一致（如：工作时长 + 怠速时长 + 关机时长，单位均为 h）；单位不同会让同一个 Y 轴混刻度没有意义。
+                                    ⚠️ 多指标限制：允许选择多个指标，同一时间块内<strong>并排显示</strong>。所选指标必须单位完全一致（如：工作时长 + 怠速时长 + 关机时长，单位均为 h）；单位不同会让同一个 Y 轴混刻度没有意义。<br/>
+                                    <strong>配置器（单机）：</strong>复选框，<strong>上限 5 个</strong>（5 色循环），底部显示「已选 N / 5 个」；选满后其余字段置灰；单位不一致的指标直接拦截不勾选。
                                 </div>
                             </div>
                             <div class="prd-block">
@@ -372,7 +376,8 @@
                             </div>
                             <div class="prd-block">
                                 <div class="prd-title">【指标选择限制】</div>
-                                <div class="warning-box">支持<strong>多个指标同图并排</strong>（每台设备一组条、不同颜色），但<strong>所选指标必须单位完全一致</strong>（示例均为 h）；排序依据＝<strong>第 1 个指标</strong>降序，其余指标仅作对照。单位不一致的指标无法共轴，必须拆成两张排行榜。</div>
+                                <div class="warning-box">支持<strong>多个指标同图并排</strong>（每台设备一组条、不同颜色），但<strong>所选指标必须单位完全一致</strong>（示例均为 h）；排序依据＝<strong>第 1 个指标</strong>降序，其余指标仅作对照。单位不一致的指标无法共轴，必须拆成两张排行榜。<br/>
+                                    <strong>配置器（机群）：</strong>与单机同为<strong>复选框、上限 5 个</strong>（排行榜不占「每台一条线」的名额，所以机群柱状图仍可多指标）；列序＝勾选顺序，排序始终按第 1 个指标。</div>
                             </div>
                             <div class="prd-block">
                                 <div class="prd-title">【强制排序】</div>
@@ -434,9 +439,10 @@
                             <div class="prd-block">
                                 <div class="prd-title">【指标选择限制】</div>
                                 <div class="warning-box">
-                                    - 必须选择 1 个同单位指标。<br/>
-                                    例如：必须全部是“时长(h)”或全部是“耗油量(L)”。若混选不同单位（如把温度和里程画在一个饼图里），前端配置器提示：配置单位错误。<br/>
-                                    - 出现负数的指标，生成时后端直接默认返回数值 0。
+                                    - 同一单位可<strong>多选（≤ 5 个）</strong>：整环＝所选指标合计，图例分块＝每一个被选中的指标（如“工作 / 怠速 / 关机”三段时长）。<br/>
+                                    例如：必须全部是“时长(h)”或全部是“耗油量(L)”。若混选不同单位（如把温度和里程画在一个饼图里），前端配置器<strong>直接拦截不勾选</strong>并提示「同屏多指标必须单位一致」。<br/>
+                                    - 出现负数的指标，生成时后端直接默认返回数值 0。<br/>
+                                    <strong>配置器（单机）：</strong>复选框，上限 5 个（5 色循环取色），选满后其余字段置灰；<strong>与机群口径的差异：机群环形图看「单机贡献度」，强制 1 个指标、控件为单选框</strong>。
                                 </div>
                             </div>
                         </div>
@@ -464,7 +470,8 @@
                                 <div class="prd-title">【指标选择限制】</div>
                                 <div class="warning-box">
                                     - 强制只能选择 1 个指标，单位必须相同。<br/>
-                                    - 该指标必须是累计型指标，禁止使用状态型指标（开关机状态）。
+                                    - 该指标必须是累计型指标，禁止使用状态型指标（开关机状态）。<br/>
+                                    <strong>配置器（机群）：</strong>单选框（不是复选框），再选一个自动替换原有的并提示「只支持 1 个指标：「工时」已替换为「里程」」；「全选当前模型」按钮隐藏。单机口径下同一组件可多选 ≤5 个（构成比例），这是两者的核心差异。
                                 </div>
                             </div>
                             <div class="prd-block">
@@ -516,7 +523,8 @@
                             </div>
                             <div class="prd-block">
                                 <div class="prd-title">【指标选择限制】</div>
-                                <div class="warning-box">- 一张卡只放 1 个指标；</div>
+                                <div class="warning-box">- 一张卡只放 1 个指标；<br/>
+                                    <strong>配置器：</strong>每次只选 1 个字段、确定后<strong>追加一张新卡</strong>（不复用原勾选），最多 <strong>6 张</strong>；已达 6 张时右栏按钮置灰并提示「已达上限 6 张，先移除一张再加」，弹窗内已加过的字段置灰不可再选。单机 / 机群规则相同。</div>
                             </div>
                             <div class="prd-block">
                                 <div class="prd-title">【卡片样式与颜色规则】</div>
@@ -608,8 +616,9 @@
                             <div class="prd-block">
                                 <div class="prd-title">【指标与聚合限制】</div>
                                 <div class="prd-text">
-                                    无图表图形特性限制，支持任意类型指标（数字型、字符串枚举型）的混合排布。<br/>
-                                    时间切片若出现缺失数据，单元格严格输出 <code>-</code>，禁止补0，防止误导。
+                                    无图表图形特性限制，支持任意类型指标（数字型、字符串枚举型）的混合排布，<strong>指标（列）数量不设上限、各列单位可不同</strong>（不受折线 / 环形「同单位」约束）。<br/>
+                                    时间切片若出现缺失数据，单元格严格输出 <code>-</code>，禁止补0，防止误导。<br/>
+                                    <strong>配置器（单机）：</strong>复选框多选（一个指标一列），是唯一保留「全选当前模型 / 取消全选」按钮的组件；单机 / 机群规则相同。
                                 </div>
                             </div>
                         </div>
@@ -638,6 +647,108 @@
                                     行数恒等于设备数。<br/>
                                     列数据聚合：如果选“本周”，则【油耗】列渲染的必须是该设备周一到周日的 <code>SUM(油耗)</code>。
                                 </div>
+                            </div>
+                        </div>
+                    </div>
+                </section>
+
+                <!-- 配置器指标数量防呆 -->
+                <section id="sec-config-guard" class="bg-white rounded-2xl shadow-sm border-2 border-blue-300 overflow-hidden">
+                    <div class="bg-gradient-to-r from-blue-600 to-sky-500 px-6 py-4 flex items-center gap-3">
+                        <i class="ph-fill ph-lock-key text-3xl text-white"></i>
+                        <h2 class="text-xl font-bold text-white tracking-wide">配置器指标数量防呆（单机 / 机群差异）</h2>
+                    </div>
+
+                    <div class="p-6 md:p-8 space-y-10">
+                        <div class="prd-block">
+                            <div class="prd-title">【总表：同一组件在两个口径下能绑几个指标】</div>
+                            <div class="overflow-x-auto">
+                                <table class="w-full text-sm border border-slate-200 rounded-lg overflow-hidden">
+                                    <thead class="bg-slate-100 text-slate-600">
+                                        <tr>
+                                            <th class="text-left px-4 py-2.5 font-semibold">可视化组件</th>
+                                            <th class="text-left px-4 py-2.5 font-semibold">单机口径</th>
+                                            <th class="text-left px-4 py-2.5 font-semibold">机群口径</th>
+                                            <th class="text-left px-4 py-2.5 font-semibold">选择控件</th>
+                                        </tr>
+                                    </thead>
+                                    <tbody class="divide-y divide-slate-100 text-slate-600">
+                                        <tr>
+                                            <td class="px-4 py-2.5 font-medium text-slate-800">折线图</td>
+                                            <td class="px-4 py-2.5"><strong>≤ 5 个</strong>（须同单位，5 色循环）</td>
+                                            <td class="px-4 py-2.5 text-red-600 font-semibold">只能 1 个（每台设备一条线）</td>
+                                            <td class="px-4 py-2.5">单机＝复选框；<strong>机群＝单选框</strong></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="px-4 py-2.5 font-medium text-slate-800">柱状图</td>
+                                            <td class="px-4 py-2.5"><strong>≤ 5 个</strong>（须同单位，并排显示）</td>
+                                            <td class="px-4 py-2.5"><strong>≤ 5 个</strong>（设备排行按第 1 个指标排序）</td>
+                                            <td class="px-4 py-2.5">复选框（两个口径相同）</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="px-4 py-2.5 font-medium text-slate-800">环形图</td>
+                                            <td class="px-4 py-2.5"><strong>≤ 5 个</strong>（须同单位，构成比例）</td>
+                                            <td class="px-4 py-2.5 text-red-600 font-semibold">只能 1 个（单机贡献度）</td>
+                                            <td class="px-4 py-2.5">单机＝复选框；<strong>机群＝单选框</strong></td>
+                                        </tr>
+                                        <tr>
+                                            <td class="px-4 py-2.5 font-medium text-slate-800">指标卡</td>
+                                            <td class="px-4 py-2.5">1 个字段 = 1 张卡，<strong>≤ 6 张</strong></td>
+                                            <td class="px-4 py-2.5">同左</td>
+                                            <td class="px-4 py-2.5">每次选 1 个、累加加卡；已加过的置灰</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="px-4 py-2.5 font-medium text-slate-800">数据明细</td>
+                                            <td class="px-4 py-2.5">不限（一列一个指标，各列单位可不同）</td>
+                                            <td class="px-4 py-2.5">同左</td>
+                                            <td class="px-4 py-2.5">复选框（仅此组件可用「全选当前模型」）</td>
+                                        </tr>
+                                        <tr>
+                                            <td class="px-4 py-2.5 font-medium text-slate-800">文本段落</td>
+                                            <td class="px-4 py-2.5">不绑定指标</td>
+                                            <td class="px-4 py-2.5">同左</td>
+                                            <td class="px-4 py-2.5">—</td>
+                                        </tr>
+                                    </tbody>
+                                </table>
+                            </div>
+                        </div>
+
+                        <div class="prd-block">
+                            <div class="prd-title">【拦截 1：数量超限（多选组件上限 5 个）】</div>
+                            <div class="prd-text">
+                                <strong>场景：</strong>单机折线图 / 柱状图 / 环形图已选满 5 个指标，用户还要再勾第 6 个。<br/>
+                                <strong>拦截与交互：</strong>① 选满瞬间，列表里<strong>其余未选字段全部置灰不可点</strong>（鼠标悬停提示「已达上限 5 个指标，先取消一个再选」）；② 若通过搜索视图绕过点击，勾选动作被撤销、字段不被选中；③ 右栏「＋ 从模型字典选择」同步置灰并附一行「已达上限 5 个，先移除一个再加。」；④ 底部计数实时显示「已选 N / 5 个 · 同单位多指标并排」。<br/>
+                                <strong>提示文案：</strong>「已达上限 5 个指标（5 色循环，第 6 个会无法区分颜色），请先取消一个再选。」<br/>
+                                <strong>说明：</strong>机群折线图 / 环形图上限为 1，不存在「超限」路径，走拦截 3 的替换逻辑。
+                            </div>
+                        </div>
+
+                        <div class="prd-block">
+                            <div class="prd-title">【拦截 2：单位不一致（同屏多指标必须同单位）】</div>
+                            <div class="prd-text">
+                                <strong>场景：</strong>折线图 / 柱状图 / 环形图里已选「工时（h）」，用户再选「里程（km）」这类不同量纲的指标。<br/>
+                                <strong>拦截与交互：</strong>该次勾选<strong>直接不生效</strong>（不勾上、不加入已选），弹窗内即时出现一行红色提示条说明原因（打开弹窗时不再常驻规则说明文案），弹窗外再出一条 Toast 说明「已选什么单位 / 本次选什么单位」。<br/>
+                                <strong>提示文案：</strong>「同屏多指标必须单位一致：已选「工时」（h），本次选「里程」（km），请换一个同单位指标。」<br/>
+                                <strong>例外：</strong>数据明细表一列一个指标，各列单位可以不同，不做该拦截。
+                            </div>
+                        </div>
+
+                        <div class="prd-block">
+                            <div class="prd-title">【拦截 3：只允许 1 个指标的组件（机群折线 / 机群环形）＝替换而非新增】</div>
+                            <div class="prd-text">
+                                <strong>场景：</strong>机群口径下折线图或环形图已绑定「工时」，用户再选「能耗」。<br/>
+                                <strong>交互：</strong>控件是<strong>单选框</strong>，新指标直接<strong>替换</strong>旧指标（不会出现两个），并明确告知被替换了什么；「全选当前模型」按钮在该组件下隐藏。<br/>
+                                <strong>提示文案：</strong>「只支持 1 个指标：「工时」已替换为「能耗」」。<br/>
+                            </div>
+                        </div>
+
+                        <div class="prd-block">
+                            <div class="prd-title">【连带规则：切换可视化类型 / 切换口径时的自动裁剪】</div>
+                            <div class="prd-text">
+                                1. <strong>切换可视化类型：</strong>新类型的上限低于现有指标数时，保留前 N 个并提示 —— 如数据明细（3 列）切成机群折线图 → 保留第 1 个，提示「「折线图」在机群口径下最多绑定 1 个指标，已保留前 1 个」；切成指标卡 → 提示「指标卡一个字段一张卡，默认保留第 1 张，其余请按需添加」。<br/>
+                                2. <strong>单机 / 机群各有独立的一套组件与绑定：</strong>切换弹窗顶部的整体口径分段，等于换另一套数据模块与版式，两侧的指标绑定互不影响，因此不会出现「单机选了 5 个、切到机群超限」的情况。<br/>
+                                3. <strong>历史数据迁移：</strong>读取已保存的版式 JSON 时按「组件类型 × 口径」重新裁剪（单机折线保留 ≤5 个、机群折线 / 环形只保留第 1 个），保证老配置不会突破新上限。
                             </div>
                         </div>
                     </div>

@@ -157,6 +157,10 @@
         .form-group textarea { resize: vertical; min-height: 180px; line-height: 1.6; font-family: 'Consolas','Monaco','Courier New',monospace; font-size: 12px; }
         .form-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
         .form-row-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+        /* 基本信息第二行：启用开关（与输入框同高、垂直居中）+ 整体口径分段 */
+        .form-row-2.meta-row .form-group { margin-bottom: 8px; }
+        .form-row-2.meta-row .switch-wrap { height: 34px; }
+        .switch-state { font-size: 13px; color: #666; }
         .form-select {
             width: 100%; height: 38px; border: 1px solid #d9d9d9; border-radius: 6px;
             padding: 0 10px; font-size: 13px; font-family: inherit; color: #333; background: #fff;
@@ -189,10 +193,6 @@
         }
         .scope-check:has(input:checked) { border-color: #E60012; background: #fff5f5; }
         .scope-check:has(input:checked) span { color: #E60012; font-weight: 600; }
-
-        /* v2.0 合并：数据列配置子 Tab（单机配置 / 机群配置） */
-        .col-subswitch-wrap { display: flex; align-items: center; gap: 10px; margin-top: 12px; }
-        .col-subswitch-hint { font-size: 11px; color: #999; }
 
         /* 变量标签 */
         .var-tags { display: flex; flex-wrap: wrap; gap: 6px; margin-bottom: 10px; }
@@ -270,11 +270,6 @@
         .wz-state.req { color: #d4380d; }
         .wz-arrow { align-self: center; color: #d9d9d9; font-size: 15px; }
         .view-switch.seg-scope button { padding: 6px 16px; font-weight: 600; }
-        .scope-mode-hint {
-            font-size: 11px; color: #666; background: #fafafa; border: 1px solid #f0f0f0;
-            border-radius: 6px; padding: 4px 10px; line-height: 1.5;
-        }
-        .scope-mode-hint.fleet { color: #b7791f; background: #fffbe6; border-color: #ffe58f; }
         .step-skip-note {
             display: flex; align-items: center; justify-content: space-between; gap: 10px;
             font-size: 11px; color: #b7791f; background: #fffbe6; border: 1px dashed #ffe58f;
@@ -859,7 +854,7 @@
         .canvas-wrap { padding: 14px; background: #f4f4f4; overflow: auto; height: 520px; }
         .canvas-scale { transform-origin: top left; }
         .canvas-page {
-            width: 780px; min-height: 500px; background: #fff; box-shadow: 0 2px 10px rgba(0,0,0,.08);
+            width: 780px; min-height: 1103px; background: #fff; box-shadow: 0 2px 10px rgba(0,0,0,.08);
             padding-bottom: 24px; position: relative; overflow: hidden;
         }
         .pdfd-head { display: flex; align-items: center; gap: 10px; padding: 14px 26px; border-bottom: 2px solid #E60012; }
@@ -958,7 +953,6 @@
         .prop-danger:hover { background: #fff1f0; }
         .designer-validate { margin: 0; padding: 8px 12px; font-size: 12px; line-height: 1.6; display: none; }
         .designer-validate.active { display: block; }
-        .designer-validate.ok { background: #f6ffed; border-top: 1px solid #b7eb8f; color: #389e0d; }
         .designer-validate.warn { background: #fffbe6; border-top: 1px solid #ffe58f; color: #d48806; }
 
         /* 字段库选择弹窗 */
@@ -974,12 +968,6 @@
         }
         .pdfpick-head-l { display: flex; align-items: center; gap: 10px; min-width: 0; flex-wrap: wrap; }
         .pdfpick-title { font-size: 14px; font-weight: 700; color: #333; }
-        .pdfpick-sub { font-size: 11px; color: #999; display: inline-flex; align-items: center; gap: 6px; }
-        .pdfpick-sub b { color: #E60012; font-weight: 600; }
-        .pdfpick-sub code {
-            font-family: ui-monospace, Menlo, monospace; font-size: 10.5px; color: #888;
-            background: #f5f5f5; border: 1px solid #eee; border-radius: 3px; padding: 0 4px;
-        }
         .pdfpick-x {
             width: 26px; height: 26px; flex: 0 0 26px; border: none; background: transparent; border-radius: 50%;
             color: #bbb; font-size: 17px; line-height: 1; cursor: pointer; font-family: inherit;
@@ -1178,6 +1166,14 @@
                     <input type="text" id="filter-name" placeholder="输入模版名称..." onkeydown="if(event.key==='Enter')filterTemplates()">
                 </div>
                 <div class="filter-item">
+                    <label>适用范围</label>
+                    <select id="filter-scope">
+                        <option value="">全部适用范围</option>
+                        <option value="单机">单机</option>
+                        <option value="机群">机群</option>
+                    </select>
+                </div>
+                <div class="filter-item">
                     <label>语言类型</label>
                     <select id="filter-lang">
                         <option value="">全部语言</option>
@@ -1195,7 +1191,7 @@
                 <div class="table-card-header"><h3>模版列表</h3><span style="font-size:12px;color:#999" id="tpl-count">共 5 个模版</span></div>
                 <div style="overflow-x:auto;">
                     <table>
-                        <thead><tr><th style="width:50px;">图标</th><th>模版名称</th><th>模版描述</th><th>语言</th><th>启用</th><th>最近更新</th><th>操作</th></tr></thead>
+                        <thead><tr><th style="width:50px;">图标</th><th>模版名称</th><th>模版描述</th><th>适用范围</th><th>语言</th><th>启用</th><th>最近更新</th><th>操作</th></tr></thead>
                         <tbody id="template-table-body"></tbody>
                     </table>
                 </div>
@@ -1219,10 +1215,27 @@
                 <div class="lang-hint">切换语言后将自动保存当前编辑内容，未配置的语言将从简体中文复制</div>
             </div>
 
-            <!-- 基本信息（随编辑语言联动） -->
+            <!-- 基本信息（随编辑语言联动）分两行：① 模版名称 / 模版描述 ② 启用开关 / 整体口径 -->
             <div class="form-row-2">
                 <div class="form-group"><label>模版名称 <span class="required">*</span></label><input type="text" id="edit-tpl-name" placeholder="如：设备运行日报模版"></div>
                 <div class="form-group"><label>模版描述 <span class="required">*</span></label><input type="text" id="edit-tpl-desc" placeholder="如：适用于挖掘机设备每日运行数据汇报"></div>
+            </div>
+            <div class="form-row-2 meta-row">
+                <div class="form-group">
+                    <label>启用此模版</label>
+                    <div class="switch-wrap">
+                        <label class="switch"><input type="checkbox" id="edit-tpl-enabled" checked onchange="syncEnabledState()"><span class="slider"></span></label>
+                        <span class="switch-state" id="edit-tpl-enabled-state">已启用</span>
+                    </div>
+                </div>
+                <!-- 整体口径：作用于整份报表（第 2 步数据列 + 第 3 步 PDF 版式共用） -->
+                <div class="form-group">
+                    <label>整体口径</label>
+                    <div class="view-switch seg-scope" id="edit-scope-tabs">
+                        <button type="button" data-col="single" class="active" onclick="setEditScope('single')">单机设备</button>
+                        <button type="button" data-col="fleet" onclick="setEditScope('fleet')">机群（聚合）</button>
+                    </div>
+                </div>
             </div>
 
             <!-- 步骤向导：1 邮件正文（必填）· 2 XLSX/CSV 附件（可跳过）· 3 PDF 附件（可跳过） -->
@@ -1293,15 +1306,6 @@
                         </div>
                     </div>
                 </div>
-
-                    <!-- 口径切换（切换即切换整套配置；在哪个口径里配置过，本步就为哪个口径产出附件） -->
-                    <div class="col-subswitch-wrap" id="data-col-subswitch">
-                        <div class="view-switch seg-scope" id="data-col-subswitch-tabs">
-                            <button type="button" data-col="single" class="active" onclick="setDataColTab('single')">单机设备</button>
-                            <button type="button" data-col="fleet" onclick="setDataColTab('fleet')">机群（聚合）</button>
-                        </div>
-                        <span class="scope-mode-hint" id="data-scope-hint"></span>
-                    </div>
                     <div class="step-skip-note" id="skipNote2" style="display:none;">
                         <span>第 2 步已跳过：不会生成 XLSX/CSV 附件，本步的配置不参与保存。</span>
                         <button type="button" onclick="restoreStep(2)">恢复此步</button>
@@ -1397,7 +1401,6 @@
                         <div class="pdfpick-head">
                             <div class="pdfpick-head-l">
                                 <span class="pdfpick-title" id="pdfPickTitle">从模型字典选择</span>
-                                <span class="pdfpick-sub" id="pdfPickSub"></span>
                             </div>
                             <button type="button" class="pdfpick-x" onclick="pdfCloseFieldPicker()" title="关闭">×</button>
                         </div>
@@ -1407,7 +1410,7 @@
                         <div class="pdfpick-warn" id="pdfPickWarn"></div>
                         <div class="pdfpick-body" id="pdfPickBody"></div>
                         <div class="pdfpick-foot">
-                            <span class="cnt" id="pdfPickCntText">已选 <b id="pdfPickCount">0</b> 项 · 字段来源：报表模版数据词典</span>
+                            <span class="cnt" id="pdfPickCntText">已选 <b id="pdfPickCount">0</b> 项</span>
                             <span>
                                 <span id="pdfPickAllWrap">
                                     <button type="button" class="pdfpick-btn" onclick="pdfPickSelectAll(false)">取消全选</button>
@@ -1424,12 +1427,6 @@
                 <!-- ===== v2.0 模式一：版式设计器 ===== -->
                 <div id="pdfDesignerMode">
                     <div class="designer-toolbar">
-                        <div class="tb-item"><span class="tb-lb">管理范围透视</span>
-                            <div class="view-switch seg-scope" id="pdf-col-subswitch-tabs">
-                                <button type="button" data-col="single" class="active" onclick="setPdfColTab('single')">单机设备</button>
-                                <button type="button" data-col="fleet" onclick="setPdfColTab('fleet')">机群（聚合）</button>
-                            </div>
-                        </div>
                         <div class="tb-item"><span class="tb-lb">统计时间维度</span>
                             <div class="tb-checks">
                                 <label class="chk-inline"><input type="checkbox" data-td="day" onchange="pdfToggleTimeDim(this)"> 日报</label>
@@ -1444,7 +1441,7 @@
                     <div class="designer-body">
                         <!-- 中：画布 -->
                         <div class="designer-col">
-                            <div class="designer-col-title">报表可视化排版画布（A4 横向）</div>
+                            <div class="designer-col-title">报表可视化排版画布（A4 纵向）</div>
                             <div class="canvas-wrap">
                                 <div class="canvas-scale">
                                     <div class="canvas-page" id="pdfCanvas"></div>
@@ -1533,14 +1530,6 @@
                     </tbody>
                 </table>
 
-            </div>
-
-            <!-- 启用开关 -->
-            <div class="form-group" style="margin-top:12px;">
-                <div class="switch-wrap">
-                    <label class="switch"><input type="checkbox" id="edit-tpl-enabled" checked><span class="slider"></span></label>
-                    <span style="font-size:13px;color:#666">启用此模版</span>
-                </div>
             </div>
         </div>
         <div class="modal-footer wz-footer">
@@ -1832,11 +1821,13 @@ function nowStr() {
 function renderTemplateTable() {
     const nameQ = (document.getElementById('filter-name').value || '').trim().toLowerCase();
     const langQ = document.getElementById('filter-lang').value || '';
+    const scopeQ = (document.getElementById('filter-scope') || {}).value || '';
 
     const filtered = templates.filter((t, i) => {
         const zhTr = t.translations['zh-CN'] || {};
         const name = (zhTr.name || '').toLowerCase();
         if (nameQ && !name.includes(nameQ)) return false;
+        if (scopeQ && getTypes(t).indexOf(scopeQ) < 0) return false;
         if (langQ) {
             const langs = getConfiguredLangs(i);
             if (!langs.includes(langQ)) return false;
@@ -1850,7 +1841,7 @@ function renderTemplateTable() {
     document.getElementById('tpl-count').textContent = '共 ' + totalCount + ' 个模版' + (shownCount < totalCount ? '（筛选后 ' + shownCount + ' 个）' : '');
 
     if (filtered.length === 0) {
-        tbody.innerHTML = '<tr><td colspan="7" style="text-align:center;color:#bbb;padding:40px 0;">无匹配模版</td></tr>';
+        tbody.innerHTML = '<tr><td colspan="8" style="text-align:center;color:#bbb;padding:40px 0;">无匹配模版</td></tr>';
         return;
     }
 
@@ -1867,6 +1858,7 @@ function renderTemplateTable() {
             <td style="text-align:center;">${iconHtml}</td>
             <td><strong>${zhTr.name || '(未命名)'}</strong></td>
             <td style="max-width:160px;overflow:hidden;text-overflow:ellipsis;white-space:nowrap">${zhTr.description || ''}</td>
+            <td class="scope-cell">${scopeTagsHtml(getTypes(t))}</td>
             <td><span class="tag tag-blue">${langLabel}</span></td>
             <td><span class="tag ${t.enabled ? 'tag-green' : 'tag-gray'}">${t.enabled ? '已启用' : '已停用'}</span></td>
             <td>${t.updatedAt}</td>
@@ -1878,6 +1870,12 @@ function renderTemplateTable() {
     }).join('');
 }
 
+// 适用范围徽标：单机（灰）/ 机群（红）—— 适用范围不存在「项目」口径，多口径并列展示
+function scopeTagsHtml(types) {
+    const arr = (types && types.length) ? types : ['单机'];
+    return arr.map(x => '<span class="tag ' + (x === '机群' ? 'tag-red' : 'tag-gray') + '">' + escapeHtml(x) + '</span>').join(' ');
+}
+
 // 搜索筛选
 function filterTemplates() {
     renderTemplateTable();
@@ -1887,6 +1885,8 @@ function filterTemplates() {
 function clearFilters() {
     document.getElementById('filter-name').value = '';
     document.getElementById('filter-lang').value = '';
+    const scopeEl = document.getElementById('filter-scope');
+    if (scopeEl) scopeEl.value = '';
     renderTemplateTable();
 }
 
@@ -1922,6 +1922,13 @@ function scrollEditModalTop() {
     if (body) body.scrollTop = 0;
 }
 
+// 启用开关右侧的状态文案（与列表里「已启用 / 已停用」口径一致）
+function syncEnabledState() {
+    const el = document.getElementById('edit-tpl-enabled');
+    const s = document.getElementById('edit-tpl-enabled-state');
+    if (el && s) s.textContent = el.checked ? '已启用' : '已停用';
+}
+
 function loadEditForm(isNew) {
     const t = templates[currentTemplateId];
     const tr = getT(currentTemplateId, currentEditLang);
@@ -1936,8 +1943,7 @@ function loadEditForm(isNew) {
     editStepTouched = { 2: false, 3: false };
     editWizardStep = 1;
     setEditTypes(isNew ? ['单机', '机群'] : getTypes(t));
-    dataColTab = 'single';
-    pdfColTab = 'single';
+    editScope = 'single';
     toggleDataColumnConfig(true);
     bindStepDirty();
     refreshWizard();
@@ -1945,6 +1951,7 @@ function loadEditForm(isNew) {
     const editLangSel = document.getElementById('edit-lang-select');
     if (editLangSel) editLangSel.disabled = !isNew;
     document.getElementById('edit-tpl-enabled').checked = t.enabled;
+    syncEnabledState();
 
     // 更新语言选择器
     updateLangSelect();
@@ -2283,6 +2290,27 @@ const PDFV3_TIME_DIMS = [{ id: 'day', name: '日报' }, { id: 'week', name: '周
 // 数据组件默认自带 1 个指标（未手动绑定时用它，避免组件空着出不了图）
 const PDF_DEFAULT_METRIC = '总油耗';
 
+/* ===== 指标绑定规则：按「组件类型 × 当前口径」决定可选几个指标 =====
+   机群：折线图每台设备一条线、环形图看「单机贡献度」→ 只能 1 个指标（单选，再选自动替换）；
+   单机折线图、柱状图（单机 / 机群排行榜）、单机环形图：可按同一单位多指标并列（5 色循环，上限 5）；
+   指标卡 1 字段 1 张卡（≤6 张）；数据明细表一列一个指标（不限，各列单位可不同）。 */
+const PDF_PICK_METRIC_MAX = 5;
+function pdfMetricRule(type, scope) {
+    scope = scope || (typeof pdfV3Scope === 'function' ? pdfV3Scope() : 'single');
+    if (type === 'text_block') return { mode: 'none', max: 0 };
+    if (type === 'data_table') return { mode: 'table', max: 0 };
+    if (type === 'kpi_card') return { mode: 'kpi', max: PDF_PICK_KPI_MAX };
+    if (scope === 'fleet' && (type === 'line_chart' || type === 'doughnut_chart')) {
+        return { mode: 'single', max: 1 };
+    }
+    return { mode: 'multi', max: PDF_PICK_METRIC_MAX };
+}
+// 该规则下允许的最大指标数（0 = 不限）
+function pdfMetricMax(type, scope) {
+    const r = pdfMetricRule(type, scope);
+    return r.mode === 'kpi' ? PDF_PICK_KPI_MAX : (r.mode === 'multi' ? r.max : (r.mode === 'single' ? 1 : 0));
+}
+
 function pdfTypeMeta(id) { return PDFV3_TYPES.find(t => t.id === id) || PDFV3_TYPES[0]; }
 function pdfTypeName(id) { return pdfTypeMeta(id).name; }
 
@@ -2317,7 +2345,7 @@ function pdfV3Defaults() {
     };
 }
 
-function pdfV3Scope() { return pdfColTab === 'fleet' ? 'fleet' : 'single'; }
+function pdfV3Scope() { return editScope === 'fleet' ? 'fleet' : 'single'; }
 function pdfV3TplName() {
     const el = document.getElementById('edit-tpl-name');
     return (el && el.value.trim()) || '未命名报表模版';
@@ -2364,7 +2392,7 @@ function pdfNormalizeState(raw) {
             if (c.type !== 'text_block') {
                 const all = (Array.isArray(c.metrics) ? c.metrics : [])
                     .filter(n => PDF_BASE_FIELD_NAMES.indexOf(n) < 0);
-                const max = c.type === 'kpi_card' ? PDF_PICK_KPI_MAX : (c.type === 'data_table' ? 0 : 1);
+                const max = pdfMetricMax(c.type, k);
                 const ms = max ? all.slice(0, max) : all;
                 c.metrics = ms.length ? ms : [PDF_DEFAULT_METRIC];
             }
@@ -2522,19 +2550,29 @@ function pdfV3RenderProps() {
     if (c.type !== 'text_block') {
         html += '<div class="prop-head">数据透视与维度</div>';
         const isKpi = c.type === 'kpi_card';
-        const kpiFull = isKpi && c.metrics.length >= PDF_PICK_KPI_MAX;
+        const rule = pdfMetricRule(c.type);
+        const capMax = (rule.mode === 'kpi') ? PDF_PICK_KPI_MAX : (rule.mode === 'multi' ? rule.max : 0);
+        const capFull = capMax > 0 && c.metrics.length >= capMax;
+        const capTip = (rule.mode === 'kpi')
+            ? '已达上限 ' + PDF_PICK_KPI_MAX + ' 张，先移除一张再加。'
+            : '已达上限 ' + capMax + ' 个，先移除一个再加。';
+        const scopeName = pdfV3Scope() === 'fleet' ? '机群' : '单机';
+        const cntTxt = (rule.mode === 'kpi')
+            ? c.metrics.length + ' / ' + PDF_PICK_KPI_MAX + ' 张'
+            : (rule.mode === 'multi' ? c.metrics.length + ' / ' + rule.max + ' 个'
+                : (rule.mode === 'table' ? c.metrics.length + ' 列'
+                    : (rule.mode === 'single' ? '1 个（' + scopeName + '口径）' : '')));
         html += '<div class="prop-group">'
             + (c.metrics.length
                 ? pdfMetricRowsHTML(c, isKpi)
                 : '<div style="font-size:11px;color:#b7791f;background:#fffbe6;border:1px solid #ffe58f;border-radius:4px;padding:4px 8px;margin-bottom:6px;">⚠ 尚未绑定字段，画布无法出图</div>')
             + '<div style="display:flex;gap:12px;align-items:center;margin-top:2px;">'
-            + '<button type="button" class="metric-add"' + (kpiFull ? ' disabled style="opacity:.45;cursor:not-allowed"' : '')
-            + ' onclick="' + (kpiFull ? '' : 'pdfOpenFieldPicker(\'' + c.id + '\')') + '">'
+            + '<button type="button" class="metric-add"' + (capFull ? ' disabled style="opacity:.45;cursor:not-allowed" title="' + capTip + '"' : '')
+            + ' onclick="' + (capFull ? '' : 'pdfOpenFieldPicker(\'' + c.id + '\')') + '">'
             + (isKpi ? '＋ 添加指标卡' : '＋ 从模型字典选择') + '</button>'
-            + (isKpi ? '<span style="font-size:11px;color:#999">' + c.metrics.length + ' / ' + PDF_PICK_KPI_MAX + ' 张</span>'
-                : (c.type === 'data_table' ? '<span style="font-size:11px;color:#999">' + c.metrics.length + ' 列</span>' : ''))
+            + (cntTxt ? '<span style="font-size:11px;color:#999">' + cntTxt + '</span>' : '')
             + '</div>'
-            + (kpiFull ? '<div style="font-size:11px;color:#b7791f;margin-top:6px;">已达上限 ' + PDF_PICK_KPI_MAX + ' 张，先移除一张再加。</div>' : '')
+            + (capFull ? '<div style="font-size:11px;color:#b7791f;margin-top:6px;">' + capTip + '</div>' : '')
             + '</div>';
     } else {
         html += '<div class="prop-group"><label>段落内容</label>'
@@ -2629,12 +2667,18 @@ function pdfUpdateSelected(key, value) {
     if (!c) return;
     if (key === 'titleKey') value = String(value || '');
     c[key] = value;
-    // 切成指标卡：默认只保留一张卡（原多指标图表的字段不整批搬过来），上限 6 张
-    if (key === 'type' && value === 'kpi_card' && Array.isArray(c.metrics) && c.metrics.length > 1) {
-        if (c.metrics.length > 1) {
-            showToast('指标卡一个字段一张卡，默认保留第 1 张，其余请按需添加', 'error');
+    // 切类型后按「新类型 × 当前口径」的上限裁剪（如：明细表多列 → 机群折线只留 1 个指标）
+    if (key === 'type' && Array.isArray(c.metrics)) {
+        const rule = pdfMetricRule(value);
+        const max = rule.mode === 'kpi' ? PDF_PICK_KPI_MAX
+            : (rule.mode === 'multi' ? rule.max : (rule.mode === 'single' ? 1 : 0));
+        if (max && c.metrics.length > max) {
+            showToast(rule.mode === 'kpi'
+                ? '指标卡一个字段一张卡，默认保留第 1 张，其余请按需添加'
+                : '「' + pdfTypeName(value) + '」在' + (pdfV3Scope() === 'fleet' ? '机群' : '单机')
+                  + '口径下最多绑定 ' + max + ' 个指标，已保留前 ' + max + ' 个', 'error');
+            c.metrics = c.metrics.slice(0, max);
         }
-        c.metrics = c.metrics.slice(0, 1);
     }
     pdfV3RenderAll();
 }
@@ -2653,8 +2697,8 @@ function pdfToggleTimeDim(el) {
     else pdfV3.timeDims = pdfV3.timeDims.filter(x => x !== id);
 }
 
-// 注：口径切换在第 3 步顶部的「单机设备 / 机群（聚合）」分段按钮上（见 setPdfColTab），
-// 切换即切换到另一套数据模块与版式；设计器通过 pdfV3Scope() 读取 pdfColTab 跟随显示。
+// 注：口径切换在弹窗顶部基本信息行的「单机设备 / 机群（聚合）」分段按钮上（见 setEditScope），
+// 切换即切换到另一套数据模块与版式；设计器通过 pdfV3Scope() 读取 editScope 跟随显示。
 // 本步为哪些口径产出，由「在该口径里配置过」自动判定（见 bindStepDirty 的 mark）。
 
 function validatePdfLayout() {
@@ -2668,12 +2712,14 @@ function validatePdfLayout() {
         if (c.type !== 'text_block' && !(c.metrics || []).length) issues.push('第 ' + (i + 1) + ' 个组件（' + pdfTypeName(c.type) + '）未绑定指标');
     });
     if (!(pdfV3.timeDims || []).length) issues.push('未选择统计时间维度');
-    const half = list.filter(c => c.pdfWidth === '50%').length;
-    el.className = 'designer-validate active ' + (issues.length ? 'warn' : 'ok');
-    el.innerHTML = issues.length
-        ? '⚠ 校验未通过：' + issues.slice(0, 4).join('；') + (issues.length > 4 ? ' 等' : '')
-        : '✓ 校验通过（' + (pdfV3Scope() === 'fleet' ? '机群' : '单机') + '口径）：' + list.length + ' 个组件，半数宽度 ' + half + ' 个，时间维度 '
-          + (pdfV3.timeDims || []).map(d => (PDFV3_TIME_DIMS.find(x => x.id === d) || {}).name).join(' / ');
+    // 2026-09-23 用户要求删掉「✓ 校验通过…」那条：没问题就不显示，只有问题才弹黄色告警条
+    if (!issues.length) {
+        el.className = 'designer-validate';
+        el.innerHTML = '';
+        return;
+    }
+    el.className = 'designer-validate active warn';
+    el.innerHTML = '⚠ 校验未通过：' + issues.slice(0, 4).join('；') + (issues.length > 4 ? ' 等' : '');
 }
 
 function pdfV3Payload() {
@@ -2833,29 +2879,26 @@ function pdfOpenFieldPicker(compId) {
     const c = list.find(x => x.id === compId);
     if (!c) return;
     pdfPickState.compId = compId;
-    // 指标卡：一个字段 = 一张卡，最多 6 张（单选累加式，不走全选/不限量）
-    pdfPickState.kpi = c.type === 'kpi_card';
-    // 数据明细：指标 = 表格的列，可多选；图表 / 环形图只 1 个指标，指标卡 ≤6 张
-    pdfPickState.multi = c.type === 'data_table';
+    // 按「组件类型 × 当前口径」决定选项形态与上限（机群折线 / 环形只 1 个；单机图表可多选 ≤5）
+    const rule = pdfMetricRule(c.type);
+    pdfPickState.mode = rule.mode;
+    pdfPickState.max = rule.max;
+    pdfPickState.kpi = rule.mode === 'kpi';
+    pdfPickState.multi = (rule.mode === 'table' || rule.mode === 'multi');
     pdfPickState.selected = {};
     pdfPickState.groupFields = {};
     pdfPickState.bound = (c.metrics || []).slice();
     // 基础维度字段已置灰不可选，回显时也不再勾上；指标卡是「再加一张」，不回显已加的
-    if (pdfPickState.multi || !pdfPickState.kpi) {
+    if (rule.mode === 'single' || rule.mode === 'multi' || rule.mode === 'table') {
         pdfPickState.bound.forEach(m => {
             if (PDF_BASE_FIELD_NAMES.indexOf(m) < 0) pdfPickState.selected[m] = true;
         });
     }
-    // 副标题显示组件标题 + 模块序号，不再暴露技术 key
     const t = document.getElementById('pdfPickTitle');
     if (t) {
-        t.textContent = pdfPickState.kpi ? '添加指标卡' : (pdfPickState.multi ? '选择明细列（可多选）' : '从模型字典选择');
-    }
-    const sub = document.getElementById('pdfPickSub');
-    if (sub) {
-        const idx = list.findIndex(x => x.id === compId) + 1;
-        sub.innerHTML = '<b>' + escapeHtml(c.title || pdfTypeName(c.type)) + '</b><span>· 第 ' + idx + ' 个模块 · '
-            + (pdfV3Scope() === 'fleet' ? '机群口径' : '单机口径') + '</span>';
+        t.textContent = (rule.mode === 'kpi') ? '添加指标卡'
+            : (rule.mode === 'table' ? '选择明细列（可多选）'
+                : (rule.mode === 'multi' ? '选择指标（可多选）' : '从模型字典选择'));
     }
     const s = document.getElementById('pdfPickSearch');
     if (s) s.value = '';
@@ -2895,6 +2938,55 @@ function pdfPickCurrentFields() {
 // 基础维度字段（统计周期 / 设备机型 / 设备编号）不占「单选 1 个指标」的名额
 const PDF_BASE_FIELD_NAMES = (PDF_FIELD_DICT.base || []).map(f => f[0]);
 
+// 已选指标个数（不含基础维度字段）
+function pdfPickSelectedCount() {
+    return Object.keys(pdfPickState.selected || {})
+        .filter(k => pdfPickState.selected[k] && PDF_BASE_FIELD_NAMES.indexOf(k) < 0).length;
+}
+// 当前翻到的「设备类型」名称（用于取单位口径）
+function pdfPickCurrentCat() {
+    const types = pdfPickTypes();
+    const ti = types[typeof pdfPickState.typeIdx === 'number' ? pdfPickState.typeIdx : 0];
+    return (ti && ti.label) || '';
+}
+// 置灰原因（返回空串 = 可选）：基础字段 / 指标卡已加过 / 多选已达上限
+function pdfPickOffReason(name) {
+    if (PDF_BASE_FIELD_NAMES.indexOf(name) >= 0) return '基础维度字段（统计周期 / 设备机型 / 设备编号）不需要绑定指标';
+    if (pdfPickState.kpi && (pdfPickState.bound || []).indexOf(name) >= 0) return '该指标已在卡片里了';
+    const on = !!pdfPickState.selected[name];
+    if (pdfPickState.multi && pdfPickState.max > 0 && !on && pdfPickSelectedCount() >= pdfPickState.max) {
+        return '已达上限 ' + pdfPickState.max + ' 个指标，先取消一个再选';
+    }
+    return '';
+}
+// 字段行里的选择控件：多选 = 复选框；单选 = 互斥单选框（再点一次取消）；置灰时禁用并给出原因
+function pdfPickInputHTML(name, on, gid) {
+    const reason = pdfPickOffReason(name);
+    if (reason) {
+        return '<input type="' + (pdfPickState.multi ? 'checkbox' : 'radio') + '" disabled title="'
+            + escapeAttr(reason) + '">';
+    }
+    if (pdfPickState.multi) {
+        return '<input type="checkbox"' + (on ? ' checked' : '')
+            + ' onclick="pdfPickToggle(\'' + escapeAttr(name) + '\', this.checked, \'' + escapeAttr(gid || '') + '\')">';
+    }
+    return '<input type="radio" name="pdfpick_one"' + (on ? ' checked' : '') + ' title="再次点击可取消"'
+        + ' onclick="pdfPickToggle(\'' + escapeAttr(name) + '\', ' + (on ? 'false' : 'true')
+        + ', \'' + escapeAttr(gid || '') + '\')">';
+}
+// 同屏多指标必须单位一致（图表 / 环形图）：返回冲突说明，无冲突返回 null
+function pdfPickUnitMismatch(name) {
+    const cat = pdfPickCurrentCat();
+    const u = pdfFieldUnit(name, cat);
+    if (!u) return null;
+    const others = Object.keys(pdfPickState.selected || {})
+        .filter(k => pdfPickState.selected[k] && k !== name && PDF_BASE_FIELD_NAMES.indexOf(k) < 0);
+    for (let i = 0; i < others.length; i++) {
+        const u2 = pdfFieldUnit(others[i], cat);
+        if (u2 && u2 !== u) return '已选「' + others[i] + '」（' + u2 + '），本次选「' + name + '」（' + u + '）';
+    }
+    return null;
+}
 // 字段行：右侧显示单位（不再显示 {{模板变量}}）
 // 指标用单选框（同组互斥）；基础维度字段（统计周期/设备机型/设备编号）与指标卡用复选框
 function pdfPickFieldRows(fields, cat, gid) {
@@ -2904,19 +2996,8 @@ function pdfPickFieldRows(fields, cat, gid) {
         const name = f[0];
         const on = !!pdfPickState.selected[name];
         const unit = pdfFieldUnit(name, cat);
-        // 置灰不可选：基础维度字段（统计周期/设备机型/设备编号），以及指标卡里已经加过的指标
-        const off = PDF_BASE_FIELD_NAMES.indexOf(name) >= 0
-            || (pdfPickState.kpi && (pdfPickState.bound || []).indexOf(name) >= 0);
-        // 明细表：复选框，可多选（一个指标 = 一列）；图表 / 环形图：单选框，再点一次取消；指标卡：复选框累加
-        const input = off
-            ? '<input type="radio" disabled>'
-            : (pdfPickState.multi
-                ? '<input type="checkbox"' + (on ? ' checked' : '')
-                  + ' onclick="pdfPickToggle(\'' + escapeAttr(name) + '\', this.checked, \'' + escapeAttr(gid || '') + '\')">'
-                : '<input type="radio" name="pdfpick_one"' + (on ? ' checked' : '')
-                  + ' title="再次点击可取消"'
-                  + ' onclick="pdfPickToggle(\'' + escapeAttr(name) + '\', ' + (on ? 'false' : 'true')
-                  + ', \'' + escapeAttr(gid || '') + '\')">');
+        const off = !!pdfPickOffReason(name);
+        const input = pdfPickInputHTML(name, on, gid);
         return '<label class="pick-item' + (on && !off ? ' on' : '') + (off ? ' off' : '') + '">' + input
             + '<span class="pick-name">' + escapeHtml(name) + '</span>'
             + '<span class="pick-unit">' + escapeHtml(unit || '—') + '</span></label>';
@@ -2941,8 +3022,11 @@ function pdfRenderPickCascade() {
             + '" onclick="pdfPickSetModel(\'' + escapeAttr(m.key) + '\')" title="' + escapeAttr(m.label) + '">' + escapeHtml(m.label) + '</div>').join('')
         + '</div>'
         + '<div class="pick-col pick-col-fields"><div class="pick-col-hd">'
-        + (pdfPickState.kpi ? '字段（每次选 1 个 · 加 1 张卡）'
-            : (pdfPickState.multi ? '字段（可多选 · 一个指标一列）' : '字段（单选 1 个）'))
+        + (pdfPickState.mode === 'kpi' ? '字段（每次选 1 个 · 加 1 张卡）'
+            : (pdfPickState.mode === 'table' ? '字段（可多选 · 一个指标一列）'
+                : (pdfPickState.mode === 'multi'
+                    ? '字段（可多选 · 最多 ' + pdfPickState.max + ' 个）'
+                    : '字段（单选 1 个）')))
         + '<span class="pick-col-hd-r">' + ((mi && mi.fields) ? mi.fields.length : 0) + ' 个</span></div>'
         + ((mi && mi.fields && mi.fields.length)
             ? pdfPickFieldRows(mi.fields, ti.label, 'c_' + ti.key + '_' + ((mi && mi.key) || ''))
@@ -2968,17 +3052,8 @@ function pdfRenderPickFlat(kw) {
         items.forEach(f => {
             const on = !!pdfPickState.selected[f.name];
             const unit = pdfFieldUnit(f.name, g.cat);
-            const off = PDF_BASE_FIELD_NAMES.indexOf(f.name) >= 0
-                || (pdfPickState.kpi && (pdfPickState.bound || []).indexOf(f.name) >= 0);
-            const input = off
-                ? '<input type="radio" disabled>'
-                : (pdfPickState.multi
-                    ? '<input type="checkbox"' + (on ? ' checked' : '')
-                      + ' onclick="pdfPickToggle(\'' + escapeAttr(f.name) + '\', this.checked, \'f_' + escapeAttr(g.cat) + '\')">'
-                    : '<input type="radio" name="pdfpick_one"' + (on ? ' checked' : '')
-                      + ' title="再次点击可取消"'
-                      + ' onclick="pdfPickToggle(\'' + escapeAttr(f.name) + '\', ' + (on ? 'false' : 'true')
-                      + ', \'f_' + escapeAttr(g.cat) + '\')">');
+            const off = !!pdfPickOffReason(f.name);
+            const input = pdfPickInputHTML(f.name, on, 'f_' + g.cat);
             html += '<label class="pick-item' + (on && !off ? ' on' : '') + (off ? ' off' : '') + '">' + input
                 + '<span class="pick-name">' + escapeHtml(f.name) + '</span>'
                 + '<span class="pick-unit">' + escapeHtml(unit || '—') + '</span></label>';
@@ -2994,21 +3069,25 @@ function pdfRenderPickBody() {
     const el = document.getElementById('pdfPickSearch');
     const kw = (el && el.value ? el.value : '').trim();
     if (kw) pdfRenderPickFlat(kw); else pdfRenderPickCascade();
-    const n = Object.keys(pdfPickState.selected).filter(k => pdfPickState.selected[k]).length;
+    const n = pdfPickSelectedCount();
     const cnt = document.getElementById('pdfPickCount');
     if (cnt) cnt.textContent = n;
     const cntText = document.getElementById('pdfPickCntText');
     if (cntText) {
-        cntText.innerHTML = pdfPickState.kpi
+        const maxTxt = pdfPickState.max > 0 ? ' / ' + pdfPickState.max : '';
+        cntText.innerHTML = pdfPickState.mode === 'kpi'
             ? '已选 <b id="pdfPickCount">' + n + '</b> 项 · 指标卡已加 ' + (pdfPickState.bound || []).length
               + ' / ' + PDF_PICK_KPI_MAX + ' 张'
-            : (pdfPickState.multi
+            : (pdfPickState.mode === 'table'
                 ? '已选 <b id="pdfPickCount">' + n + '</b> 列 · 一列一个指标（明细表可多选）'
-                : '已选 <b id="pdfPickCount">' + n + '</b> 项 · 字段来源：报表模版数据词典');
+                : (pdfPickState.mode === 'multi'
+                    ? '已选 <b id="pdfPickCount">' + n + '</b>' + maxTxt + ' 个 · 同单位多指标并排'
+                    : '已选 <b id="pdfPickCount">' + n + '</b> 项'));
     }
-    // 全选只在明细表（多选列）下可用；指标卡有 6 张上限、图表只 1 个指标，都用不上
+    // 全选只在明细表（多选列）下可用；指标卡有 6 张上限、图表有 1 个或 5 个上限，都用不上
     const allWrap = document.getElementById('pdfPickAllWrap');
-    if (allWrap) allWrap.style.display = pdfPickState.multi ? '' : 'none';
+    if (allWrap) allWrap.style.display = pdfPickState.mode === 'table' ? '' : 'none';
+    // 2026-09-23 用户要求删掉常驻的规则说明文案；拦截提示仍由各拦截处即时写入
     pdfPickWarn('');
 }
 
@@ -3030,9 +3109,12 @@ function pdfPickSelectAll(on) {
         pdfPickWarn('指标卡每次只能选 1 个字段，请逐个点选（最多 ' + PDF_PICK_KPI_MAX + ' 张）。');
         return;
     }
-    // 图表 / 环形图：只允许 1 个指标，全选会直接违反规则；明细表可全选
-    if (on && !pdfPickState.multi) {
-        pdfPickWarn('图表 / 环形图只能选 1 个指标，请逐个点选。');
+    // 图表 / 环形图：指标数量有上限（机群 1 个、单机 ≤5），全选会直接违反规则；明细表可全选
+    if (on && pdfPickState.mode !== 'table') {
+        const msg = pdfPickState.mode === 'single'
+            ? (pdfV3Scope() === 'fleet' ? '机群口径下该组件只能选 1 个指标，请逐个点选。' : '该组件只能选 1 个指标，请逐个点选。')
+            : '该组件最多选 ' + pdfPickState.max + ' 个指标，全选会超限，请逐个点选。';
+        pdfPickWarn(msg);
         return;
     }
     const types = pdfPickTypes();
@@ -3045,26 +3127,49 @@ function pdfPickSelectAll(on) {
 }
 
 function pdfPickToggle(name, on, gid) {
-    // 明细表：多选列，直接累加，不做互斥与单位校验（每列可各自带单位）
-    if (pdfPickState.multi) {
+    // 数据明细：多选列，直接累加，不做互斥与单位校验（每列可各自带单位）
+    if (pdfPickState.mode === 'table') {
         if (on) pdfPickState.selected[name] = true; else delete pdfPickState.selected[name];
         pdfRenderPickBody();
         return;
     }
     if (on) {
-        // 单位校验：同一指标跨设备类型量纲不同（如 能耗 油车 L / 电车 kWh）→ 提示报错
+        // ① 数量拦截：多选已达上限（单机图表 ≤5）→ 不勾选，先把原因告诉用户
+        const onCount = pdfPickSelectedCount();
+        if (pdfPickState.max > 0 && pdfPickState.mode !== 'single'
+            && onCount >= pdfPickState.max && !pdfPickState.selected[name]) {
+            const msg = '已达上限 ' + pdfPickState.max + ' 个指标（'
+                + (pdfPickState.mode === 'multi' ? '5 色循环，第 ' + (pdfPickState.max + 1) + ' 个会无法区分颜色' : '口径限制')
+                + '），请先取消一个再选。';
+            showToast(msg, 'error');
+            pdfRenderPickBody();
+            pdfPickWarn(msg);
+            return;
+        }
+        // ② 单位校验：同一指标跨设备类型量纲不同（如 能耗 油车 L / 电车 kWh）→ 提示报错
         const conflict = pdfFieldUnitConflict(name);
         if (conflict) {
             showToast('所选指标单位不一致：' + name + ' 在不同设备类型下为 ' + conflict.join(' / '), 'error');
         }
-        // 指标值只保留 1 个：选中新指标时取消其它已选指标（含换设备类型后选的）
-        // 基础维度字段（统计周期 / 设备机型 / 设备编号）已置灰不可点，正常不会进来
-        if (PDF_BASE_FIELD_NAMES.indexOf(name) < 0) {
-            Object.keys(pdfPickState.selected).forEach(k => {
-                if (k === name || !pdfPickState.selected[k]) return;
-                if (PDF_BASE_FIELD_NAMES.indexOf(k) >= 0) return;
-                delete pdfPickState.selected[k];
-            });
+        // ③ 同屏多指标必须单位一致（折线 / 柱状 / 环形）
+        if (pdfPickState.mode === 'multi') {
+            const mismatch = pdfPickUnitMismatch(name);
+            if (mismatch) {
+                const msg = '同屏多指标必须单位一致：' + mismatch + '，请换一个同单位指标。';
+                showToast(msg, 'error');
+                pdfRenderPickBody();
+                pdfPickWarn(msg);
+                return;
+            }
+        }
+        // ④ 单选（机群折线 / 环形只 1 个指标）：选中新指标即替换原有的，并说明替换了什么
+        if (pdfPickState.mode === 'single' && PDF_BASE_FIELD_NAMES.indexOf(name) < 0) {
+            const prev = Object.keys(pdfPickState.selected)
+                .filter(k => pdfPickState.selected[k] && k !== name && PDF_BASE_FIELD_NAMES.indexOf(k) < 0);
+            if (prev.length) {
+                showToast('只支持 1 个指标：「' + prev[prev.length - 1] + '」已替换为「' + name + '」', 'success');
+            }
+            prev.forEach(k => delete pdfPickState.selected[k]);
         }
     }
     if (on) pdfPickState.selected[name] = true;
@@ -3078,8 +3183,8 @@ function pdfConfirmFieldPicker() {
         // 基础维度字段（统计周期 / 设备机型 / 设备编号）不进指标绑定
         let picked = Object.keys(pdfPickState.selected)
             .filter(k => pdfPickState.selected[k] && PDF_BASE_FIELD_NAMES.indexOf(k) < 0);
-        if (pdfPickState.multi) {
-            c.metrics = picked.slice();          // 明细表：指标 = 列，允许多选
+        if (pdfPickState.mode === 'table') {
+            c.metrics = picked.slice();          // 数据明细：指标 = 列，允许多选
         } else if (pdfPickState.kpi) {
             // 指标卡：每次选的这 1 个指标「追加」成一张新卡，最多 6 张
             if (picked.length) {
@@ -3094,8 +3199,10 @@ function pdfConfirmFieldPicker() {
                 }
             }
         } else {
-            // 图表 / 环形图：指标值只保留 1 个
-            c.metrics = picked.length ? [picked[picked.length - 1]] : [];
+            // 折线 / 柱状 / 环形：按「组件 × 口径」上限裁剪（机群折线 / 环形只留 1 个；单机最多 5 个）
+            const max = pdfPickState.max > 0 ? pdfPickState.max : 0;
+            c.metrics = max ? picked.slice(0, max) : picked.slice();
+            if (!c.metrics.length && pdfPickState.mode === 'single') c.metrics = [];
         }
         pdfV3SelectedId = c.id;
     }
@@ -3249,18 +3356,6 @@ function toggleEditType(type) {
     refreshWizard();
 }
 
-// 口径模式说明（跟随切换变化，机群用醒目提示）
-function scopeModeHint(step, key) {
-    if (step === 2) {
-        return key === 'fleet'
-            ? '已开启机群模式：按「列名 → 模板变量」配置行式表格，支持跨设备汇总。'
-            : '单机模式：按「设备类型 → 物模型 → 字段」勾选附件表格要输出的列。';
-    }
-    return key === 'fleet'
-        ? '已开启机群模式：图表与表格支持按「设备」维度分组对比和透视；本页编辑的是机群那一套数据模块与版式。'
-        : '单机模式：报表仅展示单一设备的时间序列数据；本页编辑的是单机那一套数据模块与版式。';
-}
-
 // 跳过 / 恢复某一步（仅第 2 步可跳过；第 3 步是最后一步，直接保存即可）
 function skipCurrentStep() {
     const s = editWizardStep;
@@ -3301,7 +3396,7 @@ function bindStepDirty() {
         el.dataset.wzDirty = '1';
         // 在该步的某个口径里动过 → 本步即视为为该口径产出附件（无需勾选）
         const mark = () => {
-            const key = (s === 3) ? pdfColTab : dataColTab;
+            const key = editScope;
             let changed = false;
             if (!editScopeByStep[s][key]) { editScopeByStep[s][key] = true; changed = true; }
             if (!editStepTouched[s]) { editStepTouched[s] = true; changed = true; }
@@ -3329,18 +3424,11 @@ function refreshWizard() {
         }
     });
 
-    // 设计器左栏的口径分段按钮高亮
-    syncColSubswitch('pdf-col-subswitch-tabs', pdfColTab);
+    // 顶部整体口径分段按钮高亮
+    syncColSubswitch('edit-scope-tabs', editScope);
 
-    // 口径模式说明（随切换变化）+ 跳过提示
-    [[2, 'data'], [3, 'pdf']].forEach(([s, pre]) => {
-        const hint = document.getElementById(pre + '-scope-hint');
-        if (hint) {
-            const key = (s === 2) ? dataColTab : pdfColTab;
-            const skipped = !!editStepSkip[s];
-            hint.textContent = skipped ? '本步已跳过：不产出附件。' : scopeModeHint(s, key);
-            hint.className = 'scope-mode-hint' + (!skipped && key === 'fleet' ? ' fleet' : '');
-        }
+    // 各步的跳过提示
+    [2, 3].forEach(s => {
         const note = document.getElementById('skipNote' + s);
         if (note) note.style.display = editStepSkip[s] ? '' : 'none';
     });
@@ -3383,16 +3471,16 @@ function wizardPrev() {
     if (editWizardStep > 1) switchStep(editWizardStep - 1);
 }
 
-let dataColTab = 'single';   // 数据列配置子 Tab：'single' | 'fleet'
-let pdfColTab = 'single';    // PDF 数据列配置子 Tab
+// 整体口径：'single' | 'fleet'（顶部「单机设备 / 机群（聚合）」分段，第 2、3 步共用）
+let editScope = 'single';
 // v2.0 合并：两套列配置是否已按当前模版初始化（未初始化时不落库，避免把已保存配置覆盖成默认值）
 let attColLoaded = false;    // 步骤2：XLSX/CSV 数据列配置
 let pdfColLoaded = false;    // 步骤3：PDF 数据列配置
 
-function setDataColTab(tab) { dataColTab = tab; toggleDataColumnConfig(); refreshWizard(); }
-function setPdfColTab(tab) {
-    pdfColTab = tab;
-    // 单机 / 机群 各一套数据模块与版式：切口径 = 换另一套（画布 / 右栏一起换）
+// 切换整体口径：第 2 步的数据列配置 + 第 3 步的数据模块与版式一起换
+function setEditScope(tab) {
+    editScope = (tab === 'fleet') ? 'fleet' : 'single';
+    toggleDataColumnConfig();
     pdfV3RenderAll();
     refreshWizard();
 }
@@ -3411,14 +3499,11 @@ function toggleDataColumnConfig(skipInit) {
     const hasSingle = !editStepSkip[2] && stepScope.single;
     const fleetEl = document.getElementById('fleet-column-config');
     const singleEl = document.getElementById('single-column-config');
-    const subWrap = document.getElementById('data-col-subswitch');
+    if (!hasFleet) editScope = 'single';
+    else if (!hasSingle) editScope = 'fleet';
 
-    if (subWrap) subWrap.style.display = '';
-    if (!hasFleet) dataColTab = 'single';
-    else if (!hasSingle) dataColTab = 'fleet';
-
-    const showFleet = hasFleet && (!hasSingle || dataColTab === 'fleet');
-    const showSingle = hasSingle && (!hasFleet || dataColTab === 'single');
+    const showFleet = hasFleet && (!hasSingle || editScope === 'fleet');
+    const showSingle = hasSingle && (!hasFleet || editScope === 'single');
 
     if (fleetEl) fleetEl.style.display = showFleet ? '' : 'none';
     if (singleEl) {
@@ -3426,7 +3511,7 @@ function toggleDataColumnConfig(skipInit) {
         if (showSingle && !skipInit) scInit();
     }
     if (showFleet) tbKVRender();
-    syncColSubswitch('data-col-subswitch-tabs', dataColTab);
+    syncColSubswitch('edit-scope-tabs', editScope);
 }
 
 function initAttachmentTable() {

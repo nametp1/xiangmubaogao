@@ -11,7 +11,7 @@
 <style>
 *{box-sizing:border-box}
 body{margin:0;background:#f2f3f5;color:#1a1a1a;font-size:12px;font-family:"PingFang SC","Microsoft YaHei","Helvetica Neue",Arial,sans-serif}
-.report{width:297mm;min-height:210mm;margin:22px auto;padding:13mm 14mm 11mm;background:#fff;box-shadow:0 6px 24px rgba(0,0,0,.07)}
+.report{width:210mm;min-height:297mm;margin:22px auto;padding:13mm 14mm 11mm;background:#fff;box-shadow:0 6px 24px rgba(0,0,0,.07)}
 .header{display:flex;justify-content:space-between;align-items:flex-start;gap:20px;border-bottom:4px solid #E60012;padding-bottom:14px}
 .brand{background:#E60012;color:#fff;font-weight:900;font-size:26px;letter-spacing:2px;padding:6px 14px;border-radius:3px}
 .product{font-size:13px;color:#666;line-height:1.55}
@@ -20,14 +20,14 @@ body{margin:0;background:#f2f3f5;color:#1a1a1a;font-size:12px;font-family:"PingF
 .report-title p{margin:6px 0 0;font-size:13px;color:#666}
 .section{margin-top:20px;border:1px solid #f0f0f0;border-radius:6px;padding:14px 16px 16px}
 .section-title{margin:0 0 12px;padding-left:10px;border-left:4px solid #E60012;font-size:15px;font-weight:800}
-table{width:100%;border-collapse:collapse;font-size:12px}
-th{background:#d9000f;background:linear-gradient(180deg,#e8000f,#cc0010);color:#fff;padding:8px 9px;text-align:left;font-weight:600;white-space:nowrap}
+table{width:100%;max-width:100%;table-layout:fixed;border-collapse:collapse;font-size:12px}
+th{background:#d9000f;background:linear-gradient(180deg,#e8000f,#cc0010);color:#fff;padding:8px 9px;text-align:left;font-weight:600;white-space:normal; word-break:break-word;}
 td{padding:7px 9px;border-bottom:1px solid #f2f2f2;vertical-align:top}
 tbody tr:nth-child(even) td{background:#fbfafa}
 .num{text-align:right;font-variant-numeric:tabular-nums}
 .muted{color:#8c8c8c;font-size:11px}
 .legend{font-size:11px;color:#8c8c8c;margin-top:8px}
-@page{size:A4 landscape;margin:9mm}
+@page{size:A4 portrait;margin:9mm}
 @media print{html,body{background:#fff}.report{margin:0;padding:0;box-shadow:none}
 body{-webkit-print-color-adjust:exact;print-color-adjust:exact}
 .section,table{page-break-inside:avoid;break-inside:avoid}.section{border:0;border-bottom:1px solid #f0f0f0;border-radius:0}}

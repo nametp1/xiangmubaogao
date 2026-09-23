@@ -857,8 +857,14 @@
             text-decoration: underline;
         }
 
-        tbody td.col-assets {
+        .col-assets {
             max-width: 140px;
+        }
+
+        /* 2026-09-23：报表类型带口径后缀（…-单机 / …-机群），该列不再截断 */
+        .col-type {
+            min-width: 190px;
+            max-width: none;
         }
 
         .status-badge {
@@ -2324,17 +2330,6 @@
             font-size: 12px;
         }
 
-        .dim-badge {
-            display: inline-block;
-            padding: 2px 8px;
-            border-radius: 3px;
-            font-size: 11px;
-            line-height: 18px;
-            white-space: nowrap;
-        }
-        .dim-badge.device { background: #f2f2f2; color: #666; }
-        .dim-badge.project { background: #fdecee; color: #E60012; }
-
         .format-cell { white-space: nowrap; }
         /* v2.0 调整：接收时间 / 生效区间列不换行 */
         .nowrap-cell { white-space: nowrap; }
@@ -2813,8 +2808,7 @@
                     <thead>
                         <tr>
                             <th>报表名称</th>
-                            <th>报表类型</th>
-                            <th>维度</th>
+                            <th>单机 / 机群</th>
                             <th>所有者</th>
                             <th>频率</th>
                             <th>数据范围</th>
@@ -2884,7 +2878,6 @@
 
                     <div class="form-group">
                         <label class="form-label" id="reportTypeLabel">定期报表类型</label>
-                        <div class="dim-switch type-switch" id="typeGroupTabs"></div>
                         <select class="form-select" id="reportTypeSelect">
                             <option value="" disabled selected>选择报表类型</option>
                         </select>
@@ -3470,7 +3463,7 @@
                 {
                     id: 2,
                     name: '设备机群运行日报',
-                    type: '机群作业状态报表',
+                    type: '机群作业状态报表-机群',
                     owner: 'Admin',
                     caliber: '班次 07:00–19:00',
                     frequency: '每日',
@@ -3494,7 +3487,7 @@
                 {
                     id: 3,
                     name: 'G002发电机状态监控',
-                    type: '设备事件统计报表',
+                    type: '设备事件统计报表-单机',
                     owner: 'Admin',
                     frequency: '每日',
                     duration: '前一天',
@@ -3519,7 +3512,7 @@
                 {
                     id: 4,
                     name: '挖掘机月度能耗统计',
-                    type: '机群燃油效率报表',
+                    type: '机群燃油效率报表-机群',
                     owner: 'Admin',
                     frequency: '每月',
                     duration: '上个月',
@@ -3544,7 +3537,7 @@
                 {
                     id: 5,
                     name: '装载机车队日报',
-                    type: '机群作业状态报表',
+                    type: '机群作业状态报表-机群',
                     owner: 'Admin',
                     frequency: '每日',
                     duration: '前一天',
@@ -3606,7 +3599,7 @@
                 const pageData = filtered.slice(start, start + pageSize);
 
                 if (total === 0) {
-                    reportTableBody.innerHTML = `<tr><td colspan="18">
+                    reportTableBody.innerHTML = `<tr><td colspan="17">
                         <div class="empty-state">
                             <div class="empty-illustration">
                                 <svg viewBox="0 0 120 120" fill="none" xmlns="http://www.w3.org/2000/svg">
@@ -3671,8 +3664,7 @@
                         return `
                         <tr data-id="${r.id}" class="${rowClass}">
                             <td class="col-name" title="${escapeHtml(r.name)}">${escapeHtml(r.name)}</td>
-                            <td title="${escapeHtml(r.type)}">${escapeHtml(r.type)}</td>
-                            <td>${r.dimension === 'project' ? '<span class="dim-badge project">项目</span>' : '<span class="dim-badge device">设备</span>'}</td>
+                             <td class="col-type" title="${escapeHtml(r.type)}">${escapeHtml(r.type)}</td>
                             <td title="${escapeHtml(r.owner)}">${escapeHtml(r.owner)}</td>
                             <td><span class="status-badge enabled">${escapeHtml(r.frequency)}</span></td>
                             <td>${escapeHtml(durationText)}</td>
@@ -3861,38 +3853,6 @@
                 });
             }
 
-            // v2.0 调整：报表类型按「单机 / 机群」左右 Tab 分组切换（替代原下拉里的 optgroup）
-            const typeGroupTabs = document.getElementById('typeGroupTabs');
-            let typeGroup = '';
-
-            function getGroupsOfCurrentDim() {
-                const groups = [];
-                getTypesOfCurrentDim().forEach(t => {
-                    if (groups.indexOf(t.g) < 0) groups.push(t.g);
-                });
-                return groups;
-            }
-
-            function renderTypeGroupTabs() {
-                if (!typeGroupTabs) return;
-                const groups = getGroupsOfCurrentDim();
-                typeGroupTabs.style.display = groups.length > 1 ? 'flex' : 'none';
-                typeGroupTabs.innerHTML = groups.map(g =>
-                    '<button type="button" class="type-group-tab' + (g === typeGroup ? ' active' : '')
-                    + '" data-g="' + g + '">' + g + '</button>'
-                ).join('');
-                typeGroupTabs.querySelectorAll('button').forEach(btn => {
-                    btn.addEventListener('click', () => {
-                        if (btn.dataset.g === typeGroup) return;
-                        typeGroup = btn.dataset.g;
-                        selectedType = '';
-                        renderTypeOptions();
-                        updateTypeRelatedUI();
-                        markDirty();
-                    });
-                });
-            }
-
             const step1Label = document.getElementById('step1Label');
             const reportTypeLabel = document.getElementById('reportTypeLabel');
             const reportTypeHint = document.getElementById('reportTypeHint');
@@ -3915,7 +3875,7 @@
 
             const MAX_PROJECTS = 20;
 
-            // v2.0：资产数量上限 —— 单机报表仅 1 个；机群报表最多 100 个
+            // 资产数量上限由所选的报表类型决定：单机报表仅 1 个；机群报表最多 100 个
             const MAX_ASSETS = 100;
             function assetLimit() {
                 return isSingleAsset() ? 1 : MAX_ASSETS;
@@ -3964,6 +3924,26 @@
                 ]
             };
 
+            // 2026-09-23 调整：单机 / 机群各是一份独立报表 → 类型名直接带口径后缀（「设备利用率报表-单机」）
+            function typeLabel(t) {
+                return (t.g === '单机' || t.g === '机群') ? t.v + '-' + t.g : t.v;
+            }
+            function typeOfLabel(label) {
+                return getTypesOfCurrentDim().filter(function (x) { return typeLabel(x) === label; })[0];
+            }
+            // 名称 / 主题的默认值不带后缀（「设备利用率报表 报表」）
+            function plainTypeName(label) {
+                return String(label || '').replace(/-(单机|机群)$/, '');
+            }
+            // 兼容历史数据（存的是不带后缀的旧类型名）
+            function normalizeType(v) {
+                if (!v) return '';
+                if (typeOfLabel(v)) return v;
+                const plain = plainTypeName(v);
+                const hit = getTypesOfCurrentDim().filter(function (x) { return x.v === plain; })[0];
+                return hit ? typeLabel(hit) : v;
+            }
+
             const SRC_LABEL = {
                 all: '所有项目',
                 jobsite: '工地现场',
@@ -3990,25 +3970,18 @@
                 return REPORT_TYPES[currentDimension] || [];
             }
 
+            // 2026-09-23 调整：下拉平铺一层，类型名自带口径后缀（不再用「单机 / 机群」分组标题）
             function renderTypeOptions() {
                 const all = getTypesOfCurrentDim();
-
-                // 分组跟随已选类型；否则回落到第一个分组
-                const picked = all.find(t => t.v === selectedType);
-                if (picked) typeGroup = picked.g;
-                if (!typeGroup || !all.some(t => t.g === typeGroup)) {
-                    typeGroup = all.length ? all[0].g : '';
-                }
-                renderTypeGroupTabs();
-
                 const current = reportTypeSelect.value;
-                const list = all.filter(t => t.g === typeGroup);
+
                 let html = '<option value="" disabled' + (current ? '' : ' selected') + '>选择报表类型</option>';
-                list.forEach(t => {
-                    html += `<option value="${t.v}">${t.v}</option>`;
+                all.forEach(t => {
+                    const label = typeLabel(t);
+                    html += `<option value="${label}">${label}</option>`;
                 });
                 reportTypeSelect.innerHTML = html;
-                if (current && list.some(t => t.v === current)) {
+                if (current && all.some(t => typeLabel(t) === current)) {
                     reportTypeSelect.value = current;
                 } else {
                     reportTypeSelect.value = '';
@@ -4022,7 +3995,7 @@
                     reportTypeHint.style.display = 'none';
                     return;
                 }
-                const t = getTypesOfCurrentDim().find(x => x.v === selectedType);
+                const t = typeOfLabel(selectedType);
                 if (t && t.tip) {
                     reportTypeHint.textContent = t.tip;
                     reportTypeHint.style.display = 'block';
@@ -4537,7 +4510,6 @@
                 projSource = 'all';
                 projSortAsc = true;
                 selectedProjects = [];
-                typeGroup = '';
                 syncDimSwitch();
                 projTabs.querySelectorAll('.proj-tab').forEach(b => b.classList.toggle('active', b.dataset.src === 'all'));
                 projLeftSearch.value = '';
@@ -4607,11 +4579,11 @@
 
             function fillStep2Defaults() {
                 if (!reportName.value.trim()) {
-                    reportName.value = selectedType + ' 报表';
+                    reportName.value = plainTypeName(selectedType) + ' 报表';
                     nameCount.textContent = reportName.value.length;
                 }
                 if (!emailSubject.value.trim()) {
-                    emailSubject.value = selectedType + ' ' + reportFrequency.value + ' 报表';
+                    emailSubject.value = plainTypeName(selectedType) + ' ' + reportFrequency.value + ' 报表';
                     emailCount.textContent = emailSubject.value.length;
                 }
             }
@@ -4636,7 +4608,7 @@
             }
 
             function isSingleAsset() {
-                const t = getTypesOfCurrentDim().find(x => x.v === selectedType);
+                const t = typeOfLabel(selectedType);
                 return !!(t && t.single);
             }
 
@@ -5376,7 +5348,7 @@
                 syncSendMode(); // 频率变化会影响时间范围的标签 / 控件类型（如「每月」→ 月份选择器）
                 markDirty();
                 if (!isDownloadMode() && emailSubject.value.includes(' 报表')) {
-                    emailSubject.value = selectedType + ' ' + reportFrequency.value + ' 报表';
+                    emailSubject.value = plainTypeName(selectedType) + ' ' + reportFrequency.value + ' 报表';
                     emailCount.textContent = emailSubject.value.length;
                 }
             });
@@ -5608,6 +5580,7 @@
                 step1Label.textContent = DIM_META[currentDimension].stepLabel;
                 reportTypeLabel.textContent = DIM_META[currentDimension].typeLabel;
                 renderTypeOptions();
+                selectedType = normalizeType(selectedType);
                 reportTypeSelect.value = selectedType;
 
                 const assetIds = (report.assets || '').split(',').map(s => s.trim()).filter(Boolean);
@@ -5927,6 +5900,33 @@
                     this.tooltip.classList.remove('active');
                 }
             };
+
+            // 从「报表模版」页点「添加 / 使用该报表」跳进来时（?add=1&report=报表名&scope=口径）：
+            // 直接唤起「添加报表」弹窗，并按报表名预选「定期报表类型」（口径一致才匹配，匹配不到则留空由用户选）
+            (function openAddFromQuery() {
+                const params = new URLSearchParams(location.search);
+                if (params.get('add') !== '1') return;
+                const wanted = (params.get('report') || '').trim();
+                const scope = (params.get('scope') || '').trim();
+
+                window.addEventListener('load', function () {
+                    setTimeout(function () {
+                        openModal();
+                        if (!wanted) return;
+                        const list = (REPORT_TYPES[currentDimension] || []).filter(function (t) {
+                            return !scope || t.g === scope;
+                        });
+                        const hit = list.filter(function (t) { return t.v === wanted; })[0]
+                            || list.filter(function (t) {
+                                return t.v.indexOf(wanted) >= 0 || wanted.indexOf(t.v) >= 0;
+                            })[0];
+                        if (!hit) return;
+                        selectedType = typeLabel(hit);
+                        reportTypeSelect.value = selectedType;
+                        reportTypeSelect.dispatchEvent(new Event('change'));
+                    }, 420);
+                });
+            })();
 
             // 页面加载后延迟启动引导（嵌入预览时不弹）
             if (!/[?&]embed=1/.test(location.search)) {

@@ -13,8 +13,8 @@ body {
     color: #1a1a1a;
 }
 .report {
-    width: 297mm;
-    min-height: 210mm;
+    width: 210mm;
+    min-height: 297mm;
     margin: 20px auto;
     padding: 14mm 16mm;
     background: #ffffff;
@@ -155,10 +155,10 @@ td.num, th.num { text-align: right; }
     gap: 16px;
 }
 .footer .brand2 { font-weight: 800; color: #E60012; font-size: 13px; letter-spacing: 1px; }
-@page { size: A4 landscape; margin: 0; }
+@page { size: A4 portrait; margin: 0; }
 @media print {
     body { background: #fff; }
-    .report { margin: 0; width: 297mm; min-height: 210mm; box-shadow: none; }
+    .report { margin: 0; width: 210mm; min-height: 297mm; box-shadow: none; }
 }
 </style>
 </head>

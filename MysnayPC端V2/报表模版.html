@@ -1876,8 +1876,8 @@
     <script>
         // ====================================================================
         // ====================================================================
-        // 报表清单：18 张可添加报表（设备维度 13 + 项目维度 5）
-        // 页面不再区分单机 / 机群：同一套字段，按所选资产范围取数（弹窗内可切换查看）
+        // 报表清单：按口径分条（单机一个报表、机群一个报表，像 1.0 一样），scope 决定该报表的口径
+        // 单机 / 机群各自成条：预览不再切口径，添加报表也不再选口径（见 管理报表.html 第 1 步）
         // ====================================================================
         const ICONS = {
             summary: '<svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/></svg>',
@@ -1891,122 +1891,147 @@
         };
 
         const reports = [
-            // ============ 已上线（红底图标突出，置顶 3 张）============
-            { key:'rpt_energy', name:'设备能耗报表', en:'Energy Consumption Report', group:'设备维度', nature:'能耗与成本', icon:'fuel',
+            { key:'rpt_energy', scope:'单机', name:'设备能耗报表', en:'Energy Consumption Report', group:'设备维度', nature:'能耗与成本', icon:'fuel',
               state:'live',
               desc:'统计指定周期内设备的能耗（燃油 / 电能）与能效水平，含怠速、工作、运行三段消耗与单位时间消耗。',
               metrics:['怠速油耗(L)','工作油耗(L)','运行油耗(L)','燃烧率(L/h)'], vals:[358.0, 3120.5, 2190.5, 19.9] },
-            { key:'rpt_workmode', name:'设备工作模式报表', en:'Working Mode Report', group:'设备维度', nature:'作业与效率', icon:'clock',
+            { key:'rpt_energy_fleet', scope:'机群', name:'设备能耗报表', en:'Energy Consumption Report', group:'设备维度', nature:'能耗与成本', icon:'fuel',
+              state:'live',
+              desc:'统计指定周期内设备的能耗（燃油 / 电能）与能效水平，含怠速、工作、运行三段消耗与单位时间消耗。',
+              metrics:['怠速油耗(L)','工作油耗(L)','运行油耗(L)','燃烧率(L/h)'], vals:[358.0, 3120.5, 2190.5, 19.9] },
+            { key:'rpt_workmode', scope:'单机', name:'设备工作模式报表', en:'Working Mode Report', group:'设备维度', nature:'作业与效率', icon:'clock',
               state:'live',
               desc:'按运行 / 工作 / 怠速等工作模式拆解设备作业时长与占比，反映设备实际使用结构。',
               metrics:['运行时长(h)','工作时长(h)','怠速时长(h)','利用率(%)'], vals:[284.4, 251.5, 2.3, 99.2] },
-            { key:'rpt_move', name:'设备移动报表', en:'Movement Report', group:'设备维度', nature:'位置与维保', icon:'move',
+            { key:'rpt_workmode_fleet', scope:'机群', name:'设备工作模式报表', en:'Working Mode Report', group:'设备维度', nature:'作业与效率', icon:'clock',
+              state:'live',
+              desc:'按运行 / 工作 / 怠速等工作模式拆解设备作业时长与占比，反映设备实际使用结构。',
+              metrics:['运行时长(h)','工作时长(h)','怠速时长(h)','利用率(%)'], vals:[284.4, 251.5, 2.3, 99.2] },
+            { key:'rpt_move', scope:'单机', name:'设备移动报表', en:'Movement Report', group:'设备维度', nature:'位置与维保', icon:'move',
               state:'live',
               desc:'统计设备行驶里程、行驶时长与平均车速等移动类指标，反映转场与行驶情况。',
               metrics:['行驶里程(km)','行驶时长(h)','平均车速(km/h)','最高车速(km/h)'], vals:[128.6, 12.4, 10.4, 38.2] },
 
-            // ============ 已计划未实现（蓝底图标，置顶第 4-6 张）============
-            { key:'rpt_overtime', name:'超时工作报表', en:'Overtime Work Report', group:'设备维度', nature:'作业与效率', icon:'clock',
+            { key:'rpt_move_fleet', scope:'机群', name:'设备移动报表', en:'Movement Report', group:'设备维度', nature:'位置与维保', icon:'move',
+              state:'live',
+              desc:'统计设备行驶里程、行驶时长与平均车速等移动类指标，反映转场与行驶情况。',
+              metrics:['行驶里程(km)','行驶时长(h)','平均车速(km/h)','最高车速(km/h)'], vals:[128.6, 12.4, 10.4, 38.2] },
+
+            { key:'rpt_overtime', scope:'单机', name:'超时工作报表', en:'Overtime Work Report', group:'设备维度', nature:'作业与效率', icon:'clock',
               state:'planned',
               desc:'统计设备超时作业情况：超过设定工时阈值的时长、次数与占比，用于识别加班与合规风险。',
               metrics:['超时工作次数','超时时长(h)','超时占比(%)'], vals:[12, 18.6, 6.5], intCols:[0] },
-            { key:'rpt_abnormal', name:'设备异常通知报表', en:'Abnormal Notification Report', group:'设备维度', nature:'安全与事件', icon:'event',
+            { key:'rpt_overtime_fleet', scope:'机群', name:'超时工作报表', en:'Overtime Work Report', group:'设备维度', nature:'作业与效率', icon:'clock',
+              state:'planned',
+              desc:'统计设备超时作业情况：超过设定工时阈值的时长、次数与占比，用于识别加班与合规风险。',
+              metrics:['超时工作次数','超时时长(h)','超时占比(%)'], vals:[12, 18.6, 6.5], intCols:[0] },
+            { key:'rpt_abnormal', scope:'单机', name:'设备异常通知报表', en:'Abnormal Notification Report', group:'设备维度', nature:'安全与事件', icon:'event',
               state:'planned',
               desc:'汇总设备异常事件的即时通知记录与处理情况：异常类型、发生时间、通知对象与处理状态。',
               metrics:['异常类型','发生时间','通知对象','处理状态'], vals:['燃油液位突然下降', '2026-09-13 14:30', '张工（项目经理）', '已处理'] },
-            { key:'rpt_battery', name:'电池电量报表', en:'Battery Level Report', group:'设备维度', nature:'能耗与成本', icon:'fuel',
+            { key:'rpt_abnormal_fleet', scope:'机群', name:'设备异常通知报表', en:'Abnormal Notification Report', group:'设备维度', nature:'安全与事件', icon:'event',
+              state:'planned',
+              desc:'汇总设备异常事件的即时通知记录与处理情况：异常类型、发生时间、通知对象与处理状态。',
+              metrics:['异常类型','发生时间','通知对象','处理状态'], vals:['燃油液位突然下降', '2026-09-13 14:30', '张工（项目经理）', '已处理'] },
+            { key:'rpt_battery', scope:'单机', name:'电池电量报表', en:'Battery Level Report', group:'设备维度', nature:'能耗与成本', icon:'fuel',
               state:'planned',
               desc:'统计设备 / 机群的电池荷电状态（SOC）与充电情况：期末 SOC、最低 SOC、充电次数与充电时长。',
               metrics:['期末SOC(%)','最低SOC(%)','充电次数','充电时长(h)'], vals:[78, 22, 4, 6.5], intCols:[0,1,2] },
 
-            // ================= 平台报表库（25 张）=================
-            { key:'asset360', name:'资产 360° 报表', en:'Asset 360', group:'设备维度', nature:'设备概览', icon:'full',
+            // ================= 平台报表库（25 张）=================,
+            { key:'rpt_battery_fleet', scope:'机群', name:'电池电量报表', en:'Battery Level Report', group:'设备维度', nature:'能耗与成本', icon:'fuel',
+              state:'planned',
+              desc:'统计设备 / 机群的电池荷电状态（SOC）与充电情况：期末 SOC、最低 SOC、充电次数与充电时长。',
+              metrics:['期末SOC(%)','最低SOC(%)','充电次数','充电时长(h)'], vals:[78, 22, 4, 6.5], intCols:[0,1,2] },
+
+            // ================= 平台报表库（25 张）=================,
+            { key:'asset360', scope:'单机', name:'资产 360° 报表', en:'Asset 360', group:'设备维度', nature:'设备概览', icon:'full',
               desc:'单台设备的月度 360° 视图，覆盖利用、健康、维护、作业与成本、可持续性五大板块，帮助客户做出有依据的经营决策。',
               metrics:['开工天数(天)','运行时长(h)','怠速时长(h)','油耗(L)'], vals:[13, 284.4, 2.3, 5669.0], intCols:[0] },
-            { key:'event_count', name:'设备事件统计报表', en:'Asset Event Count', group:'设备维度', nature:'安全与事件', icon:'event',
+            { key:'event_count', scope:'单机', name:'设备事件统计报表', en:'Asset Event Count', group:'设备维度', nature:'安全与事件', icon:'event',
               desc:'汇总单台设备的全部事件及各类事件次数。',
               metrics:['告警次数','故障次数','其他事件次数'], vals:[6, 2, 1], intCols:[0,1,2] },
-            { key:'fuel_single', name:'单台设备燃油效率报表', en:'Asset Fuel Single Asset', group:'设备维度', nature:'能耗与成本', icon:'fuel',
+            { key:'fuel_single', scope:'单机', name:'单台设备燃油效率报表', en:'Asset Fuel Single Asset', group:'设备维度', nature:'能耗与成本', icon:'fuel',
               desc:'统计指定报表周期内怠速、工作、运行三种状态下的燃油消耗量，反映设备用油效率；燃烧率可相对反映设备实际作业效能。',
               metrics:['怠速油耗(L)','工作油耗(L)','运行油耗(L)','燃烧率(L/h)'], vals:[358.0, 3120.5, 2190.5, 19.9] },
-            { key:'event_history', name:'设备事件历史报表', en:'Asset History', group:'设备维度', nature:'安全与事件', icon:'event',
+            { key:'event_history', scope:'单机', name:'设备事件历史报表', en:'Asset History', group:'设备维度', nature:'安全与事件', icon:'event',
               desc:'列出单台设备的事件明细清单。',
               metrics:['事件时间','事件类型','事件详情'], vals:['2026-09-13 14:30', '燃油液位突然下降', '液位 5 分钟内下降 12%'] },
-            { key:'idle', name:'设备怠速分析报表', en:'Asset Idle', group:'设备维度', nature:'作业与效率', icon:'idle',
+            { key:'idle', scope:'单机', name:'设备怠速分析报表', en:'Asset Idle', group:'设备维度', nature:'作业与效率', icon:'idle',
               desc:'拆解每台设备的怠速情况：指定周期内的怠速事件总数、怠速总时长，以及超过指定阈值时的平均怠速时长。',
               metrics:['怠速事件数','怠速总时长(h)','平均怠速时长(min)'], vals:[128, 2.3, 1.1], intCols:[0] },
-            { key:'op_fleet', name:'机群作业状态报表', en:'Asset Operation - Fleet', group:'设备维度', nature:'作业与效率', icon:'fleet',
+            { key:'op_fleet', scope:'机群', name:'机群作业状态报表', en:'Asset Operation - Fleet', group:'设备维度', nature:'作业与效率', icon:'fleet',
               desc:'汇总一个周期内各设备的作业状态，按「运行 / 工作 / 怠速」三段呈现（与设备作业页口径一致）。',
               metrics:['运行台数','工作台数','怠速台数','停机台数'], vals:[18, 12, 5, 1], intCols:[0,1,2,3] },
-            { key:'security_activity', name:'设备安全-用户操作报表', en:'Asset Security - User Activity', group:'设备维度', nature:'安全与事件', icon:'event',
+            { key:'security_activity', scope:'单机', name:'设备安全-用户操作报表', en:'Asset Security - User Activity', group:'设备维度', nature:'安全与事件', icon:'event',
               desc:'汇总单台设备上由用户执行的全部安全相关操作。', metrics:[] },
-            { key:'usage_single', name:'单台设备利用率报表', en:'Asset Usage - Single Asset', group:'设备维度', nature:'作业与效率', icon:'clock',
+            { key:'usage_single', scope:'单机', name:'单台设备利用率报表', en:'Asset Usage - Single Asset', group:'设备维度', nature:'作业与效率', icon:'clock',
               desc:'反映指定周期内单台设备在怠速、工作、运行三种状态下的使用效率，并相对「预期使用小时」给出偏差。',
               metrics:['运行时长(h)','工作时长(h)','怠速时长(h)','利用率(%)'], vals:[284.4, 251.5, 2.3, 99.2] },
-            { key:'snapshot', name:'设备运行快照报表', en:'Asset Usage Summary', group:'设备维度', nature:'设备概览', icon:'full',
+            { key:'snapshot', scope:'单机', name:'设备运行快照报表', en:'Asset Usage Summary', group:'设备维度', nature:'设备概览', icon:'full',
               desc:'给出所选设备在指定周期内的运行小时快照，并附最后已知位置。',
               metrics:['运行小时(h)','最后位置','仪表读数(h)'], vals:[284.4, '长沙市岳麓区', 1284.4] },
-            { key:'cost_fleet', name:'机群成本分析报表', en:'Cost Analysis - Fleet', group:'设备维度', nature:'能耗与成本', icon:'fuel',
+            { key:'cost_fleet', scope:'机群', name:'机群成本分析报表', en:'Cost Analysis - Fleet', group:'设备维度', nature:'能耗与成本', icon:'fuel',
               desc:'针对所选每台设备，按运行小时与怠速小时计算花费，量化「过度怠速」带来的成本。', metrics:[] },
-            { key:'cost_single', name:'单台设备成本分析报表', en:'Cost Analysis - Single Asset', group:'设备维度', nature:'能耗与成本', icon:'fuel',
+            { key:'cost_single', scope:'单机', name:'单台设备成本分析报表', en:'Cost Analysis - Single Asset', group:'设备维度', nature:'能耗与成本', icon:'fuel',
               desc:'针对单台设备，按运行小时与怠速小时计算花费，量化「过度怠速」带来的成本。', metrics:[] },
-            { key:'fault_code', name:'故障码报表', en:'Fault Code', group:'设备维度', nature:'安全与事件', icon:'event',
+            { key:'fault_code', scope:'单机', name:'故障码报表', en:'Fault Code', group:'设备维度', nature:'安全与事件', icon:'event',
               desc:'列出一台或多台设备的故障码事件与诊断结论。', metrics:[] },
-            { key:'fleet_fuel', name:'机群燃油效率报表', en:'Fleet Fuel', group:'设备维度', nature:'能耗与成本', icon:'fuel',
+            { key:'fleet_fuel', scope:'机群', name:'机群燃油效率报表', en:'Fleet Fuel', group:'设备维度', nature:'能耗与成本', icon:'fuel',
               desc:'统计指定周期内怠速、工作、运行三种状态下的燃油消耗量，反映机群整体用油效率；燃烧率可相对反映机群作业效能。',
               metrics:['怠速油耗(L)','工作油耗(L)','运行油耗(L)','燃烧率(L/h)'], vals:[358.0, 3120.5, 2190.5, 19.9] },
-            { key:'fleet_status', name:'机群状态清单报表', en:'Fleet Status', group:'设备维度', nature:'设备概览', icon:'fleet',
+            { key:'fleet_status', scope:'机群', name:'机群状态清单报表', en:'Fleet Status', group:'设备维度', nature:'设备概览', icon:'fleet',
               desc:'给出每台设备的基础信息概览：品牌型号等识别信息、最后已知位置与仪表读数。',
               metrics:['机型','最后位置','仪表读数(h)','状态'], vals:['挖掘机 SY215', '长沙市岳麓区', 1284.4, '在线'] },
-            { key:'fleet_usage', name:'机群使用情况报表', en:'Fleet Usage', group:'设备维度', nature:'作业与效率', icon:'clock',
+            { key:'fleet_usage', scope:'机群', name:'机群使用情况报表', en:'Fleet Usage', group:'设备维度', nature:'作业与效率', icon:'clock',
               desc:'反映指定周期内机群在怠速、工作、运行三种状态下的使用效率，并相对预期使用小时给出偏差。',
               metrics:['运行时长(h)','利用率(%)','开工天数(天)'], vals:[284.4, 99.2, 13], intCols:[2] },
-            { key:'fleet_utilization', name:'机群怠速与利用率报表', en:'Fleet Utilization', group:'设备维度', nature:'作业与效率', icon:'idle',
+            { key:'fleet_utilization', scope:'机群', name:'机群怠速与利用率报表', en:'Fleet Utilization', group:'设备维度', nature:'作业与效率', icon:'idle',
               desc:'给出所选设备的怠速时长、燃油消耗，以及怠速时长占运行时间的比例。',
               metrics:['怠速时长(h)','油耗(L)','怠速占比(%)','运行时长(h)'], vals:[2.3, 5669.0, 0.8, 284.4] },
-            { key:'fluid_config', name:'油液分析-资产配置报表', en:'Fluid Analysis - Asset Configuration', group:'设备维度', nature:'位置与维保', icon:'fuel',
+            { key:'fluid_config', scope:'单机', name:'油液分析-资产配置报表', en:'Fluid Analysis - Asset Configuration', group:'设备维度', nature:'位置与维保', icon:'fuel',
               desc:'按排序列出所选设备的资产、部件与油液信息，帮助用户识别资产配置。', metrics:[] },
-            { key:'fluid_history', name:'油液分析-取样历史报表', en:'Fluid Analysis - Sample History', group:'设备维度', nature:'位置与维保', icon:'fuel',
+            { key:'fluid_history', scope:'单机', name:'油液分析-取样历史报表', en:'Fluid Analysis - Sample History', group:'设备维度', nature:'位置与维保', icon:'fuel',
               desc:'按排序列出所选设备的取样记录，帮助用户识别取样历史与趋势。', metrics:[] },
-            { key:'fluid_summary', name:'油液分析-取样汇总报表', en:'Fluid Analysis - Sample Summary', group:'设备维度', nature:'位置与维保', icon:'fuel',
+            { key:'fluid_summary', scope:'单机', name:'油液分析-取样汇总报表', en:'Fluid Analysis - Sample Summary', group:'设备维度', nature:'位置与维保', icon:'fuel',
               desc:'按排序汇总所选设备的油液取样结果，帮助用户判断是否需要针对某台设备采取措施。', metrics:[] },
-            { key:'gen_standby', name:'发电机关键备用性能报表', en:'Generator Critical Standby Performance', group:'设备维度', nature:'发电机', icon:'full',
+            { key:'gen_standby', scope:'单机', name:'发电机关键备用性能报表', en:'Generator Critical Standby Performance', group:'设备维度', nature:'发电机', icon:'full',
               desc:'单台发电机的月度报表，给出备用性能表现，如发动机参数与当月总发电量。', metrics:[] },
-            { key:'gen_fleet', name:'发电机机群运营报表', en:'Generator Fleet Operations', group:'设备维度', nature:'发电机', icon:'fleet',
+            { key:'gen_fleet', scope:'机群', name:'发电机机群运营报表', en:'Generator Fleet Operations', group:'设备维度', nature:'发电机', icon:'fleet',
               desc:'按月给出机群发电机的运营 KPI 概览：负载、效率、燃油消耗与日利用率。', metrics:[] },
-            { key:'gen_health', name:'发电机健康汇总报表', en:'Generator Health Summary', group:'设备维度', nature:'发电机', icon:'full',
+            { key:'gen_health', scope:'单机', name:'发电机健康汇总报表', en:'Generator Health Summary', group:'设备维度', nature:'发电机', icon:'full',
               desc:'单台发电机的月度报表，给出健康表现：日耗油量、日发电量、负载表现、发动机参数以及油液（SOS）数据。', metrics:[] },
-            { key:'location', name:'位置历史报表', en:'Generator Location Tracking', group:'设备维度', nature:'位置与维保', icon:'move',
+            { key:'location', scope:'机群', name:'位置历史报表', en:'Generator Location Tracking', group:'设备维度', nature:'位置与维保', icon:'move',
               desc:'单台设备的位置历史轨迹报表（机型无关）。',
               metrics:['时间','位置','里程(km)','状态'], vals:['2026-09-13 08:00', '长沙市岳麓区 梅溪湖', 128.6, '行驶中'] },
-            { key:'shared_view', name:'共享资产视图报表', en:'Shared Asset View', group:'设备维度', nature:'设备概览', icon:'fleet',
+            { key:'shared_view', scope:'机群', name:'共享资产视图报表', en:'Shared Asset View', group:'设备维度', nature:'设备概览', icon:'fleet',
               desc:'展示面向不同组织创建的共享资产视图、已共享的资产以及共享视图的起止日期，帮助用户跟踪与管理跨组织的共享视图。', metrics:[] },
-            { key:'site_runtime', name:'工地停留报表', en:'Site Runtime', group:'设备维度', nature:'位置与维保', icon:'move',
+            { key:'site_runtime', scope:'机群', name:'工地停留报表', en:'Site Runtime', group:'设备维度', nature:'位置与维保', icon:'move',
               desc:'列出设备已完成或部分完成的工地访问记录：已完成 = 有对应的入场与出场事件；部分完成 = 已有入场事件但尚未产生出场事件。', metrics:[] },
 
-            // ================= 项目维度（v2.0 新增 5 张）=================
-            { key:'proj_production', name:'项目生产报表（按行程）', en:'Project Production by Trip', group:'项目维度', nature:'项目维度', icon:'summary',
+            // ================= 项目维度（v2.0 新增 5 张）=================,
+            { key:'proj_production', scope:'项目', name:'项目生产报表（按行程）', en:'Project Production by Trip', group:'项目维度', nature:'项目维度', icon:'summary',
               desc:'按一次装载任务（Trip）计算项目产出与循环效率。',
               metrics:['行程数','平均循环时间(min)','总运距(km)','利用率(%)'], vals:[186, 18.4, 2412.6, 99.2], intCols:[0] },
-            { key:'proj_efficiency', name:'项目效率报表', en:'Project Efficiency', group:'项目维度', nature:'项目维度', icon:'clock',
+            { key:'proj_efficiency', scope:'项目', name:'项目效率报表', en:'Project Efficiency', group:'项目维度', nature:'项目维度', icon:'clock',
               desc:'哪个设备、哪个环节拖慢项目，做设备间对比。',
               metrics:['运行时长(h)','行程数','单行程耗时(min)','利用率(%)'], vals:[284.4, 186, 18.4, 99.2], intCols:[1] },
-            { key:'proj_energy', name:'项目能耗报表', en:'Project Energy', group:'项目维度', nature:'项目维度', icon:'fuel',
+            { key:'proj_energy', scope:'项目', name:'项目能耗报表', en:'Project Energy', group:'项目维度', nature:'项目维度', icon:'fuel',
               desc:'项目整体能耗与单位运输能耗。',
               metrics:['总能耗(L)','单行程能耗(L)','百公里能耗(L/100km)'], vals:[5669.0, 30.5, 26.4] },
-            { key:'proj_safety', name:'项目安全报表', en:'Project Safety', group:'项目维度', nature:'项目维度', icon:'event',
+            { key:'proj_safety', scope:'项目', name:'项目安全报表', en:'Project Safety', group:'项目维度', nature:'项目维度', icon:'event',
               desc:'超速、急刹、告警按项目汇总。',
               metrics:['超速时长(h)','超速占比(%)','急刹次数','告警次数'], vals:[1.8, 0.6, 4, 6], intCols:[2,3] },
-            { key:'proj_assets', name:'项目设备清单报表', en:'Project Asset List', group:'项目维度', nature:'项目维度', icon:'fleet',
+            { key:'proj_assets', scope:'项目', name:'项目设备清单报表', en:'Project Asset List', group:'项目维度', nature:'项目维度', icon:'fleet',
               desc:'项目在册设备一览与状态。',
-              metrics:['机型','状态','工时(h)','里程(km)'], vals:['挖掘机 SY215', '在线', 284.4, 128.6] }
+              metrics:['机型','状态','工时(h)','里程(km)'], vals:['挖掘机 SY215', '在线', 284.4, 128.6] },
         ];
 
         // ====================================================================
         // 状态与 DOM 引用
         // ====================================================================
         let currentViewMode = 'grid'; // 'grid' | 'list'
-        let previewState = { key: reports[0].key, view: 'single', format: 'table' }; // format: 'table' | 'pdf'
+        let previewState = { key: reports[0].key, format: 'table' }; // 口径由报表决定；format: 'table' | 'pdf'
         const searchInput = document.getElementById('templateSearch');
         const templateContent = document.getElementById('templateContent');
 
@@ -2035,21 +2060,14 @@
             return { cols: cols, rows: rows };
         }
 
-        // 状态样式：live = 已上线（红），planned = 已计划未实现（蓝）
-        function iconStyle(rep) {
-            if (rep.state === 'live') return 'style="background:#E60012;color:#fff;"';
-            if (rep.state === 'planned') return 'style="background:#1890ff;color:#fff;"';
-            return '';
-        }
-
-        function stateTag(rep) {
-            if (rep.state === 'live') {
-                return '<span style="display:inline-block;margin-left:6px;font-size:10px;font-weight:400;color:#E60012;background:#fdecee;border-radius:3px;padding:1px 6px;vertical-align:middle;">已上线</span>';
-            }
-            if (rep.state === 'planned') {
-                return '<span style="display:inline-block;margin-left:6px;font-size:10px;font-weight:400;color:#1890ff;background:#e6f4ff;border-radius:3px;padding:1px 6px;vertical-align:middle;">已计划</span>';
-            }
-            return '';
+        // 口径徽标（单机 / 机群 / 项目）：口径由报表本身决定，页面不再提供切换
+        function scopeTag(rep) {
+            const st = {
+                '单机': 'color:#5a6472;background:#f1f3f6;',
+                '机群': 'color:#E60012;background:#fdecee;',
+                '项目': 'color:#7C3AED;background:#f3ecff;'
+            }[rep.scope] || 'color:#8b90a0;background:#f2f3f5;';
+            return '<span style="display:inline-block;margin-left:6px;font-size:10px;font-weight:400;border-radius:3px;padding:1px 6px;vertical-align:middle;' + st + '">' + (rep.scope || '') + '</span>';
         }
 
         // ====================================================================
@@ -2060,9 +2078,9 @@
                 <div class="dim-card-unified${rep.metrics.length ? '' : ' is-disabled'}" data-key="${rep.key}">
                     <div class="card-body">
                         <div class="card-head-row">
-                            <div class="card-icon dim-icon-summary" ${iconStyle(rep)}>${ICONS[rep.icon] || ICONS.summary}</div>
+                            <div class="card-icon dim-icon-summary">${ICONS[rep.icon] || ICONS.summary}</div>
                             <div style="flex:1;min-width:0;">
-                                <div class="card-title">${rep.name}${stateTag(rep)}</div>
+                                <div class="card-title">${rep.name}${scopeTag(rep)}</div>
                                 <div class="card-subtitle">${rep.group} · ${rep.desc}</div>
                             </div>
                         </div>
@@ -2081,9 +2099,9 @@
         function renderListItem(rep) {
             return `
                 <div class="dim-list-item${rep.metrics.length ? '' : ' is-disabled'}" data-key="${rep.key}">
-                    <div class="list-icon dim-icon-summary" ${iconStyle(rep)}>${ICONS[rep.icon] || ICONS.summary}</div>
+                    <div class="list-icon dim-icon-summary">${ICONS[rep.icon] || ICONS.summary}</div>
                     <div class="list-info">
-                        <div class="list-name">${rep.name}${stateTag(rep)}</div>
+                        <div class="list-name">${rep.name}${scopeTag(rep)}</div>
                         <div class="list-desc">${rep.group} · ${rep.desc}</div>
                     </div>
                     <div class="list-fields">
@@ -2170,9 +2188,9 @@
             const rep = reports.filter(function (r) { return r.key === btn.dataset.key; })[0];
             if (!rep) return;
             if (btn.dataset.action === 'preview') {
-                openPreviewModal(rep.key, 'single');
+                openPreviewModal(rep.key);
             } else if (btn.dataset.action === 'add') {
-                if (confirm('已选择报表：' + rep.name + '\n\n将在「管理报表」页面中配置报表信息（单机 / 机群 由所选资产数量决定）。\n是否立即前往？')) {
+                if (confirm('已选择报表：' + rep.name + '（' + rep.scope + '口径）\n\n将在「管理报表」页面中配置报表信息。\n是否立即前往？')) {
                     window.location.href = '管理报表.html';
                 }
             }
@@ -2186,10 +2204,15 @@
         const previewCloseBtn = document.getElementById('previewClose');
         const previewTitle = document.querySelector('#previewModal .modal-title');
 
-        function openPreviewModal(key, view) {
+        // 口径 → 示例数据视图：单机 = 单行（含机型），机群 / 项目 = 多行设备
+        function scopedView(rep) {
+            return rep.scope === '单机' ? 'single' : 'fleet';
+        }
+
+        function openPreviewModal(key) {
             const rep = reports.filter(function (r) { return r.key === key; })[0];
             if (!rep) return;
-            previewState = { key: key, view: view || 'single', format: previewState.format || 'table' };
+            previewState = { key: key, format: previewState.format || 'table' };
             renderPreviewContent();
             previewModal.classList.add('active');
             document.body.style.overflow = 'hidden';
@@ -2312,7 +2335,7 @@
             var useBtn2 = document.getElementById('useReportBtn');
             if (useBtn2) useBtn2.style.display = '';
 
-            const t = buildTable(rep, previewState.view);
+            const t = buildTable(rep, scopedView(rep));
 
             let tableHTML = '<table class="preview-table"><thead><tr>';
             t.cols.forEach(function (c) { tableHTML += '<th>' + c + '</th>'; });
@@ -2325,11 +2348,6 @@
                 tableHTML += '</tr>';
             });
             tableHTML += '</tbody></table>';
-
-            function seg(v, label) {
-                const on = previewState.view === v;
-                return '<button class="pv-seg-btn' + (on ? ' active' : '') + '" data-view="' + v + '">' + label + '</button>';
-            }
 
             const iconTable = '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'
                 + '<rect x="3" y="4" width="18" height="16" rx="2"/><path d="M3 10h18M9 10v10"/></svg>';
@@ -2346,7 +2364,7 @@
             const pvBarHTML =
                 '<div class="pv-bar">'
                 + '<div class="pv-group"><span class="pv-label">口径</span>'
-                + '<div class="pv-seg">' + seg('single', '单机') + seg('fleet', '机群') + '</div></div>'
+                + '<span style="font-size:12px;font-weight:600;color:#161a2e;">' + rep.scope + '口径</span></div>'
                 + '<span class="pv-divider"></span>'
                 + '<div class="pv-group"><span class="pv-label">格式</span>'
                 + '<div class="pv-switch">' + segFmt('table', '表格', iconTable) + segFmt('pdf', 'PDF', iconPdf) + '</div></div>'
@@ -2355,15 +2373,8 @@
 
             previewTableContainer.innerHTML = pvBarHTML
                 + '<div class="pv-body">'
-                + (previewState.format === 'pdf' ? renderPdfPreview(rep, previewState.view) : tableHTML)
+                + (previewState.format === 'pdf' ? renderPdfPreview(rep, scopedView(rep)) : tableHTML)
                 + '</div>';
-
-            Array.prototype.slice.call(previewTableContainer.querySelectorAll('button[data-view]')).forEach(function (btn) {
-                btn.addEventListener('click', function () {
-                    previewState.view = btn.dataset.view;
-                    renderPreviewContent();
-                });
-            });
 
             Array.prototype.slice.call(previewTableContainer.querySelectorAll('button[data-format]')).forEach(function (btn) {
                 btn.addEventListener('click', function () {

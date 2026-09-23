@@ -239,6 +239,21 @@
         }
 
         /* 表格 */
+        /* 2026-09-23 加「模版名称 / 适用范围」两列后：单元格不换行，列过多时容器横向滚动 */
+        .table-wrapper thead th, #log-table-body td { white-space: nowrap; }
+        .table-wrapper thead th { padding: 12px 10px; }
+        #log-table-body td { padding: 12px 10px; }
+
+        /* 操作列固定在右侧（列变多后不用滚到最右也能点） */
+        .table-wrapper thead th:last-child,
+        #log-table-body td:last-child {
+            position: sticky; right: 0; z-index: 1;
+            box-shadow: -4px 0 8px rgba(0, 0, 0, 0.06);
+            background: #fff;
+        }
+        .table-wrapper thead th:last-child { background: #fafafa; z-index: 2; }
+        #log-table-body tr:hover td:last-child { background: #fff5f5; }
+
         .table-wrapper {
             overflow-x: auto;
             background: #fff;
@@ -621,6 +636,8 @@
                     <thead>
                         <tr>
                             <th>推送批次号</th>
+                            <th>模版名称</th>
+                            <th>适用范围</th>
                             <th>触发方式</th>
                             <th>触发时间</th>
                             <th>涉及设备</th>
@@ -689,12 +706,15 @@ function openDrawer(batchId) {
     const isFailed = batchId.includes('0035') ? false : true;
     const statusLabel = isFailed ? '部分失败' : '全部成功';
     const statusTag = isFailed ? 'tag-orange' : 'tag-green';
+    const row = (typeof logData !== 'undefined' ? logData.find(r => r.batchId === batchId) : null) || {};
 
     body.innerHTML = `
         <div class="drawer-section">
             <h4>批次概览</h4>
             <div class="info-grid">
                 <div class="info-item"><div class="info-label">推送批次号</div><div class="info-value batch-id" onclick="navigator.clipboard.writeText('${batchId}');showToast('已复制','success')">${batchId} 📋</div></div>
+                <div class="info-item"><div class="info-label">模版名称</div><div class="info-value">${row.tpl || '—'}</div></div>
+                <div class="info-item"><div class="info-label">适用范围</div><div class="info-value"><span class="tag ${scopeTag(row.scope)}">${row.scope || '—'}</span></div></div>
                 <div class="info-item"><div class="info-label">触发方式</div><div class="info-value"><span class="tag tag-purple">定时触发</span></div></div>
                 <div class="info-item"><div class="info-label">触发时间</div><div class="info-value">2026-07-17 08:00:02</div></div>
                 <div class="info-item"><div class="info-label">推送通道</div><div class="info-value">主通道（noreply@sany.com.cn）</div></div>
@@ -737,7 +757,7 @@ function openDrawer(batchId) {
             <h4>报表附件</h4>
             <div style="display:flex;align-items:center;justify-content:space-between;padding:12px;background:#fafafa;border-radius:6px;">
                 <div>
-                    <div style="font-weight:500;">单机日报_2026-07-16.xlsx</div>
+                    <div style="font-weight:500;">${row.tpl || '报表'}_2026-07-16.xlsx</div>
                     <div style="font-size:12px;color:#999;">2.4 MB</div>
                 </div>
                 <button class="btn btn-primary" onclick="showToast('报表下载已开始','success')">下载</button>
@@ -775,23 +795,30 @@ function closeDrawer() {
 
 // 模拟数据
 const logData = [
-    { batchId:'BATCH-20260717-0035', report:'单机日报', type:'单机报表', trigger:'定时触发', time:'2026-07-17 08:00:02', devices:'3 台', recipients:'2 人', channel:'主通道', result:'成功 2 / 失败 0', status:'ALL_SUCCESS', statusLabel:'全部成功', statusTag:'tag-green' },
-    { batchId:'BATCH-20260717-0034', report:'机群周报', type:'设备机群报表', trigger:'定时触发', time:'2026-07-17 07:00:01', devices:'28 台', recipients:'5 人', channel:'主通道', result:'成功 5 / 失败 0', status:'ALL_SUCCESS', statusLabel:'全部成功', statusTag:'tag-green' },
-    { batchId:'BATCH-20260717-0033', report:'单机日报', type:'单机报表', trigger:'即时触发', time:'2026-07-17 06:30:15', devices:'1 台', recipients:'1 人', channel:'主通道', result:'成功 1 / 失败 0', status:'ALL_SUCCESS', statusLabel:'全部成功', statusTag:'tag-green' },
-    { batchId:'BATCH-20260717-0032', report:'单机日报', type:'单机报表', trigger:'定时触发', time:'2026-07-17 06:00:03', devices:'1 台', recipients:'3 人', channel:'主+备', result:'成功 2 / 失败 1', status:'PARTIAL_FAILED', statusLabel:'部分失败', statusTag:'tag-orange' },
-    { batchId:'BATCH-20260717-0031', report:'机群月报', type:'设备机群报表', trigger:'定时触发', time:'2026-07-17 05:00:01', devices:'56 台', recipients:'8 人', channel:'主通道', result:'成功 8 / 失败 0', status:'ALL_SUCCESS', statusLabel:'全部成功', statusTag:'tag-green' },
-    { batchId:'BATCH-20260717-0030', report:'单机日报', type:'单机报表', trigger:'手动重发', time:'2026-07-16 18:22:40', devices:'1 台', recipients:'1 人', channel:'主通道', result:'成功 1 / 失败 0', status:'ALL_SUCCESS', statusLabel:'全部成功', statusTag:'tag-green' },
-    { batchId:'BATCH-20260716-0029', report:'单机日报', type:'单机报表', trigger:'定时触发', time:'2026-07-16 08:00:02', devices:'1 台', recipients:'2 人', channel:'主通道', result:'成功 0 / 失败 2', status:'ALL_FAILED', statusLabel:'全部失败', statusTag:'tag-red' },
-    { batchId:'BATCH-20260716-0028', report:'单机日报', type:'单机报表', trigger:'定时触发', time:'2026-07-16 08:00:01', devices:'2 台', recipients:'1 人', channel:'—', result:'成功 0 / 跳过 1', status:'SKIPPED_UNBOUND', statusLabel:'已跳过-解绑', statusTag:'tag-gray' },
-    { batchId:'BATCH-20260715-0027', report:'机群周报', type:'设备机群报表', trigger:'定时触发', time:'2026-07-15 07:00:01', devices:'30 台', recipients:'6 人', channel:'备用通道', result:'成功 6 / 失败 0', status:'ALL_SUCCESS', statusLabel:'全部成功', statusTag:'tag-green' },
-    { batchId:'BATCH-20260715-0026', report:'单机日报', type:'单机报表', trigger:'定时触发', time:'2026-07-15 06:00:05', devices:'1 台', recipients:'2 人', channel:'主通道', result:'成功 2 / 失败 0', status:'ALL_SUCCESS', statusLabel:'全部成功', statusTag:'tag-green' },
+    { batchId:'BATCH-20260717-0035', tpl:'设备运行日报模版', scope:'单机', trigger:'定时触发', time:'2026-07-17 08:00:02', devices:'3 台', recipients:'2 人', channel:'主通道', result:'成功 2 / 失败 0', status:'ALL_SUCCESS', statusLabel:'全部成功', statusTag:'tag-green' },
+    { batchId:'BATCH-20260717-0034', tpl:'设备运行周报模版', scope:'机群', trigger:'定时触发', time:'2026-07-17 07:00:01', devices:'28 台', recipients:'5 人', channel:'主通道', result:'成功 5 / 失败 0', status:'ALL_SUCCESS', statusLabel:'全部成功', statusTag:'tag-green' },
+    { batchId:'BATCH-20260717-0033', tpl:'设备运行日报模版', scope:'单机', trigger:'即时触发', time:'2026-07-17 06:30:15', devices:'1 台', recipients:'1 人', channel:'主通道', result:'成功 1 / 失败 0', status:'ALL_SUCCESS', statusLabel:'全部成功', statusTag:'tag-green' },
+    { batchId:'BATCH-20260717-0032', tpl:'设备异常告警通知模版', scope:'单机', trigger:'定时触发', time:'2026-07-17 06:00:03', devices:'1 台', recipients:'3 人', channel:'主+备', result:'成功 2 / 失败 1', status:'PARTIAL_FAILED', statusLabel:'部分失败', statusTag:'tag-orange' },
+    { batchId:'BATCH-20260717-0031', tpl:'设备运行月报模版', scope:'机群', trigger:'定时触发', time:'2026-07-17 05:00:01', devices:'56 台', recipients:'8 人', channel:'主通道', result:'成功 8 / 失败 0', status:'ALL_SUCCESS', statusLabel:'全部成功', statusTag:'tag-green' },
+    { batchId:'BATCH-20260717-0030', tpl:'设备运行日报模版', scope:'单机', trigger:'手动重发', time:'2026-07-16 18:22:40', devices:'1 台', recipients:'1 人', channel:'主通道', result:'成功 1 / 失败 0', status:'ALL_SUCCESS', statusLabel:'全部成功', statusTag:'tag-green' },
+    { batchId:'BATCH-20260716-0029', tpl:'设备运行日报模版', scope:'单机', trigger:'定时触发', time:'2026-07-16 08:00:02', devices:'1 台', recipients:'2 人', channel:'主通道', result:'成功 0 / 失败 2', status:'ALL_FAILED', statusLabel:'全部失败', statusTag:'tag-red' },
+    { batchId:'BATCH-20260716-0028', tpl:'设备离线提醒模版', scope:'单机', trigger:'定时触发', time:'2026-07-16 08:00:01', devices:'2 台', recipients:'1 人', channel:'—', result:'成功 0 / 跳过 1', status:'SKIPPED_UNBOUND', statusLabel:'已跳过-解绑', statusTag:'tag-gray' },
+    { batchId:'BATCH-20260715-0027', tpl:'设备运行周报模版', scope:'机群', trigger:'定时触发', time:'2026-07-15 07:00:01', devices:'30 台', recipients:'6 人', channel:'备用通道', result:'成功 6 / 失败 0', status:'ALL_SUCCESS', statusLabel:'全部成功', statusTag:'tag-green' },
+    { batchId:'BATCH-20260715-0026', tpl:'设备运行月报模版', scope:'机群', trigger:'定时触发', time:'2026-07-15 06:00:05', devices:'1 台', recipients:'2 人', channel:'主通道', result:'成功 2 / 失败 0', status:'ALL_SUCCESS', statusLabel:'全部成功', statusTag:'tag-green' },
 ];
+
+// 适用范围徽标配色：单机（灰）/ 机群（红）—— 适用范围不存在「项目」口径
+function scopeTag(scope) {
+    return scope === '机群' ? 'tag-red' : 'tag-gray';
+}
 
 function renderLogTable() {
     const tbody = document.getElementById('log-table-body');
     tbody.innerHTML = logData.map(row => `
         <tr>
             <td><span class="batch-id${row.status === 'ALL_FAILED' ? ' failed' : ''}" onclick="navigator.clipboard.writeText('${row.batchId}');showToast('已复制','success')">${row.batchId} 📋</span></td>
+            <td class="col-tpl" title="${row.tpl}">${row.tpl}</td>
+            <td><span class="tag ${scopeTag(row.scope)}">${row.scope}</span></td>
             <td><span class="tag ${row.trigger === '定时触发' ? 'tag-purple' : row.trigger === '即时触发' ? 'tag-blue' : 'tag-orange'}">${row.trigger}</span></td>
             <td>${row.time}</td>
             <td title="${row.devices}">${row.devices}</td>
