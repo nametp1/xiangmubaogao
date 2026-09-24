@@ -652,7 +652,6 @@
             border-radius: 3px;
             vertical-align: middle;
         }
-        .more-option-tag.planned { color: #1890ff; background: #e6f4ff; }
         .more-option-tag.apply   { color: #fa8c16; background: #fff7e6; }
         /* 候选项缩略图：hover 出现放大镜蒙层，提示可点击看大图 */
         .more-option-thumb {
@@ -2009,22 +2008,6 @@
             { key:'site_runtime', scope:'机群', name:'工地停留报表', en:'Site Runtime', group:'设备维度', nature:'位置与维保', icon:'move',
               desc:'列出设备已完成或部分完成的工地访问记录：已完成 = 有对应的入场与出场事件；部分完成 = 已有入场事件但尚未产生出场事件。', metrics:[] },
 
-            // ================= 项目维度（v2.0 新增 5 张）=================,
-            { key:'proj_production', scope:'项目', name:'项目生产报表（按行程）', en:'Project Production by Trip', group:'项目维度', nature:'项目维度', icon:'summary',
-              desc:'按一次装载任务（Trip）计算项目产出与循环效率。',
-              metrics:['行程数','平均循环时间(min)','总运距(km)','利用率(%)'], vals:[186, 18.4, 2412.6, 99.2], intCols:[0] },
-            { key:'proj_efficiency', scope:'项目', name:'项目效率报表', en:'Project Efficiency', group:'项目维度', nature:'项目维度', icon:'clock',
-              desc:'哪个设备、哪个环节拖慢项目，做设备间对比。',
-              metrics:['运行时长(h)','行程数','单行程耗时(min)','利用率(%)'], vals:[284.4, 186, 18.4, 99.2], intCols:[1] },
-            { key:'proj_energy', scope:'项目', name:'项目能耗报表', en:'Project Energy', group:'项目维度', nature:'项目维度', icon:'fuel',
-              desc:'项目整体能耗与单位运输能耗。',
-              metrics:['总能耗(L)','单行程能耗(L)','百公里能耗(L/100km)'], vals:[5669.0, 30.5, 26.4] },
-            { key:'proj_safety', scope:'项目', name:'项目安全报表', en:'Project Safety', group:'项目维度', nature:'项目维度', icon:'event',
-              desc:'超速、急刹、告警按项目汇总。',
-              metrics:['超速时长(h)','超速占比(%)','急刹次数','告警次数'], vals:[1.8, 0.6, 4, 6], intCols:[2,3] },
-            { key:'proj_assets', scope:'项目', name:'项目设备清单报表', en:'Project Asset List', group:'项目维度', nature:'项目维度', icon:'fleet',
-              desc:'项目在册设备一览与状态。',
-              metrics:['机型','状态','工时(h)','里程(km)'], vals:['挖掘机 SY215', '在线', 284.4, 128.6] },
         ];
 
         // ====================================================================
@@ -2060,12 +2043,11 @@
             return { cols: cols, rows: rows };
         }
 
-        // 口径徽标（单机 / 机群 / 项目）：口径由报表本身决定，页面不再提供切换
+        // 口径徽标（单机 / 机群）：口径由报表本身决定，页面不再提供切换（「项目」口径已删）
         function scopeTag(rep) {
             const st = {
                 '单机': 'color:#5a6472;background:#f1f3f6;',
-                '机群': 'color:#E60012;background:#fdecee;',
-                '项目': 'color:#7C3AED;background:#f3ecff;'
+                '机群': 'color:#E60012;background:#fdecee;'
             }[rep.scope] || 'color:#8b90a0;background:#f2f3f5;';
             return '<span style="display:inline-block;margin-left:6px;font-size:10px;font-weight:400;border-radius:3px;padding:1px 6px;vertical-align:middle;' + st + '">' + (rep.scope || '') + '</span>';
         }
@@ -2080,7 +2062,7 @@
                         <div class="card-head-row">
                             <div class="card-icon dim-icon-summary">${ICONS[rep.icon] || ICONS.summary}</div>
                             <div style="flex:1;min-width:0;">
-                                <div class="card-title">${rep.name}${scopeTag(rep)}</div>
+                                <div class="card-title">${rep.name}${rep.metrics.length ? scopeTag(rep) : ''}</div>
                                 <div class="card-subtitle">${rep.group} · ${rep.desc}</div>
                             </div>
                         </div>
@@ -2101,7 +2083,7 @@
                 <div class="dim-list-item${rep.metrics.length ? '' : ' is-disabled'}" data-key="${rep.key}">
                     <div class="list-icon dim-icon-summary">${ICONS[rep.icon] || ICONS.summary}</div>
                     <div class="list-info">
-                        <div class="list-name">${rep.name}${scopeTag(rep)}</div>
+                        <div class="list-name">${rep.name}${rep.metrics.length ? scopeTag(rep) : ''}</div>
                         <div class="list-desc">${rep.group} · ${rep.desc}</div>
                     </div>
                     <div class="list-fields">
@@ -2120,7 +2102,7 @@
         }
 
         // 报表性质分组顺序
-        const NATURE_ORDER = ['设备概览', '能耗与成本', '作业与效率', '安全与事件', '位置与维保', '发电机', '项目维度'];
+        const NATURE_ORDER = ['设备概览', '能耗与成本', '作业与效率', '安全与事件', '位置与维保', '发电机'];
 
         function renderAll() {
             const kw = searchInput.value.trim().toLowerCase();
@@ -2204,7 +2186,7 @@
         const previewCloseBtn = document.getElementById('previewClose');
         const previewTitle = document.querySelector('#previewModal .modal-title');
 
-        // 口径 → 示例数据视图：单机 = 单行（含机型），机群 / 项目 = 多行设备
+        // 口径 → 示例数据视图：单机 = 单行（含机型），机群 = 多行设备
         function scopedView(rep) {
             return rep.scope === '单机' ? 'single' : 'fleet';
         }
@@ -2403,13 +2385,13 @@
         // 「我需要更多报表」诉求弹窗
         // ====================================================================
         const MORE_REPORT_OPTIONS = [
-            { name: '超时工作报表', tag: '已规划', tagType: 'planned',
+            { name: '超时工作报表', tag: '可申请', tagType: 'apply',
               image: '预览图/超时工作报表.png',
               desc: '统计设备超过设定工时阈值的时长、次数与占比，用于识别加班与合规风险。' },
-            { name: '设备异常通知报表', tag: '已规划', tagType: 'planned',
+            { name: '设备异常通知报表', tag: '可申请', tagType: 'apply',
               image: '预览图/设备异常通知报表.png',
               desc: '汇总异常事件的即时通知记录与处理情况：异常类型、发生时间、通知对象与处理状态。' },
-            { name: '电池电量报表', tag: '已规划', tagType: 'planned',
+            { name: '电池电量报表', tag: '可申请', tagType: 'apply',
               image: '预览图/电池电量报表.png',
               desc: '统计设备 / 机群的电池荷电状态（SOC）与充电情况：期末 SOC、最低 SOC、充电次数与充电时长。' },
             { name: '碳排放报表', tag: '可申请', tagType: 'apply',
@@ -2455,8 +2437,8 @@
             return '';
         }
 
+        // 标签一律「可申请」（「已规划」状态 2026-09-24 删除）
         const OPT_TAG_LABEL = {
-            planned: { 'zh-CN': '已规划', en: 'Planned' },
             apply: { 'zh-CN': '可申请', en: 'On request' }
         };
 
@@ -2468,7 +2450,7 @@
                 if (!Array.isArray(arr)) return null;
                 const list = arr.map(function (o) {
                     if (!o) return null;
-                    const tagType = (o.tagType === 'apply') ? 'apply' : 'planned';
+                    const tagType = 'apply';   // 历史数据里的 planned 一并按「可申请」展示
                     return {
                         name: pickLangText(o.name),
                         desc: pickLangText(o.desc),
@@ -2506,7 +2488,7 @@
                     + thumb
                     + '<div style="flex:1;min-width:0;">'
                     + '<div class="more-option-name">' + safe(o.name)
-                    + '<span class="more-option-tag ' + (o.tagType === 'apply' ? 'apply' : 'planned') + '">' + safe(o.tag) + '</span></div>'
+                    + '<span class="more-option-tag apply">' + safe(o.tag) + '</span></div>'
                     + '<div class="more-option-desc">' + safe(o.desc) + '</div>'
                     + '</div></label>';
             }).join('');

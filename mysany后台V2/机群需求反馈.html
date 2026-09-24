@@ -464,7 +464,6 @@
         }
         .opt-row input:focus, .opt-row select:focus, .opt-row textarea:focus { border-color: #E60012; outline: none; }
         .opt-name { width: 160px; flex-shrink: 0; }
-        .opt-tag { width: 96px; flex-shrink: 0; }
         .opt-img { position: relative; flex-shrink: 0; width: 76px; }
         .opt-img-box {
             width: 76px;
@@ -1241,7 +1240,8 @@ document.addEventListener('keydown', function (e) {
 // 与 V2/MysnayPC端V2/报表模版.html 共用同一 key（前端优先读这里，未配置时用内置默认）
 // ====================================================================
 const OPT_KEY = 'mysany_more_report_options';
-const OPT_TAG_TEXT = { planned: '已规划', apply: '可申请' };
+// 标签：配置弹窗不再展示标签文案（2026-09-24 用户要求删掉「可申请」字样）；
+// 数据里仍固定写 tagType:'apply'，端侧徽标继续显示「可申请」
 // 候选项支持的语言（与「机群报表配置」的 LANG_CONFIG 对齐）
 const OPT_LANGS = [
     { id: 'zh-CN', label: '简体中文' },
@@ -1262,11 +1262,11 @@ const OPT_LANGS = [
 ];
 // 内置默认清单：本地还没有配置时作为初始内容（name / desc 按语言存放，image = 预览图 dataURL）
 const DEFAULT_REPORT_OPTIONS = [
-    { tagType: 'planned', name: { 'zh-CN': '超时工作报表', en: 'Overtime Work Report' },
+    { tagType: 'apply', name: { 'zh-CN': '超时工作报表', en: 'Overtime Work Report' },
       desc: { 'zh-CN': '统计设备超过设定工时阈值的时长、次数与占比，用于识别加班与合规风险。' } },
-    { tagType: 'planned', name: { 'zh-CN': '设备异常通知报表', en: 'Abnormal Notification Report' },
+    { tagType: 'apply', name: { 'zh-CN': '设备异常通知报表', en: 'Abnormal Notification Report' },
       desc: { 'zh-CN': '汇总异常事件的即时通知记录与处理情况：异常类型、发生时间、通知对象与处理状态。' } },
-    { tagType: 'planned', name: { 'zh-CN': '电池电量报表', en: 'Battery Level Report' },
+    { tagType: 'apply', name: { 'zh-CN': '电池电量报表', en: 'Battery Level Report' },
       desc: { 'zh-CN': '统计设备 / 机群的电池荷电状态（SOC）与充电情况：期末 SOC、最低 SOC、充电次数与充电时长。' } },
     { tagType: 'apply', name: { 'zh-CN': '碳排放报表' },
       desc: { 'zh-CN': '把燃油 / 电能消耗折算为碳排放量，支持按项目、机型、周期统计，用于 ESG 与绿色施工汇报。' } },
@@ -1299,7 +1299,7 @@ function normOptionText(v) {
 function normOption(o, i) {
     return {
         id: o.id || ('opt_' + Date.now() + '_' + i),
-        tagType: o.tagType === 'apply' ? 'apply' : 'planned',
+        tagType: 'apply',   // 已规划状态已删除：历史数据里的 planned 一并归为可申请
         image: typeof o.image === 'string' ? o.image : '',
         name: normOptionText(o.name),
         desc: normOptionText(o.desc)
@@ -1353,9 +1353,6 @@ function renderOptRows() {
         box.innerHTML = '<div class="opt-empty">清单为空，点左下角「＋ 添加一项」开始配置</div>';
     } else {
         box.innerHTML = optDraft.map(function (o, i) {
-            const tagOpts = ['planned', 'apply'].map(function (t) {
-                return '<option value="' + t + '"' + (o.tagType === t ? ' selected' : '') + '>' + OPT_TAG_TEXT[t] + '</option>';
-            }).join('');
             const imgCell = '<div class="opt-img">'
                 + '<div class="opt-img-box" title="上传 / 替换预览图" onclick="optPickImage(' + i + ')">'
                 + (o.image ? '<img src="' + o.image + '" alt="">' : '<span>＋</span>')
@@ -1366,7 +1363,6 @@ function renderOptRows() {
                 + '<span class="opt-idx">' + (i + 1) + '</span>'
                 + imgCell
                 + '<input class="opt-name" value="' + escAttr(o.name[optLang] || '') + '" placeholder="报表名称" oninput="optChange(' + i + ',\'name\',this.value)">'
-                + '<select class="opt-tag" onchange="optChange(' + i + ',\'tagType\',this.value)">' + tagOpts + '</select>'
                 + '<textarea class="opt-desc" placeholder="一句话描述（可留空）" oninput="optChange(' + i + ',\'desc\',this.value)">' + esc(o.desc[optLang] || '') + '</textarea>'
                 + '<button class="opt-del" title="删除该候选项" onclick="optDelRow(' + i + ')">✕</button>'
                 + '</div>';
@@ -1477,7 +1473,7 @@ function optSaveAll() {
         });
         list.push({
             id: item.id,
-            tagType: item.tagType === 'apply' ? 'apply' : 'planned',
+            tagType: 'apply',
             image: item.image || '',
             name: name,
             desc: desc

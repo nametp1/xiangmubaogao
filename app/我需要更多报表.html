@@ -86,7 +86,6 @@
     .opt-info { flex: 1; min-width: 0; }
     .opt-name { font-size: 14px; font-weight: 600; color: #161a2e; line-height: 1.4; }
     .opt-tag { display: inline-block; margin-left: 6px; font-size: 10px; font-weight: 400; border-radius: 999px; padding: 2px 8px; vertical-align: middle; }
-    .opt-tag.planned { background: #e6f4ff; color: #1890ff; }
     .opt-tag.apply { background: #fdecee; color: #E60012; }
     .opt-desc { font-size: 12px; color: #8b90a0; line-height: 1.6; margin-top: 5px; }
 
@@ -163,13 +162,13 @@
  * 候选项优先读后台配置（localStorage: mysany_more_report_options），未配置用内置默认
  * ====================================================================== */
 const MORE_REPORT_OPTIONS = [
-    { name: '超时工作报表', tag: '已规划', tagType: 'planned',
+    { name: '超时工作报表', tag: '可申请', tagType: 'apply',
       image: '预览图/超时工作报表.png',
       desc: '统计设备超过设定工时阈值的时长、次数与占比，用于识别加班与合规风险。' },
-    { name: '设备异常通知报表', tag: '已规划', tagType: 'planned',
+    { name: '设备异常通知报表', tag: '可申请', tagType: 'apply',
       image: '预览图/设备异常通知报表.png',
       desc: '汇总异常事件的即时通知记录与处理情况：异常类型、发生时间、通知对象与处理状态。' },
-    { name: '电池电量报表', tag: '已规划', tagType: 'planned',
+    { name: '电池电量报表', tag: '可申请', tagType: 'apply',
       image: '预览图/电池电量报表.png',
       desc: '统计设备 / 机群的电池荷电状态（SOC）与充电情况：期末 SOC、最低 SOC、充电次数与充电时长。' },
     { name: '碳排放报表', tag: '可申请', tagType: 'apply',
@@ -188,8 +187,8 @@ const REPORT_OPTIONS_KEY = 'mysany_more_report_options';
 const IMG_BASE = '../MysnayPC端V2/';
 const DEFAULT_PREVIEW_IMAGE = IMG_BASE + '预览图/默认预览.png';
 
+// 标签一律「可申请」（「已规划」状态 2026-09-24 删除）
 const OPT_TAG_LABEL = {
-    planned: { 'zh-CN': '已规划', en: 'Planned' },
     apply: { 'zh-CN': '可申请', en: 'On request' }
 };
 
@@ -243,7 +242,7 @@ function readConfiguredReportOptions() {
         if (!Array.isArray(arr)) return null;
         const list = arr.map(function (o) {
             if (!o) return null;
-            const tagType = (o.tagType === 'apply') ? 'apply' : 'planned';
+            const tagType = 'apply';   // 历史数据里的 planned 一并按「可申请」展示
             return {
                 name: pickLangText(o.name),
                 desc: pickLangText(o.desc),
@@ -281,7 +280,7 @@ function renderOptions() {
             + '</div>'
             + '<div class="opt-info">'
             + '<div class="opt-name">' + safe(o.name)
-            + '<span class="opt-tag ' + (o.tagType === 'apply' ? 'apply' : 'planned') + '">' + safe(o.tag) + '</span></div>'
+            + '<span class="opt-tag apply">' + safe(o.tag) + '</span></div>'
             + '<div class="opt-desc">' + safe(o.desc) + '</div>'
             + '</div></label>';
     }).join('');
