@@ -2260,20 +2260,25 @@ const PDFV3_TIME_DIMS = [{ id: 'day', name: '日报' }, { id: 'week', name: '周
 const PDF_DEFAULT_METRIC = '总油耗';
 
 /* ===== 指标绑定规则：按「组件类型 × 当前口径」决定可选几个指标 =====
-   单机：图表类（折线图 / 柱状图 / 环形图）统一只绑定 1 个指标 —— 单选（2026-09-23 用户要求
-        「整体口径 单机设备」下弹窗表头与交互都改成单选）；
-   机群：折线图每台设备一条线、环形图看「单机贡献度」→ 只能 1 个指标（单选，再选自动替换）；
-   机群柱状图（设备排行）仍可同单位多指标并排（5 色循环，上限 5）；
-   指标卡 1 字段 1 张卡（≤6 张）；数据明细表一列一个指标（不限，各列单位可不同）。 */
+   折线图：单机可多指标并排（须同单位，5 色循环，上限 5）；机群每台设备一条线 → 只能 1 个（单选，再选自动替换）；
+   柱状图：两个口径都可多指标并排（单机＝同一时间块内并排、机群＝设备排行；须同单位，上限 5）；
+   环形图：两个口径都只能 1 个（单机＝该指标本身；机群＝「单机贡献度」）；
+   指标卡 1 字段 1 张卡（≤6 张）；数据明细表一列一个指标（不限，各列单位可不同）。
+   —— 2026-09-24 用户：折线图 + 柱状图的单机口径都回到「≤ 5 个指标」，仅环形图保持单选
+      （09-23 曾把单机三件套一律改单选，现已按用户逐条恢复）。 */
 const PDF_PICK_METRIC_MAX = 5;
 function pdfMetricRule(type, scope) {
     scope = scope || (typeof pdfV3Scope === 'function' ? pdfV3Scope() : 'single');
     if (type === 'text_block') return { mode: 'none', max: 0 };
     if (type === 'data_table') return { mode: 'table', max: 0 };
     if (type === 'kpi_card') return { mode: 'kpi', max: PDF_PICK_KPI_MAX };
-    /* 单机口径：图表类一律单选 1 个指标 */
-    if (scope === 'single') return { mode: 'single', max: 1 };
-    if (type === 'line_chart' || type === 'doughnut_chart') return { mode: 'single', max: 1 };
+    /* 折线图：单机 ≤ 5 个（多选）；机群每台设备一条线 → 单选 1 个 */
+    if (type === 'line_chart') return scope === 'single'
+        ? { mode: 'multi', max: PDF_PICK_METRIC_MAX } : { mode: 'single', max: 1 };
+    /* 柱状图：单机与机群都可多指标并排（≤ 5 个） */
+    if (type === 'bar_chart') return { mode: 'multi', max: PDF_PICK_METRIC_MAX };
+    /* 环形图：两个口径都只 1 个 */
+    if (type === 'doughnut_chart') return { mode: 'single', max: 1 };
     return { mode: 'multi', max: PDF_PICK_METRIC_MAX };
 }
 // 该规则下允许的最大指标数（0 = 不限）
@@ -2869,7 +2874,7 @@ function pdfOpenFieldPicker(compId) {
     const c = list.find(x => x.id === compId);
     if (!c) return;
     pdfPickState.compId = compId;
-    // 按「组件类型 × 当前口径」决定选项形态与上限（单机图表、机群折线 / 环形 = 单选 1 个；机群柱状图可多选 ≤5）
+    // 按「组件类型 × 当前口径」决定选项形态与上限（单机折线图 / 柱状图 = 多选 ≤5；机群折线图、环形图 = 单选 1 个）
     const rule = pdfMetricRule(c.type);
     pdfPickState.mode = rule.mode;
     pdfPickState.max = rule.max;
@@ -3123,7 +3128,7 @@ function pdfPickToggle(name, on, gid) {
         return;
     }
     if (on) {
-        // ① 数量拦截：多选已达上限（如机群柱状图 ≤5；单选口径不走这里）→ 不勾选，先把原因告诉用户
+        // ① 数量拦截：多选已达上限（单机折线图 / 柱状图 ≤5；单选口径不走这里）→ 不勾选，先把原因告诉用户
         const onCount = pdfPickSelectedCount();
         if (pdfPickState.max > 0 && pdfPickState.mode !== 'single'
             && onCount >= pdfPickState.max && !pdfPickState.selected[name]) {
@@ -3194,7 +3199,7 @@ function pdfConfirmFieldPicker() {
                 }
             }
         } else {
-            // 折线 / 柱状 / 环形：按「组件 × 口径」上限裁剪（单选口径只留 1 个；机群柱状图最多 5 个）
+            // 折线 / 柱状 / 环形：按「组件 × 口径」上限裁剪（多选口径＝单机折线图 / 柱状图，最多 5 个；机群折线与环形图只留 1 个）
             const max = pdfPickState.max > 0 ? pdfPickState.max : 0;
             c.metrics = max ? picked.slice(0, max) : picked.slice();
             if (!c.metrics.length && pdfPickState.mode === 'single') c.metrics = [];

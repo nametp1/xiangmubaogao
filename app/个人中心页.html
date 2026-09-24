@@ -1027,7 +1027,7 @@
                 <span class="quick-label">设备预警</span>
             </div>
             <div class="quick-item" onclick="goFleetReport()">
-                <div class="quick-icon green new-flag">
+                <div class="quick-icon green" data-new-flag="fleet">
                     <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
                         <line x1="18" y1="20" x2="18" y2="10" />
                         <line x1="12" y1="20" x2="12" y2="4" />
@@ -1094,7 +1094,7 @@
         <!-- Quick Menu Group 2: 服务 -->
         <div class="menu-card">
             <div class="menu-item" onclick="goFleetReport()">
-                <div class="menu-icon blue new-flag"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"
+                <div class="menu-icon blue" data-new-flag="fleet"><svg width="20" height="20" viewBox="0 0 24 24" fill="none"
                         stroke="#2563EB" stroke-width="2">
                         <path d="M3 3v18h18" />
                         <path d="M18.7 8l-5.1 5.2-2.8-2.7L6 15.2" />
@@ -1277,7 +1277,28 @@
         // ===== 跳转 =====
         function goSubscribe() { window.location.href = '版本选购页.html'; }
         function goMySubscription() { window.location.href = '我的订阅管理页.html'; }
-        function goFleetReport() { window.location.href = '机群数据.html'; }
+        // ===== 机群报表「新功能」红色角标 =====
+        // 规则：点过「机群报表」入口（进过机群数据页）之后，角标不再显示（localStorage 记录，刷新 / 重进都生效）
+        const FLEET_VISITED_KEY = 'mysany_fleet_report_visited';
+        function fleetReportVisited() {
+            try { return !!localStorage.getItem(FLEET_VISITED_KEY); } catch (e) { return false; }
+        }
+        // 给所有标了 data-new-flag="fleet" 的入口按访问记录挂 / 摘角标
+        function syncFleetNewFlag() {
+            const on = !fleetReportVisited();
+            document.querySelectorAll('[data-new-flag="fleet"]').forEach(el => el.classList.toggle('new-flag', on));
+        }
+        // 记录已访问 + 立刻摘掉角标（不依赖跳转后的新页面）
+        function markFleetReportVisited() {
+            try { localStorage.setItem(FLEET_VISITED_KEY, '1'); } catch (e) {}
+            document.querySelectorAll('[data-new-flag="fleet"]').forEach(el => el.classList.remove('new-flag'));
+        }
+        syncFleetNewFlag();   // 脚本在页面底部，此时入口已在 DOM 里
+
+        function goFleetReport() {
+            markFleetReportVisited();
+            window.location.href = '机群数据.html';
+        }
 
         function showToast(msg) {
             const t = document.getElementById('toast');

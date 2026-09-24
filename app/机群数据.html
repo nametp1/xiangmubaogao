@@ -27,13 +27,29 @@
         flex: 1 1 auto; min-width: 0; display: flex; align-items: center; gap: 20px; margin-left: 6px;
         overflow-x: auto; scrollbar-width: none;
         -webkit-overflow-scrolling: touch; overscroll-behavior-x: contain;
+        max-width: 360px;
     }
     .top-tabs::-webkit-scrollbar { display: none; }
+    /* 顶部 tab 溢出：右侧渐隐 + 「…」入口（仅当 tab 超出一屏时出现，点一下向右翻一屏） */
+    .tabs-more {
+        display: none; flex-shrink: 0; width: 22px; height: 22px; margin-left: -4px; padding: 0;
+        align-items: center; justify-content: center; border: none; border-radius: 50%;
+        background: #f2f3f5; color: #8b90a0; font-family: inherit; font-size: 13px; line-height: 1;
+        cursor: pointer; letter-spacing: .5px;
+    }
+    .topbar.tabs-overflow .tabs-more { display: inline-flex; }
+    .topbar.tabs-overflow .top-tabs {
+        -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 26px), transparent);
+        mask-image: linear-gradient(to right, #000 calc(100% - 26px), transparent);
+    }
+    .tabs-more:hover { background: #e9eaee; color: #E60012; }
     .top-tab {
         position: relative; flex-shrink: 0; border: none; background: transparent; font-family: inherit; cursor: pointer;
         height: 52px; padding: 0; font-size: 15px; color: #8b90a0; white-space: nowrap;
     }
     .top-tab:hover:not(.active) { color: #E60012; }
+    /* tab 文案过长：在内容后面用「…」截断（不换行、不挤压其它 tab） */
+    .top-tab { max-width: 120px; overflow: hidden; text-overflow: ellipsis; }
     .top-tab.active { font-size: 17px; font-weight: 600; color: #161a2e; letter-spacing: .2px; cursor: default; }
     .top-tab.active::after {
         content: ''; position: absolute; left: 50%; transform: translateX(-50%); bottom: 8px;
@@ -41,12 +57,21 @@
     }
     /* 引导文案（可点）：只在需要「申请更多报表」的视图里，居中显示 */
     .view-hint {
-        flex-shrink: 0; background: #fffaf0; color: #ad6800; font-size: 12px; line-height: 1.6;
-        padding: 9px 24px; border-bottom: 1px solid #f5ecd8;
+        position: relative; flex-shrink: 0; background: #fffaf0; color: #ad6800; font-size: 12px; line-height: 1.6;
+        padding: 9px 34px; border-bottom: 1px solid #f5ecd8;
         text-align: center; cursor: pointer;
     }
     .view-hint:hover { background: #fff5e0; }
     .view-hint b { color: #E60012; font-weight: 600; }
+    /* 右侧「×」：只关闭横幅，不触发「去申请」跳转（stopPropagation） */
+    .view-hint .hint-close {
+        position: absolute; right: 8px; top: 50%; transform: translateY(-50%);
+        width: 20px; height: 20px; border-radius: 50%;
+        display: flex; align-items: center; justify-content: center;
+        font-size: 14px; line-height: 1; color: #c49a5b;
+    }
+    .view-hint .hint-close:hover { background: #f4e4c6; color: #ad6800; }
+    .view-hint.hidden { display: none; }
     /* ================= 机群数据内容（铺满，内部自己滚） ================= */
     .phone {
         flex: 1 1 auto; min-width: 0; min-height: 0; background: #f4f5f7;
@@ -181,12 +206,16 @@
         <button class="top-tab active">机群数据</button>
         <button class="top-tab" onclick="location.href='报表库-缺省页.html'">报表库</button>
         <button class="top-tab" onclick="location.href='我的报表-缺省页.html'">我的报表</button>
+            <button class="top-tab fake" title="演示：文案过长 → 内容后面省略号截断（设备健康与维保计划）" onclick="if(typeof showToast==='function')showToast('演示占位 tab')">设备健康与维保计划</button>
+            <button class="top-tab fake" title="演示用的占位 tab（用于触发 tab 条横向溢出）" onclick="if(typeof showToast==='function')showToast('演示占位 tab')">培训中心</button>
     </div>
+
+        <button class="tabs-more" type="button" title="更多" aria-label="更多 tab" onclick="scrollTabsRight()">…</button>
     <button class="quick-more" title="提交报表需求" onclick="location.href='我需要更多报表.html'">＋ 提需求</button>
 </div>
 
 <!-- 引导（可点）：没找到合适的报表时怎么申请，居中显示 -->
-<div class="view-hint" onclick="location.href='我需要更多报表.html'">没找到需要的报表？<b>点这里申请</b>，我们会第一时间处理</div>
+<div class="view-hint" onclick="location.href='我需要更多报表.html'">没找到需要的报表？<b>点这里申请</b>，我们会第一时间处理<span class="hint-close" title="关闭" onclick="event.stopPropagation();this.parentElement.classList.add('hidden')">×</span></div>
 
 <!-- ==================== 机群数据（设备报表数据） ==================== -->
 <div class="phone">
@@ -567,5 +596,40 @@ function showToast(msg) {
 render();
 </script>
 
+
+<script>
+/* 顶部 tab 溢出处理：超出一屏时给「…」入口 + 右侧渐隐；点「…」向右翻；滚到底/没溢出就还原 */
+function syncTabsOverflow() {
+    var bar = document.querySelector('.topbar');
+    var strip = bar ? bar.querySelector('.top-tabs') : null;
+    if (!bar || !strip) return;
+    var overflow = strip.scrollWidth - strip.clientWidth > 4;
+    var atEnd = strip.scrollLeft + strip.clientWidth >= strip.scrollWidth - 4;
+    bar.classList.toggle('tabs-overflow', overflow && !atEnd);
+}
+function scrollTabsRight() {
+    var strip = document.querySelector('.top-tabs');
+    if (!strip) return;
+    // 向右翻一屏（夹在可滚动范围内，不会越界）
+    var max = strip.scrollWidth - strip.clientWidth;
+    var target = Math.min(max, strip.scrollLeft + Math.max(120, strip.clientWidth * 0.6));
+    strip.scrollTo({ left: target, behavior: 'smooth' });
+    // 兜底：个别环境（无头 / 关动效）不跑平滑动画，300ms 后没动就直接跳到位
+    setTimeout(function () {
+        if (Math.abs(strip.scrollLeft - target) > 2) strip.scrollLeft = target;
+        syncTabsOverflow();
+    }, 320);
+    // 平滑滚动结束后再复算一次（避免滚动事件在动画中提前触发、把渐隐留在已滚到底的状态）
+    setTimeout(syncTabsOverflow, 620);
+}
+(function () {
+    var strip = document.querySelector('.top-tabs');
+    if (!strip) return;
+    strip.addEventListener('scroll', syncTabsOverflow, { passive: true });
+    window.addEventListener('resize', syncTabsOverflow);
+    syncTabsOverflow();
+    setTimeout(syncTabsOverflow, 300);   // 字体 / 布局稳定后复查
+})();
+</script>
 </body>
 </html>
