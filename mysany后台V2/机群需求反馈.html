@@ -464,6 +464,18 @@
         }
         .opt-row input:focus, .opt-row select:focus, .opt-row textarea:focus { border-color: #E60012; outline: none; }
         .opt-name { width: 160px; flex-shrink: 0; }
+        /* 标签类型固定为「可申请」：不再用下拉，改只读胶囊 */
+        .opt-tag {
+            width: 66px;
+            flex-shrink: 0;
+            margin-top: 5px;
+            padding: 3px 0;
+            border-radius: 999px;
+            background: #fdecee;
+            color: #E60012;
+            font-size: 11px;
+            text-align: center;
+        }
         .opt-img { position: relative; flex-shrink: 0; width: 76px; }
         .opt-img-box {
             width: 76px;
@@ -1240,8 +1252,8 @@ document.addEventListener('keydown', function (e) {
 // 与 V2/MysnayPC端V2/报表模版.html 共用同一 key（前端优先读这里，未配置时用内置默认）
 // ====================================================================
 const OPT_KEY = 'mysany_more_report_options';
-// 标签：配置弹窗不再展示标签文案（2026-09-24 用户要求删掉「可申请」字样）；
-// 数据里仍固定写 tagType:'apply'，端侧徽标继续显示「可申请」
+// 标签文案：候选项一律「可申请」（「已规划」状态 2026-09-24 按用户要求删除；历史数据自动归为「可申请」）
+const OPT_TAG_TEXT = { apply: '可申请' };
 // 候选项支持的语言（与「机群报表配置」的 LANG_CONFIG 对齐）
 const OPT_LANGS = [
     { id: 'zh-CN', label: '简体中文' },
@@ -1363,6 +1375,7 @@ function renderOptRows() {
                 + '<span class="opt-idx">' + (i + 1) + '</span>'
                 + imgCell
                 + '<input class="opt-name" value="' + escAttr(o.name[optLang] || '') + '" placeholder="报表名称" oninput="optChange(' + i + ',\'name\',this.value)">'
+                + '<span class="opt-tag">' + OPT_TAG_TEXT.apply + '</span>'
                 + '<textarea class="opt-desc" placeholder="一句话描述（可留空）" oninput="optChange(' + i + ',\'desc\',this.value)">' + esc(o.desc[optLang] || '') + '</textarea>'
                 + '<button class="opt-del" title="删除该候选项" onclick="optDelRow(' + i + ')">✕</button>'
                 + '</div>';

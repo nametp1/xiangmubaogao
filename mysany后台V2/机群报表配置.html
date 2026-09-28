@@ -883,9 +883,6 @@
         .pdfd-kpi .v { margin-top: 4px; font-size: 17px; font-weight: 800; color: #E60012; }
         .pdfd-kpi .v span { font-size: 10px; font-weight: 600; color: #bbb; margin-left: 3px; }
         .pdfd-iw { text-align: center; font-size: 10px; color: #aaa; font-family: ui-monospace, Menlo, monospace; margin-top: 8px; }
-        .pdfd-break { display: flex; align-items: center; gap: 10px; margin: 0 0 14px; }
-        .pdfd-break .ln { flex: 1; border-top: 2px dashed #f7a6a6; }
-        .pdfd-break .lb { font-size: 11px; font-weight: 700; color: #E60012; background: #fff2f2; padding: 2px 10px; border-radius: 10px; letter-spacing: 1px; }
         .pdfd-add {
             width: 100%; padding: 12px; border: 2px dashed #f3c9cd; border-radius: 6px; background: #fff;
             color: #E60012; font-family: inherit; font-size: 12px; font-weight: 600; cursor: pointer;
@@ -1249,7 +1246,7 @@
                         <strong>可用变量：</strong>
                     </div>
                     <span style="font-size:12px;color:#8c6d00;">点击下方变量即可插入到正文光标处，发送时将自动替换</span><br>
-                    <strong>基础信息：</strong><span class="clickable-var" onclick="insertVarEdit('{{模版名称}}')">{{模版名称}}</span> <span class="clickable-var" onclick="insertVarEdit('{{发送日期}}')">{{发送日期}}</span> <span class="clickable-var" onclick="insertVarEdit('{{收件人姓名}}')">{{收件人姓名}}</span> <span class="clickable-var" onclick="insertVarEdit('{{生成时间}}')">{{生成时间}}</span> <span class="clickable-var" onclick="insertVarEdit('{{一键订阅}}')">{{一键订阅}}</span> <span class="clickable-var" onclick="insertVarEdit('{{查看报告}}')">{{查看报告}}</span>
+                    <strong>基础信息：</strong><span class="clickable-var" onclick="insertVarEdit('{{模版名称}}')">{{模版名称}}</span> <span class="clickable-var" onclick="insertVarEdit('{{发送日期}}')">{{发送日期}}</span> <span class="clickable-var" onclick="insertVarEdit('{{收件人姓名}}')">{{收件人姓名}}</span> <span class="clickable-var" onclick="insertVarEdit('{{生成时间}}')">{{生成时间}}</span> <span class="clickable-var" onclick="insertVarEdit('{{一键退订}}')">{{一键退订}}</span> <span class="clickable-var" onclick="insertVarEdit('{{查看报告}}')">{{查看报告}}</span>
                 </div>
 
                 <!-- 富文本编辑器（全宽）｜v2.0 调整：支持切到「HTML 源码」直接输入代码 -->
@@ -2260,12 +2257,13 @@ const PDFV3_TIME_DIMS = [{ id: 'day', name: '日报' }, { id: 'week', name: '周
 const PDF_DEFAULT_METRIC = '总油耗';
 
 /* ===== 指标绑定规则：按「组件类型 × 当前口径」决定可选几个指标 =====
-   折线图：单机可多指标并排（须同单位，5 色循环，上限 5）；机群每台设备一条线 → 只能 1 个（单选，再选自动替换）；
+   折线图：单机 ≤ 5 个（多选）；机群每台设备一条线 → 只能 1 个（单选，再选自动替换）；
    柱状图：两个口径都可多指标并排（单机＝同一时间块内并排、机群＝设备排行；须同单位，上限 5）；
    环形图：两个口径都只能 1 个（单机＝该指标本身；机群＝「单机贡献度」）；
    指标卡 1 字段 1 张卡（≤6 张）；数据明细表一列一个指标（不限，各列单位可不同）。
-   —— 2026-09-24 用户：折线图 + 柱状图的单机口径都回到「≤ 5 个指标」，仅环形图保持单选
-      （09-23 曾把单机三件套一律改单选，现已按用户逐条恢复）。 */
+   —— 口径变更记录：09-23 单机三件套单选 → 09-24 恢复折线 / 柱状多选 → 09-24 又改单选 →
+      09-24 最终（用户「柱状和折线图都能选5个」）：折线 / 柱状 multi·5，仅环形单选；
+      单选口径绑满 1 个后「＋ 从模型字典选择」置灰。 */
 const PDF_PICK_METRIC_MAX = 5;
 function pdfMetricRule(type, scope) {
     scope = scope || (typeof pdfV3Scope === 'function' ? pdfV3Scope() : 'single');
@@ -2299,13 +2297,13 @@ function pdfV3DefaultComponents() {
     return [
         {
             id: 'comp_1', type: 'line_chart', title: '油耗与电耗趋势', titleKey: 'chart.fuel_trend_comparison',
-            metrics: ['总油耗'], pdfWidth: '100%', pageBreak: false,
+            metrics: ['总油耗'], pdfWidth: '100%',
             xAxis: 'time', groupBy: 'equipment', rowDimension: 'equipment', colDimension: 'metrics',
             barDirection: 'vertical'
         },
         {
             id: 'comp_2', type: 'data_table', title: '设备运行明细', titleKey: 'table.equipment_details',
-            metrics: ['总油耗'], pdfWidth: '100%', pageBreak: false,
+            metrics: ['总油耗'], pdfWidth: '100%',
             xAxis: 'time', groupBy: 'metric', rowDimension: 'equipment', colDimension: 'metrics',
             barDirection: 'vertical'
         }
@@ -2472,9 +2470,6 @@ function pdfV3ComponentHTML(c, scope) {
             + axis + '<div class="pdfd-iw">指标：' + escapeAttr(c.metrics[0] || '未绑定')
             + (c.metrics.length > 1 ? '（共 ' + c.metrics.length + ' 项）' : '') + '</div></div>';
     }
-    const brk = c.pageBreak
-        ? '<div class="pdfd-break"><span class="ln"></span><span class="lb">✂ PDF 换页线</span><span class="ln"></span></div>'
-        : '';
     return '<div class="' + cls + '" draggable="true" onclick="pdfSelectComponent(\'' + c.id + '\')"'
         + ' ondragstart="pdfCompDragStart(event,\'' + c.id + '\')" ondragover="pdfCompDragOver(event,\'' + c.id + '\')"'
         + ' ondragleave="pdfCompDragLeave(event)" ondrop="pdfCompDrop(event,\'' + c.id + '\')" ondragend="pdfCompDragEnd(event)">'
@@ -2493,7 +2488,7 @@ function pdfV3ComponentHTML(c, scope) {
                 ? '<span class="pdfd-err" title="所选指标在不同设备类型下单位不一致，需要更换指标">⚠ 单位不一致</span>'
                 : '';
         })()
-        + '</div>' + inner + '</div>' + brk;
+        + '</div>' + inner + '</div>';
 }
 
 // 右栏指标行：绑定的指标若单位不一致（同一指标跨设备类型量纲不同）→ 整行错误态 + 提示
@@ -2538,17 +2533,21 @@ function pdfV3RenderProps() {
         html += '<div class="prop-head">数据透视与维度</div>';
         const isKpi = c.type === 'kpi_card';
         const rule = pdfMetricRule(c.type);
-        const capMax = (rule.mode === 'kpi') ? PDF_PICK_KPI_MAX : (rule.mode === 'multi' ? rule.max : 0);
+        /* 单选口径上限 = 1：绑满后「＋ 从模型字典选择」置灰，不能再加（先移除当前指标才能重选） */
+        const capMax = (rule.mode === 'kpi') ? PDF_PICK_KPI_MAX
+            : (rule.mode === 'multi' ? rule.max : (rule.mode === 'single' ? 1 : 0));
         const capFull = capMax > 0 && c.metrics.length >= capMax;
+        const scopeName = pdfV3Scope() === 'fleet' ? '机群' : '单机';
         const capTip = (rule.mode === 'kpi')
             ? '已达上限 ' + PDF_PICK_KPI_MAX + ' 张，先移除一张再加。'
-            : '已达上限 ' + capMax + ' 个，先移除一个再加。';
-        const scopeName = pdfV3Scope() === 'fleet' ? '机群' : '单机';
+            : (rule.mode === 'single'
+                ? '只能绑定 1 个指标（' + scopeName + '口径），先移除当前指标再重新选择。'
+                : '已达上限 ' + capMax + ' 个，先移除一个再加。');
         const cntTxt = (rule.mode === 'kpi')
             ? c.metrics.length + ' / ' + PDF_PICK_KPI_MAX + ' 张'
             : (rule.mode === 'multi' ? c.metrics.length + ' / ' + rule.max + ' 个'
                 : (rule.mode === 'table' ? c.metrics.length + ' 列'
-                    : (rule.mode === 'single' ? '1 个（' + scopeName + '口径）' : '')));
+                    : (rule.mode === 'single' ? c.metrics.length + ' / 1 个（' + scopeName + '口径）' : '')));
         html += '<div class="prop-group">'
             + (c.metrics.length
                 ? pdfMetricRowsHTML(c, isKpi)
@@ -2578,8 +2577,6 @@ function pdfV3RenderProps() {
         + '<div class="prop-group"><label>纸张宽度占比</label><select onchange="pdfUpdateSelected(\'pdfWidth\', this.value)">'
         + '<option value="100%"' + (c.pdfWidth === '100%' ? ' selected' : '') + '>100%（满宽整行）</option>'
         + '<option value="50%"' + (c.pdfWidth === '50%' ? ' selected' : '') + '>50%（半宽并排）</option></select></div>'
-        + '<label class="chk-row" style="background:#fafafa;border:1px solid #f0f0f0;border-radius:5px;padding:7px 9px">'
-        + '<input type="checkbox"' + (c.pageBreak ? ' checked' : '') + ' onchange="pdfUpdateSelected(\'pageBreak\', this.checked)"> 渲染完毕后强制换页</label>'
         + '<div style="margin-top:16px;border-top:1px solid #f0f0f0;padding-top:12px">'
         + '<button type="button" class="prop-danger" onclick="pdfRemoveSelected()">🗑 删除当前组件</button></div>';
     panel.innerHTML = html;
@@ -2639,7 +2636,7 @@ function pdfAddComponent() {
     const id = 'comp_' + Date.now();
     pdfModules().push({
         id: id, type: 'bar_chart', title: '新组件', titleKey: 'new.component.title', metrics: [PDF_DEFAULT_METRIC],
-        pdfWidth: '100%', pageBreak: false, xAxis: 'time', groupBy: 'metric',
+        pdfWidth: '100%', xAxis: 'time', groupBy: 'metric',
         rowDimension: 'time', colDimension: 'metrics', barDirection: 'vertical'
     });
     pdfV3SelectedId = id;
@@ -2708,7 +2705,7 @@ function pdfV3Payload() {
         id: c.id, type: c.type, title: c.title, titleKey: c.titleKey, metrics: (c.metrics || []).slice(),
         xAxis: c.xAxis, groupBy: c.groupBy, rowDimension: c.rowDimension, colDimension: c.colDimension,
         barDirection: c.barDirection === 'horizontal' ? 'horizontal' : 'vertical',
-        pdfWidth: c.pdfWidth, pageBreak: !!c.pageBreak
+        pdfWidth: c.pdfWidth
     }));
     return {
         templateName: pdfV3TplName(),
@@ -2879,12 +2876,14 @@ function pdfOpenFieldPicker(compId) {
     pdfPickState.mode = rule.mode;
     pdfPickState.max = rule.max;
     pdfPickState.kpi = rule.mode === 'kpi';
-    pdfPickState.multi = (rule.mode === 'table' || rule.mode === 'multi');
+    /* 2026-09-24 用户定稿：指标弹窗内一律单选 —— 每次只选 1 个字段，确定后「追加」为 1 个指标；
+       折线 / 柱状图反复打开可加到 5 个；只有数据明细表是复选多列 */
+    pdfPickState.multi = (rule.mode === 'table');
     pdfPickState.selected = {};
     pdfPickState.groupFields = {};
     pdfPickState.bound = (c.metrics || []).slice();
-    // 基础维度字段已置灰不可选，回显时也不再勾上；指标卡是「再加一张」，不回显已加的
-    if (rule.mode === 'single' || rule.mode === 'multi' || rule.mode === 'table') {
+    // 数据明细：回显已选列；指标弹窗不回显（已绑定字段在列表里置灰「该指标已绑定」）
+    if (rule.mode === 'table') {
         pdfPickState.bound.forEach(m => {
             if (PDF_BASE_FIELD_NAMES.indexOf(m) < 0) pdfPickState.selected[m] = true;
         });
@@ -2893,7 +2892,7 @@ function pdfOpenFieldPicker(compId) {
     if (t) {
         t.textContent = (rule.mode === 'kpi') ? '添加指标卡'
             : (rule.mode === 'table' ? '选择明细列（可多选）'
-                : (rule.mode === 'multi' ? '选择指标（可多选）' : '选择指标（单选）'));
+                : '选择指标');
     }
     const s = document.getElementById('pdfPickSearch');
     if (s) s.value = '';
@@ -2948,6 +2947,8 @@ function pdfPickCurrentCat() {
 function pdfPickOffReason(name) {
     if (PDF_BASE_FIELD_NAMES.indexOf(name) >= 0) return '基础维度字段（统计周期 / 设备机型 / 设备编号）不需要绑定指标';
     if (pdfPickState.kpi && (pdfPickState.bound || []).indexOf(name) >= 0) return '该指标已在卡片里了';
+    // 指标弹窗（单选追加式）：已绑定的字段置灰，防止重复添加
+    if (!pdfPickState.multi && pdfPickState.mode !== 'kpi' && (pdfPickState.bound || []).indexOf(name) >= 0) return '该指标已绑定';
     const on = !!pdfPickState.selected[name];
     if (pdfPickState.multi && pdfPickState.max > 0 && !on && pdfPickSelectedCount() >= pdfPickState.max) {
         return '已达上限 ' + pdfPickState.max + ' 个指标，先取消一个再选';
@@ -2973,8 +2974,14 @@ function pdfPickInputHTML(name, on, gid) {
    —— 单位不同的直接拦下；一方无单位可匹配；双方都无单位但属性不同 → 允许添加、报表报属性错误 */
 function pdfPickMetricConflict(name) {
     const cat = pdfPickCurrentCat();
-    const others = Object.keys(pdfPickState.selected || {})
+    let others = Object.keys(pdfPickState.selected || {})
         .filter(k => pdfPickState.selected[k] && k !== name && PDF_BASE_FIELD_NAMES.indexOf(k) < 0);
+    // 指标弹窗（单选追加式）：已绑定的指标同样参与同单位校验
+    if (!pdfPickState.multi) {
+        (pdfPickState.bound || []).forEach(m => {
+            if (m !== name && PDF_BASE_FIELD_NAMES.indexOf(m) < 0 && others.indexOf(m) < 0) others.push(m);
+        });
+    }
     for (let i = 0; i < others.length; i++) {
         const cf = pdfMetricPairConflict(others[i], name, cat);
         if (cf) return cf;
@@ -3019,7 +3026,7 @@ function pdfRenderPickCascade() {
         + (pdfPickState.mode === 'kpi' ? '字段（每次选 1 个 · 加 1 张卡）'
             : (pdfPickState.mode === 'table' ? '字段（可多选 · 一个指标一列）'
                 : (pdfPickState.mode === 'multi'
-                    ? '字段（可多选 · 最多 ' + pdfPickState.max + ' 个）'
+                    ? '字段（每次选 1 个 · 最多 ' + pdfPickState.max + ' 个）'
                     : '字段（单选 1 个）')))
         + '<span class="pick-col-hd-r">' + ((mi && mi.fields) ? mi.fields.length : 0) + ' 个</span></div>'
         + ((mi && mi.fields && mi.fields.length)
@@ -3075,7 +3082,7 @@ function pdfRenderPickBody() {
             : (pdfPickState.mode === 'table'
                 ? '已选 <b id="pdfPickCount">' + n + '</b> 列 · 一列一个指标（明细表可多选）'
                 : (pdfPickState.mode === 'multi'
-                    ? '已选 <b id="pdfPickCount">' + n + '</b>' + maxTxt + ' 个 · 同单位多指标并排'
+                    ? '已选 <b id="pdfPickCount">' + n + '</b> 项 · 确定后加为 1 个指标'
                     : '已选 <b id="pdfPickCount">' + n + '</b> 项'));
     }
     // 全选只在明细表（多选列）下可用；指标卡有 6 张上限、单选 / 多选图表有 1 个或 5 个上限，都用不上
@@ -3103,7 +3110,7 @@ function pdfPickSelectAll(on) {
         pdfPickWarn('指标卡每次只能选 1 个字段，请逐个点选（最多 ' + PDF_PICK_KPI_MAX + ' 张）。');
         return;
     }
-    // 图表 / 环形图：指标数量有上限（机群 1 个、单机 ≤5），全选会直接违反规则；明细表可全选
+    // 图表 / 环形图：指标数量有上限（机群折线 / 环形 1 个、单机折线 ≤5、柱状 ≤5），全选会直接违反规则；明细表可全选
     if (on && pdfPickState.mode !== 'table') {
         const msg = pdfPickState.mode === 'single'
             ? (pdfV3Scope() === 'fleet' ? '机群口径下该组件只能选 1 个指标，请逐个点选。' : '该组件只能选 1 个指标，请逐个点选。')
@@ -3128,7 +3135,7 @@ function pdfPickToggle(name, on, gid) {
         return;
     }
     if (on) {
-        // ① 数量拦截：多选已达上限（单机折线图 / 柱状图 ≤5；单选口径不走这里）→ 不勾选，先把原因告诉用户
+        // ① 数量拦截：多选已达上限（折线单机 ≤5、柱状 ≤5；单选口径不走这里）→ 不勾选，先把原因告诉用户
         const onCount = pdfPickSelectedCount();
         if (pdfPickState.max > 0 && pdfPickState.mode !== 'single'
             && onCount >= pdfPickState.max && !pdfPickState.selected[name]) {
@@ -3162,8 +3169,8 @@ function pdfPickToggle(name, on, gid) {
                 pdfPickWarn(cf.msg + '：报表将报「属性错误」');
             }
         }
-        // ④ 单选（单机图表、机群折线 / 环形只 1 个指标）：选中新指标即替换原有的，并说明替换了什么
-        if (pdfPickState.mode === 'single' && PDF_BASE_FIELD_NAMES.indexOf(name) < 0) {
+        // ④ 弹窗内单选（指标弹窗一律 radio）：选中新字段即替换本次已选的（只影响本次弹窗，确定后追加）
+        if (!pdfPickState.multi && pdfPickState.mode !== 'kpi' && PDF_BASE_FIELD_NAMES.indexOf(name) < 0) {
             const prev = Object.keys(pdfPickState.selected)
                 .filter(k => pdfPickState.selected[k] && k !== name && PDF_BASE_FIELD_NAMES.indexOf(k) < 0);
             if (prev.length) {
@@ -3199,10 +3206,20 @@ function pdfConfirmFieldPicker() {
                 }
             }
         } else {
-            // 折线 / 柱状 / 环形：按「组件 × 口径」上限裁剪（多选口径＝单机折线图 / 柱状图，最多 5 个；机群折线与环形图只留 1 个）
+            // 折线 / 柱状 / 环形：弹窗内每次只选 1 个字段，确定后「追加」为 1 个指标（上限 = pdfMetricRule().max）
             const max = pdfPickState.max > 0 ? pdfPickState.max : 0;
-            c.metrics = max ? picked.slice(0, max) : picked.slice();
-            if (!c.metrics.length && pdfPickState.mode === 'single') c.metrics = [];
+            const name = picked.length ? picked[picked.length - 1] : null;
+            if (name) {
+                const next = (c.metrics || []).slice();
+                if (max && next.length >= max) {
+                    showToast('已达上限 ' + max + ' 个指标，请先移除一个再加', 'error');
+                } else if (next.indexOf(name) >= 0) {
+                    showToast('该指标已绑定', 'error');
+                } else {
+                    next.push(name);
+                    c.metrics = next;
+                }
+            }
         }
         pdfV3SelectedId = c.id;
     }

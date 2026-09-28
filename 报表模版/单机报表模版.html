@@ -1,0 +1,553 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>单机报表模版 · 三一品牌（头部 / 底部固定，正文由后台配置）</title>
+<style>
+/* ============================================================================
+   系统生成报告 · 通用规范（后端接入必读）
+   本页 = 所有系统生成报告的基准模板：头部 / 页脚 / 水印 / 分页规则全局通用。
+   后端生成页面时：按同样骨架与类名输出 HTML → 替换 {{变量}} → 拼装 .main 内的组件块，
+   以下规则（A4 版式 / 水印 / 分页防断层 / 配色）自动生效。
+
+   ① 页面骨架（顺序固定）：
+      .report（A4 210×297mm、flex 纵向、position:relative = 水印定位基准）
+        ├ .watermark     背景水印（斜向平铺 San VIST，覆盖全页 z-index:99；删除该 div 即关闭）
+        ├ .topbar        顶部品牌条（三一红 160px + 品牌黑）
+        ├ .header        左：SANY 字标（A4 恒定高 7mm）+ San VIST｜品质改变世界；右：{{报表名称}}
+        ├ .meta-strip    元信息条 4 格：{{资产编号}} / {{设备机型}} / {{统计周期}} / {{报告编号}}
+        ├ .head-rule     双线（4px 三一红 + 1px 灰）
+        ├ .main          正文组件区（后台按配置拼装，flex:1 把页脚压到页底）
+        ├ .foot-note     页脚说明行（报告生成人：{{用户名称}} · 数据来源 · www.mysany.vip）
+        └ .footer        品牌色带（San VIST｜品质改变世界 + 生成时间：{{生成时间}}）
+
+   ② 变量填充：data-field 定位 + {{变量名}} 占位，后台整体替换（正则 {{[^}]+}}）。
+
+   ③ 组件块约定（.main 内，每个组件一块）：
+      .section > .section-head（标题加粗在前 + .comp-tag 灰底类型标签在后）
+      + 图形（svg，width:100%）/ 表格 / 文本；多组件并排用 .cols（各占 50%）。
+
+   ④ 打印分页（@media print，规则全局自动生效）：
+      - @page A4 竖版 margin 0；* print-color-adjust: exact（背景色不丢）
+      - 不跨页：.metric / .meta-strip / .header / .cols（并排块整块换页）；table tr 不加 avoid（Chromium bug：avoid + 跨页表头会吞行）
+      - .section-head break-after: avoid（标题不落单，杜绝「标题在上页、图形在下页」断层）
+      - .section 大容器允许分页（长明细表必须能跨页）；thead { display: table-header-group }（表头跨页自动重复）
+
+   ⑤ 配色变量：--sany-red #E60000（三一红 PANTONE 485C）+ 品牌黑 #1a1a1a/#000 + 官方灰阶
+      （深灰 #575757 / 中深灰 #A0A0A0 / 中灰 #CACACA / 浅灰 #DCDCDC / 浅灰2 #EFEFEF）。
+   ============================================================================ */
+* { box-sizing: border-box; }
+:root {
+    --sany-red: #E60000;      /* 三一红：PANTONE 485C（RGB 230,0,0）*/
+    --pri: #1a1a1a;           /* 品牌黑（近黑，用于结构色） */
+    --pri-dark: #000000;      /* 品牌黑 */
+    --pri-soft: #f5f5f5;      /* 品牌白灰底 */
+    --accent: #E60000;        /* 对比色：三一红 */
+    --ink: #1a1a1a;
+    --grey: #575757;      /* 辅助·深灰（RGB 87,87,87 / 425C）*/
+    --line: #dcdcdc;      /* 辅助·浅灰（RGB 220,220,220）*/
+}
+body {
+    margin: 0;
+    background: #f4f4f4;
+    font-family: "PingFang SC", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+    color: #1a1a1a;
+}
+.report {
+    position: relative;           /* 水印层的定位基准：铺满整个报告 */
+    width: 210mm;
+    min-height: 297mm;
+    margin: 20px auto;
+    padding: 0 16mm;
+    background: #ffffff;
+    display: flex;
+    flex-direction: column;
+}
+/* 正文容器：后台按配置拼装组件的区域，flex:1 撑开，把底部压到页脚 */
+.main { flex: 1; padding-top: 5mm; }
+/* ---------- 背景水印（斜向平铺 San VIST）---------- */
+/* 覆盖全页：置于内容上层（低透明度不挡阅读），不需要时整个删掉 .watermark 这个 div 即可 */
+.watermark {
+    position: absolute;
+    inset: 0;
+    z-index: 99;
+    pointer-events: none;
+    background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='230' height='160'><text x='115' y='80' text-anchor='middle' dominant-baseline='middle' transform='rotate(-28 115 80)' font-family='Arial, sans-serif' font-size='26' font-weight='900' letter-spacing='2' fill='%23575757' fill-opacity='0.07'>San VIST</text></svg>");
+    background-size: 230px 160px;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+.report > *:not(.watermark) { position: relative; z-index: 1; }
+/* ---------- 头部 ---------- */
+/* 顶部品牌红条：贴纸张上边缘 */
+.topbar {
+    height: 8px;
+    margin: 0 -16mm;
+    background: linear-gradient(90deg, var(--sany-red) 0 160px, var(--pri-dark) 160px, var(--pri) 100%);
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+.header {
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    padding-top: 7mm;
+    padding-bottom: 12px;
+}
+.logo { display: flex; align-items: center; gap: 14px; }
+.brand-wrap { display: flex; align-items: baseline; gap: 10px; }
+/* VI 2.2.6 字母标志恒定尺寸：A4 版面高度 = 7mm（cap 高 ≈ 0.72em → 字号 9.7mm）；Arial Black 加粗 */
+.logo .brand {
+    color: var(--sany-red);
+    font-family: 'Arial Black', 'Arial', sans-serif;
+    font-weight: 900;
+    font-size: 9.7mm;
+    line-height: 1;
+    letter-spacing: 1px;
+}
+.logo .product {
+    font-size: 11px;
+    color: #A0A0A0;
+    line-height: 1.7;
+    padding-top: 2px;
+}
+.logo .slogan {
+    display: inline-block;
+    margin-top: 3px;
+    color: #8a94a3;
+    font-weight: 700;
+    letter-spacing: 4px;
+}
+.report-title { text-align: right; }
+.report-title h1 { margin: 0; font-size: 19px; letter-spacing: 1px; color: var(--ink); }
+/* 元信息条：后台逐项填充（资产编号 / 机型 / 周期 / 报告编号） */
+.meta-strip {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    background: #EFEFEF;
+    border: 1px solid #CACACA;
+    border-radius: 3px;
+    overflow: hidden;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+.meta-strip .meta { padding: 14px 14px; border-left: 1px solid #DCDCDC; }
+.meta-strip .meta:first-child { border-left: none; }
+.meta-strip .k { display: block; font-size: 10px; color: #A0A0A0; letter-spacing: 1px; }
+.meta-strip .v { display: block; margin-top: 5px; font-size: 14px; color: var(--ink); }
+/* 头部收尾双线：粗红 + 细灰 */
+.head-rule { margin-top: 14px; height: 4px; background: var(--sany-red); position: relative; }
+.head-rule::after {
+    content: "";
+    position: absolute; left: 0; right: 0; bottom: -4px;
+    height: 1px; background: var(--line);
+}
+/* ---------- 顶部指标卡 ---------- */
+.metrics {
+    margin-top: 18px;
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 12px;
+}
+.metric {
+    padding: 14px 16px;
+    background: #fff;
+    border-top: 4px solid var(--sany-red);
+    border-radius: 2px;
+    box-shadow: 0 1px 4px rgba(0,0,0,.06);
+}
+.metric .label { font-size: 12px; color: #575757; letter-spacing: .5px; }
+.metric .number { margin-top: 6px; font-size: 26px; font-weight: 800; color: var(--sany-red); }
+.metric .unit { font-size: 12px; color: #A0A0A0; }
+/* ---------- 版式 ---------- */
+.cols { display: grid; grid-template-columns: 1fr 1fr; gap: 20px; }
+.section { margin-top: 22px; }
+.section-title {
+    margin-bottom: 12px;
+    padding-left: 10px;
+    border-left: 4px solid var(--sany-red);
+    font-size: 16px;
+    font-weight: 700;
+    color: #1a1a1a;
+    letter-spacing: .5px;
+}
+    font-weight: 700;
+    color: #333;
+}
+/* ---------- 组件示例通用 ---------- */
+.section-head { display: flex; align-items: center; gap: 10px; margin-bottom: 18px; }
+.comp-tag {
+    flex-shrink: 0;
+    font-size: 10px;
+    font-weight: 700;
+    color: #575757;
+    background: #EFEFEF;
+    border: 1px solid #CACACA;
+    padding: 2px 8px;
+    border-radius: 3px;
+    letter-spacing: .5px;
+}
+.comp-title { font-size: 13px; font-weight: 700; color: var(--ink); }
+.chart-wrap svg { width: 100%; height: auto; display: block; }
+/* 半宽（50%）卡片里的表格：紧凑排版，首列不换行 */
+.cols table { font-size: 11px; }
+.cols th, .cols td { padding: 6px 6px; }
+.cols th:first-child, .cols td:first-child { white-space: nowrap; }
+/* ---------- 环形图 ---------- */
+/* ---------- 进度条 ---------- */
+/* ---------- 表格 ---------- */
+table { width: 100%; border-collapse: collapse; font-size: 12px; }
+th {
+    background: #575757;
+    color: #fff;
+    padding: 8px;
+    text-align: left;
+    font-weight: 600;
+    letter-spacing: .5px;
+}
+td { padding: 7px 8px; border-bottom: 1px solid #f0f0f0; }
+tr:nth-child(even) td { background: #fafafa; }
+td.num, th.num { text-align: right; }
+/* ---------- 页脚 ---------- */
+/* 页脚说明行：生成人 / 数据来源声明 / 官网 */
+.foot-note {
+    margin-top: 26px;
+    padding: 10px 0;
+    border-top: 1px solid var(--line);
+    display: flex;
+    justify-content: space-between;
+    color: #999;
+    font-size: 10px;
+    gap: 16px;
+}
+/* 品牌红带：贴纸张下边缘 */
+.footer {
+    margin: 10px -16mm 0;
+    padding: 12px 16mm;
+    border-top: 3px solid var(--sany-red);
+    background: linear-gradient(90deg, var(--pri-dark) 0%, var(--pri) 100%);
+    color: #fff;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+    font-size: 11px;
+    -webkit-print-color-adjust: exact;
+    print-color-adjust: exact;
+}
+.footer .brand2 { font-weight: 900; font-size: 17px; letter-spacing: 2px; }
+.footer .slogan {
+    margin-left: 12px;
+    padding-left: 12px;
+    border-left: 1px solid rgba(255,255,255,.45);
+    opacity: .9;
+    letter-spacing: 3px;
+}
+.footer .right { text-align: right; opacity: .95; }
+.footer .right span + span { margin-left: 10px; padding-left: 10px; border-left: 1px solid rgba(255,255,255,.35); }
+@page { size: A4 portrait; margin: 0; }
+@media print {
+    body { background: #fff; }
+    /* 打印时保留所有背景色（深蓝表头 / 红字标 / 页脚色带） */
+    * { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+    .report { margin: 0; width: 210mm; min-height: 297mm; }
+    /* 小单元不跨页截断；.section 等大容器允许分页（40 行明细表必须能跨页）；表头跨页自动重复 */
+    .metric, .meta-strip, .header { break-inside: avoid; page-break-inside: avoid; }
+    /* 并排块（横向柱状 + 环形图等）整块换页：标题不与图形分离 */
+    .cols { break-inside: avoid; page-break-inside: avoid; }
+    /* 标题行不落在页面末尾（避免「标题在上页、图形在下页」的断层） */
+    .section-head { break-after: avoid; page-break-after: avoid; }
+    /* 注意：不给 tr 加 break-inside: avoid —— Chromium 已知 bug（avoid + 跨页表头组合时，
+       落在分页点上的行会被整行吞掉）；行允许跨页断开，但不会丢数据 */
+    thead { display: table-header-group; }
+}
+</style>
+</head>
+<body>
+<div class="report">
+
+    <!-- 背景水印（斜向平铺 San VIST）：不需要时删除此 div -->
+    <div class="watermark" aria-hidden="true"></div>
+
+    <!-- ================================================================
+         【头部模板 · 后端接入契约】
+         结构（顺序固定）：
+           .topbar      顶部品牌条（三一红 160px + 品牌黑）
+           .header      左：SANY 字标（A4 恒定高 7mm / Arial Black）+ San VIST｜品质改变世界（上下两行）
+                        右：{{报表名称}}（字号 19px，防多语言溢出）
+           .meta-strip  元信息条 4 格：{{资产编号}} / {{设备机型}} / {{统计周期}} / {{报告编号}}
+           .head-rule   双线（4px 三一红 + 1px 灰）
+         填充方式：data-field 定位 + {{变量名}} 占位，后台整体替换（正则 {{[^}]+}}）。
+         颜色 / 字标尺寸 / 组合规范见 <style> 顶部「系统生成报告 · 通用规范」。
+         ================================================================ -->
+    <!-- ==================== 头部（后台模板：固定结构，逐项填充数据） ==================== -->
+    <div class="topbar"></div>
+    <div class="header">
+        <div class="logo">
+            <div class="brand-wrap">
+                <span class="brand">SANY</span>
+            </div>
+            <div class="product" style="font-size:14px;font-weight:700"><b style="font-weight:800;color:#1a1a1a">San VIST</b><br><span>品质改变世界</span></div>
+        </div>
+        <div class="report-title">
+            <h1 data-field="reportTitle">{{报表名称}}</h1>
+        </div>
+    </div>
+    <!-- 【后台填充】元信息条：data-field 与后台字段对应 -->
+    <div class="meta-strip">
+        <div class="meta"><span class="k">资产编号</span><span class="v" data-field="deviceSn">{{资产编号}}</span></div>
+        <div class="meta"><span class="k">设备机型</span><span class="v" data-field="deviceModel">{{设备机型}}</span></div>
+        <div class="meta"><span class="k">统计周期</span><span class="v" data-field="period">{{统计周期}}</span></div>
+        <div class="meta"><span class="k">报告编号</span><span class="v" data-field="reportNo">{{报告编号}}</span></div>
+    </div>
+    <div class="head-rule"></div>
+    <!-- ==================== 头部结束 ==================== -->
+
+    <!-- ==================== 正文（后台配置区：由组件按配置拼装） ==================== -->
+    <div class="main">
+        <!-- ===== 组件示例 1：指标卡（一个字段一张卡，≤ 6 张） ===== -->
+        <div class="section">
+            <div class="section-head"><span class="comp-title">关键指标（一个字段一张卡）</span><span class="comp-tag">指标卡</span></div>
+            <div class="metrics">
+                <div class="metric"><div class="label">工作时间</div><div class="number" style="font-size:24px">284h 24m</div><div class="unit">&nbsp;</div></div>
+                <div class="metric"><div class="label">怠速时间</div><div class="number" style="font-size:24px">2h 18m</div><div class="unit">&nbsp;</div></div>
+                <div class="metric"><div class="label">燃油消耗</div><div class="number">5,669.0</div><div class="unit">升</div></div>
+                <div class="metric"><div class="label">平均小时油耗</div><div class="number">19.9</div><div class="unit">升/小时</div></div>
+            </div>
+        </div>
+
+        <!-- ===== 组件示例 2：折线图（时间趋势，多指标须同单位） ===== -->
+        <div class="section">
+            <div class="section-head"><span class="comp-title">5 项时长指标趋势（日粒度 · 近 31 天 · 同单位 h）</span><span class="comp-tag">折线图</span></div>
+            <div class="chart-wrap" id="chart-line"></div>
+        </div>
+
+        <!-- ===== 组件示例 3：柱状图 · 垂直（100% 满宽） ===== -->
+        <div class="section">
+            <div class="section-head"><span class="comp-title">垂直排布 · 5 项时长指标对比（日粒度 · 近 31 天 · 100% 满宽）</span><span class="comp-tag">柱状图</span></div>
+            <div class="chart-wrap" id="chart-bar-v"></div>
+        </div>
+
+        <!-- ===== 组件示例 3b + 4：柱状图 · 横向 / 环形图（各占 50% 半宽并排） ===== -->
+        <div class="cols">
+            <div class="section">
+                <div class="section-head"><span class="comp-title">横向排布 · 5 项工况油耗（31 天累计 · 分类在 Y 轴）</span><span class="comp-tag">柱状图</span></div>
+                <div class="chart-wrap" id="chart-bar-h"></div>
+            </div>
+            <div class="section">
+                <div class="section-head"><span class="comp-title">发动机状态构成（近 7 天）</span><span class="comp-tag">环形图</span></div>
+                <div class="chart-wrap" id="chart-ring"></div>
+            </div>
+        </div>
+
+        <!-- ===== 组件示例 5：数据明细（100% 满宽） ===== -->
+        <div class="section">
+            <div class="section-head"><span class="comp-title">周明细（一列一个指标，缺失输出 -）</span><span class="comp-tag">数据明细</span></div>
+                <table>
+                    <thead><tr><th>周期</th><th class="num">工作时长</th><th class="num">怠速时长</th><th class="num">燃油消耗（升）</th><th class="num">行驶里程（km）</th></tr></thead>
+                    <tbody>
+                        <tr><td>10-01 ～ 10-07</td><td class="num">42h 36m</td><td class="num">1h 48m</td><td class="num">856.4</td><td class="num">96.2</td></tr>
+                        <tr><td>10-08 ～ 10-14</td><td class="num">43h 24m</td><td class="num">2h 6m</td><td class="num">852.9</td><td class="num">96.8</td></tr>
+                        <tr><td>10-15 ～ 10-21</td><td class="num">44h 6m</td><td class="num">2h 24m</td><td class="num">849.4</td><td class="num">94.3</td></tr>
+                        <tr><td>10-22 ～ 10-28</td><td class="num">44h 54m</td><td class="num">2h 42m</td><td class="num">827.3</td><td class="num">94.9</td></tr>
+                        <tr><td>10-29 ～ 11-04</td><td class="num">40h 48m</td><td class="num">3h 0m</td><td class="num">823.8</td><td class="num">92.4</td></tr>
+                        <tr><td>11-05 ～ 11-11</td><td class="num">41h 36m</td><td class="num">1h 48m</td><td class="num">820.3</td><td class="num">-</td></tr>
+                        <tr><td>11-12 ～ 11-18</td><td class="num">42h 18m</td><td class="num">2h 6m</td><td class="num">798.2</td><td class="num">90.5</td></tr>
+                        <tr><td>11-19 ～ 11-25</td><td class="num">43h 6m</td><td class="num">2h 24m</td><td class="num">794.7</td><td class="num">91.0</td></tr>
+                        <tr><td>11-26 ～ 12-02</td><td class="num">39h 0m</td><td class="num">2h 42m</td><td class="num">791.2</td><td class="num">88.6</td></tr>
+                        <tr><td>12-03 ～ 12-09</td><td class="num">39h 48m</td><td class="num">3h 0m</td><td class="num">769.1</td><td class="num">89.2</td></tr>
+                        <tr><td>12-10 ～ 12-16</td><td class="num">40h 30m</td><td class="num">1h 48m</td><td class="num">765.6</td><td class="num">86.7</td></tr>
+                        <tr><td>12-17 ～ 12-23</td><td class="num">41h 12m</td><td class="num">2h 6m</td><td class="num">762.1</td><td class="num">87.2</td></tr>
+                        <tr><td>12-24 ～ 12-30</td><td class="num">37h 12m</td><td class="num">2h 24m</td><td class="num">740.0</td><td class="num">84.8</td></tr>
+                        <tr><td>12-31 ～ 01-06</td><td class="num">38h 0m</td><td class="num">2h 42m</td><td class="num">736.5</td><td class="num">85.4</td></tr>
+                        <tr><td>01-07 ～ 01-13</td><td class="num">38h 42m</td><td class="num">3h 0m</td><td class="num">733.0</td><td class="num">82.9</td></tr>
+                        <tr><td>01-14 ～ 01-20</td><td class="num">39h 30m</td><td class="num">1h 48m</td><td class="num">710.9</td><td class="num">83.5</td></tr>
+                        <tr><td>01-21 ～ 01-27</td><td class="num">35h 24m</td><td class="num">2h 6m</td><td class="num">707.4</td><td class="num">81.0</td></tr>
+                        <tr><td>01-28 ～ 02-03</td><td class="num">36h 12m</td><td class="num">2h 24m</td><td class="num">-</td><td class="num">81.6</td></tr>
+                        <tr><td>02-04 ～ 02-10</td><td class="num">36h 54m</td><td class="num">2h 42m</td><td class="num">681.8</td><td class="num">79.1</td></tr>
+                        <tr><td>02-11 ～ 02-17</td><td class="num">37h 36m</td><td class="num">3h 0m</td><td class="num">678.3</td><td class="num">79.7</td></tr>
+                        <tr><td>02-18 ～ 02-24</td><td class="num">33h 36m</td><td class="num">1h 48m</td><td class="num">674.8</td><td class="num">77.2</td></tr>
+                        <tr><td>02-25 ～ 03-03</td><td class="num">34h 24m</td><td class="num">2h 6m</td><td class="num">652.7</td><td class="num">77.8</td></tr>
+                        <tr><td>03-04 ～ 03-10</td><td class="num">35h 6m</td><td class="num">2h 24m</td><td class="num">649.2</td><td class="num">75.3</td></tr>
+                        <tr><td>03-11 ～ 03-17</td><td class="num">35h 54m</td><td class="num">2h 42m</td><td class="num">645.7</td><td class="num">-</td></tr>
+                        <tr><td>03-18 ～ 03-24</td><td class="num">31h 48m</td><td class="num">3h 0m</td><td class="num">623.6</td><td class="num">73.4</td></tr>
+                        <tr><td>03-25 ～ 03-31</td><td class="num">32h 36m</td><td class="num">1h 48m</td><td class="num">620.1</td><td class="num">74.0</td></tr>
+                        <tr><td>04-01 ～ 04-07</td><td class="num">33h 18m</td><td class="num">2h 6m</td><td class="num">616.6</td><td class="num">71.5</td></tr>
+                        <tr><td>04-08 ～ 04-14</td><td class="num">34h 6m</td><td class="num">2h 24m</td><td class="num">594.5</td><td class="num">72.1</td></tr>
+                        <tr><td>04-15 ～ 04-21</td><td class="num">30h 0m</td><td class="num">2h 42m</td><td class="num">591.0</td><td class="num">69.6</td></tr>
+                        <tr><td>04-22 ～ 04-28</td><td class="num">30h 48m</td><td class="num">3h 0m</td><td class="num">587.5</td><td class="num">70.2</td></tr>
+                        <tr><td>04-29 ～ 05-05</td><td class="num">31h 30m</td><td class="num">1h 48m</td><td class="num">565.4</td><td class="num">67.7</td></tr>
+                        <tr><td>05-06 ～ 05-12</td><td class="num">32h 12m</td><td class="num">2h 6m</td><td class="num">561.9</td><td class="num">68.2</td></tr>
+                        <tr><td>05-13 ～ 05-19</td><td class="num">28h 12m</td><td class="num">2h 24m</td><td class="num">558.4</td><td class="num">65.8</td></tr>
+                        <tr><td>05-20 ～ 05-26</td><td class="num">28h 54m</td><td class="num">2h 42m</td><td class="num">536.3</td><td class="num">66.4</td></tr>
+                        <tr><td>05-27 ～ 06-02</td><td class="num">29h 42m</td><td class="num">3h 0m</td><td class="num">532.8</td><td class="num">63.9</td></tr>
+                        <tr><td>06-03 ～ 06-09</td><td class="num">30h 30m</td><td class="num">1h 48m</td><td class="num">529.3</td><td class="num">64.5</td></tr>
+                        <tr><td>06-10 ～ 06-16</td><td class="num">26h 24m</td><td class="num">2h 6m</td><td class="num">507.2</td><td class="num">62.0</td></tr>
+                        <tr><td>06-17 ～ 06-23</td><td class="num">27h 6m</td><td class="num">2h 24m</td><td class="num">503.7</td><td class="num">62.6</td></tr>
+                        <tr><td>06-24 ～ 06-30</td><td class="num">27h 54m</td><td class="num">2h 42m</td><td class="num">500.2</td><td class="num">60.1</td></tr>
+                        <tr><td>07-01 ～ 07-07</td><td class="num">28h 36m</td><td class="num">3h 0m</td><td class="num">478.1</td><td class="num">60.7</td></tr>
+                    </tbody>
+                </table>
+        </div>
+
+    </div>
+    <!-- ==================== 正文结束 ==================== -->
+
+    <!-- ==================== 页脚（后台模板：固定结构） ==================== -->
+    <div class="foot-note">
+        <div data-field="creator">报告生成人：{{用户名称}}</div>
+        <div>本报告由 San VIST 自动生成 · 数据来自设备物联网历史工况采集</div>
+        <div>www.mysany.vip</div>
+    </div>
+    <div class="footer">
+        <div>
+            <span class="brand2">San VIST</span>
+            <span class="slogan">品质改变世界</span>
+        </div>
+        <div class="right">
+            <span data-field="genTime">生成时间：{{生成时间}}</span>
+        </div>
+    </div>
+    <!-- ==================== 页脚结束 ==================== -->
+
+</div>
+
+<script>
+/* ===== 组件示例图形：画法与 折线图节点密度示例.html 同源，配色 = 本模板工业钢灰 ===== */
+(function () {
+    var C5 = ['#E60000', '#575757', '#A0A0A0', '#CACACA', '#DCDCDC'], GRID = '#dcdcdc', AXIS = '#a0a0a0', TXT = '#575757', TXT = '#7c8798';
+    function svg(w, h, inner) { return '<svg viewBox="0 0 ' + w + ' ' + h + '" xmlns="http://www.w3.org/2000/svg">' + inner + '</svg>'; }
+    function r1(a) { return a.map(function (v) { return Math.round(v * 10) / 10; }); }
+    function series(n, seed) { var out = [], v = 50 + seed * 7; for (var i = 0; i < n; i++) { v += Math.sin(i * 1.7 + seed) * 6 + (seed % 3 - 1) * 2; out.push(v); } return out; }
+    function grid(W, H, padL, padR, padT, padB, lo, hi) {
+        var s = '';
+        for (var g = 0; g <= 4; g++) {
+            var y = padT + (H - padT - padB) * g / 4;
+            s += '<line x1="' + padL + '" y1="' + y + '" x2="' + (W - padR) + '" y2="' + y + '" stroke="' + GRID + '" stroke-width="1"/>';
+            s += '<text x="' + (padL - 8) + '" y="' + (y + 4) + '" text-anchor="end" font-size="14" fill="' + AXIS + '">' + (hi - (hi - lo) * g / 4).toFixed(0) + '</text>';
+        }
+        return s;
+    }
+
+    /* 折线图：同单位 5 指标（h），日粒度 31 天 —— 节点>10 刻度倾斜 40°，>24 抽稀（末点必有刻度） */
+    (function () {
+        var labels = []; for (var i = 1; i <= 31; i++) labels.push('7/' + i);
+        var defs = [
+            ['工作时长 (h)', 1, function (v) { return v / 6 + 7; }],
+            ['怠速时长 (h)', 4, function (v) { return v / 12 + 2; }],
+            ['回转时间 (h)', 9, function (v) { return v / 24 + 2; }],
+            ['行走时间 (h)', 7, function (v) { return v / 40 + 2; }],
+            ['待机时间 (h)', 11, function (v) { return v / 45 + 0.8; }]
+        ];
+        var COLORS = C5;
+        var list = defs.map(function (d) { return r1(series(31, d[1]).map(d[2])); });
+        var W = 960, H = 290, padL = 56, padR = 18, padT = 54, padB = 76;
+        var all = list.reduce(function (a, b) { return a.concat(b); }, []);
+        var mn = Math.min.apply(null, all), mx = Math.max.apply(null, all), d = (mx - mn) || 1;
+        var lo = mn - d * .12, hi = mx + d * .12;
+        var X = function (i) { return padL + (W - padL - padR) * i / (labels.length - 1); };
+        var Y = function (v) { return padT + (H - padT - padB) * (1 - (v - lo) / (hi - lo)); };
+        var s = grid(W, H, padL, padR, padT, padB, lo, hi);
+        defs.forEach(function (d, k) {
+            var vals = list[k], c = COLORS[k];
+            s += '<polyline points="' + vals.map(function (v, i) { return X(i).toFixed(1) + ',' + Y(v).toFixed(1); }).join(' ') + '" fill="none" stroke="' + c + '" stroke-width="1.8" stroke-linejoin="round"/>';
+            var gap = (W - padL - padR) / defs.length, lx = padL + k * gap;
+            s += '<line x1="' + lx + '" y1="16" x2="' + (lx + 16) + '" y2="16" stroke="' + c + '" stroke-width="2"/>';
+            s += '<text x="' + (lx + 22) + '" y="19.5" font-size="14" fill="#7c8798">' + d[0] + '</text>';
+        });
+        var step = 3;
+        labels.forEach(function (t, i) {
+            if ((labels.length - 1 - i) % step !== 0) return;
+            var cx = X(i).toFixed(1), ly = H - 52;
+            s += '<text x="' + cx + '" y="' + ly + '" text-anchor="end" font-size="14" fill="' + TXT + '" transform="rotate(-40 ' + cx + ' ' + ly + ')">' + t + '</text>';
+        });
+        document.getElementById('chart-line').innerHTML = svg(W, H, s);
+    })();
+
+    /* 柱状图·垂直：同单位 5 指标（h）× 31 天 —— 组内并排、刻度倾斜 + 抽稀（画法与 colChart 同源） */
+    (function () {
+        var labels = []; for (var i = 1; i <= 31; i++) labels.push('7/' + i);
+        var defs = [
+            ['工作时长 (h)', 1, function (v) { return v / 6 + 7; }],
+            ['怠速时长 (h)', 4, function (v) { return v / 12 + 2; }],
+            ['回转时间 (h)', 9, function (v) { return v / 24 + 2; }],
+            ['行走时间 (h)', 7, function (v) { return v / 40 + 2; }],
+            ['待机时间 (h)', 11, function (v) { return v / 45 + 0.8; }]
+        ];
+        var COLORS = C5;
+        var list = defs.map(function (d) { return r1(series(31, d[1]).map(d[2])); });
+        var W = 960, H = 320, padL = 56, padR = 18, padT = 46, padB = 84;
+        var mx = Math.max.apply(null, list.reduce(function (a, b) { return a.concat(b); }, [])) * 1.15;
+        var band = (W - padL - padR) / labels.length;
+        var bw = Math.min(30, band * 0.74 / list.length), rectW = bw * 0.74;
+        var Y = function (v) { return padT + (H - padT - padB) * (1 - v / mx); };
+        var s = grid(W, H, padL, padR, padT, padB, 0, mx);
+        labels.forEach(function (t, i) {
+            var start = padL + band * i + (band - bw * list.length) / 2;
+            list.forEach(function (vals, j) {
+                var x = start + bw * j + 1, y = Y(vals[i]), h = Math.max(1, H - padB - y);
+                s += '<rect x="' + x.toFixed(1) + '" y="' + y.toFixed(1) + '" width="' + rectW.toFixed(1) + '" height="' + h.toFixed(1) + '" fill="' + COLORS[j] + '" rx="1"/>';
+            });
+            if ((labels.length - 1 - i) % 3 !== 0) return;
+            var cx = (padL + band * (i + .5)).toFixed(1), ly = H - 52;
+            s += '<text x="' + cx + '" y="' + ly + '" text-anchor="end" font-size="14" fill="' + TXT + '" transform="rotate(-40 ' + cx + ' ' + ly + ')">' + t + '</text>';
+        });
+        defs.forEach(function (d, k) {
+            var gap = (W - padL - padR) / defs.length, lx = padL + k * gap;
+            s += '<rect x="' + lx + '" y="10" width="12" height="12" rx="3" fill="' + COLORS[k] + '"/>';
+            s += '<text x="' + (lx + 20) + '" y="20" font-size="14" fill="#7c8798">' + d[0] + '</text>';
+        });
+        document.getElementById('chart-bar-v').innerHTML = svg(W, H, s);
+    })();
+
+    /* 柱状图·横向：5 项工况指标（31 天累计油耗，L），分类在 Y 轴（rankBar 画法） */
+    (function () {
+        var rows = [
+            { name: '高功率段', value: 3918.2 },
+            { name: '中功率段', value: 1057.4 },
+            { name: '低功率段', value: 562.1 },
+            { name: '行走', value: 214.6 },
+            { name: '怠速', value: 29.4 }
+        ];
+        var W = 460, H = 240, padL = 62, padR = 58, padT = 14, padB = 12, rowH = 42;
+        var mx = Math.max.apply(null, rows.map(function (r) { return r.value; })) * 1.12;
+        var BX = function (v) { return padL + (W - padL - padR) * v / mx; };
+        var s = '';
+        rows.forEach(function (r, i) {
+            var y = padT + i * rowH;
+            s += '<text x="' + (padL - 10) + '" y="' + (y + 14) + '" text-anchor="end" font-size="11.5" fill="#475569">' + r.name + '</text>';
+            s += '<rect x="' + padL + '" y="' + (y + 3) + '" width="' + (BX(r.value) - padL).toFixed(1) + '" height="16" fill="' + C5[0] + '" rx="3"/>';
+            s += '<text x="' + (BX(r.value) + 7).toFixed(1) + '" y="' + (y + 15) + '" font-size="11" fill="#475569">' + r.value.toLocaleString() + ' 升</text>';
+        });
+        document.getElementById('chart-bar-h').innerHTML = svg(W, H, s);
+    })();
+
+    /* 环形图：状态构成（工作 / 怠速 / 关机）+ 中心合计 + 图例 —— 50% 半宽卡片用紧凑画布 */
+    (function () {
+        var items = [{ name: '工作', value: 18.6, text: '18h 36m' }, { name: '怠速', value: 2.3, text: '2h 18m' }, { name: '关机', value: 3.1, text: '3h 6m' }];
+        var colors = ['#E60000', '#575757', '#CACACA'];
+        var total = 24.0, W = 460, H = 220, cx = 108, cy = 110, r = 80;
+        function polar(deg) { var rad = (deg - 90) * Math.PI / 180; return [cx + r * Math.cos(rad), cy + r * Math.sin(rad)]; }
+        var s = '', a = 0;
+        items.forEach(function (it, k) {
+            var to = a + it.value / total * 360;
+            var p0 = polar(a), p1 = polar(to), large = (to - a) > 180 ? 1 : 0;
+            s += '<path d="M ' + cx + ' ' + cy + ' L ' + p0[0].toFixed(1) + ' ' + p0[1].toFixed(1) + ' A ' + r + ' ' + r + ' 0 ' + large + ' 1 ' + p1[0].toFixed(1) + ' ' + p1[1].toFixed(1) + ' Z" fill="' + colors[k] + '"/>';
+            a = to;
+        });
+        s += '<circle cx="' + cx + '" cy="' + cy + '" r="' + (r * .62).toFixed(1) + '" fill="#fff"/>';
+        s += '<text x="' + cx + '" y="' + (cy + 1) + '" text-anchor="middle" font-size="16" font-weight="700" fill="#1a1a1a">20h 54m</text>';
+        s += '<text x="' + cx + '" y="' + (cy + 19) + '" text-anchor="middle" font-size="11" fill="#8b90a0">总运行时长</text>';
+        items.forEach(function (it, k) {
+            var y = 52 + k * 40;
+            s += '<rect x="228" y="' + (y - 11) + '" width="12" height="12" rx="3" fill="' + colors[k] + '"/>';
+            s += '<text x="250" y="' + y + '" font-size="13" fill="#334155">' + it.name + '</text>';
+            s += '<text x="330" y="' + y + '" font-size="13" fill="#334155">' + it.text + '</text>';
+            s += '<text x="448" y="' + y + '" text-anchor="end" font-size="13" fill="#8b90a0">' + (it.value / total * 100).toFixed(1) + '%</text>';
+        });
+        document.getElementById('chart-ring').innerHTML = svg(W, H, s);
+    })();
+})();
+</script>
+</body>
+</html>
