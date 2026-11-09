@@ -1,0 +1,361 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- 原型页：禁用缓存，改完刷新即生效（否则浏览器会用旧的 HTML/CSS） -->
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>添加分组</title>
+<style>
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    /* 关掉「双击放大」：touch-action: manipulation 只禁双击缩放，
+       双指捏合与滑动照旧（iOS Safari 会忽略 user-scalable=no，所以用这个更靠谱） */
+    html, body { touch-action: manipulation; }
+    button, input, label, a { touch-action: manipulation; }
+    body {
+        font-family: "PingFang SC", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+        background: #f4f5f7; color: #1a1a1a; height: 100vh; overflow: hidden; display: flex; align-items: stretch;
+    }
+    .phone {
+        flex: 1 1 auto; min-width: 0; height: 100vh; background: #f4f5f7;
+        display: flex; flex-direction: column;
+    }
+
+    /* ================= 顶部导航（与 App 其他页统一：白底 + 圆形返回 + 页面标题） ================= */
+    .topbar {
+        height: 52px; background: #fff; border-bottom: 1px solid #e8e8e8; flex-shrink: 0;
+        display: flex; align-items: center; padding: 0 12px;
+    }
+    .topbar-back {
+        width: 30px; height: 30px; flex-shrink: 0; border: none; background: transparent;
+        border-radius: 50%; color: #1a1a1a; font-size: 22px; line-height: 1; font-family: inherit;
+        display: flex; align-items: center; justify-content: center; cursor: pointer;
+    }
+    .topbar-back:hover { background: #f2f3f5; }
+    .page-title {
+        margin-left: 4px; flex: 1 1 auto; min-width: 0; font-size: 17px; font-weight: 600;
+        color: #161a2e; letter-spacing: .2px;
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+
+    /* ================= 内容区（不整页滚动：两栏各自滚，底部按钮不被顶走） ================= */
+    .screen {
+        flex: 1; min-height: 0; display: flex; flex-direction: column;
+        padding: 14px 14px 12px; overflow: hidden;
+    }
+    .section-title {
+        flex-shrink: 0; display: flex; align-items: center; gap: 7px;
+        font-size: 13px; font-weight: 700; color: #161a2e; margin: 0 2px 10px;
+    }
+    .section-title::before { content: ''; width: 3px; height: 12px; border-radius: 2px; background: #E60012; }
+    .section-title.spaced { margin-top: 16px; }
+    .sel-count { margin-left: auto; font-size: 11px; font-weight: 400; color: #b0b4bd; }
+    .sel-count.on { color: #E60012; font-weight: 600; }
+    /* 标题右侧快捷操作：全选 / 清空 */
+    .mini {
+        font-family: inherit; font-size: 12px; color: #E60012; background: #fff;
+        border: 1px solid #f2c4c8; border-radius: 999px; padding: 4px 12px; cursor: pointer;
+    }
+    .mini:hover { background: #fff7f7; }
+
+    /* ================= 分组名称 ================= */
+    .name-input {
+        flex-shrink: 0; width: 100%; border: 1px solid #eef0f3; border-radius: 14px; background: #fff;
+        padding: 12px 14px; font-family: inherit; font-size: 16px; color: #333;
+        outline: none; box-shadow: 0 1px 3px rgba(22,26,46,.05);
+        transition: border-color .16s, box-shadow .16s;
+    }
+    .name-input::placeholder { color: #b8bcc4; }
+    .name-input:focus { border-color: #f0a5ab; box-shadow: 0 0 0 3px rgba(230,0,18,.06); }
+    .field-hint { flex-shrink: 0; font-size: 11px; color: #a0a4ad; line-height: 1.6; margin: 6px 2px 0; }
+
+    /* ================= 两栏：左「设备类型」→ 右「具体设备」（与报表页弹层同一套视觉） ================= */
+    .pane {
+        flex: 1; min-height: 0; display: flex;
+        background: #fff; border: 1px solid #eef0f3; border-radius: 14px; overflow: hidden;
+        box-shadow: 0 1px 3px rgba(22,26,46,.05);
+    }
+    .pane-types {
+        width: 36%; flex-shrink: 0; background: #f7f8fa; overflow-y: auto;
+        -webkit-overflow-scrolling: touch; padding-bottom: 8px;
+    }
+    .type-item {
+        position: relative; padding: 14px 10px 14px 14px; font-size: 14px; line-height: 1.45;
+        color: #5a6472; cursor: pointer; overflow-wrap: anywhere;
+    }
+    .type-item .cnt { font-size: 11px; color: #b0b4bd; }
+    .type-item.active { background: #fff; color: #E60012; font-weight: 600; }
+    .type-item.active::before {
+        content: ''; position: absolute; left: 0; top: 50%; transform: translateY(-50%);
+        width: 3px; height: 16px; border-radius: 0 3px 3px 0; background: #E60012;
+    }
+    .pane-devices { flex: 1; min-width: 0; overflow-y: auto; -webkit-overflow-scrolling: touch; }
+    .dev {
+        position: relative; display: flex; align-items: center; gap: 10px; padding: 12px 12px;
+        border-bottom: 1px solid #f6f7f9; cursor: pointer;
+        -webkit-user-select: none; user-select: none; touch-action: manipulation;
+        transition: background .16s;
+    }
+    .dev:last-child { border-bottom: none; }
+    .dev:hover { background: #fafbfc; }
+    .dev.on { background: #fff7f7; }
+    .dev input { position: absolute; opacity: 0; width: 0; height: 0; }
+    .dev-main { flex: 1; min-width: 0; }
+    .dev-name { display: block; font-size: 13.5px; font-weight: 600; color: #161a2e; }
+    .dev.on .dev-name { color: #E60012; }
+    .dev-meta { display: block; margin-top: 3px; font-size: 12px; letter-spacing: 0; color: #8b90a0; }
+    .dev-check {
+        flex-shrink: 0; width: 20px; height: 20px; border-radius: 50%;
+        border: 1.5px solid #dfe2e8; color: #fff;
+        display: flex; align-items: center; justify-content: center;
+    }
+    .dev-check svg { display: none; }
+    .dev.on .dev-check { background: #E60012; border-color: #E60012; }
+    .dev.on .dev-check svg { display: block; }
+    .dev-empty { padding: 40px 14px; text-align: center; font-size: 12px; color: #b0b4bd; }
+
+    .tip { flex-shrink: 0; min-height: 20px; font-size: 12px; line-height: 1.6; margin-top: 8px; }
+    .tip.error { color: #E60012; }
+    .tip.success { color: #389e0d; }
+
+    /* ================= 底部按钮（固定在本屏底部，含 iPhone 安全区） ================= */
+    .foot-bar {
+        flex-shrink: 0; display: flex; gap: 10px; background: #fff; border-top: 1px solid #eef0f3;
+        padding: 10px 14px calc(14px + env(safe-area-inset-bottom));
+        box-shadow: 0 -2px 12px rgba(22,26,46,.05);
+    }
+    .foot-bar button { flex: 1; border-radius: 22px; font-family: inherit; font-size: 15px; padding: 13px 0; cursor: pointer; }
+    .btn-ghost { border: 1px solid #e3e5ea; background: #fff; color: #666; }
+    .btn-primary { border: none; background: #E60012; color: #fff; box-shadow: 0 2px 8px rgba(230,0,18,.22); }
+    .btn-primary:hover { background: #c40011; }
+</style>
+</head>
+<body>
+
+<!-- ==================== 手机端：添加分组 ====================
+     入口：机群数据-机群.html →「选择设备」弹层 →「＋ 添加分组」
+     保存后写入 localStorage(mysany_device_groups)，返回报表页，弹层分组条即时可用
+     （本期只做界面：分组暂不参与数据过滤，报表页仍以「已选设备」为准） -->
+<div class="phone">
+    <div class="topbar">
+        <button class="topbar-back" onclick="goBack()" aria-label="返回"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+        <span class="page-title">添加分组</span>
+    </div>
+
+    <div class="screen">
+        <div class="section-title">分组名称</div>
+        <input class="name-input" id="groupName" maxlength="16" placeholder="请输入分组名称，如：长沙地铁6号线项目">
+        <div class="field-hint">名称最多 16个字符，用于在报表页按分组一键选中这批设备。</div>
+
+        <div class="section-title spaced">选择设备<span class="sel-count" id="selCount">已选 0 台</span>
+            <button class="mini" id="allBtn" onclick="pickAll()">全选本类</button>
+            <button class="mini" onclick="pickClear()">清空</button>
+        </div>
+
+        <!-- 左：设备类型（筛选）｜右：具体设备（勾选，可多选） -->
+        <div class="pane">
+            <div class="pane-types" id="typeList"></div>
+            <div class="pane-devices" id="devList"></div>
+        </div>
+
+        <div class="tip" id="tip"></div>
+    </div>
+
+    <div class="foot-bar">
+        <button class="btn-ghost" onclick="cancel()">取消</button>
+        <button class="btn-primary" onclick="save()">保存</button>
+    </div>
+</div>
+
+<script>
+/* ========================================================================
+ * 设备清单：与 机群数据-机群.html 的 DEVICE_TYPES 同源（静态原型 → 两处同步维护）
+ *   4 类共 100 台（挖机 40 / 装载机 20 / 宽体自卸车 25 / 起重机 15）
+ * 分组存储：localStorage['mysany_device_groups'] = [{ name, machines: [设备 id] }]
+ *   —— 报表页弹层每次打开都会重读，所以这里新增的分组回去就能用
+ * ====================================================================== */
+/* 演示资产：4 类共 100 台（与报表页同一份口径；报表图表只画前 10 台） */
+const FLEET_PLAN = [
+    { type: '挖掘机',    prefix: 'EX', label: '挖机',   models: ['SY215C10', 'SY365H', 'SY485H', 'SY305H', 'SY135C10'], count: 40 },
+    { type: '装载机',    prefix: 'LD', label: '装载机', models: ['SW955K', 'SW953K'], count: 20 },
+    { type: '宽体自卸车', prefix: 'WT', label: '自卸车', models: ['SKT105E', 'SKT90E'], count: 25 },
+    { type: '汽车起重机', prefix: 'CR', label: '起重机', models: ['STC250T'], count: 15 }
+];
+const DEVICE_TYPES = FLEET_PLAN.map(p => ({
+    type: p.type,
+    models: Array.from({ length: p.count }, (_, i) => ({
+        id: p.prefix + String(i + 1).padStart(3, '0'),
+        name: '长沙' + p.label + (i + 1) + '号',
+        model: p.models[i % p.models.length]
+    }))
+}));
+
+const GROUP_STORE_KEY = 'mysany_device_groups';
+const BACK_PAGE = '机群数据-机群.html';        /* 保存 / 取消后回到报表页 */
+const CHECK_SVG = '<svg width="12" height="12" viewBox="0 0 24 24" fill="none" stroke="currentColor"'
+    + ' stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="20 6 9 17 4 12"/></svg>';
+
+const picked = {};                              /* 设备 id → true */
+/* 编辑模式：Url 带 ?edit=分组名 时回填名称与已选设备，保存时原地更新（不改名也可） */
+const EDIT_NAME = (function () {
+    try { return new URLSearchParams(location.search).get('edit') || ''; } catch (e) { return ''; }
+})();
+let curType = DEVICE_TYPES[0].type;             /* 左栏当前选中类型（默认第 1 种） */
+
+const nameEl = document.getElementById('groupName');
+const typeEl = document.getElementById('typeList');
+const listEl = document.getElementById('devList');
+const tipEl = document.getElementById('tip');
+const countEl = document.getElementById('selCount');
+
+/* 右栏：当前类型下的设备 */
+function devicePool() {
+    const g = DEVICE_TYPES.filter(t => t.type === curType)[0];
+    return g ? g.models.map(m => Object.assign({ type: g.type }, m)) : [];
+}
+
+/* 左栏：各设备类型（括号显示 已选/总数） */
+function renderTypes() {
+    typeEl.innerHTML = DEVICE_TYPES.map(t => {
+        const total = t.models.length;
+        const on = t.models.filter(m => picked[m.id]).length;
+        return '<div class="type-item' + (t.type === curType ? ' active' : '') + '"'
+            + ' onclick="pickType(&quot;' + t.type + '&quot;)">' + t.type
+            + '<span class="cnt">（' + (on ? on + '/' + total : total) + '）</span></div>';
+    }).join('');
+}
+
+/* 右栏：设备多选（点整行切换勾选） */
+function renderDevices() {
+    const list = devicePool();
+    listEl.innerHTML = list.length ? list.map(m =>
+        '<label class="dev' + (picked[m.id] ? ' on' : '') + '">'
+        + '<input type="checkbox"' + (picked[m.id] ? ' checked' : '')
+        + ' data-id="' + m.id + '" onchange="toggle(this)">'
+        + '<span class="dev-main"><span class="dev-name">' + m.model + '</span>'
+        + '<span class="dev-meta">' + m.name + '</span></span>'
+        + '<span class="dev-check">' + CHECK_SVG + '</span></label>'
+    ).join('') : '<div class="dev-empty">该类型下暂无设备</div>';
+}
+
+function renderAll() {
+    renderTypes();
+    renderDevices();
+    updateCount();
+}
+
+function pickType(type) {
+    curType = type;
+    renderAll();
+    clearTip();
+}
+
+function toggle(input) {
+    const id = input.dataset.id;
+    const box = input.closest('.dev');
+    if (input.checked) picked[id] = true; else delete picked[id];
+    box.classList.toggle('on', !!picked[id]);
+    renderTypes();                              /* 左栏计数同步 */
+    updateCount();
+    clearTip();
+}
+
+/* 全选：当前类型下的全部设备；清空 = 取消所有选择 */
+function pickAll() {
+    devicePool().forEach(m => { picked[m.id] = true; });
+    renderAll();
+    clearTip();
+}
+
+function pickClear() {
+    Object.keys(picked).forEach(k => delete picked[k]);
+    renderAll();
+    clearTip();
+}
+
+function updateCount() {
+    const n = Object.keys(picked).length;
+    countEl.textContent = '已选 ' + n + ' 台';
+    countEl.classList.toggle('on', n > 0);
+
+}
+
+function clearTip() { tipEl.textContent = ''; tipEl.className = 'tip'; }
+function fail(msg) { tipEl.textContent = msg; tipEl.className = 'tip error'; }
+function ok(msg) { tipEl.textContent = msg; tipEl.className = 'tip success'; }
+
+/* 已有分组（配置损坏时按空处理） */
+function loadGroups() {
+    try {
+        const arr = JSON.parse(localStorage.getItem(GROUP_STORE_KEY) || 'null');
+        return Array.isArray(arr) ? arr : [];
+    } catch (e) { return []; }
+}
+
+function save() {
+    const name = nameEl.value.trim();
+    const ids = Object.keys(picked);
+    if (!name) { fail('请先填写分组名称'); nameEl.focus(); return; }
+    if (!ids.length) { fail('请至少选择 1 台设备'); return; }
+
+    const groups = loadGroups();
+    /* 重名校验：编辑模式下，跟自己原来的名字重名是允许的（可只改设备不改名） */
+    if (groups.some(g => g && g.name === name && g.name !== EDIT_NAME)) {
+        fail('已存在同名分组「' + name + '」，换个名称试试');
+        return;
+    }
+
+    const entry = { name: name, machines: ids };
+    const at = EDIT_NAME ? groups.findIndex(g => g && g.name === EDIT_NAME) : -1;
+    if (at >= 0) groups[at] = entry; else groups.push(entry);   /* 编辑 → 原地替换，保持分组顺序 */
+    try {
+        localStorage.setItem(GROUP_STORE_KEY, JSON.stringify(groups));
+    } catch (e) {
+        fail('当前环境不支持本地保存，请在浏览器中打开');
+        return;
+    }
+    ok((EDIT_NAME ? '已更新分组「' : '已保存分组「') + name + '」，共 ' + ids.length + ' 台设备');
+    showToast((EDIT_NAME ? '已更新分组：' : '已保存分组：') + name);
+    setTimeout(back, 600);                      /* 返回报表页，弹层分组条里即可用 */
+}
+
+function cancel() { back(); }
+
+function back() {
+    if (history.length > 1) { history.back(); return; }
+    location.href = BACK_PAGE;
+}
+
+function goBack() { back(); }
+
+function showToast(msg) {
+    const t = document.createElement('div');
+    t.textContent = msg;
+    t.style.cssText = 'position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom));transform:translateX(-50%);'
+        + 'background:rgba(0,0,0,.78);color:#fff;font-size:13px;padding:9px 16px;border-radius:20px;z-index:90;'
+        + 'white-space:nowrap;transition:opacity .25s;';
+    document.body.appendChild(t);
+    setTimeout(() => { t.style.opacity = '0'; }, 1100);
+    setTimeout(() => t.remove(), 1400);
+}
+
+/* 编辑模式初始化：标题 + 回填名称与已选设备（左栏默认落在有选中的类型上） */
+(function initEdit() {
+    if (!EDIT_NAME) return;
+    const g = loadGroups().filter(x => x && x.name === EDIT_NAME)[0];
+    document.title = '添加分组';
+    const title = document.querySelector('.page-title');
+    if (title) title.textContent = '编辑分组';
+    if (!g) { fail('原分组「' + EDIT_NAME + '」已不存在，保存将新建一个同名分组'); return; }
+    nameEl.value = g.name;
+    (g.machines || []).forEach(id => { picked[id] = true; });
+    const hit = DEVICE_TYPES.filter(t => t.models.some(m => picked[m.id]))[0];
+    if (hit) curType = hit.type;
+})();
+
+renderAll();
+</script>
+</body>
+</html>

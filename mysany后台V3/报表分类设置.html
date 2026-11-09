@@ -1,0 +1,387 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>报表分类设置（v3.0）</title>
+<style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; background-color: #f4f5f7; color: #333; }
+    /* 侧边栏 */ .sidebar { width: 210px; background: #1E3255; border-right: 1px solid rgba(255,255,255,.06); display: flex; flex-direction: column; flex-shrink: 0; overflow-y: auto; }
+    .sidebar-menu { list-style: none; padding: 8px 0; }
+    .sidebar-item { position: relative; }
+    .sidebar-link { display: flex; align-items: center; gap: 10px; padding: 10px 16px; font-size: 14px; color: rgba(255,255,255,.75); text-decoration: none; transition: all 0.2s; cursor: pointer; }
+    .sidebar-link:hover { color: #fff; background: rgba(255,255,255,.07); }
+    .sidebar-item.active > .sidebar-link, .sidebar-link.active { background: linear-gradient(90deg, rgba(41,190,206,0) 0%, #29BECE 100%); color: #fff; font-weight: 600; box-shadow: inset 3px 0 0 #29BECE; }
+    .sidebar-submenu { list-style: none; padding: 0; }
+    .sidebar-submenu .sidebar-link { padding-left: 42px; font-size: 13px; }
+    .sidebar-icon { width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    /* 主内容区 */ .main-content { flex: 1; overflow-y: auto; padding: 24px; background: #f4f5f7; }
+    .page-header .breadcrumb { font-size: 12px; color: #999; }
+    .page-header .breadcrumb span { color: #333; }
+    .layout { display: flex; min-height: 100vh; }
+    .sidebar { min-height: 100vh; }
+    .main-content { flex: 1; min-width: 0; }
+    .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+    .page-header h2 { margin: 0; font-size: 17px; font-weight: 600; color: #161a2e; }
+    .card { background: #fff; border-radius: 12px; box-shadow: 0 1px 3px rgba(22,26,46,.05); }
+    .card-head { display: flex; align-items: center; justify-content: space-between; padding: 16px 18px; border-bottom: 1px solid var(--line); }
+    .card-title { font-size: 14px; font-weight: 600; }
+    .card-title span { font-size: 12px; font-weight: 400; color: var(--text-3); margin-left: 6px; }
+    .btn { height: 32px; padding: 0 14px; border-radius: 8px; border: 1px solid transparent; font-family: inherit; font-size: 13px; cursor: pointer; }
+    .btn.primary { background: var(--red); color: #fff; font-weight: 600; }
+    .btn.primary:hover { background: #cc0010; }
+    .btn.ghost { background: #f4f5f7; color: var(--text-2); }
+    .btn.ghost:hover { background: #ebedf0; }
+    .btn.link { background: transparent; border: none; color: #24839B; padding: 0 6px; height: auto; cursor: pointer; font-size: 13px; }
+    .btn.link.grey { color: #5a6472; }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 12px 16px; text-align: left; border-bottom: 1px solid var(--line); vertical-align: middle; }
+    th { font-size: 12px; color: var(--text-3); font-weight: 500; background: #fafbfc; }
+    td { font-size: 13px; }
+    tbody tr:hover { background: #fcfcfd; }
+    .tag { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11.5px; }
+    .tag.grey { background: #f2f3f5; color: var(--text-3); }
+    .tag.green { background: #eaf8ee; color: #21a44a; }
+    .empty { padding: 48px 0; text-align: center; color: var(--text-3); font-size: 13px; }
+    /* 弹窗 */ .mask { position: fixed; inset: 0; background: rgba(22,26,46,.45); display: none; align-items: center; justify-content: center; z-index: 90; }
+    .mask.show { display: flex; }
+    .modal { width: 520px; max-width: calc(100vw - 32px); background: #fff; border-radius: 14px; overflow: hidden; }
+    .modal-head { display: flex; align-items: center; justify-content: space-between; padding: 16px 18px; border-bottom: 1px solid var(--line); }
+    .modal-title { font-size: 15px; font-weight: 600; }
+    .modal-close { cursor: pointer; color: var(--text-3); font-size: 16px; }
+    .modal-body { padding: 18px; max-height: 62vh; overflow: auto; }
+    .f-label { display: block; font-size: 12.5px; color: var(--text-2); margin: 14px 0 6px; }
+    .f-label i { color: var(--red); font-style: normal; }
+    .f-input { width: 100%; height: 36px; border: 1px solid #e6e8ee; border-radius: 8px; padding: 0 10px; font-family: inherit; font-size: 13px; color: var(--text); }
+    .f-input:focus { outline: none; border-color: var(--red); }
+    .modal-foot { display: flex; justify-content: flex-end; gap: 10px; padding: 14px 18px; border-top: 1px solid var(--line); }
+    .lang-tabs { display: flex; gap: 6px; flex-wrap: wrap; max-height: 96px; overflow: auto; padding: 8px; border: 1px solid #eef0f3; border-radius: 8px; background: #fafbfc; }
+    .lang-chip { height: 28px; padding: 0 10px; border-radius: 999px; border: 1px solid #e6e8ee; background: #fff; color: #5a6472; font-family: inherit; font-size: 12px; cursor: pointer; display: inline-flex; align-items: center; gap: 5px; }
+    .lang-chip:hover { border-color: #29BECE; color: #24839B; }
+    .lang-chip.on { background: #24839B; border-color: #24839B; color: #fff; font-weight: 600; }
+    .lang-chip .dot-ok { width: 5px; height: 5px; border-radius: 50%; background: #21a44a; }
+    .lang-chip.on .dot-ok { background: #b7ebc6; }
+    .lang-hint { font-size: 11.5px; color: #8b90a0; margin-top: 6px; }
+    .btn.danger { background: #E60012; color: #fff; border: 1px solid #E60012; font-weight: 600; height: 34px; padding: 0 18px; border-radius: 8px; cursor: pointer; font-size: 13px; }
+    .btn.danger:hover { background: #cc0010; }
+    .modal-sm { width: 420px; }
+    .warn-ico { flex: 0 0 22px; width: 22px; height: 22px; border-radius: 50%; background: #fff1f0; color: #E60012; font-weight: 700; font-size: 13px; display: flex; align-items: center; justify-content: center; margin-top: 1px; }
+    .modal .f-input:hover { border-color: #d7dbe3; }
+    .modal .f-input:focus { border-color: #E60012; box-shadow: 0 0 0 3px rgba(230,0,18,.06); }
+    .modal-body::-webkit-scrollbar { width: 6px; }
+    .modal-body::-webkit-scrollbar-thumb { background: #e4e6ea; border-radius: 3px; }
+    .card-head .btn.primary { height: 34px; padding: 0 16px; border-radius: 8px; font-family: inherit; font-size: 13px; cursor: pointer; background: #24839B; color: #fff; border: 1px solid #29BECE; font-weight: 600; transition: background .16s, border-color .16s, transform .1s; }
+    .card-head .btn.primary:hover { background: #226884; border-color: #226884; }
+    .card-head .btn.primary:active { transform: scale(.98); }
+    .modal-foot .btn.primary { height: 34px; padding: 0 18px; border-radius: 8px; font-family: inherit; font-size: 13px; cursor: pointer; background: #24839B; color: #fff; border: 1px solid #29BECE; font-weight: 600; }
+    .modal-foot .btn.primary:hover { background: #226884; border-color: #226884; }
+    .btn.link:hover { text-decoration: underline; }
+    .toast { position: fixed; left: 50%; top: 72px; transform: translateX(-50%); background: rgba(22,26,46,.9); color: #fff; font-size: 13px; padding: 9px 16px; border-radius: 8px; opacity: 0; transition: opacity .2s; z-index: 999; }
+    .toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+<div class="layout">
+<aside class="sidebar">
+            <ul class="sidebar-menu">
+                <li class="sidebar-item">
+                    <a class="sidebar-link">
+                        <span class="sidebar-icon">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                        </span>
+                        机群报表订阅
+                    </a>
+                    <ul class="sidebar-submenu">
+                        <li class="sidebar-item"><a class="sidebar-link" href="机群邮件设置.html">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="2" y="4" width="20" height="16" rx="2"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                            机群邮件设置
+                        </a></li>
+                        <li class="sidebar-item"><a class="sidebar-link">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                            机群报表配置
+                        </a></li>
+                        <li class="sidebar-item"><a class="sidebar-link" href="机群订阅记录.html">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"/><polyline points="14 2 14 8 20 8"/><line x1="16" y1="13" x2="8" y2="13"/><line x1="16" y1="17" x2="8" y2="17"/></svg>
+                            机群订阅记录
+                        </a></li>
+                        <li class="sidebar-item"><a class="sidebar-link" href="机群需求反馈.html"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 3h6v6H9z"/><path d="M5 9h14a2 2 0 0 1 2 2v9a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-9a2 2 0 0 1 2-2z"/><line x1="7" y1="14" x2="17" y2="14"/><line x1="7" y1="17" x2="13" y2="17"/></svg>机群需求反馈</a></li>
+                        <li class="sidebar-item"><a class="sidebar-link active" href="报表分类设置.html"><svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 7h7l2 2h9v10a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2z"/><path d="M8 14h8"/></svg>报表分类设置</a></li>
+                    </ul>
+                </li>
+            </ul>
+        </aside>
+    <main class="main-content">
+
+        <div class="wrap">
+            <div class="page-header">
+                <div>
+                    <h2>报表分类设置</h2>
+                    <div class="breadcrumb" style="margin-top:4px">机群报表订阅 / <span>报表分类设置</span></div>
+                </div>
+            </div>
+
+    <div class="card">
+        <div class="card-head">
+            <div class="card-title">报表分类</div>
+            <button class="btn primary" onclick="openCatModal()">＋ 新增分类</button>
+        </div>
+        <table>
+            <thead>
+                <tr>
+                    <th>分类名称</th>
+                    <th style="width:90px;">排序</th>
+                    <th style="width:110px;">状态</th>
+                    <th style="width:140px;">操作</th>
+                </tr>
+            </thead>
+            <tbody id="catBody"></tbody>
+        </table>
+        <div id="catEmpty" class="empty" style="display:none;">暂无分类，点右上角「＋ 新增分类」开始配置</div>
+    </div>
+        </div>
+    </main>
+</div>
+
+<!-- 新增 / 编辑分类 -->
+<div class="mask" id="catMask" onclick="closeCatModal()">
+    <div class="modal" onclick="event.stopPropagation()">
+        <div class="modal-head">
+            <span class="modal-title" id="catModalTitle">新增分类</span>
+            <span class="modal-close" onclick="closeCatModal()">✕</span>
+        </div>
+        <div class="modal-body">
+            <label class="f-label">语言</label>
+            <div class="lang-tabs" id="catLangTabs"></div>
+            <div class="lang-hint" id="catLangHint">切换语言后，下方「分类名称」会同步显示该语言的名称</div>
+
+            <label class="f-label">分类名称 <i>*</i></label>
+            <input class="f-input" id="catName" maxlength="40" placeholder="如：设备维度 / 能耗与成本" />
+
+            <label class="f-label">排序（数值越小越靠前）</label>
+            <input class="f-input" id="catSort" type="number" min="1" step="1" value="1" />
+
+            <label class="f-label">状态</label>
+            <select class="f-input" id="catStatus">
+                <option value="1">启用</option>
+                <option value="0">停用</option>
+            </select>
+        </div>
+        <div class="modal-foot">
+            <button class="btn ghost" onclick="closeCatModal()">取消</button>
+            <button class="btn primary" onclick="saveCatModal()">保存</button>
+        </div>
+    </div>
+</div>
+
+<!-- 删除确认 -->
+<div class="mask" id="delCatMask" onclick="closeDelCat()">
+    <div class="modal modal-sm" onclick="event.stopPropagation()">
+        <div class="modal-head">
+            <span class="modal-title">删除分类</span>
+            <span class="modal-close" onclick="closeDelCat()">✕</span>
+        </div>
+        <div class="modal-body" style="padding:20px 18px;">
+            <div style="display:flex;gap:10px;">
+                <div class="warn-ico">!</div>
+                <div>
+                    <div style="font-size:13.5px;color:#161a2e;line-height:1.6;" id="delCatText"></div>
+                    <div style="font-size:12px;color:#8b90a0;margin-top:6px;">删除后该分类下的报表将归入「未分类」。</div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-foot">
+            <button class="btn ghost" onclick="closeDelCat()">取消</button>
+            <button class="btn danger" onclick="confirmDelCat()">删除</button>
+        </div>
+    </div>
+</div>
+
+<div class="toast" id="catToast"></div>
+
+<script>
+/* ==================== 报表分类（多语言） ==================== */
+const CAT_KEY = 'mysany_report_cats';
+
+const CAT_LANGS = {
+    'zh-CN': '简体中文', en: 'English', ja: '日本語', ko: '한국어', de: 'Deutsch',
+    fr: 'Français', es: 'Español', pt: 'Português', ru: 'Русский', ar: 'العربية',
+    th: 'ไทย', vi: 'Tiếng Việt', id: 'Bahasa Indonesia', tr: 'Türkçe', it: 'Italiano'
+};
+
+/* 默认分类：与 PC / App 报表模版现有分组保持一致 */
+const DEFAULT_CATS = [
+    { id: 'cat_overview', sort: 1, enabled: 1, names: { 'zh-CN': '设备概览', en: 'Device Overview' } },
+    { id: 'cat_energy', sort: 2, enabled: 1, names: { 'zh-CN': '能耗与成本', en: 'Energy & Cost' } },
+    { id: 'cat_efficiency', sort: 3, enabled: 1, names: { 'zh-CN': '作业与效率', en: 'Operation & Efficiency' } },
+    { id: 'cat_safety', sort: 4, enabled: 1, names: { 'zh-CN': '安全与事件', en: 'Safety & Events' } },
+    { id: 'cat_position', sort: 5, enabled: 1, names: { 'zh-CN': '位置与维保', en: 'Location & Maintenance' } },
+    { id: 'cat_genset', sort: 6, enabled: 1, names: { 'zh-CN': '发电机', en: 'Generator' } },
+    { id: 'cat_project', sort: 7, enabled: 1, names: { 'zh-CN': '项目维度', en: 'Project' } }
+];
+
+function loadCats() {
+    try {
+        const raw = localStorage.getItem(CAT_KEY);
+        if (raw) return JSON.parse(raw);
+    } catch (e) {}
+    return DEFAULT_CATS.map(c => JSON.parse(JSON.stringify(c)));
+}
+function saveCats(list) {
+    localStorage.setItem(CAT_KEY, JSON.stringify(list));
+}
+
+let cats = loadCats();
+let editingId = null;
+let draft = { 'zh-CN': '' };
+let curLang = 'zh-CN';
+
+const CAT_LANG_LIST = ['zh-CN', 'en', 'ja', 'ko', 'de', 'fr', 'es', 'pt', 'ru', 'ar', 'th', 'vi', 'id', 'tr', 'it'];
+const CAT_LANG_LABEL = {
+    'zh-CN': '简体中文', en: 'English', ja: '日本語', ko: '한국어', de: 'Deutsch',
+    fr: 'Français', es: 'Español', pt: 'Português', ru: 'Русский', ar: 'العربية',
+    th: 'ไทย', vi: 'Tiếng Việt', id: 'Indonesia', tr: 'Türkçe', it: 'Italiano'
+};
+
+function toast(msg) {
+    const el = document.getElementById('catToast');
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(el._t);
+    el._t = setTimeout(() => el.classList.remove('show'), 1800);
+}
+
+function renderCats() {
+    cats.sort((a, b) => (a.sort || 99) - (b.sort || 99));
+    const body = document.getElementById('catBody');
+    const empty = document.getElementById('catEmpty');
+
+    if (!cats.length) {
+        body.innerHTML = '';
+        empty.style.display = '';
+        return;
+    }
+    empty.style.display = 'none';
+    body.innerHTML = cats.map(c => {
+        const zh = (c.names && c.names['zh-CN']) || '-';
+        return '<tr>'
+            + '<td><b>' + zh + '</b></td>'
+            + '<td>' + (c.sort || '-') + '</td>'
+            + '<td>' + (c.enabled ? '<span class="tag green">启用</span>' : '<span class="tag grey">停用</span>') + '</td>'
+            + '<td>'
+            + '<button class="btn link" onclick="openCatModal(\'' + c.id + '\')">编辑</button>'
+            + '<button class="btn link grey" onclick="removeCat(\'' + c.id + '\')">删除</button>'
+            + '</td>'
+            + '</tr>';
+    }).join('');
+}
+
+function renderLangTabs() {
+    const box = document.getElementById('catLangTabs');
+    if (!box) return;
+    box.innerHTML = CAT_LANG_LIST.map(l => {
+        const filled = (draft[l] || '').trim() ? '<span class="dot-ok"></span>' : '';
+        return '<button type="button" class="lang-chip' + (l === curLang ? ' on' : '') + '"'
+            + ' onclick="catSetLang(\'' + l + '\')">' + CAT_LANG_LABEL[l] + filled + '</button>';
+    }).join('');
+}
+
+function catSetLang(lang) {
+    draft[curLang] = document.getElementById('catName').value;
+    curLang = lang;
+    document.getElementById('catName').value = draft[lang] || '';
+    document.getElementById('catLangHint').textContent =
+        '正在编辑：' + CAT_LANG_LABEL[lang] + (lang === 'zh-CN' ? '（必填）' : '');
+    renderLangTabs();
+}
+
+function openCatModal(id) {
+    editingId = id || null;
+    document.getElementById('catModalTitle').textContent = id ? '编辑分类' : '新增分类';
+    curLang = 'zh-CN';
+    document.getElementById('catSort').value = id
+        ? (cats.filter(c => c.id === id)[0] || {}).sort || cats.length + 1
+        : cats.length + 1;
+    const cat = id ? cats.filter(c => c.id === id)[0] : null;
+    document.getElementById('catStatus').value = cat ? String(cat.enabled ? 1 : 0) : '1';
+    draft = cat ? JSON.parse(JSON.stringify(cat.names || {})) : { 'zh-CN': '' };
+    document.getElementById('catName').value = draft['zh-CN'] || '';
+    document.getElementById('catLangHint').textContent = '正在编辑：简体中文（必填）';
+    renderLangTabs();
+    document.getElementById('catMask').classList.add('show');
+    setTimeout(() => document.getElementById('catName').focus(), 60);
+}
+
+function closeCatModal() {
+    document.getElementById('catMask').classList.remove('show');
+    editingId = null;
+}
+
+
+function saveCatModal() {
+    draft[curLang] = (document.getElementById('catName').value || '').trim();
+    if (!draft[curLang]) { toast('请填写分类名称'); return; }
+
+    if (!draft['zh-CN']) { toast('请先配置简体中文名称'); return; }
+    const dup = cats.filter(c => c.id !== editingId && (c.names || {})['zh-CN'] === draft['zh-CN']);
+    if (dup.length) { toast('分类名称重复：' + draft['zh-CN']); return; }
+
+    const sort = parseInt(document.getElementById('catSort').value, 10) || (cats.length + 1);
+    const enabled = document.getElementById('catStatus').value === '1' ? 1 : 0;
+
+    if (editingId) {
+        const cat = cats.filter(c => c.id === editingId)[0];
+        cat.names = draft;
+        cat.sort = sort;
+        cat.enabled = enabled;
+    } else {
+        cats.push({
+            id: 'cat_' + Date.now(),
+            sort: sort,
+            enabled: enabled,
+            names: draft,
+            count: 0
+        });
+    }
+    saveCats(cats);
+    closeCatModal();
+    renderCats();
+    toast('保存成功');
+}
+
+let delCatId = null;
+
+function removeCat(id) {
+    const cat = cats.filter(c => c.id === id)[0];
+    if (!cat) return;
+    delCatId = id;
+    document.getElementById('delCatText').innerHTML =
+        '确定删除分类「<b>' + ((cat.names || {})['zh-CN'] || '') + '</b>」吗？';
+    document.getElementById('delCatMask').classList.add('show');
+}
+
+function closeDelCat() {
+    document.getElementById('delCatMask').classList.remove('show');
+    delCatId = null;
+}
+
+function confirmDelCat() {
+    if (delCatId == null) return;
+    cats = cats.filter(c => c.id !== delCatId);
+    saveCats(cats);
+    closeDelCat();
+    renderCats();
+    toast('删除成功');
+}
+
+/* Esc 关闭弹层 */
+document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Escape') return;
+    if (document.getElementById('delCatMask').classList.contains('show')) { closeDelCat(); return; }
+    if (document.getElementById('catMask').classList.contains('show')) closeCatModal();
+});
+
+renderCats();
+</script>
+</body>
+</html>

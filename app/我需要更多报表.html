@@ -1,0 +1,394 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- 原型页：禁用缓存，改完刷新即生效（否则浏览器会用旧的 HTML/CSS） -->
+<meta http-equiv="Cache-Control" content="no-cache, no-store, must-revalidate">
+<meta http-equiv="Pragma" content="no-cache">
+<meta http-equiv="Expires" content="0">
+<title>我需要更多报表</title>
+<style>
+    * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
+    /* 手机端：去掉双击缩放等待，点按即时响应 */
+    button, label { touch-action: manipulation; }
+    body {
+        font-family: "PingFang SC", "Microsoft YaHei", "Helvetica Neue", Arial, sans-serif;
+        background: #f4f5f7; color: #1a1a1a; height: 100vh; overflow: hidden; display: flex; align-items: stretch;
+    }
+    .phone {
+        flex: 1 1 auto; min-width: 0; height: 100vh; background: #f4f5f7;
+        display: flex; flex-direction: column;
+    }
+
+    /* ================= 顶部导航（与 App 其他页统一：白底 + 圆形返回 + 页面标题） ================= */
+    .topbar {
+        height: 52px; background: #fff; border-bottom: 1px solid #e8e8e8; flex-shrink: 0;
+        display: flex; align-items: center; padding: 0 12px;
+    }
+    .topbar-back {
+        width: 30px; height: 30px; flex-shrink: 0; border: none; background: transparent;
+        border-radius: 50%; color: #1a1a1a; font-size: 22px; line-height: 1; font-family: inherit;
+        display: flex; align-items: center; justify-content: center; cursor: pointer;
+    }
+    .topbar-back:hover { background: #f2f3f5; }
+    /* 多语言标题可能变长：占满剩余宽度、超出省略号截断，不把返回键挤走 */
+    .page-title {
+        margin-left: 4px; flex: 1 1 auto; min-width: 0; font-size: 17px; font-weight: 600;
+        color: #161a2e; letter-spacing: .2px;
+        white-space: nowrap; overflow: hidden; text-overflow: ellipsis;
+    }
+
+    /* ================= 内容区（唯一滚动容器，底部按钮因此不会被内容顶走） ================= */
+    .screen {
+        flex: 1; min-height: 0; overflow-y: auto; -webkit-overflow-scrolling: touch;
+        overscroll-behavior: contain; padding: 12px 14px 20px;
+    }
+    /* ================= 顶部说明（信息卡） ================= */
+    .intro {
+        display: flex; gap: 10px; background: #fff; border-radius: 16px; padding: 13px 14px;
+        margin-bottom: 18px; box-shadow: 0 1px 3px rgba(22,26,46,.05);
+    }
+    .intro-icon { flex-shrink: 0; width: 17px; height: 17px; color: #E60012; margin-top: 1px; }
+    .intro-txt { font-size: 12px; color: #8b90a0; line-height: 1.65; }
+
+    /* ================= 分组标题 ================= */
+    .section-title {
+        display: flex; align-items: center; gap: 7px;
+        font-size: 13px; font-weight: 700; color: #161a2e; margin: 0 2px 10px;
+    }
+    .section-title::before { content: ''; width: 3px; height: 12px; border-radius: 2px; background: #E60012; }
+    .section-title.spaced { margin-top: 22px; margin-bottom: 8px; }
+    .sel-count { margin-left: auto; font-size: 11px; font-weight: 400; color: #b0b4bd; }
+    .sel-count.on { color: #E60012; font-weight: 600; }
+    .field-hint { font-size: 11px; color: #a0a4ad; line-height: 1.5; margin: 0 2px 8px; }
+
+    /* ================= 候选项（整卡可点，选中 = 卡片染色） ================= */
+    /* 2026-10-15：按用户要求去掉「图片预览」（预览胶囊 + 大图弹层），卡片只留文字 */
+    .opt {
+        position: relative; display: block; background: #fff;
+        border: 1.5px solid transparent; border-radius: 16px; padding: 12px 14px; margin-bottom: 9px;
+        box-shadow: 0 1px 3px rgba(22,26,46,.05); cursor: pointer;
+        -webkit-user-select: none; user-select: none; touch-action: manipulation;
+        transition: background .16s, border-color .16s, box-shadow .16s, transform .1s;
+    }
+    .opt:active { transform: scale(.985); background: #fafbfc; }
+    .opt input { position: absolute; opacity: 0; width: 0; height: 0; }
+    .opt.checked { border-color: #f6a8ae; background: #fff7f7; box-shadow: 0 3px 14px rgba(230,0,18,.1); }
+    .opt-info { min-width: 0; }
+    /* 名称：多语言长单词（德语复合词等）必须能在卡片内断行，否则会横向溢出 */
+    .opt-name {
+        font-size: 14px; font-weight: 600; color: #161a2e; line-height: 1.4;
+        overflow-wrap: anywhere; word-break: break-word;
+    }
+    /* 副标题（描述）：默认只显示 2 行 —— 多语言长文案不再把卡片撑得高矮不一；
+       第 2 行做渐隐，提示「后面还有」，但只有真被截断的卡片才出现「展开全文」胶囊 */
+    .opt-desc {
+        font-size: 12px; color: #8b90a0; line-height: 1.6; margin-top: 5px;
+        overflow-wrap: anywhere; word-break: break-word;
+    }
+    .opt-desc .desc-txt {
+        display: -webkit-box; -webkit-box-orient: vertical;
+        -webkit-line-clamp: 2; line-clamp: 2; overflow: hidden;
+        -webkit-mask-image: linear-gradient(180deg, #000 58%, rgba(0,0,0,.3) 100%);
+        mask-image: linear-gradient(180deg, #000 58%, rgba(0,0,0,.3) 100%);
+    }
+    .opt-desc.open .desc-txt {
+        display: block; overflow: visible;
+        -webkit-mask-image: none; mask-image: none;
+    }
+    /* 「展开全文 / 收起」：很轻的小胶囊，展开后原地收起，不跳转、不弹窗 */
+    .desc-toggle {
+        display: inline-flex; align-items: center; gap: 3px; margin-top: 5px;
+        padding: 3px 9px; border: none; border-radius: 999px; background: #f2f4f7;
+        color: #5a6472; font-family: inherit; font-size: 11px; line-height: 1.2; cursor: pointer;
+        transition: background .15s, color .15s;
+    }
+    .desc-toggle:hover { background: #eaeef3; color: #161a2e; }
+    .desc-toggle svg { transition: transform .18s; }
+    .opt-desc.open .desc-toggle svg { transform: rotate(180deg); }
+    .opt.checked .desc-toggle { background: #fdecee; color: #E60012; }
+
+    .note-input {
+        width: 100%; min-height: 104px; border: 1px solid #eef0f3; border-radius: 16px; background: #fff;
+        padding: 13px; font-family: inherit; font-size: 16px; color: #333; line-height: 1.6;
+        resize: vertical; outline: none; box-shadow: 0 1px 3px rgba(22,26,46,.05);
+        transition: border-color .16s, box-shadow .16s;
+    }
+    .note-input::placeholder { color: #b8bcc4; }
+    .note-input:focus { border-color: #f0a5ab; box-shadow: 0 0 0 3px rgba(230,0,18,.06); }
+    .form-tip { font-size: 12px; line-height: 1.6; margin-top: 10px; }
+    .form-tip.error { color: #E60012; }
+    .form-tip.success { color: #389e0d; }
+
+    /* ================= 底部按钮（固定在本屏底部，含 iPhone 安全区） ================= */
+    .foot-bar {
+        flex-shrink: 0; display: flex; gap: 10px; background: #fff; border-top: 1px solid #eef0f3;
+        padding: 10px 14px calc(14px + env(safe-area-inset-bottom));
+        box-shadow: 0 -2px 12px rgba(22,26,46,.05);
+    }
+    .foot-bar button { flex: 1; border-radius: 22px; font-family: inherit; font-size: 15px; padding: 13px 0; cursor: pointer; }
+    .btn-ghost { border: 1px solid #e3e5ea; background: #fff; color: #666; }
+    .btn-primary { border: none; background: #E60012; color: #fff; box-shadow: 0 2px 8px rgba(230,0,18,.22); }
+    .btn-primary:hover { background: #c40011; }
+</style>
+</head>
+<body>
+
+<!-- ==================== 手机端：我需要更多报表 ==================== -->
+<div class="phone">
+    <!-- 顶部导航：与 App 其他页同一套（白底 52px + 圆形返回 + 页面标题） -->
+    <div class="topbar">
+        <button class="topbar-back" onclick="goBack()" aria-label="返回"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
+        <span class="page-title">我需要更多报表</span>
+    </div>
+
+    <div class="screen">
+        <div class="intro">
+            <svg class="intro-icon" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="12" cy="12" r="9"/><line x1="12" y1="11" x2="12" y2="16"/><circle cx="12" cy="7.8" r="1" fill="currentColor" stroke="none"/></svg>
+            <div class="intro-txt">勾选你希望上线的报表，或直接描述你的诉求，我们会第一时间处理。</div>
+        </div>
+
+        <div class="section-title">候选报表（可多选）<span class="sel-count" id="selCount"></span></div>
+        <div id="options"></div>
+
+        <div class="section-title spaced">自定义诉求说明</div>
+        <textarea class="note-input" id="note" placeholder="例如：我希望有一份按周统计的「设备保养提醒报表」，需要包含下次保养时间、剩余小时数、所属项目…"></textarea>
+        <div class="form-tip" id="tip"></div>
+    </div>
+
+    <div class="foot-bar">
+        <button class="btn-ghost" onclick="cancelSubmit()">取消</button>
+        <button class="btn-primary" id="submitBtn" onclick="submit()">提交</button>
+    </div>
+</div>
+
+<script>
+/* ========================================================================
+ * 数据来源：海外版-V2/MysnayPC端V2/报表模版.html 的「我需要更多报表」弹窗
+ * 候选项优先读后台配置（localStorage: mysany_more_report_options），未配置用内置默认
+ * 2026-10-15：本页不做图片预览（预览胶囊 / 大图弹层已删）
+ * ====================================================================== */
+/* 内置默认清单：只保留中文（多语言仍支持 —— 后台配置里 name / desc 写成 { 'zh-CN': …, de: … } 即可被 pickLangText 取到）
+   候选项不再带预览图字段（本页不做图片预览） */
+/* 2026-10-18：示例数据取 海外版-V2/报表意向收集配置.xlsx 的「简体中文」列（标题 + 内容） */
+const MORE_REPORT_OPTIONS = [
+    { name: '自定义设备分组报表',
+      desc: '可按需要自行选择设备建成分组，生成报表时按该分组内的设备汇总数据。' },
+    { name: '工地项目报表',
+      desc: '可按工地/项目维度汇总该项目下设备的报表数据，例如：A项目中的油耗报表、作业工时报表等。' },
+    { name: '年度统计报表',
+      desc: '按自然年统计单台或多台设备的使用情况，例如：A设备的一年油耗报表、一年作业工时报表等。' },
+    { name: '设备预警报表',
+      desc: '统计单台或多台设备的预警事件明细，例如：A设备近1个月的预警数据，可按日、周、月汇总。' },
+    { name: '地理围栏报警报表',
+      desc: '统计单台或多台设备的地理围栏（电子围栏）报警数据，例如：A设备近1个月的驶入/驶出围栏记录，可按日、周、月汇总。' },
+    { name: '工况报警报表',
+      desc: '统计单台或多台设备的工况报警数据，例如：A设备近1个月的工况报警明细，可按日、周、月汇总。' },
+    { name: '设备维保临期报表',
+      desc: '统计单台或多台设备的维保数据，列出即将到期或已超期的保养项，便于提前安排维护。' },
+    { name: '油位报表',
+      desc: '统计单台或多台设备的油位情况，例如：A设备在统计周期内每日23:59:59的油位数据，可用于日常管理与交接班核对。' }
+];
+
+const REPORT_OPTIONS_KEY = 'mysany_more_report_options';
+/* 2026-10-15：按用户要求去掉本页的图片预览 —— 不再引用预览图、不再加载/放大图片
+   （后台配置里候选项可能仍带 image 字段，PC 端「报表模版」弹窗继续用，本页忽略） */
+
+const optionsBox = document.getElementById('options');
+const noteInput = document.getElementById('note');
+const tipEl = document.getElementById('tip');
+const selCountEl = document.getElementById('selCount');
+const submitBtn = document.getElementById('submitBtn');
+
+/* 已选数量反馈：卡片染色 + 分组标题右侧 + 提交按钮文案 */
+function updateSelCount() {
+    let n = 0;
+    optionsBox.querySelectorAll('.opt').forEach(function (label) {
+        const input = label.querySelector('input');
+        const on = !!(input && input.checked);
+        if (on) n++;
+        label.classList.toggle('checked', on);
+    });
+    selCountEl.textContent = n ? '已选 ' + n + ' 项' : '';
+    selCountEl.className = 'sel-count' + (n ? ' on' : '');
+    submitBtn.textContent = n ? '提交（' + n + '）' : '提交';
+}
+
+/* 国内版只保留中文：候选项的 name / desc 允许写成纯字符串或 { 'zh-CN': ... }，统一取中文 */
+function pickLangText(v) {
+    if (v == null) return '';
+    if (typeof v === 'string') return v;
+    if (typeof v === 'object') {
+        if (v['zh-CN']) return v['zh-CN'];
+        const k = Object.keys(v).find(function (x) { return v[x]; });
+        return k ? v[k] : '';
+    }
+    return '';
+}
+
+function readConfiguredReportOptions() {
+    try {
+        const raw = localStorage.getItem(REPORT_OPTIONS_KEY);
+        if (!raw) return null;
+        const arr = JSON.parse(raw);
+        if (!Array.isArray(arr)) return null;
+        const list = arr.map(function (o) {
+            if (!o) return null;
+            return {
+                name: pickLangText(o.name),
+                desc: pickLangText(o.desc)
+            };
+        }).filter(function (o) { return o && o.name; });
+        return list.length ? list : null;
+    } catch (e) { return null; }
+}
+
+function safe(v) {
+    return String(v == null ? '' : v).replace(/[&<>"]/g, function (c) {
+        return { '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c];
+    });
+}
+
+/* ==================== 渲染候选项 ==================== */
+/* 候选项清单：后台配置优先；内置默认也走一遍多语言取值（name / desc 允许写成 { 'zh-CN': …, de: … }） */
+function optionList() {
+    const list = readConfiguredReportOptions() || MORE_REPORT_OPTIONS;
+    return list.map(function (o) {
+        return {
+            name: pickLangText(o.name),
+            desc: pickLangText(o.desc)
+        };
+    }).filter(function (o) { return o.name; });
+}
+
+function renderOptions() {
+    const list = optionList();
+    optionsBox.innerHTML = list.map(function (o) {
+        return '<label class="opt">'
+            + '<input type="checkbox" value="' + safe(o.name) + '" onchange="updateSelCount()">'
+            + '<div class="opt-info">'
+            + '<div class="opt-name">' + safe(o.name) + '</div>'
+            + '<div class="opt-desc"><div class="desc-txt">' + safe(o.desc) + '</div></div>'
+            + '</div></label>';
+    }).join('');
+    markDescOverflow();      /* 渲染完量一次：只有真被截断的描述才挂「展开全文」 */
+}
+
+/* 副标题是否被截断：被截断才补「展开全文」小胶囊（没截断的卡片保持干净） */
+function markDescOverflow() {
+    optionsBox.querySelectorAll('.opt-desc').forEach(function (box) {
+        const txt = box.querySelector('.desc-txt');
+        if (!txt) return;
+        const clipped = txt.scrollHeight - txt.clientHeight > 2;
+        box.classList.remove('open');
+        const old = box.querySelector('.desc-toggle');
+        if (old) old.remove();
+        if (!clipped) return;
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'desc-toggle';
+        btn.innerHTML = '<span>展开全文</span>' + ARROW_DOWN;
+        btn.onclick = function (e) { toggleDesc(e, btn); };
+        box.appendChild(btn);
+    });
+}
+
+/* 展开 / 收起：原地切换，不弹窗、不跳页；点它不能连带勾选卡片（label 的默认行为要拦掉） */
+function toggleDesc(e, btn) {
+    if (e) { e.preventDefault(); e.stopPropagation(); }
+    const box = btn.closest('.opt-desc');
+    if (!box) return;
+    const open = box.classList.toggle('open');
+    btn.querySelector('span').textContent = open ? '收起' : '展开全文';
+}
+
+/* 屏幕宽度变化（横竖屏 / 窗口缩放）后重新量一次截断状态 */
+let descTimer = null;
+window.addEventListener('resize', function () {
+    clearTimeout(descTimer);
+    descTimer = setTimeout(markDescOverflow, 120);
+});
+
+const ARROW_DOWN = '<svg width="9" height="9" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><polyline points="6 9 12 15 18 9"/></svg>';
+
+/* ==================== 提交 ==================== */
+function submit() {
+    const checked = Array.prototype.slice
+        .call(optionsBox.querySelectorAll('input:checked'))
+        .map(function (c) { return c.value; });
+    const note = noteInput.value.trim();
+
+    if (!checked.length && !note) {
+        tipEl.className = 'form-tip error';
+        tipEl.textContent = '请至少勾选一张候选报表，或填写自定义诉求说明';
+        return;
+    }
+
+    saveReportRequest('报表模版', checked, note);
+
+    tipEl.className = 'form-tip success';
+    tipEl.textContent = '已提交诉求'
+        + (checked.length ? '（勾选 ' + checked.length + ' 张：' + checked.join('、') + '）' : '（自定义 1 条）')
+        + '，我们会第一时间处理。';
+
+    setTimeout(resetForm, 1500);
+}
+
+function resetForm() {
+    optionsBox.querySelectorAll('input:checked').forEach(function (c) { c.checked = false; });
+    noteInput.value = '';
+    tipEl.className = 'form-tip';
+    tipEl.textContent = '';
+    updateSelCount();
+}
+
+function cancelSubmit() {
+    resetForm();
+    showToast('已取消提交');
+}
+
+/* 写入诉求（后台 海外版-V2/mysany后台V2/机群需求反馈.html 读取同一个 localStorage key） */
+function saveReportRequest(source, reports, note) {
+    try {
+        const KEY = 'mysany_report_requests';
+        const now = new Date();
+        const p2 = function (n) { return String(n).padStart(2, '0'); };
+        const time = now.getFullYear() + '-' + p2(now.getMonth() + 1) + '-' + p2(now.getDate())
+            + ' ' + p2(now.getHours()) + ':' + p2(now.getMinutes());
+        const list = JSON.parse(localStorage.getItem(KEY) || '[]');
+        list.unshift({
+            id: 'REQ-' + now.getTime(),
+            time: time,
+            user: 'Schuck',
+            source: source,
+            reports: reports,
+            note: note,
+            status: '待评估'
+        });
+        localStorage.setItem(KEY, JSON.stringify(list));
+    } catch (e) { /* 演示环境忽略存储异常 */ }
+}
+
+/* 返回上一页（无历史记录时只提示一下） */
+function goBack() {
+    if (history.length > 1) { history.back(); return; }
+    showToast('返回上一页');
+}
+
+function showToast(msg) {
+    const t = document.createElement('div');
+    t.textContent = msg;
+    t.style.cssText = 'position:fixed;left:50%;bottom:calc(84px + env(safe-area-inset-bottom));transform:translateX(-50%);'
+        + 'background:rgba(0,0,0,.78);color:#fff;'
+        + 'font-size:12px;padding:9px 16px;border-radius:18px;z-index:99;max-width:80%;text-align:center;';
+    document.body.appendChild(t);
+    setTimeout(() => t.remove(), 1800);
+}
+
+/* ==================== 初始化 ==================== */
+renderOptions();
+updateSelCount();
+</script>
+</body>
+</html>
