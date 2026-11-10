@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>手机端 · 我的报表（缺省页 · v2.0）</title>
+<title>手机端 · 报表订阅（缺省页 · v2.0）</title>
 <style>
     * { box-sizing: border-box; margin: 0; padding: 0; -webkit-tap-highlight-color: transparent; }
     body {
@@ -131,7 +131,7 @@
     .btn-ghost { border: 1px solid #dcdcdc; background: #fff; color: #555; }
     .btn-danger { border: none; background: #E60012; color: #fff; }
     .btn-danger:hover { background: #c40011; }
-    /* 右上角 ＋ 提需求（与「我的报表」页一致） */
+    /* 右上角 ＋ 提需求（与「报表订阅」页一致） */
     .quick-more {
         margin-left: auto; flex-shrink: 0; font-family: inherit; white-space: nowrap;
         max-width: 42%; overflow: hidden; text-overflow: ellipsis;
@@ -145,14 +145,14 @@
 </head>
 <body>
 
-<!-- ==================== 手机端：我的报表（缺省页 · 无报表数据） ==================== -->
+<!-- ==================== 手机端：报表订阅（缺省页 · 无报表数据） ==================== -->
 <div class="phone">
     <!-- 顶部导航（三页统一）：返回 + 页面标题＝当前 tab，三个 tab 可点击互相切换 -->
     <div class="topbar">
         <button class="topbar-back" onclick="goBack()" aria-label="返回"><svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg></button>
         <div class="top-tabs">
             <button class="top-tab" onclick="location.href='机群报表.html'">机群报表</button>
-            <button class="top-tab active">我的报表</button>
+            <button class="top-tab active">报表订阅</button>
         </div>
         <button class="quick-more" title="提交报表需求" onclick="location.href='我需要更多报表.html'">＋ 提需求</button>
     </div>

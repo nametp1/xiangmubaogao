@@ -1800,7 +1800,7 @@
             <!-- 顶部标签页 -->
             <div class="tabs">
                 <a href="报表模版.html" class="tab active">报表模版</a>
-                <a href="管理报表.html" class="tab">管理报表</a>
+                <a href="管理报表.html" class="tab">报表订阅</a>
                 <div class="tabs-right">
                     <button class="more-reports-entry" id="moreReportsEntry" type="button">
                         <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.5" stroke-linecap="round">
@@ -2306,7 +2306,7 @@
             if (btn.dataset.action === 'preview') {
                 openPreviewModal(rep.key);
             } else if (btn.dataset.action === 'add') {
-                if (confirm('已选择报表：' + rep.name + '（' + rep.scope + '口径）\n\n将在「管理报表」页面中配置报表信息。\n是否立即前往？')) {
+                if (confirm('已选择报表：' + rep.name + '（' + rep.scope + '口径）\n\n将在「报表订阅」页面中配置报表信息。\n是否立即前往？')) {
                     window.location.href = '管理报表.html';
                 }
             }
@@ -2818,7 +2818,7 @@
                     selector: '.tabs a[href*="管理报表"]',
                     badge: '步骤 4/4',
                     title: '管理已有报表',
-                    desc: '点击顶部<span class="hl">"管理报表"</span>标签页，即可查看、编辑或删除您已添加的所有报表配置。',
+                    desc: '点击顶部<span class="hl">"报表订阅"</span>标签页，即可查看、编辑或删除您已添加的所有报表配置。',
                     placement: 'below'
                 }
             ];
