@@ -57,7 +57,6 @@
     .hdr-dl-btn.is-icon-only span { display: none; }
     .hdr-dl-btn.is-icon-only:hover { background: #f2f3f5; }
 
-
     /* ================= 分享面板（两步：选方式 → 分享图） ================= */
     /* 覆盖 .picker-sheet 的 56vh 固定高（同权重靠后写会输 → 用双类名提高权重） */
     /* ===== 分享弹层（独立遮罩 + 面板，不复用 .picker-sheet 的 56vh 固定高度） ===== */
@@ -136,21 +135,50 @@
         background: #f7f8fa; border: 1px solid #eef0f3; color: #5a6472; cursor: pointer;
     }
     .plan-seg button.on { background: #fdecee; border-color: #f5c6cb; color: #E60012; font-weight: 600; }
-    .plan-mail {
-        display: flex; align-items: center; justify-content: space-between;
-        height: 38px; padding: 0 10px; border-radius: 8px; background: #f7f8fa;
-        font-size: 13px; color: #333;
-    }
-    .plan-mail span { font-size: 11.5px; color: #a7abb8; }
 
     .plan-select { appearance: none; -webkit-appearance: none; background-image: none; }
     .plan-row2 { display: flex; gap: 8px; }
     .plan-row2 > * { flex: 1; min-width: 0; }
-    .plan-add {
-        flex: 0 0 64px; height: 38px; font-family: inherit; font-size: 12.5px; border-radius: 8px;
-        background: #fdecee; border: 1px solid #f5c6cb; color: #E60012; font-weight: 600; cursor: pointer;
+        /* 收件人弹层：需盖住「获取报表」主弹层（同为 .picker-mask，z-index 80） */
+    #mailPicker { z-index: 95; }
+    /* 收件人入口（第二步骤） */
+    .plan-picker {
+        width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 8px;
+        height: 40px; padding: 0 12px; margin-top: 4px;
+        background: #fff; border: 1px solid #e6e8ee; border-radius: 10px;
+        font-family: inherit; font-size: 13px; color: #161a2e; cursor: pointer;
     }
-    .plan-mails { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
+    .plan-picker:hover { border-color: #c9ced8; }
+    .plan-picker .pp-left { display: inline-flex; align-items: center; gap: 6px; color: #5a6472; }
+    .plan-picker .pp-left svg { color: #8b90a0; }
+    /* 收件人选择弹层 */
+    .picker-sheet.mail-sheet { height: auto; max-height: 78vh; }
+    .mail-tip { font-size: 11.5px; color: #8b90a0; line-height: 1.6; padding: 0 16px 8px; }
+    .mail-list { flex: 1; overflow-y: auto; padding: 0 12px; }
+    .mail-row {
+        display: flex; align-items: center; gap: 10px; padding: 10px 4px;
+        border-bottom: 1px solid #f2f3f6; cursor: pointer;
+    }
+    .mail-row:last-child { border-bottom: none; }
+    .mail-avatar {
+        width: 30px; height: 30px; border-radius: 50%; flex: 0 0 30px;
+        background: #eef8fb; color: #24839B; font-size: 12px; font-weight: 700;
+        display: flex; align-items: center; justify-content: center;
+    }
+    .mail-meta { flex: 1; min-width: 0; }
+    .mail-name { font-size: 13px; color: #161a2e; line-height: 1.4; }
+    .mail-addr { font-size: 11.5px; color: #8b90a0; line-height: 1.4; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .mail-chk {
+        flex: 0 0 18px; width: 18px; height: 18px; border-radius: 50%;
+        border: 1.5px solid #d8dbe2; display: flex; align-items: center; justify-content: center;
+    }
+    .mail-row.on .mail-chk { background: #E60012; border-color: #E60012; }
+    .mail-row.on .mail-chk::after {
+        content: ''; width: 8px; height: 4px; border-left: 2px solid #fff; border-bottom: 2px solid #fff;
+        transform: rotate(-45deg) translate(1px,-1px);
+    }
+
+.plan-mails { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 8px; }
     .plan-mail-chip {
         display: inline-flex; align-items: center; gap: 5px; padding: 4px 9px; border-radius: 999px;
         background: #f2f3f5; font-size: 12px; color: #333;
@@ -208,9 +236,6 @@
         display: inline-flex; align-items: center; gap: 4px;
     }
     .range-line .date-nav { color: #8b90a0; }
-    .date-inline {
-        margin-left: auto; flex-shrink: 0; display: flex; align-items: center; gap: 2px;
-    }
     .date-nav {
         width: 28px; height: 28px; border: none; background: transparent; border-radius: 50%;
         font-size: 17px; color: #333; cursor: pointer; font-family: inherit; line-height: 1;
@@ -294,16 +319,6 @@
         font-size: 15px; font-weight: 700; color: #161a2e; margin-bottom: 16px;
     }
     .card-title::before { content: ''; width: 3px; height: 13px; border-radius: 2px; background: #E60012; }
-
-    /* 三列指标 */
-    /* 指标区标题（KPI 条上方） */
-    .strip-title {
-        display: flex; align-items: center; gap: 6px;
-        margin: 12px 4px 8px; font-size: 13px; font-weight: 600; color: #161a2e;
-    }
-    .strip-title::before {
-        content: ''; width: 3px; height: 13px; border-radius: 2px; background: #E60012;
-    }
     .kpi-strip {
         display: grid; grid-template-columns: repeat(2, 1fr);
         background: #fff; border-radius: 16px; padding: 16px 8px 20px; margin-bottom: 12px;
@@ -923,7 +938,6 @@
     #planSheet .plan-note {
         margin-top: 12px; padding: 9px 12px; font-size: 12px; border-radius: 10px; line-height: 1.6;
     }
-    #planSheet .plan-add { height: 42px; border-radius: 10px; font-size: 13px; }
     #planSheet .plan-mails { gap: 8px; margin-top: 10px; }
     #planSheet .plan-mail-chip { font-size: 12.5px; padding: 5px 10px; }
 
@@ -1090,10 +1104,13 @@
             <!-- 收件人 -->
             <div class="plan-sec" id="planMailSection" style="display:none;">
                 <div class="sec-title">收件人 <i>*</i></div>
-                <div class="plan-row2">
-                    <select class="plan-input plan-select" id="planMailSelect"></select>
-                    <button type="button" class="plan-add" onclick="planAddMail()">添加</button>
-                </div>
+                <button type="button" class="plan-picker" onclick="openMailPicker()">
+                    <span class="pp-left">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M22 12.6V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h9"/><path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/></svg>
+                        <span id="planMailSummary">选择收件人</span>
+                    </span>
+                    <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><polyline points="9 6 15 12 9 18"/></svg>
+                </button>
                 <div class="plan-note" id="planMailTip"></div>
                 <div class="plan-mails" id="planMailList"></div>
             </div>
@@ -1107,6 +1124,23 @@
 </div>
 
 <!-- ==================== 选择设备弹层（机群报表：可多选设备 + 分组快捷 + 全选/清空） ==================== -->
+<!-- 选择收件人（第二步骤弹层） -->
+<div class="picker-mask" id="mailPicker" onclick="closeMailPicker()">
+    <div class="picker-sheet mail-sheet" onclick="event.stopPropagation()">
+        <div class="picker-title">选择收件人
+            <span class="picker-close" onclick="closeMailPicker()">
+                <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>
+            </span>
+        </div>
+        <div class="mail-tip">仅支持组织内已绑定邮箱的用户；未绑定邮箱不会出现在列表。</div>
+        <div class="mail-list" id="mailPickerList"></div>
+        <div class="dlg-btns">
+            <button class="dlg-btn ghost" onclick="closeMailPicker()">取消</button>
+            <button class="dlg-btn primary" id="mailPickerOk" onclick="confirmMailPicker()">确定</button>
+        </div>
+    </div>
+</div>
+
 <div class="picker-mask" id="machinePicker" onclick="closeMachinePicker()">
     <div class="picker-sheet machine-sheet" onclick="event.stopPropagation()">
         <div class="picker-head">
@@ -1683,7 +1717,6 @@ function labelWidth(t) {
 
 /* 设备名缩略：超过 5 个字就截断成「长沙起重…」（图表刻度 / 图例 / 排行名 / 台账这类窄位用）
    —— 完整名称仍放在悬停气泡、标题属性与「选择设备」弹层里，不丢信息 */
-const DEV_NAME_MAX = 5;
 /* 设备标签缩略：前 3 位 + ... + 后 3 位（短编号 ≤8 位原样返回）
    注意：图表里的设备标签一律用「设备编号」，不用设备名称 */
 function shortDevName(n) {
@@ -2403,7 +2436,7 @@ function openPlanSheet() {
 
     planRenderRecvDay();
     planRenderDataScope();
-    planRenderMailOptions();
+    planRenderMailSummary();
     planRenderMails();
     setPlanFreq({ day: 'daily', week: 'weekly', month: 'monthly' }[state.period] || 'daily');
 
@@ -2529,31 +2562,60 @@ const ORG_MAILS = [
     { mail: 'fleet@sany.com.cn', name: '机群运营组' }
 ];
 
-function planRenderMailOptions() {
-    const sel = document.getElementById('planMailSelect');
-    if (!sel) return;
-    /* 已选中的账号不再出现在下拉里 */
-    const rest = ORG_MAILS.filter(o => planMails.indexOf(o.mail) < 0);
-    sel.innerHTML = rest.length
-        ? rest.map(o => '<option value="' + o.mail + '">' + o.name + '（' + o.mail + '）</option>').join('')
-        : '<option value="">已全部添加</option>';
+/* ===== 收件人：第二步骤弹层 ===== */
+let mailDraft = [];        /* 弹层内临时选择 */
+
+function openMailPicker() {
+    mailDraft = planMails.slice();
+    renderMailPicker();
+    const box = document.getElementById('mailPicker');
+    if (box) box.classList.add('show');
 }
 
-function planAddMail() {
-    const sel = document.getElementById('planMailSelect');
-    const val = sel ? sel.value : '';
-    if (!val) { planToast('添加失败'); return; }
-    if (planMails.indexOf(val) >= 0) { planToast('添加失败'); return; }
-    planMails.push(val);
+function closeMailPicker() {
+    const box = document.getElementById('mailPicker');
+    if (box) box.classList.remove('show');
+}
+
+function renderMailPicker() {
+    const box = document.getElementById('mailPickerList');
+    if (!box) return;
+    box.innerHTML = ORG_MAILS.map(o => {
+        const on = mailDraft.indexOf(o.mail) >= 0;
+        return '<div class="mail-row' + (on ? ' on' : '') + '" onclick="toggleMailDraft(\'' + o.mail + '\')">'
+            + '<span class="mail-avatar">' + o.name.slice(0, 1) + '</span>'
+            + '<span class="mail-meta"><span class="mail-name">' + o.name + '</span>'
+            + '<span class="mail-addr">' + o.mail + '</span></span>'
+            + '<span class="mail-chk"></span></div>';
+    }).join('');
+    const ok = document.getElementById('mailPickerOk');
+    if (ok) ok.textContent = mailDraft.length ? ('确定（' + mailDraft.length + '）') : '确定';
+}
+
+function toggleMailDraft(mail) {
+    const i = mailDraft.indexOf(mail);
+    if (i >= 0) mailDraft.splice(i, 1); else mailDraft.push(mail);
+    renderMailPicker();
+}
+
+function confirmMailPicker() {
+    planMails = mailDraft.slice();
     planRenderMails();
-    planRenderMailOptions();
+    planRenderMailSummary();
     planSyncBtn();
+    closeMailPicker();
+}
+
+function planRenderMailSummary() {
+    const el = document.getElementById('planMailSummary');
+    if (!el) return;
+    el.textContent = planMails.length ? ('已选 ' + planMails.length + ' 人') : '选择收件人';
 }
 
 function planRemoveMail(m) {
     planMails = planMails.filter(x => x !== m);
     planRenderMails();
-    planRenderMailOptions();
+    planRenderMailSummary();
     planSyncBtn();
 }
 
@@ -2620,14 +2682,13 @@ function planSubmit() {
     if (!name) { planToast('提交失败'); return; }
     if (!planMails.length) { planToast('提交失败'); return; }
     const day = document.getElementById('planRecvDay').value;
-    const scopeText = document.getElementById('planDataScope').value;
     const tz = document.getElementById('planTz').value;
     const time = document.getElementById('planRecvTime').value;
-    const whenText = planFreq === 'daily' ? '每天'
-        : planFreq === 'weekly' ? ('每' + day)
-        : ('每月 ' + day);
     planToast('添加成功');
     closePlanSheet();
+    /* 跳回「报表订阅」页，并在目标页提示添加成功 */
+    try { sessionStorage.setItem('mysany_sub_added', '1'); } catch (e) {}
+    setTimeout(function () { location.href = '我的报表.html'; }, 700);
 }
 
 /* 打开弹层：默认第 1 种类型 + 回显当前报表已选设备 */

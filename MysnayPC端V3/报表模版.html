@@ -406,60 +406,6 @@
             flex-shrink: 0;
         }
 
-        /* 模板网格 */
-        .template-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 24px;
-            padding: 24px;
-        }
-
-
-
-        .template-card {
-            background: #fff;
-            border: 1px solid #e8e8e8;
-            border-radius: 8px;
-            padding: 24px;
-            display: flex;
-            flex-direction: column;
-            transition: box-shadow 0.2s, border-color 0.2s;
-        }
-
-        .template-card:hover {
-            box-shadow: 0 4px 16px rgba(0, 0, 0, 0.08);
-            border-color: #d9d9d9;
-        }
-
-        .template-card-header {
-            margin-bottom: 12px;
-        }
-
-        .template-card-title {
-            font-size: 16px;
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 12px;
-            line-height: 1.4;
-        }
-
-        .template-card-desc {
-            font-size: 13px;
-            color: #999;
-            line-height: 1.6;
-            display: -webkit-box;
-            -webkit-line-clamp: 4;
-            -webkit-box-orient: vertical;
-            overflow: hidden;
-        }
-
-        .template-card-footer {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            margin-top: 24px;
-        }
-
         .btn-link {
             font-size: 13px;
             color: #E60012;
@@ -500,13 +446,6 @@
             justify-content: center;
             padding: 80px 24px;
             color: #999;
-        }
-
-        .empty-illustration {
-            width: 120px;
-            height: 120px;
-            margin-bottom: 16px;
-            opacity: 0.6;
         }
 
         .empty-text {
@@ -786,133 +725,6 @@
         .more-form-tip.error   { display: block; color: #E60012; }
         .more-form-tip.success { display: block; color: #52c41a; }
 
-        /* 邮件预览区 */
-        .email-preview {
-            border: none;
-            background: #f9f9fb;
-        }
-        .email-preview-header {
-            background: #f5f5f5;
-            padding: 12px 20px;
-            font-size: 12px;
-            color: #999;
-            display: flex;
-            flex-direction: column;
-            gap: 4px;
-            border-bottom: 1px solid #e8e8e8;
-        }
-        .email-preview-header .ph-row {
-            display: flex;
-            gap: 8px;
-        }
-        .email-preview-header .ph-label {
-            color: #666;
-            min-width: 48px;
-            text-align: right;
-            flex-shrink: 0;
-        }
-        .email-preview-header .ph-value {
-            color: #333;
-            font-weight: 500;
-        }
-        .email-preview-body {
-            padding: 24px 28px;
-            font-size: 13px;
-            color: #333;
-            line-height: 1.8;
-            max-height: 480px;
-            overflow-y: auto;
-            background: #fff;
-        }
-        .email-preview-body .report-title {
-            font-size: 18px;
-            font-weight: 700;
-            color: #E60012;
-            text-align: center;
-            margin-bottom: 6px;
-        }
-        .email-preview-body .report-subtitle {
-            font-size: 12px;
-            color: #999;
-            text-align: center;
-            margin-bottom: 20px;
-        }
-        .email-preview-body .report-section {
-            margin-bottom: 16px;
-        }
-        .email-preview-body .report-section h4 {
-            font-size: 14px;
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 8px;
-            padding-left: 8px;
-            border-left: 3px solid #E60012;
-        }
-        .email-preview-body table {
-            width: 100%;
-            margin: 12px 0;
-            font-size: 12px;
-            border-collapse: collapse;
-        }
-        .email-preview-body table th {
-            background: #f5f5f5;
-            padding: 8px 10px;
-            text-align: center;
-            font-weight: 500;
-            color: #555;
-            border: 1px solid #e8e8e8;
-        }
-        .email-preview-body table td {
-            padding: 7px 10px;
-            text-align: center;
-            border: 1px solid #e8e8e8;
-            color: #333;
-        }
-        .email-footer {
-            margin-top: 20px;
-            padding-top: 12px;
-            border-top: 1px solid #f0f0f0;
-            font-size: 11px;
-            color: #bbb;
-            text-align: center;
-            line-height: 1.8;
-        }
-
-        /* 报告头部信息 */
-        .report-header {
-            background: #fafafa;
-            padding: 20px 28px;
-            border-bottom: 1px solid #f0f0f0;
-        }
-
-        .report-header-title {
-            font-size: 16px;
-            font-weight: 600;
-            color: #333;
-            margin-bottom: 12px;
-        }
-
-        .report-header-meta {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
-            gap: 8px 32px;
-        }
-
-        .report-meta-item {
-            display: flex;
-            gap: 8px;
-            font-size: 13px;
-        }
-
-        .report-meta-label {
-            color: #999;
-            white-space: nowrap;
-        }
-
-        .report-meta-value {
-            color: #333;
-        }
-
         /* 预览表格区域 */
         .preview-table-wrap {
             padding: 0;
@@ -1131,27 +943,6 @@
 
         .pv-label { font-size: 12px; color: #8b90a0; }
 
-        .pv-seg {
-            display: inline-flex;
-            padding: 3px;
-            background: #f4f5f7;
-            border-radius: 9px;
-        }
-
-        .pv-seg-btn {
-            border: none;
-            background: transparent;
-            color: #4a4f5c;
-            font-family: inherit;
-            font-size: 13px;
-            padding: 6px 18px;
-            border-radius: 7px;
-            cursor: pointer;
-            transition: all 0.15s;
-        }
-
-        .pv-seg-btn:hover { color: #161a2e; }
-
         .pv-seg-btn.active {
             background: #fff;
             color: #161a2e;
@@ -1189,8 +980,6 @@
             font-weight: 600;
         }
 
-        .pv-note { margin-left: auto; font-size: 11px; color: #b0b5c0; }
-
         /* 预览演示数据提示条 */
         .pv-demo-tip {
             display: flex; align-items: flex-start; gap: 8px;
@@ -1211,94 +1000,6 @@
             font-weight: 500;
         }
 
-        .tag-green {
-            background: #f6ffed;
-            color: #52c41a;
-            border: 1px solid #b7eb8f;
-        }
-
-        .tag-red {
-            background: #fff2f0;
-            color: #ff4d4f;
-            border: 1px solid #ffccc7;
-        }
-
-        .tag-blue {
-            background: #e6f7ff;
-            color: #E60012;
-            border: 1px solid #91d5ff;
-        }
-
-        .tag-orange {
-            background: #fff7e6;
-            color: #fa8c16;
-            border: 1px solid #ffd591;
-        }
-
-        /* 模板分类区块 */
-        .template-section {
-            padding: 24px 24px 0;
-        }
-
-        .template-section:last-child {
-            padding-bottom: 24px;
-        }
-
-        .section-header {
-            display: flex;
-            align-items: center;
-            gap: 12px;
-            margin-bottom: 16px;
-        }
-
-        .section-title {
-            font-size: 16px;
-            font-weight: 600;
-            color: #333;
-        }
-
-        .section-badge {
-            display: inline-block;
-            padding: 2px 12px;
-            border-radius: 10px;
-            font-size: 12px;
-            font-weight: 500;
-        }
-
-        .badge-single {
-            background: #e6f7ff;
-            color: #E60012;
-            border: 1px solid #91d5ff;
-        }
-
-        .badge-fleet {
-            background: #fff7e6;
-            color: #fa8c16;
-            border: 1px solid #ffd591;
-        }
-
-        .section-desc {
-            font-size: 13px;
-            color: #999;
-            margin-bottom: 16px;
-        }
-
-        .template-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 24px;
-        }
-
-        .type-tag {
-            display: inline-block;
-            padding: 1px 8px;
-            border-radius: 10px;
-            font-size: 11px;
-            font-weight: 500;
-            margin-left: 8px;
-            vertical-align: middle;
-        }
-
         .type-tag.single {
             background: #e6f7ff;
             color: #E60012;
@@ -1309,34 +1010,6 @@
             background: #fff7e6;
             color: #fa8c16;
             border: 1px solid #ffd591;
-        }
-
-        .unified-fields {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 4px 8px;
-            margin-top: 10px;
-        }
-
-        .field-chip {
-            font-size: 11px;
-            color: #8c8c8c;
-            background: #fafafa;
-            border: 1px solid #f0f0f0;
-            border-radius: 3px;
-            padding: 1px 6px;
-        }
-
-        /* 卡片右上角类型标签 */
-        .card-type-badge {
-            position: absolute;
-            top: 12px;
-            right: 12px;
-            font-size: 11px;
-            padding: 2px 10px;
-            border-radius: 3px;
-            font-weight: 500;
-            z-index: 2;
         }
 
         /* 维度分组区块 */
@@ -1354,68 +1027,12 @@
             gap: 12px;
             margin-bottom: 12px;
         }
-
-        .dimension-icon {
-            width: 32px;
-            height: 32px;
-            border-radius: 6px;
-            display: flex;
-            align-items: center;
-            justify-content: center;
-            flex-shrink: 0;
-        }
-
-        .dim-icon-run    { background: #e6f7ff; color: #1890ff; }
-        .dim-icon-energy { background: #fff7e6; color: #fa8c16; }
-        .dim-icon-alarm  { background: #fff2f0; color: #ff4d4f; }
-        .dim-icon-idle   { background: #f6ffed; color: #52c41a; }
-        .dim-icon-gear   { background: #f9f0ff; color: #722ed1; }
         .dim-icon-summary{ background: #fff0f6; color: #eb2f96; }
 
         .dimension-name {
             font-size: 16px;
             font-weight: 600;
             color: #333;
-        }
-
-        .dimension-desc {
-            font-size: 12px;
-            color: #999;
-        }
-
-        .dimension-fields {
-            display: flex;
-            flex-wrap: wrap;
-            gap: 4px 6px;
-            margin-left: auto;
-        }
-
-        .dimension-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-            gap: 20px;
-        }
-
-        .template-card.dim-card {
-            padding: 20px;
-        }
-
-        .template-card.dim-card .template-card-title {
-            font-size: 15px;
-            margin-bottom: 8px;
-        }
-
-        .template-card.dim-card .template-card-desc {
-            font-size: 12px;
-            -webkit-line-clamp: 3;
-        }
-
-        .template-card.dim-card .unified-fields {
-            margin-top: 8px;
-        }
-
-        .template-card.dim-card .template-card-footer {
-            margin-top: 16px;
         }
 
         /* ====== 新手引导 - 聚光灯 + 红框高亮 ====== */
@@ -1633,13 +1250,6 @@
             border-radius: 0;
         }
 
-        .accent-run     { background: linear-gradient(90deg, #1890ff, #69c0ff); }
-        .accent-energy  { background: linear-gradient(90deg, #fa8c16, #ffc069); }
-        .accent-alarm   { background: linear-gradient(90deg, #ff4d4f, #ff7875); }
-        .accent-idle    { background: linear-gradient(90deg, #52c41a, #95de64); }
-        .accent-gear    { background: linear-gradient(90deg, #722ed1, #b37feb); }
-        .accent-summary { background: linear-gradient(90deg, #eb2f96, #ff85c0); }
-
         .dim-card-unified .card-body {
             padding: 20px 20px 16px;
             flex: 1;
@@ -1707,9 +1317,6 @@
             border-top: 1px solid #f5f5f5;
             background: #fafafa;
         }
-
-        .badge-single { background: #e6f7ff; color: #1890ff; }
-        .badge-fleet  { background: #fff7e6; color: #fa8c16; }
 
         /* 嵌入预览模式（?embed=1）：只留内容区，隐藏左侧菜单与新手引导 */
         html.embed .sidebar { display: none; }
@@ -1860,7 +1467,6 @@
             </div>
         </div>
     </div>
-
 
     <!-- 预览弹窗 -->
     <div class="modal-overlay" id="previewModal">
@@ -2101,7 +1707,6 @@
         // 示例数据：同一套字段，按取数范围生成单机 / 机群两种视图
         // ====================================================================
         const PERIOD = '2026-09-01 ~ 2026-09-30';
-        const FLEET_DEVICES = ['F3S01395', 'F3S01402', 'F3S01418'];
         /* ===== 预览示例数据规则（2026-11-12）
            · 数值来源：IOT 指标配置表「Sheet1」的单位区间（最小值 ~ 最大值），随机取
            · 统计周期：最近 3 天，每天一行
@@ -3180,5 +2785,3 @@
     </div>
 </body>
 </html>
-
-

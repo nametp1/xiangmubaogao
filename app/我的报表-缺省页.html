@@ -30,19 +30,11 @@
         -webkit-overflow-scrolling: touch; overscroll-behavior-x: contain;
     }
     .top-tabs::-webkit-scrollbar { display: none; }
-    /* 顶部 tab 溢出：右侧渐隐 + 「…」入口（仅当 tab 超出一屏时出现，点一下向右翻一屏） */
-    .tabs-more {
-        display: none; flex-shrink: 0; width: 22px; height: 22px; margin-left: -4px; padding: 0;
-        align-items: center; justify-content: center; border: none; border-radius: 50%;
-        background: #f2f3f5; color: #8b90a0; font-family: inherit; font-size: 13px; line-height: 1;
-        cursor: pointer; letter-spacing: .5px;
-    }
     .topbar.tabs-overflow .tabs-more { display: inline-flex; }
     .topbar.tabs-overflow .top-tabs {
         -webkit-mask-image: linear-gradient(to right, #000 calc(100% - 26px), transparent);
         mask-image: linear-gradient(to right, #000 calc(100% - 26px), transparent);
     }
-    .tabs-more:hover { background: #e9eaee; color: #E60012; }
     .top-tab {
         position: relative; flex-shrink: 0; border: none; background: transparent; font-family: inherit; cursor: pointer;
         height: 52px; padding: 0; font-size: 15px; color: #8b90a0; white-space: nowrap;
@@ -365,7 +357,6 @@ function showToast(msg) {
 /* ==================== 初始化 ==================== */
 renderAll();
 </script>
-
 
 <script>
 /* 顶部 tab 溢出处理：超出一屏时给「…」入口 + 右侧渐隐；点「…」向右翻；滚到底/没溢出就还原 */

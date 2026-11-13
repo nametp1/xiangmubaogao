@@ -476,39 +476,6 @@
             padding-bottom: 8px;
             border-bottom: 1px solid #f0f0f0;
         }
-
-        /* 预览表格区域（详情中复用） */
-        .preview-table-wrap {
-            overflow-x: auto;
-            border: 1px solid #f0f0f0;
-            border-radius: 6px;
-        }
-        .preview-table {
-            width: 100%;
-            border-collapse: collapse;
-            font-size: 13px;
-            min-width: 800px;
-        }
-        .preview-table thead th {
-            background: #fafafa;
-            color: #666;
-            text-align: left;
-            padding: 12px 14px;
-            border-bottom: 1px solid #e8e8e8;
-            font-weight: 500;
-            white-space: nowrap;
-            position: sticky;
-            top: 0;
-            z-index: 1;
-        }
-        .preview-table tbody td {
-            padding: 10px 14px;
-            border-bottom: 1px solid #f0f0f0;
-            color: #333;
-        }
-        .preview-table tbody tr:hover {
-            background: #fafafa;
-        }
         .preview-table .col-name {
             color: #E60012;
             font-weight: 500;
@@ -520,9 +487,6 @@
             font-size: 12px;
             font-weight: 500;
         }
-        .tag-green { background: #f6ffed; color: #52c41a; }
-        .tag-red { background: #fff2f0; color: #ff4d4f; }
-        .tag-orange { background: #fff7e6; color: #fa8c16; }
 
         /* 删除确认弹窗 */
         .confirm-overlay {
@@ -1408,31 +1372,7 @@
             margin-top: 6px;
             border-radius: 0 4px 4px 0;
             line-height: 1.6;
-        }
-
-        .dropdown-panel {
-            border: 1px solid #d9d9d9;
-            border-radius: 4px;
-            max-height: 260px;
-            overflow-y: auto;
-            margin-top: 4px;
-        }
-
-        .dropdown-item {
-            padding: 12px 16px;
-            font-size: 14px;
-            color: #333;
-            cursor: pointer;
-            transition: background 0.2s;
-            border-bottom: 1px solid #f5f5f5;
-        }
-
-        .dropdown-item:last-child {
-            border-bottom: none;
-        }
-
-        .dropdown-item:hover,
-        .dropdown-item.selected {
+        }.dropdown-item.selected {
             background: #fff5f5;
         }
 
@@ -1473,59 +1413,10 @@
             margin-bottom: 0;
         }
 
-        .form-textarea {
-            width: 100%;
-            min-height: 80px;
-            border: 1px solid #d9d9d9;
-            border-radius: 4px;
-            padding: 10px 12px;
-            font-size: 14px;
-            color: #333;
-            outline: none;
-            resize: vertical;
-            transition: border-color 0.2s;
-        }
-
-        .form-textarea:focus {
-            border-color: #E60012;
-        }
-
-        .date-picker {
-            position: relative;
-        }
-
         .date-picker .form-input {
             padding-left: 36px;
             background: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 24 24' fill='none' stroke='%23999' stroke-width='2'%3E%3Crect x='3' y='4' width='18' height='18' rx='2' ry='2'/%3E%3Cline x1='16' y1='2' x2='16' y2='6'/%3E%3Cline x1='8' y1='2' x2='8' y2='6'/%3E%3Cline x1='3' y1='10' x2='21' y2='10'/%3E%3C/svg%3E") no-repeat 12px center;
             background-size: 16px;
-            cursor: pointer;
-        }
-
-        .radio-group {
-            display: flex;
-            gap: 16px;
-            flex-wrap: wrap;
-        }
-
-        .radio-item {
-            display: flex;
-            align-items: center;
-            gap: 8px;
-            font-size: 14px;
-            color: #333;
-            cursor: pointer;
-            padding: 8px 12px;
-            border: 1px solid #d9d9d9;
-            border-radius: 4px;
-            transition: all 0.2s;
-        }
-
-        .radio-item:hover {
-            border-color: #E60012;
-        }
-
-        .radio-item input[type="radio"] {
-            accent-color: #E60012;
             cursor: pointer;
         }
 
@@ -1541,7 +1432,6 @@
             padding: 16px 24px;
             border-top: 1px solid #f0f0f0;
         }
-
 
         .btn {
             height: 36px;
@@ -1580,22 +1470,8 @@
             cursor: not-allowed;
         }
 
-        .selected-preview {
-            margin-top: 16px;
-            padding: 12px 16px;
-            background: #fafafa;
-            border-radius: 4px;
-            font-size: 13px;
-            color: #666;
-            display: none;
-        }
-
         .selected-preview.active {
             display: block;
-        }
-
-        .selected-preview strong {
-            color: #333;
         }
 
         /* 穿梭框 */
@@ -1924,14 +1800,6 @@
             cursor: pointer;
         }
 
-        /* 信息图标 */
-        /* 邮箱输入行 */
-        .email-input-row {
-            display: flex;
-            gap: 10px;
-            align-items: center;
-        }
-
         /* 收件人下拉选择组件 */
         .recipient-select-wrap {
             position: relative;
@@ -2000,10 +1868,6 @@
             text-align: center;
             color: #bbb;
             font-size: 13px;
-        }
-
-        .btn-add-email:hover {
-            background: #cc0010;
         }
 
         .recipient-list {
@@ -2322,15 +2186,6 @@
             min-width: 0;
             padding: 8px 12px;
             font-size: 12px;
-        }
-
-        .dim-badge {
-            display: inline-block;
-            padding: 2px 8px;
-            border-radius: 3px;
-            font-size: 11px;
-            line-height: 18px;
-            white-space: nowrap;
         }
         .dim-badge.device { background: #f2f2f2; color: #666; }
         .dim-badge.project { background: #fdecee; color: #E60012; }
@@ -2892,7 +2747,6 @@
                     </div>
                 </div>
 
-
                 <!-- 步骤 1：报表范围 -->
                 <div class="step-content active" data-step="1">
 
@@ -3015,7 +2869,6 @@
                     <div class="proj-tip" id="projTip"></div>
                 </div>
 
-
                 <!-- 步骤 2：制定报表计划 -->
                 <div class="step-content" data-step="2">
                     <div class="form-row" style="grid-template-columns: 2fr 1fr 1fr;">
@@ -3105,7 +2958,7 @@
                     <div id="dynamicStep2Fields" class="frequency-fields"></div>
 
                     <!-- v3.0 调整：时间范围 —— 直接下载时按该范围立即出报表（开始 / 结束均必填）；邮件接收时作为生效区间（可留空） -->
-                    <div id="rangeBlock">
+                    <div>
                         <div class="form-row two-col">
                             <div class="form-group">
                                 <label class="form-label" id="rangeStartLabel">开始日期<span class="req">*</span></label>
@@ -3130,7 +2983,6 @@
                             <span>包括周末</span>
                         </label>
                     </div>
-
 
                     <div id="emailSection">
                         <div class="form-section-title">电子邮件信息</div>
@@ -3213,7 +3065,6 @@
                 <!-- 收件人信息 -->
                 <div class="detail-section-title">收件人</div>
                 <div class="detail-info-grid" id="detailRecipientsGrid"></div>
-
 
             </div>
         </div>
@@ -3317,7 +3168,6 @@
             const leaveConfirmClose = document.getElementById('leaveConfirmClose');
             const leaveConfirmBack = document.getElementById('leaveConfirmBack');
             const leaveConfirmLeave = document.getElementById('leaveConfirmLeave');
-
 
             let currentStep = 1;
             let selectedType = '';
@@ -4483,7 +4333,6 @@
                 return true;
             }
 
-
             // 统计口径与班次只对「每日」频率有意义：周 / 月按自然周期统计，不涉及统计口径
             // v3.0 调整：发送方式（直接下载 / 邮件接收）替代原「频率」下拉
             // 直接下载 → 频率值「下载」（按时间范围立即出报表，不写入列表）；邮件接收 → 频率值「每日」（定期递送）
@@ -5074,8 +4923,6 @@
                 emailSection.style.display = config.showEmail ? 'block' : 'none';
                 timezoneExplain.style.display = config.showTimezoneHint ? 'block' : 'none';
 
-
-
                 updateStep2Hint();
                 bindDynamicFieldEvents();
             }
@@ -5535,8 +5382,6 @@
                 }
             });
 
-
-
             clearAllBtn.addEventListener('click', () => {
                 selectedAssets = [];
                 markDirty();
@@ -5580,7 +5425,6 @@
                     });
                 });
             }
-
 
             includeWeekend.addEventListener('change', markDirty);
 
@@ -5994,7 +5838,6 @@
                 positionElements: function(target, step) {
                     if (!target) return;
                     var rect = target.getBoundingClientRect();
-                    var scrollX = window.scrollX || window.pageXOffset;
                     var scrollY = window.scrollY || window.pageYOffset;
 
                     // 聚光灯定位（加一点 padding）
@@ -6125,9 +5968,7 @@
             }
         })();
 
-
     </script>
-
 
             </main>
         </div>
@@ -6384,5 +6225,3 @@
 
 </body>
 </html>
-
-

@@ -204,12 +204,6 @@
 /* ==================== 报表分类（多语言） ==================== */
 const CAT_KEY = 'mysany_report_cats';
 
-const CAT_LANGS = {
-    'zh-CN': '简体中文', en: 'English', ja: '日本語', ko: '한국어', de: 'Deutsch',
-    fr: 'Français', es: 'Español', pt: 'Português', ru: 'Русский', ar: 'العربية',
-    th: 'ไทย', vi: 'Tiếng Việt', id: 'Bahasa Indonesia', tr: 'Türkçe', it: 'Italiano'
-};
-
 /* 默认分类：与 PC / App 报表模版现有分组保持一致 */
 const DEFAULT_CATS = [
     { id: 'cat_overview', sort: 1, enabled: 1, names: { 'zh-CN': '设备概览', en: 'Device Overview' } },
@@ -317,7 +311,6 @@ function closeCatModal() {
     document.getElementById('catMask').classList.remove('show');
     editingId = null;
 }
-
 
 function saveCatModal() {
     draft[curLang] = (document.getElementById('catName').value || '').trim();

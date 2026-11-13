@@ -90,7 +90,6 @@
     .badge.overdue, .badge.partial { background: #fff7e6; color: #d46b08; border-color: #ffd591; }
     .badge.expired { background: #f5f5f5; color: #999; border-color: #d9d9d9; }
     .badge.overdue, .badge.partial, .badge.expired { cursor: help; }
-    .rc-type { font-size: 12px; color: #6b7280; margin-top: 4px; }
     /* 通用弹层 */
     .mask { position: fixed; inset: 0; z-index: 90; display: none; background: rgba(0,0,0,.45); align-items: flex-end; justify-content: center; }
     .mask.show { display: flex; }
@@ -837,6 +836,15 @@ renderAll();
         if (hint && hint.parentNode) hint.parentNode.removeChild(hint);
         document.body.classList.add('embedded');
     });
+})();
+
+/* 从机群/单机数据页「添加订阅」跳转而来：提示添加成功 */
+(function () {
+    var flag = null;
+    try { flag = sessionStorage.getItem('mysany_sub_added'); } catch (e) {}
+    if (!flag) return;
+    try { sessionStorage.removeItem('mysany_sub_added'); } catch (e) {}
+    setTimeout(function () { if (typeof showToast === 'function') showToast('添加成功'); }, 250);
 })();
 </script>
 </body>
