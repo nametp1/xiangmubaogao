@@ -2515,7 +2515,128 @@
         /* 外层已有「报表模版 / 管理报表」切换条，页内重复的 Tab 隐藏（右侧按钮保留） */
         html.embed .tabs .tab { display: none; }
 
-    </style>
+    
+    /* ==================== 设备分组管理（与「设备管理」页一致） ==================== */
+    .gm-mask {
+        position: fixed; inset: 0; background: rgba(22, 26, 46, .45);
+        z-index: 2000;                      /* 高于「添加报表」弹窗（1000） */
+        display: none; align-items: center; justify-content: center;
+    }
+    .gm-mask.show { display: flex; }
+    .gm-modal {
+        width: 620px; max-width: calc(100vw - 32px); background: #fff;
+        border-radius: 12px; overflow: hidden;
+    }
+    .gm-modal.gm-modal-narrow { width: 420px; }
+    .gm-modal-head {
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 16px 18px; border-bottom: 1px solid #eff0f3;
+    }
+    .gm-modal-title { font-size: 15px; font-weight: 600; }
+    .gm-modal-close { cursor: pointer; color: #8b90a0; font-size: 16px; line-height: 1; }
+    .gm-modal-body { padding: 16px 18px; max-height: 60vh; overflow: auto; }
+    .gm-modal-foot {
+        display: flex; justify-content: flex-end; gap: 10px;
+        padding: 14px 18px; border-top: 1px solid #eff0f3;
+    }
+    .gm-btn {
+        height: 32px; padding: 0 14px; border: 1px solid #e6e8ee; border-radius: 8px;
+        background: #fff; color: #5a6472; font-family: inherit; font-size: 13px;
+        cursor: pointer;
+    }
+    .gm-btn:hover { border-color: #c9ced8; }
+    .gm-btn.primary { background: #E60012; border-color: #E60012; color: #fff; font-weight: 600; }
+    .gm-btn.primary:hover { background: #cc0010; border-color: #cc0010; }
+    .gm-btn.danger { background: #E60012; border-color: #E60012; color: #fff; font-weight: 600; }
+    .gm-btn.danger:hover { background: #cc0010; border-color: #cc0010; }
+    .gm-op-link { color: #2d7ff9; font-size: 13px; cursor: pointer; }
+    .gm-op-link:hover { text-decoration: underline; }
+
+    .gm-group-row {
+        display: flex; align-items: center; justify-content: space-between; gap: 10px;
+        padding: 10px 12px; border: 1px solid #f0f2f5; border-radius: 8px; margin-bottom: 8px;
+        cursor: pointer; transition: border-color .15s, background .15s;
+    }
+    .gm-group-row:hover { border-color: #cfe9f0; background: #fafdfe; }
+    .gm-g-name { font-size: 13.5px; color: #161a2e; }
+    .gm-g-cnt { font-size: 12px; color: #8b90a0; margin-left: 8px; }
+    .gm-g-del { color: #E60012; font-size: 12.5px; cursor: pointer; }
+    .gm-g-del:hover { text-decoration: underline; }
+    .gm-g-create { width: 100%; height: 36px; margin-top: 12px; }
+
+    .gm-f-label { display: block; font-size: 12.5px; color: #5a6472; margin-bottom: 6px; }
+    .gm-f-label i { color: #E60012; font-style: normal; }
+    .gm-f-input {
+        width: 100%; height: 36px; padding: 0 10px; border: 1px solid #e6e8ee;
+        border-radius: 8px; font-family: inherit; font-size: 13px; color: #161a2e; outline: none;
+    }
+    .gm-f-input:focus { border-color: #29BECE; box-shadow: 0 0 0 3px rgba(41, 190, 206, .08); }
+
+    .gm-pick-tools {
+        padding: 10px 12px; margin-bottom: 10px;
+        background: #f8f9fb; border: 1px solid #eef0f4; border-radius: 10px;
+    }
+    .gm-pick-row1 { display: flex; align-items: center; gap: 8px; }
+    .gm-pick-row2 {
+        display: flex; align-items: center; justify-content: space-between;
+        margin-top: 10px; padding-top: 9px; border-top: 1px dashed #e7ebf1;
+    }
+    .gm-pick-sep { color: #c9ced8; font-size: 12px; }
+    .gm-pick-search {
+        flex: 1 1 auto; min-width: 120px; display: flex; align-items: center; gap: 6px;
+        height: 32px; padding: 0 10px; background: #fff;
+        border: 1px solid #e6e8ee; border-radius: 8px; color: #9aa0ad;
+    }
+    .gm-pick-search:focus-within { border-color: #29BECE; }
+    .gm-pick-search input {
+        flex: 1; min-width: 0; border: none; outline: none; background: transparent;
+        font-family: inherit; font-size: 12.5px; color: #161a2e;
+    }
+    .gm-pick-sel {
+        height: 32px; padding: 0 10px; border: 1px solid #e6e8ee; border-radius: 8px;
+        background: #fff; font-family: inherit; font-size: 12.5px; color: #5a6472;
+        cursor: pointer; flex: 0 0 auto;
+    }
+    .gm-pick-sel:hover { border-color: #c9ced8; }
+    .gm-pick-sel:focus { outline: none; border-color: #29BECE; }
+    .gm-pick-opt {
+        display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 10px;
+        background: #fff; border: 1px solid #e6e8ee; border-radius: 8px;
+        font-size: 12.5px; color: #5a6472; cursor: pointer; white-space: nowrap;
+    }
+    .gm-pick-opt:hover { border-color: #c9ced8; }
+    .gm-pick-opt input { width: 13px; height: 13px; accent-color: #24839B; cursor: pointer; }
+    .gm-pick-count {
+        font-size: 12px; color: #24839B; background: #eef7fa; border: 1px solid #d8ecf3;
+        border-radius: 999px; padding: 3px 10px; font-variant-numeric: tabular-nums; white-space: nowrap;
+    }
+    .gm-pick-acts { display: inline-flex; align-items: center; gap: 8px; }
+    .gm-pick-list {
+        border: 1px solid #eef0f4; border-radius: 10px; max-height: 320px;
+        overflow: auto; background: #fff;
+    }
+    .gm-pick-row {
+        display: flex; align-items: center; gap: 10px; padding: 9px 12px;
+        border-bottom: 1px solid #f5f6f8; cursor: pointer;
+    }
+    .gm-pick-row:last-child { border-bottom: none; }
+    .gm-pick-row:hover { background: #fcfcfd; }
+    .gm-pick-row input { width: 14px; height: 14px; accent-color: #24839B; cursor: pointer; flex-shrink: 0; }
+    .gm-pick-main { flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+    .gm-pick-type {
+        display: inline-block; padding: 1px 7px; border-radius: 4px; white-space: nowrap;
+        background: #f2f4f7; color: #5a6472; font-size: 11.5px; line-height: 1.6;
+    }
+    .gm-pick-no { font-size: 13px; color: #161a2e; }
+    .gm-pick-vin { font-size: 11.5px; color: #9aa0ad; }
+    .gm-pick-cur {
+        font-size: 11.5px; color: #b7791f; background: #fff7e6;
+        padding: 2px 8px; border-radius: 999px; white-space: nowrap;
+    }
+    .gm-pick-empty { padding: 26px 0; text-align: center; font-size: 12.5px; color: #9aa0ad; }
+
+
+</style>
     <script>
         /* 被 App 端页面以 iframe 嵌入预览时（?embed=1）：隐藏左侧菜单、不弹引导，并让页内跳转继续保持嵌入 */
         (function () {
@@ -3866,6 +3987,51 @@
                 { id: 'PJ202', name: '宽体车运输组', desc: '设备群组 · 宽体车 18 台', src: 'group', devices: 18 },
                 { id: 'PJ203', name: '装载机班组', desc: '设备群组 · 轮式装载机 9 台', src: 'group', devices: 9 }
             ];
+
+            /* 设备分组管理弹窗（管理报表内）→ 自定义分组下拉的同步钩子 */
+            /* 分组管理弹窗点击分组 → 选中该分组并返回添加报表页 */
+            window.__gmPickGroup = function (name) {
+                const hit = projects.filter(p => p.src === 'group' && p.name === name)[0];
+                if (!hit) return false;
+                assetScope = 'group';
+                assetScopeValue = hit.id;
+                selectedAssets = [];
+                if (leftSearch) leftSearch.value = '';
+                if (rightSearch) rightSearch.value = '';
+                markDirty();
+                renderAssetScope();
+                renderLeftPanel();
+                renderRightPanel();
+                return true;
+            };
+
+            window.__gmOwned = [];
+            window.__gmSyncGroups = function (list) {
+                const groupProjects = () => projects.filter(p => p.src === 'group');
+                list.forEach(function (name) {
+                    const hit = groupProjects().filter(p => p.name === name)[0];
+                    const cnt = (typeof GM_DEVICES !== 'undefined')
+                        ? GM_DEVICES.filter(d => d.group === name).length : 0;
+                    if (hit) { hit.devices = cnt; }
+                    else {
+                        projects.push({
+                            id: 'PJ' + (900 + projects.length),
+                            name: name,
+                            desc: '设备群组 · 自定义分组',
+                            src: 'group',
+                            devices: cnt
+                        });
+                    }
+                });
+                /* 仅移除「本弹窗创建过、现在已删除」的分组，避免动到原型自带的群组 */
+                (window.__gmOwned || []).forEach(function (name) {
+                    if (list.indexOf(name) >= 0) return;
+                    const i = projects.findIndex(p => p.src === 'group' && p.name === name);
+                    if (i >= 0) projects.splice(i, 1);
+                });
+                window.__gmOwned = list.slice();
+                if (typeof renderAssetScope === 'function') renderAssetScope();
+            };
 
             function getTypesOfCurrentDim() {
                 return REPORT_TYPES[currentDimension] || [];
@@ -5274,9 +5440,11 @@
 
             document.getElementById('assetScopeAddLink').addEventListener('click', (e) => {
                 e.preventDefault();
-                showToast(assetScope === 'group'
-                    ? '新增分组请前往「设备管理 > 分组管理」'
-                    : '新增工地项目请前往「项目管理」', 'success');
+                if (assetScope === 'group') {
+                    gmOpenGroups();                 /* 打开「设备分组管理」弹窗（与设备管理页一致） */
+                } else {
+                    showToast('新增工地项目请前往「项目管理」', 'success');
+                }
             });
 
             assetScopeSelect.addEventListener('change', () => {
@@ -6221,7 +6389,305 @@
                 closeMoreReportsModal();
             }
         });
-    </script>
+    
+/* ==================== 设备分组管理（与「设备管理」页一致） ==================== */
+const GM_DEVICES = [
+    { no: 'TI-DT 501',  vin: 'HRZX2431013318', type: '自卸装车', group: '运输 A 组' },
+    { no: 'TI-DT 531',  vin: 'HRZX2431013320', type: '自卸装车', group: '运输 A 组' },
+    { no: 'TI-DT 508',  vin: 'HRZX2431013321', type: '自卸装车', group: '运输 A 组' },
+    { no: 'TI-DT 502',  vin: 'HRZX2431013322', type: '自卸装车', group: '运输 B 组' },
+    { no: 'TI-DT 507',  vin: 'HRZX2431013323', type: '自卸装车', group: '运输 B 组' },
+    { no: 'TI-DT 505',  vin: 'HRZX2431013325', type: '自卸装车', group: '运输 B 组' },
+    { no: 'TI-DT 512',  vin: 'HRZX2431013326', type: '自卸装车', group: '土方 C 组' },
+    { no: 'TI-DT 515',  vin: 'HRZX2431013327', type: '自卸装车', group: '' },
+    { no: 'SKT-105E 01', vin: 'HRZX2431013328', type: '宽体自卸车', group: '矿山 D 组' },
+    { no: 'SKT-105E 02', vin: 'HRZX2431013329', type: '宽体自卸车', group: '矿山 D 组' },
+    { no: 'SY215-01',   vin: 'HRZX2431013330', type: '挖掘机', group: '土方 C 组' },
+    { no: 'SD16-01',    vin: 'HRZX2431013332', type: '推土机', group: '' },
+    { no: 'SD16-02',    vin: 'HRZX2431013333', type: '推土机', group: '' },
+    { no: 'SCC-800A 01', vin: 'HRZX2431013331', type: '履带吊', group: '' }
+];
+let GM_GROUPS = ['运输 A 组', '运输 B 组', '土方 C 组', '矿山 D 组'];
+let gmEditMode = 'create';
+let gmOldName = '';
+let gmPickSet = new Set();
+let gmDelTarget = '';
+
+function gmEsc(v) {
+    return String(v == null ? '' : v).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+}
+function gmTip(msg) {
+    if (typeof showToast === 'function') showToast(msg, 'success');
+}
+
+function gmOpenGroups() {
+    gmSyncProjects();          /* 先把分组同步进「自定义分组」数据源，保证点击可命中 */
+    gmRenderGroupList();
+    gmBackToList();
+    document.getElementById('gmGroupMask').classList.add('show');
+}
+function gmClose() {
+    document.getElementById('gmGroupMask').classList.remove('show');
+    gmBackToList();
+}
+function gmShowView(id) {
+    const modal = document.querySelector('#gmGroupMask .gm-modal');
+    if (modal) modal.classList.toggle('gm-modal-narrow', id === 'gmDelView');
+    ['gmGroupView', 'gmEditView', 'gmDelView'].forEach(function (v) {
+        const el = document.getElementById(v);
+        if (el) el.style.display = (v === id) ? '' : 'none';
+    });
+    document.getElementById('gmListCloseBtn').style.display = (id === 'gmGroupView') ? '' : 'none';
+    document.getElementById('gmEditCancelBtn').style.display = (id === 'gmEditView') ? '' : 'none';
+    document.getElementById('gmEditSaveBtn').style.display = (id === 'gmEditView') ? '' : 'none';
+    document.getElementById('gmDelCancelBtn').style.display = (id === 'gmDelView') ? '' : 'none';
+    document.getElementById('gmDelConfirmBtn').style.display = (id === 'gmDelView') ? '' : 'none';
+}
+function gmBackToList() {
+    gmShowView('gmGroupView');
+    document.getElementById('gmModalTitle').textContent = '设备分组管理';
+    gmOldName = '';
+    gmDelTarget = '';
+}
+
+/* 点击分组 = 选中该分组并回到「添加报表」页 */
+function gmSelectGroup(name) {
+    const ok = (typeof window.__gmPickGroup === 'function') ? window.__gmPickGroup(name) : false;
+    gmClose();
+    gmTip(ok ? ('已选中分组「' + name + '」') : ('分组「' + name + '」暂无关联资产'));
+}
+
+function gmRenderGroupList() {
+    const box = document.getElementById('gmGroupList');
+    if (!GM_GROUPS.length) {
+        box.innerHTML = '<div class="gm-pick-empty">还没有分组，点下方「＋ 新建分组」开始</div>';
+        return;
+    }
+    box.innerHTML = GM_GROUPS.map(function (g) {
+        const cnt = GM_DEVICES.filter(function (d) { return d.group === g; }).length;
+        return '<div class="gm-group-row" onclick="gmSelectGroup(\'' + gmEsc(g) + '\')">'
+            + '<div><span class="gm-g-name">' + gmEsc(g) + '</span>'
+            + '<span class="gm-g-cnt">' + cnt + ' 台设备</span></div>'
+            + '<span style="display:inline-flex;gap:14px;align-items:center;">'
+            + '<span class="gm-op-link" onclick="event.stopPropagation();gmOpenEditor(\'' + gmEsc(g) + '\')">编辑</span>'
+            + '<span class="gm-g-del" onclick="event.stopPropagation();gmAskDelete(\'' + gmEsc(g) + '\')">删除</span>'
+            + '</span></div>';
+    }).join('');
+}
+
+/* ---- 新建 / 编辑分组 ---- */
+function gmOpenEditor(g) {
+    gmOldName = g || '';
+    gmEditMode = g ? 'edit' : 'create';
+    const inp = document.getElementById('gmNameInput');
+    inp.value = g || '';
+    gmPickSet = new Set(g ? GM_DEVICES.filter(function (d) { return d.group === g; }).map(function (d) { return d.no; }) : []);
+    const kwInp = document.getElementById('gmPickKw');
+    if (kwInp) kwInp.value = '';
+    gmRenderTypes();
+    const onlyBox = document.getElementById('gmPickOnlyNone');
+    if (onlyBox) onlyBox.checked = false;
+    document.getElementById('gmModalTitle').textContent = g ? '编辑分组' : '新建分组';
+    gmShowView('gmEditView');
+    gmRenderList();
+    setTimeout(function () { inp.focus(); inp.select(); }, 50);
+}
+
+function gmRenderTypes() {
+    const sel = document.getElementById('gmPickType');
+    if (!sel) return;
+    const types = GM_DEVICES.map(function (d) { return d.type; })
+        .filter(function (v, i, a) { return v && a.indexOf(v) === i; });
+    sel.innerHTML = '<option value="">全部产品类型</option>'
+        + types.map(function (t) { return '<option value="' + gmEsc(t) + '">' + gmEsc(t) + '</option>'; }).join('');
+    sel.value = '';
+}
+
+function gmPickVisible() {
+    const inp = document.getElementById('gmPickKw');
+    const kwp = (inp && inp.value ? inp.value : '').trim().toLowerCase();
+    const onlyEl = document.getElementById('gmPickOnlyNone');
+    const only = !!(onlyEl && onlyEl.checked);
+    const typeEl = document.getElementById('gmPickType');
+    const onlyType = typeEl && typeEl.value ? typeEl.value : '';
+    return GM_DEVICES.filter(function (d) {
+        if (only && d.group && d.group !== gmOldName) return false;
+        if (onlyType && d.type !== onlyType) return false;
+        if (kwp) {
+            const hay = (d.no + ' ' + d.vin).toLowerCase();
+            if (hay.indexOf(kwp) < 0) return false;
+        }
+        return true;
+    });
+}
+
+function gmRenderList() {
+    const list = gmPickVisible();
+    const box = document.getElementById('gmPickList');
+    if (!list.length) {
+        box.innerHTML = '<div class="gm-pick-empty">没有匹配的设备</div>';
+    } else {
+        box.innerHTML = list.map(function (d) {
+            const checked = gmPickSet.has(d.no);
+            const tag = (d.group && d.group === gmOldName) ? '<span class="gm-pick-cur">当前所在组</span>' : '';
+            return '<label class="gm-pick-row">'
+                + '<input type="checkbox" data-no="' + gmEsc(d.no) + '"' + (checked ? ' checked' : '') + ' onchange="gmTogglePick(this)">'
+                + '<span class="gm-pick-main">'
+                + '<span class="gm-pick-no">' + gmEsc(d.no) + '</span>'
+                + '<span class="gm-pick-type">' + gmEsc(d.type) + '</span>'
+                + '<span class="gm-pick-vin">' + gmEsc(d.vin) + '</span>'
+                + '</span>' + tag + '</label>';
+        }).join('');
+    }
+    gmUpdateCount();
+}
+
+function gmUpdateCount() {
+    const cnt = document.getElementById('gmPickCount');
+    if (cnt) cnt.textContent = '已选 ' + gmPickSet.size + ' / 共 ' + GM_DEVICES.length + ' 台';
+}
+function gmTogglePick(el) {
+    const no = el.getAttribute('data-no');
+    if (el.checked) gmPickSet.add(no); else gmPickSet.delete(no);
+    gmUpdateCount();
+}
+function gmPickAll(on) {
+    gmPickVisible().forEach(function (d) {
+        if (on) gmPickSet.add(d.no); else gmPickSet.delete(d.no);
+    });
+    gmRenderList();
+}
+
+/* 同步到「添加报表 → 自定义分组」下拉（由页面内 IIFE 暴露的钩子完成） */
+function gmSyncProjects() {
+    try {
+        if (typeof window.__gmSyncGroups === 'function') window.__gmSyncGroups(GM_GROUPS);
+    } catch (e) { }
+}
+
+function gmSaveEditor() {
+    const name = (document.getElementById('gmNameInput').value || '').trim();
+    if (!name) { gmTip('请填写分组名称'); return; }
+    const dup = GM_GROUPS.filter(function (g) { return g === name && g !== gmOldName; });
+    if (dup.length) { gmTip('分组名称已存在：' + name); return; }
+
+    if (gmEditMode === 'create') {
+        GM_GROUPS.push(name);
+    } else if (gmOldName && gmOldName !== name) {
+        GM_GROUPS = GM_GROUPS.map(function (g) { return g === gmOldName ? name : g; });
+        GM_DEVICES.forEach(function (d) { if (d.group === gmOldName) d.group = name; });
+    }
+
+    let movedIn = 0, movedOut = 0;
+    GM_DEVICES.forEach(function (d) {
+        const want = gmPickSet.has(d.no);
+        if (want) {
+            if (d.group !== name) { d.group = name; movedIn++; }
+        } else if (d.group === name) {
+            d.group = '';
+            movedOut++;
+        }
+    });
+
+    gmRenderGroupList();
+    gmSyncProjects();
+    gmBackToList();
+    gmTip((gmEditMode === 'create' ? '已新建分组「' + name + '」' : '分组已更新')
+        + '：加入 ' + movedIn + ' 台' + (movedOut ? '，移出 ' + movedOut + ' 台' : ''));
+}
+
+/* ---- 删除分组（二次确认） ---- */
+function gmAskDelete(g) {
+    gmDelTarget = g;
+    const cnt = GM_DEVICES.filter(function (d) { return d.group === g; }).length;
+    document.getElementById('gmDelText').innerHTML =
+        '删除后，该分组下的设备将转为「未分组」，且不可恢复。';
+    document.getElementById('gmModalTitle').textContent = '删除分组';
+    gmShowView('gmDelView');
+}
+function gmDoDelete() {
+    const g = gmDelTarget;
+    if (!g) return;
+    const cnt = GM_DEVICES.filter(function (d) { return d.group === g; }).length;
+    GM_GROUPS = GM_GROUPS.filter(function (x) { return x !== g; });
+    GM_DEVICES.forEach(function (d) { if (d.group === g) d.group = ''; });
+    gmDelTarget = '';
+    gmRenderGroupList();
+    gmSyncProjects();
+    gmBackToList();
+    gmTip('已删除分组「' + g + '」，' + cnt + ' 台设备转为未分组');
+}
+
+/* 回车保存 + Esc 逐层返回 */
+document.addEventListener('keydown', function (e) {
+    const mask = document.getElementById('gmGroupMask');
+    if (!mask) return;
+    if (e.key === 'Enter') {
+        const active = document.activeElement;
+        if (active && active.id === 'gmNameInput' && mask.classList.contains('show')) {
+            e.preventDefault(); gmSaveEditor();
+        }
+        return;
+    }
+    if (e.key !== 'Escape') return;
+    if (!mask.classList.contains('show')) return;
+    const listShown = document.getElementById('gmGroupView').style.display !== 'none';
+    if (listShown) gmClose(); else gmBackToList();
+});
+
+</script>
+
+
+<!-- 设备分组管理弹窗（与「设备管理 > 分组管理」完全一致） -->
+<div class="gm-mask" id="gmGroupMask" onclick="gmClose()">
+    <div class="gm-modal" onclick="event.stopPropagation()">
+        <div class="gm-modal-head">
+            <span class="gm-modal-title" id="gmModalTitle">设备分组管理</span>
+            <span class="gm-modal-close" onclick="gmClose()">✕</span>
+        </div>
+        <div class="gm-modal-body">
+            <div id="gmGroupView">
+                <div id="gmGroupList"></div>
+                <button class="gm-btn primary gm-g-create" onclick="gmOpenEditor()">＋ 新建分组</button>
+            </div>
+            <div id="gmEditView" style="display:none;">
+                <label class="gm-f-label">分组名称 <i>*</i></label>
+                <input type="text" class="gm-f-input" id="gmNameInput" maxlength="20" placeholder="如：运输 C 组" />
+                <div class="gm-pick-tools" style="margin-top:14px;">
+                    <div class="gm-pick-row1">
+                        <div class="gm-pick-search">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><line x1="16.5" y1="16.5" x2="21" y2="21"></line></svg>
+                            <input type="text" id="gmPickKw" placeholder="搜索设备编号 / 车架号" oninput="gmRenderList()" />
+                        </div>
+                        <select class="gm-pick-sel" id="gmPickType" onchange="gmRenderList()">
+                            <option value="">全部产品类型</option>
+                        </select>
+                        <label class="gm-pick-opt"><input type="checkbox" id="gmPickOnlyNone" onchange="gmRenderList()"> 只看未分组</label>
+                    </div>
+                    <div class="gm-pick-row2">
+                        <span class="gm-pick-count" id="gmPickCount"></span>
+                        <span class="gm-pick-acts">
+                            <a class="gm-op-link" onclick="gmPickAll(true)">全选</a>
+                            <span class="gm-pick-sep">·</span>
+                            <a class="gm-op-link" onclick="gmPickAll(false)">清空</a>
+                        </span>
+                    </div>
+                </div>
+                <div class="gm-pick-list" id="gmPickList"></div>
+            </div>
+            <div id="gmDelView" style="display:none;">
+                <div id="gmDelText" style="font-size:13px;line-height:1.7;color:#5a6472;"></div>
+            </div>
+        </div>
+        <div class="gm-modal-foot">
+            <button class="gm-btn" id="gmListCloseBtn" onclick="gmClose()">关闭</button>
+            <button class="gm-btn" id="gmEditCancelBtn" style="display:none;" onclick="gmBackToList()">取消</button>
+            <button class="gm-btn primary" id="gmEditSaveBtn" style="display:none;" onclick="gmSaveEditor()">保存</button>
+            <button class="gm-btn" id="gmDelCancelBtn" style="display:none;" onclick="gmBackToList()">取消</button>
+            <button class="gm-btn danger" id="gmDelConfirmBtn" style="display:none;" onclick="gmDoDelete()">删除</button>
+        </div>
+    </div>
+</div>
 
 </body>
 </html>

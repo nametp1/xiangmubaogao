@@ -759,7 +759,7 @@ function openDeleteConfirm(g) {
     delTarget = g;
     const cnt = DEVICES.filter(function (d) { return d.group === g; }).length;
     document.getElementById('delText').innerHTML =
-        '删除分组「<b>' + esc(g) + '</b>」后，该分组下的 <b>' + cnt + '</b> 台设备将转为「未分组」，且不可恢复。';
+        '删除后，该分组下的设备将转为「未分组」，且不可恢复。';
     document.getElementById('groupModalTitle').textContent = '删除分组';
     showView('delView');
 }
