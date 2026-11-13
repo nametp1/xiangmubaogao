@@ -237,6 +237,9 @@
     }
     .kpi { text-align: center; border-right: 1px solid #f2f3f6; }
     .kpi:last-child { border-right: none; }
+    /* 四宫格（2×2）：右列去右边框，第二行加上分隔 + 行距 */
+    .kpi:nth-child(3), .kpi:nth-child(5) { border-right: none; }
+    .kpi:nth-child(4), .kpi:nth-child(5) { border-top: 1px solid #f2f3f6; padding-top: 14px; margin-top: 14px; }
     .kpi-value { font-size: 22px; font-weight: 800; color: #161a2e; line-height: 1.1; letter-spacing: -.2px; }
     .kpi-value small { font-size: 12px; font-weight: 600; color: #8b90a0; margin-left: 3px; letter-spacing: 0; }
     .kpi-label { font-size: 12px; color: #8b90a0; margin-top: 8px; }
@@ -644,7 +647,19 @@
     }
     .pick-target .pt-btn.active { color: #fff; background: #E60012; border-color: #E60012; font-weight: 600; }
     /* 下载（获取报表）与分享同款按钮，紧跟在分享右侧 */
-    .hdr-dl-btn {margin-left: 4px;}
+    /* 订阅按钮：胶囊 +「订阅」文案，明确功能 */
+    .hdr-dl-btn {
+        margin-left: 6px; width: auto; padding: 0 10px 0 7px; height: 28px; border-radius: 14px;
+        gap: 4px; font-size: 12px; font-weight: 600; color: #24839B;
+        background: #eef8fb; border: 1px solid #cfe9f0;
+    }
+    .hdr-dl-btn:hover { background: #e2f3f8; }
+    .hdr-dl-btn span { line-height: 1; }
+    /* 长语言（如 Русский / Abonnieren）时只显示图标，避免挤压标题 */
+    .hdr-dl-btn.is-icon-only { width: 30px; padding: 0; border-radius: 50%; background: transparent; border-color: transparent; }
+    .hdr-dl-btn.is-icon-only span { display: none; }
+    .hdr-dl-btn.is-icon-only:hover { background: #f2f3f5; }
+
     /* 获取报表弹层 */
     /* 获取报表：字段较多，弹层按比例加高（原 56vh → 82vh），内容区独立滚动 */
     #planSheet .picker-sheet {height: 82vh;}
@@ -749,10 +764,14 @@
             <path d="M8.4 13.4l7.2 4.2M15.6 6.4l-7.2 4.2"/>
         </svg>
     </button>
-    <button class="share-btn hdr-dl-btn" onclick="openPlanSheet()" aria-label="获取报表">
-        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
-            <path d="M12 3v11"/><polyline points="7 10 12 15 17 10"/><path d="M4 19h16"/>
+    <button class="share-btn hdr-dl-btn" onclick="openPlanSheet()" aria-label="订阅报表">
+        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">
+            <path d="M22 12.6V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v12a2 2 0 0 0 2 2h9"/>
+            <path d="m22 7-8.97 5.7a1.94 1.94 0 0 1-2.06 0L2 7"/>
+            <line x1="18.5" y1="15.5" x2="18.5" y2="21.5"/>
+            <line x1="15.5" y1="18.5" x2="21.5" y2="18.5"/>
         </svg>
+        <span>订阅</span>
     </button>
 </div>
 
@@ -875,13 +894,8 @@
         </div>
 
         <div class="plan-body">
-            <!-- 发送方式 -->
+            <!-- 发送方式：仅保留邮件订阅（直接下载已屏蔽） -->
             <div class="plan-sec">
-                <div class="sec-title">发送方式</div>
-                <div class="plan-seg" id="planSendSeg">
-                    <button type="button" class="on" data-v="download" onclick="setPlanSend('download')">直接下载</button>
-                    <button type="button" data-v="subscribe" onclick="setPlanSend('subscribe')">邮件接收</button>
-                </div>
                 <label class="plan-label">报表名称 <i>*</i></label>
                 <input type="text" class="plan-input" id="planName" maxlength="100" placeholder="请输入报表名称" oninput="planSyncBtn()">
                 <label class="plan-label">格式</label>
@@ -1810,9 +1824,9 @@ function viewToggleHTML(key) {
 }
 const XLS_PAGE_SIZE = 5;           /* 图表明细表每页行数（10 行 → 2 页，便于看分页效果） */
 const LIST_PAGE_SIZE = 5;          /* 周期明细 / 数据台账每页行数（与图表明细一致） */
-/* 通用分页条：key＝state.xlsPage 里的键，fn 固定 xlsPageGo；只有多于一页时才渲染 */
+/* 通用分页条：key＝state.xlsPage 里的键，fn 固定 xlsPageGo；
+   明细视图始终渲染（单页时页码置灰），保证「共 N 条 + 翻页」一致可见 */
 function pagerHTML(key, page, pages, from, size, total) {
-    if (pages <= 1) return '';
     const btn = (label, n, on, dis) => '<button type="button" class="pg-btn' + (on ? ' on' : '') + '"'
         + (dis ? ' disabled' : '') + ' onclick="xlsPageGo(\'' + key + '\',' + n + ')">' + label + '</button>';
     /* 页码窗口：首末页 + 当前页 ±1，其余用省略号 —— 100 台设备也只出 5 个数字，不会把卡片挤爆 */
@@ -1942,12 +1956,16 @@ function render() {
     const rows = idxs.map(i => DATA[state.machineId][i]);
     const html = [];
 
-    /* 1. 指标卡（两列：发动机运行时长 / 燃油消耗） */
+    /* 1. 指标卡（2×2 四宫格：发动机运行时长 / 燃油消耗 / 作业工时 / 平均油耗） */
     const runHours = rows.reduce((s, r) => s + r.A + r.B + r.C + r.D, 0);
     const fuelTotal = rows.reduce((s, r) => s + r.G + r.H, 0);
+    const workHours = rows.reduce((s, r) => s + r.A, 0);
+    const avgFuel = runHours > 0 ? fuelTotal / runHours : 0;
     html.push(`<div class="kpi-strip">\n        <div class="kpi-title">数据汇总统计</div>
         <div class="kpi"><div class="kpi-value">${hm(runHours)}<small>h</small></div><div class="kpi-label">发动机运行时长</div></div>
         <div class="kpi"><div class="kpi-value">${fmt(fuelTotal, 1)}<small>L</small></div><div class="kpi-label">燃油消耗</div></div>
+        <div class="kpi"><div class="kpi-value">${hm(workHours)}<small>h</small></div><div class="kpi-label">作业工时</div></div>
+        <div class="kpi"><div class="kpi-value">${fmt(avgFuel, 2)}<small>L/h</small></div><div class="kpi-label">平均油耗</div></div>
     </div>`);
 
     /* 2. 工时统计（近 7 日 / 7 周 / 7 个月的工时对比） */
@@ -2628,7 +2646,7 @@ bindPullToRefresh();
 })();
 
 /* ==================== 获取报表（复刻自机群页，适配单机） ==================== */
-let planSend = 'download';
+let planSend = 'subscribe';
 let planFreq = 'daily';
 let planMails = ['admin@sany.com.cn'];
 
@@ -2864,6 +2882,32 @@ function planSubmit() {
     planToast('添加成功');
     closePlanSheet();
 }
+
+        /* ===== 订阅按钮多语言（与站点 mysany_lang 保持一致）===== */
+        const SUBSCRIBE_I18N = {'zh-CN': '订阅', 'en': 'Subscribe', 'ja': '購読', 'ko': '구독', 'de': 'Abo', 'fr': 'S’abonner', 'es': 'Suscribir', 'pt': 'Assinar', 'ru': 'Подписка', 'ar': 'اشتراك', 'th': 'สมัคร', 'vi': 'Đăng ký', 'id': 'Langganan', 'tr': 'Abone', 'it': 'Abbonati'};
+
+        function applySubscribeLang() {
+            let lang = 'zh-CN';
+            try { lang = localStorage.getItem('mysany_lang') || 'zh-CN'; } catch (e) {}
+            const txt = SUBSCRIBE_I18N[lang] || SUBSCRIBE_I18N['zh-CN'];
+            const btn = document.querySelector('.hdr-dl-btn');
+            if (!btn) return;
+            const span = btn.querySelector('span');
+            if (span) span.textContent = txt;
+            /* 文案较长时只显示图标，避免顶栏被挤压（标题仍可读） */
+            btn.classList.toggle('is-icon-only', txt.length > 6);
+            btn.setAttribute('aria-label', txt);
+            btn.setAttribute('title', txt);
+            document.documentElement.setAttribute('lang', lang);
+        }
+
+        /* 初始化：应用订阅按钮多语言；语言切换后也同步（监听 storage 变化）*/
+        document.addEventListener('DOMContentLoaded', applySubscribeLang);
+        window.addEventListener('storage', function (e) {
+            if (e.key === 'mysany_lang') applySubscribeLang();
+        });
+        applySubscribeLang();
+
 </script>
 
 </body>

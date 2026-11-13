@@ -1,0 +1,835 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>设备管理（v3.0）</title>
+<style>
+    * { margin: 0; padding: 0; box-sizing: border-box; }
+    :root {
+        --sany-red: #E60012;
+        --text-1: #161a2e;
+        --text-2: #4e5969;
+        --text-3: #8b90a0;
+        --line: #e8e8e8;
+        --bg-page: #f5f6f7;
+    }
+    body {
+        font-family: -apple-system, BlinkMacSystemFont, "PingFang SC", "Microsoft YaHei", sans-serif;
+        background: var(--bg-page); color: var(--text-1); font-size: 14px;
+    }
+    .app-wrapper { display: flex; flex-direction: column; height: 100vh; overflow: hidden; }
+
+    /* ============ 顶部导航 ============ */
+    .navbar {
+        height: 50px; background: #fff; border-bottom: 1px solid var(--line);
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 0 24px; flex-shrink: 0;
+    }
+    .navbar-left { display: flex; align-items: center; gap: 12px; }
+    .logo { font-size: 17px; font-weight: 700; letter-spacing: .3px; }
+    .navbar-right { display: flex; align-items: center; gap: 22px; font-size: 13px; color: var(--text-2); }
+    .navbar-item { display: flex; align-items: center; gap: 6px; cursor: pointer; }
+    .navbar-avatar { width: 24px; height: 24px; border-radius: 50%; background: #d8dbe2; }
+
+    /* ============ 主区域 ============ */
+    .main-wrapper { display: flex; flex: 1; min-height: 0; overflow: hidden; }
+    .sidebar {
+        width: 210px; background: #fff; border-right: 1px solid var(--line);
+        padding: 8px 0; flex-shrink: 0; overflow-y: auto;
+    }
+    .sidebar-menu { list-style: none; }
+    .sidebar-item { position: relative; }
+    .sidebar-link {
+        display: flex; align-items: center; gap: 10px; padding: 11px 18px;
+        font-size: 14px; color: var(--text-2); text-decoration: none; cursor: pointer;
+        transition: color .15s, background .15s;
+    }
+    .sidebar-link:hover { color: var(--text-1); background: #f7f8fa; }
+    .sidebar-item.active > .sidebar-link {
+        color: var(--sany-red); font-weight: 600;
+        background: #fff5f5; box-shadow: inset 3px 0 0 var(--sany-red);
+    }
+    .sidebar-icon { width: 16px; height: 16px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+
+    .main-content { flex: 1; min-width: 0; overflow: auto; padding: 20px 24px 28px; }
+
+    /* ============ 卡片 ============ */
+    .page-card { background: #fff; border-radius: 10px; box-shadow: 0 1px 3px rgba(22,26,46,.06); overflow: hidden; }
+
+    /* ============ 筛选栏 ============ */
+    .filter-bar {
+        display: flex; align-items: center; gap: 10px; padding: 16px 20px;
+        border-bottom: 1px solid #f0f2f5; flex-wrap: wrap;
+    }
+    .f-search {
+        flex: 0 1 320px; min-width: 220px; display: flex; align-items: center; gap: 8px;
+        height: 34px; padding: 0 10px; border: 1px solid #e6e8ee; border-radius: 6px; color: #9aa0ad;
+    }
+    .f-search:focus-within { border-color: #29BECE; }
+    .f-search input {
+        flex: 1; min-width: 0; border: none; outline: none; background: transparent;
+        font-family: inherit; font-size: 13px; color: var(--text-1);
+    }
+    .f-search input::placeholder { color: #b8bcc6; }
+    .f-sel {
+        height: 34px; padding: 0 10px; border: 1px solid #e6e8ee; border-radius: 6px;
+        background: #fff; font-family: inherit; font-size: 13px; color: var(--text-2); cursor: pointer;
+    }
+    .f-sel:focus { outline: none; border-color: #29BECE; }
+    .icon-btn {
+        width: 34px; height: 34px; border: 1px solid #e6e8ee; border-radius: 6px; background: #fff;
+        color: var(--text-2); cursor: pointer; display: inline-flex; align-items: center; justify-content: center;
+    }
+    .icon-btn:hover { border-color: #c9ced8; color: var(--text-1); }
+    /* 设备分组相关入口：红色突出 */
+    #fGroup {
+        color: #E60012; border-color: #f4c4c8; background: #fffafa; font-weight: 600;
+    }
+    #fGroup:hover { border-color: #e8a4ab; }
+    #fGroup:focus { border-color: #E60012; }
+    .btn.group-entry {
+        color: #E60012; border-color: #f4c4c8; background: #fffafa; font-weight: 600;
+    }
+    .btn.group-entry:hover { border-color: #e8a4ab; background: #ffecee; color: #cc0010; }
+    .filter-right { margin-left: auto; display: flex; align-items: center; gap: 8px; }
+    .btn {
+        height: 34px; padding: 0 14px; border-radius: 6px; border: 1px solid #e6e8ee; background: #fff;
+        font-family: inherit; font-size: 13px; color: var(--text-2); cursor: pointer;
+    }
+    .btn:hover { border-color: #c9ced8; color: var(--text-1); }
+    .btn.primary { background: var(--sany-red); border-color: var(--sany-red); color: #fff; font-weight: 600; }
+    .btn.primary:hover { background: #cc0010; border-color: #cc0010; }
+
+    /* ============ 表格 ============ */
+    .table-scroll { overflow: auto; max-height: calc(100vh - 300px); }
+    table { width: 100%; border-collapse: separate; border-spacing: 0; min-width: 1180px; }
+    thead th {
+        position: sticky; top: 0; z-index: 2; background: #fff;
+        font-size: 12.5px; font-weight: 600; color: var(--text-2); text-align: left;
+        padding: 12px 16px; border-bottom: 1px solid var(--line); white-space: nowrap;
+    }
+    thead th .th-help {
+        display: inline-flex; width: 13px; height: 13px; margin-left: 4px; vertical-align: -2px;
+        border: 1px solid #c4c9d4; border-radius: 50%; color: #9aa0ad;
+        font-size: 9px; align-items: center; justify-content: center; cursor: help;
+    }
+    tbody td { padding: 12px 16px; border-bottom: 1px solid #f2f3f5; font-size: 13px; color: var(--text-1); vertical-align: middle; }
+    tbody tr:hover { background: #fcfcfd; }
+
+    .dev-cell { display: flex; align-items: center; gap: 10px; }
+    .dev-thumb {
+        width: 46px; height: 34px; border-radius: 4px; background: #f5f6f8;
+        display: flex; align-items: center; justify-content: center; color: #b6bcc8; flex-shrink: 0;
+    }
+    .dev-meta { min-width: 0; }
+    .dev-no { font-size: 13px; color: var(--text-1); line-height: 1.5; }
+    .dev-vin { font-size: 12px; color: var(--sany-red); line-height: 1.5; letter-spacing: .1px; }
+
+    .dot { display: inline-block; width: 6px; height: 6px; border-radius: 50%; margin-right: 6px; vertical-align: 1px; }
+    .dot-green { background: #22c55e; }
+    .dot-blue { background: #38bdf8; }
+    .dot-orange { background: #f59e0b; }
+    .dot-grey { background: #c4c9d4; }
+    .muted { color: var(--text-3); }
+
+    .op-link { color: #2d7ff9; font-size: 13px; text-decoration: none; cursor: pointer; margin-right: 10px; }
+    .op-link:hover { text-decoration: underline; }
+    .op-link:last-child { margin-right: 0; }
+
+    /* ============ 设备分组 ============ */
+    /* 列表中的「设备分组」字段：红色突出 */
+    th .th-group { color: #E60012; font-weight: 600; }
+    .group-tag {
+        display: inline-block; padding: 2px 9px; border-radius: 999px;
+        font-size: 12px; background: #fdebed; color: #E60012; white-space: nowrap;
+    }
+    .group-tag.none { background: #f2f3f5; color: #9aa0ad; }
+
+    .mask {
+        position: fixed; inset: 0; background: rgba(22,26,46,.45); z-index: 90;
+        display: none; align-items: center; justify-content: center;
+    }
+    .mask.show { display: flex; }
+    .modal { width: 620px; max-width: calc(100vw - 32px); background: #fff; border-radius: 12px; overflow: hidden; }
+    .modal-head {
+        display: flex; align-items: center; justify-content: space-between;
+        padding: 16px 18px; border-bottom: 1px solid #eff0f3;
+    }
+    .modal-title { font-size: 15px; font-weight: 600; }
+    .modal-close { cursor: pointer; color: #8b90a0; font-size: 16px; line-height: 1; }
+    .modal-body { padding: 16px 18px; max-height: 60vh; overflow: auto; }
+    .modal-foot { display: flex; justify-content: flex-end; gap: 10px; padding: 14px 18px; border-top: 1px solid #eff0f3; }
+
+    .group-row {
+        display: flex; align-items: center; justify-content: space-between; gap: 10px;
+        padding: 10px 12px; border: 1px solid #f0f2f5; border-radius: 8px; margin-bottom: 8px;
+        cursor: pointer; transition: border-color .15s, background .15s;
+    }
+    .group-row:hover { border-color: #cfe9f0; background: #fafdfe; }
+    .group-row .g-name { font-size: 13.5px; color: #161a2e; }
+    .group-row .g-cnt { font-size: 12px; color: #8b90a0; margin-left: 8px; }
+    .g-del { color: #E60012; font-size: 12.5px; cursor: pointer; }
+    .g-del:hover { text-decoration: underline; }
+    .g-add { display: flex; gap: 8px; margin-top: 4px; }
+    .g-add input {
+        flex: 1; height: 34px; padding: 0 10px; border: 1px solid #e6e8ee; border-radius: 6px;
+        font-family: inherit; font-size: 13px; outline: none;
+    }
+    .g-add input:focus { border-color: #29BECE; }
+
+    /* 选择设备面板 */
+    .pick-head {
+        display: flex; align-items: center; gap: 8px; margin-bottom: 10px;
+    }
+    .pick-back {
+        display: inline-flex; align-items: center; gap: 4px; font-size: 12.5px;
+        color: #24839B; cursor: pointer;
+    }
+    .pick-back:hover { text-decoration: underline; }
+    .pick-title { font-size: 13px; color: #161a2e; font-weight: 600; }
+    .pick-tip { font-size: 12px; color: #8b90a0; margin-bottom: 10px; line-height: 1.6; }
+    .pick-list {
+        border: 1px solid #eef0f4; border-radius: 10px; max-height: 320px; overflow: auto; background: #fff;
+    }
+    .pick-row {
+        display: flex; align-items: center; gap: 10px; padding: 9px 12px;
+        border-bottom: 1px solid #f5f6f8; cursor: pointer;
+    }
+    .pick-row:last-child { border-bottom: none; }
+    .pick-row:hover { background: #fcfcfd; }
+    .pick-row input { width: 14px; height: 14px; accent-color: #24839B; cursor: pointer; flex-shrink: 0; }
+    .pick-main {
+        flex: 1; min-width: 0; display: flex; align-items: center; gap: 8px; flex-wrap: wrap;
+    }
+    .pick-type {
+        display: inline-block; padding: 1px 7px; border-radius: 4px; white-space: nowrap;
+        background: #f2f4f7; color: #5a6472; font-size: 11.5px; line-height: 1.6;
+    }
+    .pick-no { font-size: 13px; color: #161a2e; }
+    .pick-vin { font-size: 11.5px; color: #9aa0ad; }
+    .pick-cur { font-size: 11.5px; color: #b7791f; background: #fff7e6; padding: 2px 8px; border-radius: 999px; white-space: nowrap; }
+    .pick-cur.none { color: #9aa0ad; background: #f2f3f5; }
+
+    .pick-tools {
+        padding: 10px 12px; margin-bottom: 10px;
+        background: #f8f9fb; border: 1px solid #eef0f4; border-radius: 10px;
+    }
+    .pick-row1 { display: flex; align-items: center; gap: 8px; }
+    .pick-row2 {
+        display: flex; align-items: center; justify-content: space-between;
+        margin-top: 10px; padding-top: 9px; border-top: 1px dashed #e7ebf1;
+    }
+    .pick-sep { color: #c9ced8; font-size: 12px; }
+    .pick-search {
+        flex: 1 1 auto; min-width: 120px; display: flex; align-items: center; gap: 6px;
+        height: 32px; padding: 0 10px; background: #fff;
+        border: 1px solid #e6e8ee; border-radius: 8px; color: #9aa0ad;
+    }
+    .pick-search:focus-within { border-color: #29BECE; }
+    .pick-search input {
+        flex: 1; min-width: 0; border: none; outline: none; background: transparent;
+        font-family: inherit; font-size: 12.5px; color: #161a2e;
+    }
+    .pick-sel {
+        height: 32px; padding: 0 10px; border: 1px solid #e6e8ee; border-radius: 8px;
+        background: #fff; font-family: inherit; font-size: 12.5px; color: #5a6472;
+        cursor: pointer; flex: 0 0 auto;
+    }
+    .pick-sel:hover { border-color: #c9ced8; }
+    .pick-sel:focus { outline: none; border-color: #29BECE; }
+    .pick-seg { display: inline-flex; padding: 2px; background: #f4f5f7; border-radius: 8px; flex: 0 0 auto; }
+    .pick-seg button {
+        height: 26px; padding: 0 12px; border: none; background: transparent; border-radius: 6px;
+        font-family: inherit; font-size: 12.5px; color: #5a6472; cursor: pointer;
+    }
+    .pick-seg button:hover { color: #161a2e; }
+    .pick-seg button.on { background: #fff; color: #E60012; font-weight: 600; box-shadow: 0 1px 3px rgba(22,26,46,.12); }
+    .pick-opt {
+        display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 10px;
+        background: #fff; border: 1px solid #e6e8ee; border-radius: 8px;
+        font-size: 12.5px; color: #5a6472; cursor: pointer; white-space: nowrap;
+    }
+    .pick-opt:hover { border-color: #c9ced8; }
+    .pick-opt input:checked { accent-color: #E60012; }
+    .pick-opt input { width: 13px; height: 13px; accent-color: #24839B; cursor: pointer; }
+    .pick-count {
+        font-size: 12px; color: #24839B; background: #eef7fa; border: 1px solid #d8ecf3;
+        border-radius: 999px; padding: 3px 10px; font-variant-numeric: tabular-nums; white-space: nowrap;
+    }
+    .pick-acts { display: inline-flex; align-items: center; gap: 8px; }
+    .pick-empty { padding: 26px 0; text-align: center; font-size: 12.5px; color: #9aa0ad; }
+
+    /* 删除确认等轻量弹窗：窄版 */
+    #groupMask .modal.modal-narrow { width: 420px; }
+    .g-create { width: 100%; height: 36px; margin-top: 12px; }
+    .f-label { display: block; font-size: 12.5px; color: #5a6472; margin-bottom: 6px; }
+    .f-label i { color: #E60012; font-style: normal; }
+    .f-input {
+        width: 100%; height: 36px; padding: 0 10px; border: 1px solid #e6e8ee; border-radius: 8px;
+        font-family: inherit; font-size: 13px; color: #161a2e; outline: none;
+    }
+    .f-input:focus { border-color: #29BECE; box-shadow: 0 0 0 3px rgba(41,190,206,.08); }
+    .warn-box { display: flex; gap: 10px; }
+    .warn-ico {
+        flex: 0 0 22px; width: 22px; height: 22px; border-radius: 50%; background: #fff1f0;
+        color: #E60012; font-weight: 700; font-size: 13px;
+        display: flex; align-items: center; justify-content: center; margin-top: 1px;
+    }
+    .btn.danger { background: #E60012; border-color: #E60012; color: #fff; font-weight: 600; }
+    .btn.danger:hover { background: #cc0010; border-color: #cc0010; }
+
+    /* ============ 分页 ============ */
+    .pager {
+        display: flex; align-items: center; justify-content: space-between; gap: 10px;
+        padding: 12px 20px; border-top: 1px solid #f2f3f5;
+    }
+    .pager .range { font-size: 12.5px; color: #6b7280; font-variant-numeric: tabular-nums; }
+    .pager .pages { display: inline-flex; align-items: center; gap: 8px; }
+    .pg-btn {
+        min-width: 32px; height: 32px; padding: 0 8px; border-radius: 10px;
+        border: 1px solid #e6e8ee; background: #fff; color: #4b5563;
+        font-family: inherit; font-size: 13px; cursor: pointer; font-variant-numeric: tabular-nums;
+    }
+    .pg-btn:hover:not(:disabled):not(.on) { border-color: #c9ced8; color: #161a2e; }
+    .pg-btn.on { background: #161a2e; border-color: #161a2e; color: #fff; font-weight: 600; }
+    .pg-btn:disabled { color: #c8ccd6; border-color: #eef0f3; background: #fbfcfd; cursor: default; }
+</style>
+</head>
+<body>
+<div class="app-wrapper">
+    <nav class="navbar">
+        <div class="navbar-left"><span class="logo">MySANY</span></div>
+        <div class="navbar-right">
+            <div class="navbar-item">
+                <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="10"></circle><line x1="2" y1="12" x2="22" y2="12"></line><path d="M12 2a15.3 15.3 0 0 1 4 10 15.3 15.3 0 0 1-4 10 15.3 15.3 0 0 1-4-10 15.3 15.3 0 0 1 4-10z"></path></svg>
+                简体中文
+            </div>
+            <a class="navbar-item" href="个人中心.html" style="text-decoration:none;color:inherit;">
+                <span>Schuck</span>
+                <div class="navbar-avatar"></div>
+            </a>
+        </div>
+    </nav>
+
+    <div class="main-wrapper">
+        <aside class="sidebar">
+            <ul class="sidebar-menu">
+                <li class="sidebar-item active">
+                    <a class="sidebar-link active" href="设备管理.html">
+                        <span class="sidebar-icon">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect></svg>
+                        </span>
+                        设备管理
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a class="sidebar-link">
+                        <span class="sidebar-icon">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"></path><path d="M18 17V9"></path><path d="M13 17V5"></path><path d="M8 17v-3"></path></svg>
+                        </span>
+                        数据大屏
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a class="sidebar-link" href="报表模版.html">
+                        <span class="sidebar-icon">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><path d="M3 9h18"></path><path d="M9 21V9"></path></svg>
+                        </span>
+                        机群报表
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a class="sidebar-link">
+                        <span class="sidebar-icon">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="16" y1="13" x2="8" y2="13"></line><line x1="16" y1="17" x2="8" y2="17"></line></svg>
+                        </span>
+                        项目管理
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a class="sidebar-link">
+                        <span class="sidebar-icon">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="4" width="18" height="18" rx="2" ry="2"></rect><line x1="16" y1="2" x2="16" y2="6"></line><line x1="8" y1="2" x2="8" y2="6"></line><line x1="3" y1="10" x2="21" y2="10"></line></svg>
+                        </span>
+                        设备保养
+                    </a>
+                </li>
+                <li class="sidebar-item">
+                    <a class="sidebar-link">
+                        <span class="sidebar-icon">
+                            <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M14.7 6.3a1 1 0 0 0 0 1.4l1.6 1.6a1 1 0 0 0 1.4 0l3.77-3.77a6 6 0 0 1-7.94 7.94l-6.91 6.91a2.12 2.12 0 0 1-3-3l6.91-6.91a6 6 0 0 1 7.94-7.94l-3.76 3.76z"></path></svg>
+                        </span>
+                        维修管理
+                    </a>
+                </li>
+            </ul>
+        </aside>
+
+        <main class="main-content">
+            <div class="page-card">
+                <!-- 筛选栏 -->
+                <div class="filter-bar">
+                    <div class="f-search">
+                        <input type="text" id="kw" placeholder="设备序列号、项目自编号、资产编号、车牌号" />
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><line x1="16.5" y1="16.5" x2="21" y2="21"></line></svg>
+                    </div>
+                    <select class="f-sel" id="fGroup">
+                        <option value="">设备分组</option>
+                    </select>
+                    <select class="f-sel" id="fType">
+                        <option value="">设备类型</option>
+                        <option>自卸装车</option>
+                        <option>宽体自卸车</option>
+                        <option>挖掘机</option>
+                        <option>履带吊</option>
+                        <option>推土机</option>
+                    </select>
+                    <select class="f-sel" id="fRun">
+                        <option value="">运行状态</option>
+                        <option>行驶</option>
+                        <option>怠速</option>
+                        <option>作业</option>
+                        <option>离线</option>
+                    </select>
+                    <button class="icon-btn" title="更多筛选">
+                        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><path d="M3 5h18l-7 8v6l-4-2v-4z"/></svg>
+                    </button>
+                    <div class="filter-right">
+                        <button class="btn group-entry" onclick="openGroupModal()">分组管理</button>
+                        <button class="btn" onclick="toast('已开始导出，请稍候')">导出</button>
+                        <button class="btn" onclick="toast('请选择要导入的设备文件')">批量导入</button>
+                        <button class="btn" onclick="toast('正在同步设备…')">同步设备</button>
+                        <button class="btn primary" onclick="toast('请选择设备后进行绑定')">绑定设备</button>
+                    </div>
+                </div>
+
+                <!-- 表格 -->
+                <div class="table-scroll">
+                    <table>
+                        <thead>
+                            <tr>
+                                <th>设备编号</th>
+                                <th>设备类型</th>
+                                <th><span class="th-group">设备分组</span></th>
+                                <th>在线状态</th>
+                                <th>运行状态</th>
+                                <th>数据更新时间 <span class="th-help" title="设备最近一次上报数据的时间">?</span></th>
+                                <th>资产编号</th>
+                                <th>设备归属类型</th>
+                                <th>关联项目</th>
+                                <th>所属组织</th>
+                                <th>操作</th>
+                            </tr>
+                        </thead>
+                        <tbody id="tbody"></tbody>
+                    </table>
+                </div>
+
+                <div class="pager">
+                    <span class="range" id="range">共 0 条</span>
+                    <span class="pages" id="pages"></span>
+                </div>
+            </div>
+        </main>
+    </div>
+</div>
+
+<!-- 分组管理弹窗 -->
+<div class="mask" id="groupMask" onclick="closeGroupModal()">
+    <div class="modal" onclick="event.stopPropagation()">
+        <div class="modal-head">
+            <span class="modal-title" id="groupModalTitle">设备分组管理</span>
+            <span class="modal-close" onclick="closeGroupModal()">✕</span>
+        </div>
+        <div class="modal-body">
+            <!-- 视图 1：分组列表 -->
+            <div id="groupView">
+                <div id="groupList"></div>
+                <button class="btn primary g-create" onclick="openGroupEditor()">＋ 新建分组</button>
+            </div>
+
+            <!-- 视图 2：新建 / 编辑分组（名称 + 选择设备） -->
+            <div id="editView" style="display:none;">
+                <label class="f-label">分组名称 <i>*</i></label>
+                <input type="text" class="f-input" id="groupNameInput" maxlength="20" placeholder="如：运输 C 组" />
+                <div class="pick-tools" style="margin-top:14px;">
+                    <div class="pick-row1">
+                        <div class="pick-search">
+                            <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><line x1="16.5" y1="16.5" x2="21" y2="21"></line></svg>
+                            <input type="text" id="pickKw" placeholder="搜索设备编号 / 车架号" oninput="renderPickList()" />
+                        </div>
+                        <select class="pick-sel" id="pickType" onchange="renderPickList()">
+                            <option value="">全部产品类型</option>
+                        </select>
+                        <label class="pick-opt"><input type="checkbox" id="pickOnlyNone" onchange="renderPickList()"> 只看未分组</label>
+                    </div>
+                    <div class="pick-row2">
+                        <span class="pick-count" id="pickCount"></span>
+                        <span class="pick-acts">
+                            <a class="op-link" onclick="pickAll(true)">全选</a>
+                            <span class="pick-sep">·</span>
+                            <a class="op-link" onclick="pickAll(false)">清空</a>
+                        </span>
+                    </div>
+                </div>
+                <div class="pick-list" id="pickList"></div>
+            </div>
+
+            <!-- 视图 3：删除确认 -->
+            <div id="delView" style="display:none;">
+                <div id="delText" style="font-size:13px;line-height:1.7;color:#5a6472;"></div>
+            </div>
+        </div>
+        <div class="modal-foot">
+            <button class="btn" id="listCloseBtn" onclick="closeGroupModal()">关闭</button>
+            <button class="btn" id="editCancelBtn" style="display:none;" onclick="backToList()">取消</button>
+            <button class="btn primary" id="editSaveBtn" style="display:none;" onclick="saveGroupEditor()">保存</button>
+            <button class="btn" id="delCancelBtn" style="display:none;" onclick="backToList()">取消</button>
+            <button class="btn danger" id="delConfirmBtn" style="display:none;" onclick="doRemoveGroup()">删除</button>
+        </div>
+    </div>
+</div>
+
+<div id="toast"
+ style="position:fixed;left:50%;top:72px;transform:translateX(-50%);background:rgba(22,26,46,.9);color:#fff;font-size:13px;padding:9px 16px;border-radius:8px;opacity:0;transition:opacity .2s;z-index:999;"></div>
+
+<script>
+/* ==================== 设备管理（示例数据） ==================== */
+const DEVICES = [
+    { no: 'TI-DT 501',  vin: 'HRZX2431013318', type: '自卸装车', group: '运输 A 组', online: 1, run: '行驶', time: '2026-11-12 05:09:48', asset: 'TI-DT 501',  attr: '自有', project: 'Lameruru', org: 'TIRAN INDO' },
+    { no: 'TI-DT 531',  vin: 'HRZX2431013320', type: '自卸装车', group: '运输 A 组', online: 1, run: '行驶', time: '2026-11-12 03:57:41', asset: 'TI-DT 531',  attr: '自有', project: 'Lameruru', org: 'TIRAN INDO' },
+    { no: 'TI-DT 508',  vin: 'HRZX2431013321', type: '自卸装车', group: '运输 A 组', online: 1, run: '行驶', time: '2026-11-12 04:01:04', asset: 'TI-DT 508',  attr: '自有', project: 'Lameruru', org: 'TIRAN INDO' },
+    { no: 'TI-DT 502',  vin: 'HRZX2431013322', type: '自卸装车', group: '运输 B 组', online: 1, run: '怠速', time: '2026-11-12 05:09:55', asset: 'TI-DT 502',  attr: '自有', project: 'Lameruru', org: 'TIRAN INDO' },
+    { no: 'TI-DT 507',  vin: 'HRZX2431013323', type: '自卸装车', group: '运输 B 组', online: 1, run: '怠速', time: '2026-11-12 05:09:54', asset: 'TI-DT 507',  attr: '自有', project: 'Lameruru', org: 'TIRAN INDO' },
+    { no: 'TI-DT 505',  vin: 'HRZX2431013325', type: '自卸装车', group: '运输 B 组', online: 1, run: '行驶', time: '2026-11-12 04:03:32', asset: 'TI-DT 505',  attr: '自有', project: 'Lameruru', org: 'TIRAN INDO' },
+    { no: 'TI-DT 512',  vin: 'HRZX2431013326', type: '自卸装车', group: '土方 C 组', online: 1, run: '作业', time: '2026-11-12 05:11:02', asset: 'TI-DT 512',  attr: '自有', project: 'Lameruru', org: 'TIRAN INDO' },
+    { no: 'TI-DT 515',  vin: 'HRZX2431013327', type: '自卸装车', group: '', online: 0, run: '离线', time: '2026-11-11 22:40:19', asset: 'TI-DT 515',  attr: '租赁', project: 'Morowali', org: 'TIRAN INDO' },
+    { no: 'SKT-105E 01', vin: 'HRZX2431013328', type: '宽体自卸车', group: '矿山 D 组', online: 1, run: '行驶', time: '2026-11-12 05:07:11', asset: 'SKT105E-001', attr: '自有', project: 'Morowali', org: 'TIRAN INDO' },
+    { no: 'SKT-105E 02', vin: 'HRZX2431013329', type: '宽体自卸车', group: '矿山 D 组', online: 1, run: '怠速', time: '2026-11-12 04:52:36', asset: 'SKT105E-002', attr: '自有', project: 'Morowali', org: 'TIRAN INDO' },
+    { no: 'SY215-01',   vin: 'HRZX2431013330', type: '挖掘机', group: '土方 C 组',     online: 1, run: '作业', time: '2026-11-12 05:10:03', asset: 'SY215-001',  attr: '自有', project: 'Lameruru', org: 'TIRAN INDO' },
+    { no: 'SD16-01',    vin: 'HRZX2431013332', type: '推土机', online: 1, run: '作业', time: '2026-11-12 05:06:18', asset: 'SD16-001', attr: '自有', project: 'Lameruru', org: 'TIRAN INDO' },
+    { no: 'SD16-02',    vin: 'HRZX2431013333', type: '推土机', online: 0, run: '离线', time: '2026-11-11 19:31:44', asset: 'SD16-002', attr: '租赁', project: 'Morowali', org: 'TIRAN INDO' },
+    { no: 'SCC-800A 01', vin: 'HRZX2431013331', type: '履带吊', group: '',     online: 0, run: '离线', time: '2026-11-10 18:22:57', asset: 'SCC800A-01', attr: '租赁', project: 'Morowali', org: 'TIRAN INDO' }
+];
+
+let page = 1;
+const SIZE = 10;
+let kw = '', fType = '', fRun = '', fGroup = '';
+let GROUPS = ['运输 A 组', '运输 B 组', '土方 C 组', '矿山 D 组'];
+
+const RUN_DOT = { '行驶': 'dot-blue', '怠速': 'dot-orange', '作业': 'dot-green', '离线': 'dot-grey' };
+
+function esc(v) {
+    return String(v == null ? '' : v).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+}
+
+const TRUCK_ICON = '<svg width="26" height="18" viewBox="0 0 26 18" fill="currentColor"><rect x="1" y="3" width="13" height="9" rx="1"/><path d="M15 5h4l4 4v3h-8z"/><circle cx="6" cy="14" r="2.2"/><circle cx="19" cy="14" r="2.2"/></svg>';
+
+function filtered() {
+    const k = kw.trim().toLowerCase();
+    return DEVICES.filter(d => {
+        if (fType && d.type !== fType) return false;
+        if (fRun && d.run !== fRun) return false;
+        if (fGroup) {
+            if (fGroup === '__none__') { if (d.group) return false; }
+            else if (d.group !== fGroup) return false;
+        }
+        if (k) {
+            const hay = [d.no, d.vin, d.asset, d.project, d.group].join(' ').toLowerCase();
+            if (hay.indexOf(k) < 0) return false;
+        }
+        return true;
+    });
+}
+
+function render() {
+    const list = filtered();
+    const pages = Math.max(1, Math.ceil(list.length / SIZE));
+    if (page > pages) page = pages;
+    const slice = list.slice((page - 1) * SIZE, page * SIZE);
+
+    document.getElementById('tbody').innerHTML = slice.map(d => {
+        const online = d.online
+            ? '<span class="dot dot-green"></span>在线'
+            : '<span class="dot dot-grey"></span>离线';
+        const run = '<span class="dot ' + (RUN_DOT[d.run] || 'dot-grey') + '"></span>' + esc(d.run);
+        return '<tr>'
+            + '<td><div class="dev-cell"><div class="dev-thumb">' + TRUCK_ICON + '</div>'
+            + '<div class="dev-meta"><div class="dev-no">' + esc(d.no) + '</div>'
+            + '<div class="dev-vin">' + esc(d.vin) + '</div></div></div></td>'
+            + '<td>' + esc(d.type) + '</td>'
+            + '<td>' + (d.group ? '<span class="group-tag">' + esc(d.group) + '</span>' : '<span class="group-tag none">未分组</span>') + '</td>'
+            + '<td>' + online + '</td>'
+            + '<td>' + run + '</td>'
+            + '<td class="muted">' + esc(d.time) + '</td>'
+            + '<td>' + esc(d.asset) + '</td>'
+            + '<td>' + esc(d.attr) + '</td>'
+            + '<td>' + esc(d.project) + '</td>'
+            + '<td>' + esc(d.org) + '</td>'
+            + '<td><a class="op-link" onclick="toast(\'打开 ' + esc(d.no) + ' 详情\')">详情</a>'
+            + '<a class="op-link" onclick="toast(\'解绑 ' + esc(d.no) + '\')">解绑</a></td>'
+            + '</tr>';
+    }).join('');
+
+    document.getElementById('range').textContent = '共 ' + list.length + ' 条';
+    renderPager(list.length, pages);
+}
+
+function renderPager(total, pages) {
+    const box = document.getElementById('pages');
+    if (pages <= 1) { box.innerHTML = ''; return; }
+    const btn = (label, p, on, dis) => '<button class="pg-btn' + (on ? ' on' : '') + '"' + (dis ? ' disabled' : '')
+        + ' onclick="goPage(' + p + ')">' + label + '</button>';
+    const nums = [1, pages];
+    for (let n = page - 1; n <= page + 1; n++) if (n >= 1 && n <= pages) nums.push(n);
+    const uniq = nums.filter((v, i, a) => a.indexOf(v) === i).sort((a, b) => a - b);
+    const win = uniq.map((n, i) => (i && n - uniq[i - 1] > 1 ? '<span class="muted">…</span>' : '') + btn(n, n, n === page, false)).join('');
+    box.innerHTML = btn('‹', page - 1, false, page === 1) + win + btn('›', page + 1, false, page === pages);
+}
+
+function goPage(p) { page = p; render(); }
+
+function toast(msg) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.style.opacity = 1;
+    clearTimeout(el._t);
+    el._t = setTimeout(() => { el.style.opacity = 0; }, 1800);
+}
+
+/* ---------- 设备分组 ---------- */
+let editMode = 'create';     /* create | edit */
+let editOldName = '';        /* 编辑时的原分组名 */
+let pickSet = new Set();
+let delTarget = '';
+
+function renderGroupSelect() {
+    const sel = document.getElementById('fGroup');
+    sel.innerHTML = '<option value="">设备分组</option>'
+        + '<option value="__none__">未分组</option>'
+        + GROUPS.map(function (g) { return '<option value="' + esc(g) + '">' + esc(g) + '</option>'; }).join('');
+    sel.value = fGroup;
+}
+
+function renderGroupList() {
+    const box = document.getElementById('groupList');
+    if (!GROUPS.length) {
+        box.innerHTML = '<div class="pick-empty">还没有分组，点下方「＋ 新建分组」开始</div>';
+        return;
+    }
+    box.innerHTML = GROUPS.map(function (g) {
+        const cnt = DEVICES.filter(function (d) { return d.group === g; }).length;
+        return '<div class="group-row" onclick="openGroupEditor(\'' + esc(g) + '\')">'
+            + '<div><span class="g-name">' + esc(g) + '</span>'
+            + '<span class="g-cnt">' + cnt + ' 台设备</span></div>'
+            + '<span style="display:inline-flex;gap:14px;align-items:center;">'
+            + '<span class="op-link" onclick="event.stopPropagation();openGroupEditor(\'' + esc(g) + '\')">编辑</span>'
+            + '<span class="g-del" onclick="event.stopPropagation();openDeleteConfirm(\'' + esc(g) + '\')">删除</span>'
+            + '</span></div>';
+    }).join('');
+}
+
+function openGroupModal() {
+    renderGroupList();
+    backToList();
+    document.getElementById('groupMask').classList.add('show');
+}
+
+function closeGroupModal() {
+    document.getElementById('groupMask').classList.remove('show');
+    backToList();
+}
+
+function backToList() {
+    showView('groupView');
+    document.getElementById('groupModalTitle').textContent = '设备分组管理';
+    editOldName = '';
+    delTarget = '';
+}
+
+function showView(id) {
+    const modal = document.querySelector('#groupMask .modal');
+    if (modal) modal.classList.toggle('modal-narrow', id === 'delView');
+    ['groupView', 'editView', 'delView'].forEach(function (v) {
+        const el = document.getElementById(v);
+        if (el) el.style.display = (v === id) ? '' : 'none';
+    });
+    document.getElementById('listCloseBtn').style.display = (id === 'groupView') ? '' : 'none';
+    document.getElementById('editCancelBtn').style.display = (id === 'editView') ? '' : 'none';
+    document.getElementById('editSaveBtn').style.display = (id === 'editView') ? '' : 'none';
+    document.getElementById('delCancelBtn').style.display = (id === 'delView') ? '' : 'none';
+    document.getElementById('delConfirmBtn').style.display = (id === 'delView') ? '' : 'none';
+}
+
+/* ---- 新建 / 编辑分组 ---- */
+function openGroupEditor(g) {
+    editOldName = g || '';
+    editMode = g ? 'edit' : 'create';
+    const inp = document.getElementById('groupNameInput');
+    inp.value = g || '';
+    pickSet = new Set(g ? DEVICES.filter(function (d) { return d.group === g; }).map(function (d) { return d.no; }) : []);
+    const kwInp = document.getElementById('pickKw');
+    if (kwInp) kwInp.value = '';
+    renderPickTypeSelect();           /* 产品类型下拉：默认全部产品类型 */
+    const onlyBox = document.getElementById('pickOnlyNone');
+    if (onlyBox) onlyBox.checked = false;   /* 默认不勾选 = 全部设备 */
+    document.getElementById('groupModalTitle').textContent = g ? '编辑分组' : '新建分组';
+    showView('editView');
+    renderPickList();
+    setTimeout(function () { inp.focus(); inp.select(); }, 50);
+}
+
+function pickVisible() {
+    const inp = document.getElementById('pickKw');
+    const kwp = (inp && inp.value ? inp.value : '').trim().toLowerCase();
+    const onlyEl = document.getElementById('pickOnlyNone');
+    const only = !!(onlyEl && onlyEl.checked);
+    const typeEl = document.getElementById('pickType');
+    const onlyType = typeEl && typeEl.value ? typeEl.value : '';
+    return DEVICES.filter(function (d) {
+        if (only && d.group && d.group !== editOldName) return false;
+        if (onlyType && d.type !== onlyType) return false;
+        if (kwp) {
+            const hay = (d.no + ' ' + d.vin).toLowerCase();
+            if (hay.indexOf(kwp) < 0) return false;
+        }
+        return true;
+    });
+}
+
+function renderPickTypeSelect() {
+    const sel = document.getElementById('pickType');
+    if (!sel) return;
+    const types = DEVICES.map(function (d) { return d.type; })
+        .filter(function (v, i, a) { return v && a.indexOf(v) === i; });
+    sel.innerHTML = '<option value="">全部产品类型</option>'
+        + types.map(function (t) { return '<option value="' + esc(t) + '">' + esc(t) + '</option>'; }).join('');
+    sel.value = '';
+}
+
+function renderPickList() {
+    const list = pickVisible();
+    const box = document.getElementById('pickList');
+    if (!list.length) {
+        box.innerHTML = '<div class="pick-empty">没有匹配的设备</div>';
+    } else {
+        box.innerHTML = list.map(function (d) {
+            const checked = pickSet.has(d.no);
+            /* 只标注「当前所在组」；其它分组的设备不再显示归属标签 */
+            const tag = (d.group && d.group === editOldName) ? '<span class="pick-cur">当前所在组</span>' : '';
+            return '<label class="pick-row">'
+                + '<input type="checkbox" data-no="' + esc(d.no) + '"' + (checked ? ' checked' : '') + ' onchange="togglePick(this)">'
+                + '<span class="pick-main">'
+                + '<span class="pick-no">' + esc(d.no) + '</span>'
+                + '<span class="pick-type">' + esc(d.type) + '</span>'
+                + '<span class="pick-vin">' + esc(d.vin) + '</span>'
+                + '</span>'
+                + tag + '</label>';
+        }).join('');
+    }
+    updatePickCount();
+}
+
+function updatePickCount() {
+    const cnt = document.getElementById('pickCount');
+    if (cnt) cnt.textContent = '已选 ' + pickSet.size + ' / 共 ' + DEVICES.length + ' 台';
+}
+
+function togglePick(el) {
+    const no = el.getAttribute('data-no');
+    if (el.checked) pickSet.add(no); else pickSet.delete(no);
+    updatePickCount();
+}
+
+function pickAll(on) {
+    pickVisible().forEach(function (d) {
+        if (on) pickSet.add(d.no); else pickSet.delete(d.no);
+    });
+    renderPickList();
+}
+
+function saveGroupEditor() {
+    const name = (document.getElementById('groupNameInput').value || '').trim();
+    if (!name) { toast('请填写分组名称'); return; }
+    const dup = GROUPS.filter(function (g) { return g === name && g !== editOldName; });
+    if (dup.length) { toast('分组名称已存在：' + name); return; }
+
+    if (editMode === 'create') {
+        GROUPS.push(name);
+    } else if (editOldName && editOldName !== name) {
+        GROUPS = GROUPS.map(function (g) { return g === editOldName ? name : g; });
+        DEVICES.forEach(function (d) { if (d.group === editOldName) d.group = name; });
+        if (fGroup === editOldName) fGroup = name;
+    }
+
+    /* 应用设备归属：勾选归入本组，取消则移出本组 */
+    let movedIn = 0, movedOut = 0;
+    DEVICES.forEach(function (d) {
+        const want = pickSet.has(d.no);
+        if (want) {
+            if (d.group !== name) { d.group = name; movedIn++; }
+        } else if (d.group === name) {
+            d.group = '';
+            movedOut++;
+        }
+    });
+
+    if (fGroup && GROUPS.indexOf(fGroup) < 0 && fGroup !== '__none__') fGroup = '';
+    render();
+    renderGroupSelect();
+    renderGroupList();
+    backToList();
+    toast((editMode === 'create' ? '已新建分组「' + name + '」' : '分组已更新')
+        + '：加入 ' + movedIn + ' 台' + (movedOut ? '，移出 ' + movedOut + ' 台' : ''));
+}
+
+/* ---- 删除分组（二次确认弹窗） ---- */
+function openDeleteConfirm(g) {
+    delTarget = g;
+    const cnt = DEVICES.filter(function (d) { return d.group === g; }).length;
+    document.getElementById('delText').innerHTML =
+        '删除分组「<b>' + esc(g) + '</b>」后，该分组下的 <b>' + cnt + '</b> 台设备将转为「未分组」，且不可恢复。';
+    document.getElementById('groupModalTitle').textContent = '删除分组';
+    showView('delView');
+}
+
+function doRemoveGroup() {
+    const g = delTarget;
+    if (!g) return;
+    const cnt = DEVICES.filter(function (d) { return d.group === g; }).length;
+    GROUPS = GROUPS.filter(function (x) { return x !== g; });
+    DEVICES.forEach(function (d) { if (d.group === g) d.group = ''; });
+    if (fGroup === g) fGroup = '';
+    delTarget = '';
+    render();
+    renderGroupSelect();
+    renderGroupList();
+    backToList();
+    toast('已删除分组「' + g + '」，' + cnt + ' 台设备转为未分组');
+}
+
+document.getElementById('kw').addEventListener('input', function () { kw = this.value; page = 1; render(); });
+document.getElementById('fType').addEventListener('change', function () { fType = this.value; page = 1; render(); });
+document.getElementById('fRun').addEventListener('change', function () { fRun = this.value; page = 1; render(); });
+document.getElementById('fGroup').addEventListener('change', function () { fGroup = this.value; page = 1; render(); });
+const groupNameInput = document.getElementById('groupNameInput');
+if (groupNameInput) {
+    groupNameInput.addEventListener('keydown', function (e) {
+        if (e.key === 'Enter') { e.preventDefault(); saveGroupEditor(); }
+    });
+}
+
+renderGroupSelect();
+render();
+
+document.addEventListener('keydown', function (e) {
+    if (e.key !== 'Escape') return;
+    const mask = document.getElementById('groupMask');
+    if (!mask || !mask.classList.contains('show')) return;
+    const listShown = document.getElementById('groupView').style.display !== 'none';
+    if (listShown) closeGroupModal(); else backToList();
+});
+</script>
+</body>
+</html>

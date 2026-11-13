@@ -1191,6 +1191,16 @@
 
         .pv-note { margin-left: auto; font-size: 11px; color: #b0b5c0; }
 
+        /* 预览演示数据提示条 */
+        .pv-demo-tip {
+            display: flex; align-items: flex-start; gap: 8px;
+            margin: 0 0 12px; padding: 10px 12px; border-radius: 8px;
+            background: #fff8e6; border: 1px solid #ffe2a8; color: #8a5a00;
+            font-size: 12.5px; line-height: 1.6;
+        }
+        .pv-demo-tip svg { flex: 0 0 15px; margin-top: 1px; color: #d99300; }
+        .pv-demo-tip b { color: #7a4d00; }
+
         .pv-body { padding: 16px 24px 20px; }
 
         .tag {
@@ -1742,7 +1752,7 @@
             <aside class="sidebar">
                 <ul class="sidebar-menu">
                     <li class="sidebar-item">
-                        <a class="sidebar-link">
+                        <a class="sidebar-link" href="设备管理.html">
                             <span class="sidebar-icon">
                                 <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect><rect x="14" y="14" width="7" height="7"></rect></svg>
                             </span>
@@ -2092,23 +2102,150 @@
         // ====================================================================
         const PERIOD = '2026-09-01 ~ 2026-09-30';
         const FLEET_DEVICES = ['F3S01395', 'F3S01402', 'F3S01418'];
-        const FLEET_FACTORS = [1, 0.88, 0.71];
+        /* ===== 预览示例数据规则（2026-11-12）
+           · 数值来源：IOT 指标配置表「Sheet1」的单位区间（最小值 ~ 最大值），随机取
+           · 统计周期：最近 3 天，每天一行
+           · 固定列：统计周期 / 设备机型 / 设备编号 / 设备自编号
+           · 演示设备：燃油设备（宽体自卸车 燃油版） */
 
-        function cellText(rep, ci, v, factor) {
-            if (typeof v !== 'number') return v;
-            const x = v * factor;
-            return (rep.intCols || []).indexOf(ci) >= 0 ? String(Math.round(x)) : x.toFixed(1);
+        /* 单位 → [最小值, 最大值, 精度]（精度来自 IOT 表「指标单位示例数据」） */
+        const UNIT_RANGE = {
+            'h':          [4, 10, 1],
+            'km':         [52, 156, 0],
+            'kwh':        [250, 500, 0],
+            'kwh/100km':  [100, 150, 0],
+            'kwh/h':      [15, 35, 2],
+            'kwh/pc':     [3, 8, 2],
+            'l':          [78, 260, 0],
+            'l/100km':    [46, 72, 0],
+            'l/h':        [16, 32, 2],
+            'l/pc':       [4, 10, 2],
+            'm':          [260, 1040, 0],
+            'm³':         [78, 234, 0],
+            'm3':         [78, 234, 0],
+            'trips':      [8, 20, 0],
+            '次':         [13, 39, 0],
+            'kg':         [3900, 10400, 0],
+            'v':          [500, 700, 0],
+            '%':          [0, 100, 1],
+            '℃':          [20, 95, 1],
+            'mpa':        [0.5, 30, 2],
+            'rpm':        [600, 2200, 0],
+            'km/h':       [5, 40, 1],
+            'min':        [1, 60, 0],
+            's':          [1, 60, 0],
+            'kw':         [30, 320, 1],
+            '天':         [1, 30, 0]
+        };
+
+        /* 拿不到实测值的指标（经纬度等）：不展示数值，统一输出 — */
+        const NO_DATA_UNITS = ['°', '度', 'deg'];
+        const NO_DATA_KEYWORDS = ['经度', '纬度', '定位', '坐标', 'longitude', 'latitude'];
+
+        /* 演示设备（燃油） */
+        const DEMO_EQUIP = {
+            model: '宽体自卸车（燃油）',
+            product: 'SKT105E',
+            /* 设备编号（系统）→ 设备自编号（用户自定义） */
+            selfNo: {
+                'SY4101A969': '矿卡-001',
+                'SY4101B972': '矿卡-002',
+                'SY4102C988': '矿卡-003'
+            },
+            single: ['SY4101A969'],
+            fleet: ['SY4101A969', 'SY4101B972', 'SY4102C988']
+        };
+
+        /* 从指标名里取单位：如「怠速油耗(L)」「小时电耗（kWh/h）」 */
+        function unitOfMetric(name) {
+            const m = String(name || '').match(/[（(]([^（）()]+)[）)]\s*$/);
+            const u = m ? m[1].trim() : '';
+            return u;
+        }
+
+        function rangeKey(u) {
+            let k = String(u || '').toLowerCase().replace(/\s/g, '');
+            if (UNIT_RANGE[k]) return k;
+            if (k.indexOf('kwh') === 0) return 'kwh';
+            if (k.indexOf('l/') === 0 && k !== 'l/h') return k;
+            if (k.indexOf('l') === 0) return 'l';
+            if (k.indexOf('km') === 0) return 'km';
+            return '';
+        }
+
+        /* 是否属于「拿不到」的指标（经纬度 / 坐标 / 定位） */
+        function isNoDataMetric(metricName) {
+            const u = String(unitOfMetric(metricName) || '').trim();
+            if (NO_DATA_UNITS.indexOf(u) >= 0) return true;
+            const n = String(metricName || '').toLowerCase();
+            return NO_DATA_KEYWORDS.some(function (k) { return n.indexOf(k.toLowerCase()) >= 0; });
+        }
+
+        /* 按单位区间随机取值；精度 0=整数、1=1位、2=2位；拿不到的返回 — */
+        function randomByUnit(unit, metricName) {
+            if (isNoDataMetric(metricName)) return '—';
+            const k = rangeKey(unit);
+            if (!k) return '—';                       /* 没有可用区间的单位也不编数 */
+            const r = UNIT_RANGE[k];
+            const v = r[0] + Math.random() * (r[1] - r[0]);
+            const dec = r[2] || 0;
+            return dec === 0 ? String(Math.round(v)) : v.toFixed(dec);
+        }
+
+        /* 补足用的通用可出数字段（当原指标大多拿不到值时用） */
+        const FILLER_METRICS = [
+            '工时(h)', '里程(km)', '油耗(L)', '作业量(m³)',
+            '行驶里程(km)', '怠速油耗(L)', '工作油耗(L)', '运行油耗(L)',
+            '充电电量(kWh)', '作业次数(次)'
+        ];
+
+        /* 指标是否可生成数值（有单位区间、且不属于拿不到的类型） */
+        function isUsableMetric(name) {
+            if (isNoDataMetric(name)) return false;
+            return !!rangeKey(unitOfMetric(name));
+        }
+
+        /* 预览展示的指标列：保留可出数的，不足 3 个时用通用字段补足 */
+        function previewMetrics(rep) {
+            const src = rep.metrics || [];
+            const keep = src.filter(isUsableMetric);
+            if (keep.length >= 3 || keep.length === src.length) return keep;
+            const out = keep.slice();
+            FILLER_METRICS.forEach(function (m) {
+                if (out.length >= 3) return;
+                if (src.indexOf(m) >= 0) return;
+                if (out.indexOf(m) >= 0) return;
+                out.push(m);
+            });
+            return out.length ? out : FILLER_METRICS.slice(0, 3);
+        }
+
+        /* 最近 3 天（含今天），格式 M/D */
+        function lastThreeDays() {
+            const out = [];
+            const today = new Date();
+            for (let i = 2; i >= 0; i--) {
+                const d = new Date(today.getFullYear(), today.getMonth(), today.getDate() - i);
+                out.push((d.getMonth() + 1) + '/' + d.getDate());
+            }
+            return out;
         }
 
         function buildTable(rep, view) {
-            const cols = view === 'single'
-                ? ['统计周期', '设备机型', '设备编号'].concat(rep.metrics)
-                : ['统计周期', '设备编号'].concat(rep.metrics);
-            const rows = view === 'single'
-                ? [[PERIOD, '挖掘机 SY215', 'F3S01395'].concat(rep.vals.map(function (v, i) { return cellText(rep, i, v, 1); }))]
-                : FLEET_DEVICES.map(function (id, k) {
-                      return [PERIOD, id].concat(rep.vals.map(function (v, i) { return cellText(rep, i, v, FLEET_FACTORS[k]); }));
-                  });
+            const metrics = previewMetrics(rep);
+            const cols = ['统计周期', '设备机型', '设备编号', '设备自编号'].concat(metrics);
+            /* 统计周期按时间倒序（最新在上） */
+            const days = lastThreeDays().slice().reverse();
+            const units = metrics.map(unitOfMetric);
+            const devices = (view === 'single') ? DEMO_EQUIP.single : DEMO_EQUIP.fleet;
+
+            const rows = [];
+            devices.forEach(function (no) {
+                days.forEach(function (day) {
+                    const vals = units.map(function (u, i) { return randomByUnit(u, metrics[i]); });
+                    rows.push([day, DEMO_EQUIP.model, no, (DEMO_EQUIP.selfNo[no] || '—')].concat(vals));
+                });
+            });
             return { cols: cols, rows: rows };
         }
 
@@ -2459,7 +2596,7 @@
             t.rows.forEach(function (row) {
                 tableHTML += '<tr>';
                 row.forEach(function (cell, ci) {
-                    tableHTML += ci <= 2 ? '<td><span class="col-asset">' + cell + '</span></td>' : '<td>' + cell + '</td>';
+                    tableHTML += ci <= 3 ? '<td><span class="col-asset">' + cell + '</span></td>' : '<td>' + cell + '</td>';
                 });
                 tableHTML += '</tr>';
             });
@@ -2484,11 +2621,17 @@
                 + '<span class="pv-divider"></span>'
                 + '<div class="pv-group"><span class="pv-label">格式</span>'
                 + '<div class="pv-switch">' + segFmt('table', '表格', iconTable) + segFmt('pdf', 'PDF', iconPdf) + '</div></div>'
-                + '<span class="pv-note">示例数据，仅示意展示效果</span>'
+                + '</div>';
+
+            const demoTip = '<div class="pv-demo-tip">'
+                + '<svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">'
+                + '<circle cx="12" cy="12" r="9"/><line x1="12" y1="8" x2="12" y2="13"/><circle cx="12" cy="16.5" r="0.6" fill="currentColor"/></svg>'
+                + '<div><b>以下均为演示数据</b>：仅用于展示报表字段与版式，不代表真实设备数据。</div>'
                 + '</div>';
 
             previewTableContainer.innerHTML = pvBarHTML
                 + '<div class="pv-body">'
+                + demoTip
                 + (previewState.format === 'pdf' ? renderPdfPreview(rep, scopedView(rep)) : tableHTML)
                 + '</div>';
 

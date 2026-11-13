@@ -1,0 +1,832 @@
+<!DOCTYPE html>
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>指标映射关系（v3.0）</title>
+<style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "PingFang SC", "Microsoft YaHei", sans-serif; background-color: #f4f5f7; color: #333; }
+    /* 侧边栏 */
+    .sidebar { width: 210px; background: #1E3255; border-right: 1px solid rgba(255,255,255,.06); display: flex; flex-direction: column; flex-shrink: 0; overflow-y: auto; min-height: 100vh; }
+    .sidebar-menu { list-style: none; padding: 8px 0; }
+    .sidebar-item { position: relative; }
+    .sidebar-link { display: flex; align-items: center; gap: 10px; padding: 10px 16px; font-size: 14px; color: rgba(255,255,255,.75); text-decoration: none; transition: all .2s; cursor: pointer; }
+    .sidebar-link:hover { color: #fff; background: rgba(255,255,255,.07); }
+    .sidebar-item.active > .sidebar-link, .sidebar-link.active { background: linear-gradient(90deg, rgba(41,190,206,0) 0%, #29BECE 100%); color: #fff; font-weight: 600; box-shadow: inset 3px 0 0 #29BECE; }
+    .sidebar-submenu { list-style: none; padding: 0; }
+    .sidebar-submenu .sidebar-link { padding-left: 42px; font-size: 13px; }
+    .sidebar-icon { width: 18px; height: 18px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+    .layout { display: flex; min-height: 100vh; }
+    .main-content { flex: 1; min-width: 0; overflow-y: auto; padding: 24px; background: #f4f5f7; }
+    .page-header { display: flex; align-items: center; justify-content: space-between; margin-bottom: 14px; }
+    .page-header h2 { margin: 0; font-size: 17px; font-weight: 600; color: #161a2e; }
+    .page-header .breadcrumb { font-size: 12px; color: #999; }
+    .page-header .breadcrumb span { color: #333; }
+    .card { background: #fff; border-radius: 12px; box-shadow: 0 1px 3px rgba(22,26,46,.05); }
+    .card-head { display: flex; align-items: center; justify-content: space-between; gap: 12px; padding: 16px 18px; border-bottom: 1px solid #eff0f3; flex-wrap: wrap; }
+    .card-title { font-size: 14px; font-weight: 600; }
+    .card-title span { font-size: 12px; font-weight: 400; color: #8b90a0; margin-left: 8px; }
+    .btn { height: 32px; padding: 0 14px; border-radius: 8px; border: 1px solid transparent; font-family: inherit; font-size: 13px; cursor: pointer; }
+    .btn.ghost { background: #f4f5f7; color: #5a6472; border-color: #e6e8ee; }
+    .btn.ghost:hover { background: #ebedf0; }
+    .card-head .btn.primary { height: 34px; padding: 0 16px; border-radius: 8px; font-size: 13px; cursor: pointer; background: #24839B; color: #fff; border: 1px solid #29BECE; font-weight: 600; transition: background .16s, border-color .16s, transform .1s; }
+    .card-head .btn.primary:hover { background: #226884; border-color: #226884; }
+    .card-head .btn.primary:active { transform: scale(.98); }
+    .btn.link { background: transparent; border: none; color: #24839B; padding: 0 6px; height: auto; font-size: 13px; cursor: pointer; }
+    .btn.link:hover { text-decoration: underline; }
+    .btn.link.grey { color: #5a6472; }
+
+    /* 工具栏 */
+    .toolbar { display: flex; align-items: center; gap: 10px; padding: 12px 18px; border-bottom: 1px solid #f2f3f5; flex-wrap: wrap; }
+    .search { flex: 1; min-width: 220px; display: flex; align-items: center; gap: 8px; height: 34px; padding: 0 10px; border: 1px solid #e6e8ee; border-radius: 8px; background: #fff; color: #9aa0ad; }
+    .search:focus-within { border-color: #29BECE; }
+    .search input { flex: 1; min-width: 0; border: none; outline: none; font-family: inherit; font-size: 13px; color: #161a2e; background: transparent; }
+    .search input::placeholder { color: #b8bcc6; }
+    .sel { height: 34px; padding: 0 10px; border: 1px solid #e6e8ee; border-radius: 8px; background: #fff; font-family: inherit; font-size: 13px; color: #5a6472; cursor: pointer; }
+    .sel:focus { outline: none; border-color: #29BECE; }
+
+    /* 表格 */
+    .table-wrap { overflow-x: auto; }
+    table { width: 100%; border-collapse: collapse; table-layout: fixed; }
+    th, td { padding: 11px 14px; text-align: left; border-bottom: 1px solid #f2f3f5; vertical-align: middle; }
+    th { font-size: 12px; color: #8b90a0; font-weight: 500; background: #fafbfc; white-space: nowrap; position: sticky; top: 0; z-index: 2; }
+    td { font-size: 12.5px; color: #2b2f3a; }
+    tbody tr:hover { background: #fcfcfd; }
+    .c-idx { width: 56px; color: #8b90a0; }
+    .c-cat { width: 120px; }
+    .tag { display: inline-block; padding: 2px 8px; border-radius: 999px; font-size: 11.5px; white-space: nowrap; }
+    .tag.grey { background: #f2f3f5; color: #8b90a0; }
+    .tag.blue { background: #eef7fa; color: #24839B; }
+    .tag.orange { background: #fff7e6; color: #b7791f; }
+    .mono { font-family: Menlo, Consolas, monospace; font-size: 11.5px; color: #4e5969; }
+    .ellip { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: block; }
+    td.clip, td.clip span, td.clip b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    /* 列宽（百分比，合计 100%，长内容省略不撑破页面） */
+    th:nth-child(1), td:nth-child(1) { width: 3%; }
+    th:nth-child(2), td:nth-child(2) { width: 4%; }
+    th:nth-child(3), td:nth-child(3) { width: 9%; }
+    th:nth-child(4), td:nth-child(4) { width: 6%; }
+    th:nth-child(5), td:nth-child(5) { width: 9%; }
+    th:nth-child(6), td:nth-child(6) { width: 10%; }
+    th:nth-child(7), td:nth-child(7) { width: 9%; }
+    th:nth-child(8), td:nth-child(8) { width: 4%; }
+    th:nth-child(9), td:nth-child(9) { width: 6%; }
+    th:nth-child(10), td:nth-child(10) { width: 5%; }
+    th:nth-child(11), td:nth-child(11) { width: 8%; }
+    th:nth-child(12), td:nth-child(12) { width: 10%; }
+    th:nth-child(13), td:nth-child(13) { width: 8%; }
+    th:nth-child(14), td:nth-child(14) { width: 9%; }
+
+    .mono { font-family: Menlo, Consolas, monospace; font-size: 11.5px; color: #4e5969; }
+    .ellip { max-width: 100%; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; display: block; }
+    td.clip, td.clip span, td.clip b { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+    .empty { padding: 56px 0; text-align: center; color: #8b90a0; font-size: 13px; }
+
+    /* 分页 */
+    .pager { display: flex; align-items: center; justify-content: space-between; gap: 10px; padding: 12px 18px; }
+    .pager .range { font-size: 12.5px; color: #6b7280; font-variant-numeric: tabular-nums; }
+    .pager .pages { display: inline-flex; align-items: center; gap: 8px; }
+    .pg-btn { min-width: 32px; height: 32px; padding: 0 8px; border-radius: 10px; border: 1px solid #e6e8ee; background: #fff; color: #4b5563; font-size: 13px; font-family: inherit; cursor: pointer; font-variant-numeric: tabular-nums; }
+    .pg-btn:hover:not(:disabled):not(.on) { border-color: #c9ced8; color: #161a2e; }
+    .pg-btn.on { background: #161a2e; border-color: #161a2e; color: #fff; font-weight: 600; }
+    .pg-btn:disabled { color: #c8ccd6; border-color: #eef0f3; background: #fbfcfd; cursor: default; }
+    .pg-gap { color: #9aa3b2; font-size: 12.5px; padding: 0 2px; }
+
+    /* 导入弹层 */
+    .mask { position: fixed; inset: 0; background: rgba(22,26,46,.45); display: none; align-items: center; justify-content: center; z-index: 90; }
+    .mask.show { display: flex; }
+    .modal { width: 520px; max-width: calc(100vw - 32px); background: #fff; border-radius: 14px; overflow: hidden; }
+    .modal-head { display: flex; align-items: center; justify-content: space-between; padding: 16px 18px; border-bottom: 1px solid #eff0f3; }
+    .modal-title { font-size: 15px; font-weight: 600; }
+    .modal-close { cursor: pointer; color: #8b90a0; font-size: 16px; }
+    .modal-body { padding: 18px; }
+    .modal-foot { display: flex; justify-content: flex-end; gap: 10px; padding: 14px 18px; border-top: 1px solid #eff0f3; }
+    .drop { border: 1.5px dashed #d7dbe3; border-radius: 12px; padding: 30px 20px; text-align: center; color: #5a6472; cursor: pointer; transition: border-color .16s, background .16s; }
+    .drop:hover, .drop.over { border-color: #24839B; background: #f7fcfd; }
+    .drop .big { font-size: 14px; color: #161a2e; font-weight: 600; margin-bottom: 6px; }
+    .drop .sub { font-size: 12px; color: #8b90a0; line-height: 1.7; }
+    .hint { font-size: 12px; color: #8b90a0; line-height: 1.8; margin-top: 12px; background: #fafbfc; border: 1px solid #f0f2f5; border-radius: 8px; padding: 10px 12px; }
+    .hint b { color: #2b2f3a; }
+    .c-chk { width: 40px; text-align: center; }
+    .c-chk input { width: 14px; height: 14px; cursor: pointer; accent-color: #24839B; }
+    .c-op { width: 118px; white-space: nowrap; }
+    /* 表单（编辑弹窗） */
+    .modal-md { width: 620px; }
+    #editFields { display: grid; grid-template-columns: 1fr 1fr; column-gap: 16px; }
+    #editFields .f-item { min-width: 0; }
+    #editFields .f-item.f-full { grid-column: 1 / -1; }
+    .f-label { display: block; font-size: 12.5px; color: #5a6472; margin: 14px 0 6px; }
+    .f-label i { color: #E60012; font-style: normal; }
+    .f-input { width: 100%; height: 36px; border: 1px solid #e6e8ee; border-radius: 8px; padding: 0 10px; font-family: inherit; font-size: 13px; color: #161a2e; background: #fff; }
+    .f-input:focus { outline: none; border-color: #29BECE; box-shadow: 0 0 0 3px rgba(41,190,206,.08); }
+    .f-input:disabled { background: #f7f8fa; color: #8b90a0; }
+    textarea.f-input { height: 72px; padding: 8px 10px; resize: vertical; line-height: 1.65; white-space: pre-wrap; }
+    .btn.danger-link { background: transparent; border: none; color: #E60012; padding: 0 6px; height: auto; font-size: 13px; cursor: pointer; }
+    .btn.danger-link:hover { text-decoration: underline; }
+    .btn.del { height: 34px; padding: 0 14px; border-radius: 8px; border: 1px solid #f4c4c8; background: #fff5f5; color: #E60012; font-family: inherit; font-size: 13px; cursor: pointer; }
+    .btn.del:hover { background: #ffecee; border-color: #e8a4ab; }
+    .btn.del:disabled { color: #c8ccd6; border-color: #eef0f3; background: #fbfcfd; cursor: default; }
+    .btn.danger { background: #E60012; color: #fff; border: 1px solid #E60012; font-weight: 600; height: 34px; padding: 0 18px; border-radius: 8px; cursor: pointer; font-size: 13px; }
+    .btn.danger:hover { background: #cc0010; }
+    .modal-sm { width: 420px; }
+    .warn-ico { flex: 0 0 22px; width: 22px; height: 22px; border-radius: 50%; background: #fff1f0; color: #E60012; font-weight: 700; font-size: 13px; display: flex; align-items: center; justify-content: center; margin-top: 1px; }
+    .toast { position: fixed; left: 50%; top: 72px; transform: translateX(-50%); background: rgba(22,26,46,.9); color: #fff; font-size: 13px; padding: 9px 16px; border-radius: 8px; opacity: 0; transition: opacity .2s; z-index: 999; }
+    .toast.show { opacity: 1; }
+</style>
+</head>
+<body>
+<div class="layout">
+    <aside class="sidebar">
+        <ul class="sidebar-menu">
+            <li class="sidebar-item">
+                <a class="sidebar-link">
+                    <span class="sidebar-icon">
+                        <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><circle cx="12" cy="12" r="3"/><path d="M19.4 15a1.65 1.65 0 0 0 .33 1.82l.06.06a2 2 0 0 1 0 2.83 2 2 0 0 1-2.83 0l-.06-.06a1.65 1.65 0 0 0-1.82-.33 1.65 1.65 0 0 0-1 1.51V21a2 2 0 0 1-2 2 2 2 0 0 1-2-2v-.09A1.65 1.65 0 0 0 9 19.4a1.65 1.65 0 0 0-1.82.33l-.06.06a2 2 0 0 1-2.83 0 2 2 0 0 1 0-2.83l.06-.06A1.65 1.65 0 0 0 4.68 15a1.65 1.65 0 0 0-1.51-1H3a2 2 0 0 1-2-2 2 2 0 0 1 2-2h.09A1.65 1.65 0 0 0 4.6 9a1.65 1.65 0 0 0-.33-1.82l-.06-.06a2 2 0 0 1 0-2.83 2 2 0 0 1 2.83 0l.06.06A1.65 1.65 0 0 0 9 4.68a1.65 1.65 0 0 0 1-1.51V3a2 2 0 0 1 2-2 2 2 0 0 1 2 2v.09a1.65 1.65 0 0 0 1 1.51 1.65 1.65 0 0 0 1.82-.33l.06-.06a2 2 0 0 1 2.83 0 2 2 0 0 1 0 2.83l-.06.06a1.65 1.65 0 0 0-.33 1.82V9a1.65 1.65 0 0 0 1.51 1H21a2 2 0 0 1 2 2 2 2 0 0 1-2 2h-.09a1.65 1.65 0 0 0-1.51 1z"/></svg>
+                    </span>
+                    机群报表订阅
+                </a>
+                <ul class="sidebar-submenu">
+                    <li class="sidebar-item"><a class="sidebar-link" href="机群邮件设置.html">机群邮件设置</a></li>
+                    <li class="sidebar-item"><a class="sidebar-link" href="机群报表配置.html">机群报表配置</a></li>
+                    <li class="sidebar-item"><a class="sidebar-link" href="机群订阅记录.html">机群订阅记录</a></li>
+                    <li class="sidebar-item"><a class="sidebar-link" href="机群需求反馈.html">机群需求反馈</a></li>
+                    <li class="sidebar-item"><a class="sidebar-link active">指标映射关系</a></li>
+                </ul>
+            </li>
+        </ul>
+    </aside>
+
+    <main class="main-content">
+        <div class="card">
+            <div class="card-head">
+                <div class="card-title">指标映射</div>
+                <div style="display:flex;gap:8px;flex-wrap:wrap;">
+                    <button class="btn ghost" onclick="downloadTemplate()">下载模板</button>
+                    <button class="btn ghost" onclick="exportCsv()">导出</button>
+                    <button class="btn primary" onclick="openCreate()">＋ 新增映射</button>
+                    <button class="btn ghost" onclick="openImport()">＋ 导入表格</button>
+                </div>
+            </div>
+
+            <div class="toolbar">
+                <select class="sel" id="fField" style="flex:0 0 auto;">
+                    <option value="name">映射指标名称</option>
+                    <option value="code">映射指标编码</option>
+                    <option value="codes">字典指标编码（全部）</option>
+                    <option value="raws">IOT原始字段名（全部）</option>
+                    <option value="models">涉及的物模型ID</option>
+                    <option value="pid">主键ID（参考）</option>
+                    <option value="memo">备注</option>
+                    <option value="__all">全部字段</option>
+                </select>
+                <div class="search">
+                    <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round"><circle cx="11" cy="11" r="7"></circle><line x1="16.5" y1="16.5" x2="21" y2="21"></line></svg>
+                    <input type="text" id="kw" placeholder="请输入关键词" />
+                </div>
+                <select class="sel" id="fSrc"><option value="">全部数据来源</option></select>
+                <button class="btn primary" style="height:34px;" onclick="applySearch()">搜索</button>
+                <button class="btn ghost" onclick="resetFilters()">重置</button>
+                <button class="btn del" id="btnBatchDel" disabled onclick="askDelete('batch')">删除选中（0）</button>
+            </div>
+
+            <div class="table-wrap">
+                <table>
+                    <thead>
+                        <tr>
+                            <th class="c-chk"><input type="checkbox" id="chkAll" title="全选本页" /></th>
+                            <th class="c-idx">序号</th>
+                            <th>映射指标名称</th>
+                            <th>字段别名</th>
+                            <th>映射指标编码</th>
+                            <th>字典指标编码（全部）</th>
+                            <th>IOT原始字段名（全部）</th>
+                            <th>映射单位</th>
+                            <th>字典单位（原始写法）</th>
+                            <th>数据来源</th>
+                            <th>主键ID（参考）</th>
+                            <th>涉及的物模型ID</th>
+                            <th>备注</th>
+                            <th class="c-op">操作</th>
+                        </tr>
+                    </thead>
+                    <tbody id="tbody"></tbody>
+                </table>
+            </div>
+            <div id="empty" class="empty" style="display:none;">
+                暂无映射数据，点右上角「＋ 导入表格」上传 Excel / CSV
+            </div>
+            <div class="pager" id="pager"></div>
+        </div>
+    </main>
+</div>
+
+<!-- 导入弹层 -->
+<div class="mask" id="impMask" onclick="closeImport()">
+    <div class="modal" onclick="event.stopPropagation()">
+        <div class="modal-head">
+            <span class="modal-title">导入指标映射表</span>
+            <span class="modal-close" onclick="closeImport()">✕</span>
+        </div>
+        <div class="modal-body">
+            <div class="drop" id="dropZone" onclick="document.getElementById('fileInput').click()">
+                <div class="big">点击选择或拖拽文件到此处</div>
+                <div class="sub">支持 .xlsx / .xls / .csv<br>会自动读取其中名为「指标映射关系」的工作表</div>
+            </div>
+            <input type="file" id="fileInput" accept=".xlsx,.xls,.csv" style="display:none" />
+            <div class="hint">
+                <b>表头要求</b>（顺序不限，按名称匹配）：<br>
+                序号 / 映射指标名称 / 字段别名 / 映射指标编码 / 字典指标编码（全部） / IOT原始字段名（全部） / 映射单位 / 字典单位（原始写法） / 数据来源 / 主键ID（参考） / 涉及的物模型ID / 备注
+            </div>
+        </div>
+        <div class="modal-foot">
+            <button class="btn ghost" onclick="closeImport()">取消</button>
+        </div>
+    </div>
+</div>
+
+<!-- 编辑单条映射 -->
+<div class="mask" id="editMask" onclick="closeEdit()">
+    <div class="modal modal-md" onclick="event.stopPropagation()">
+        <div class="modal-head">
+            <span class="modal-title" id="editTitle">编辑指标映射</span>
+            <span class="modal-close" onclick="closeEdit()">✕</span>
+        </div>
+        <div class="modal-body" style="max-height:64vh;overflow:auto;" id="editFields"></div>
+        <div class="modal-foot">
+            <button class="btn ghost" onclick="closeEdit()">取消</button>
+            <button class="btn primary" onclick="saveEdit()">保存</button>
+        </div>
+    </div>
+</div>
+<datalist id="dlCat"></datalist>
+<datalist id="dlSrc"></datalist>
+
+<!-- 删除确认 -->
+<div class="mask" id="delMask" onclick="closeDelete()">
+    <div class="modal modal-sm" onclick="event.stopPropagation()">
+        <div class="modal-head">
+            <span class="modal-title" id="delTitle">删除指标映射</span>
+            <span class="modal-close" onclick="closeDelete()">✕</span>
+        </div>
+        <div class="modal-body" style="padding:20px 18px;">
+            <div style="display:flex;gap:10px;">
+                <div class="warn-ico">!</div>
+                <div>
+                    <div style="font-size:13.5px;color:#161a2e;line-height:1.6;" id="delText"></div>
+                    <div style="font-size:12px;color:#8b90a0;margin-top:6px;">删除后不可恢复，请确认后再操作。</div>
+                </div>
+            </div>
+        </div>
+        <div class="modal-foot">
+            <button class="btn ghost" onclick="closeDelete()">取消</button>
+            <button class="btn danger" onclick="confirmDelete()">删除</button>
+        </div>
+    </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script src="https://cdn.sheetjs.com/xlsx-0.20.3/package/dist/xlsx.full.min.js"></script>
+<script>
+/* ==================== 指标映射关系 ==================== */
+const STORE_KEY = 'mysany_metric_mapping_v1';
+const SHEET_NAME = '指标映射关系';
+
+const COLS = [
+    { key: 'idx',    label: '序号',                aliases: ['序号'] },
+    { key: 'cat',    label: '指标分类',             aliases: ['指标分类', '分类'] },
+    { key: 'name',   label: '映射指标名称',          aliases: ['映射指标名称', '标准指标名称', '指标名称'] },
+    { key: 'alias',  label: '字段别名',             aliases: ['字段别名', '别名'] },
+    { key: 'code',   label: '映射指标编码',          aliases: ['映射指标编码', '标准指标编码', '指标编码'] },
+    { key: 'codes',  label: '字典指标编码（全部）',   aliases: ['字典指标编码（全部）', '组内指标编码（全部）', '指标编码（全部）'] },
+    { key: 'raws',   label: 'IOT原始字段名（全部）', aliases: ['IOT原始字段名（全部）', '原始字段名（全部）', 'IOT原始字段名'] },
+    { key: 'unit',   label: '映射单位',              aliases: ['映射单位', '标准单位', '单位'] },
+    { key: 'units',  label: '字典单位（原始写法）',   aliases: ['字典单位（原始写法）', '组内单位（原始写法）', '单位（原始写法）'] },
+    { key: 'src',    label: '数据来源',              aliases: ['数据来源'] },
+    { key: 'pid',    label: '主键ID（参考）',         aliases: ['主键ID（参考）', '主键ID'] },
+    { key: 'models', label: '涉及的物模型ID',        aliases: ['涉及的物模型ID', '物模型ID'] },
+    { key: 'memo',   label: '备注',                  aliases: ['备注', '说明'] }
+];
+
+/* 默认示例数据（可用导入覆盖） */
+const DEMO = [
+    { idx: 1,  cat: '工时/时间类', name: '工作时间', code: 'dailyWorkHours', unit: 'h',
+      codes: 'dailyWorkHours', alias: '工作时长', raws: 'inc_work_hour', units: 'h', src: '日统计',
+      models: '1bg3JoEC0wM / cm1AkKr12ylNK / cm1c34dg1DZ84', pid: '20、154、179', memo: '物模型ID + 指标编码（联合唯一）；唯一' },
+    { idx: 2,  cat: '工时/时间类', name: '工作时长', code: 'workTime', unit: 'h',
+      codes: 'workTime', alias: '工作时长', raws: 'workTime', units: 'h', src: '日统计',
+      models: 'cm1msAdt82HWU / cm1msB5xNmTtu', pid: '85、431', memo: '与「工作时间」物模型无交集，可合并' },
+    { idx: 3,  cat: '里程/距离类', name: '里程', code: 'dailyMileage', unit: 'km',
+      codes: 'Mileage / dailyMileage', alias: '行驶里程', raws: 'inc_work_load / mileage', units: 'KM / km', src: '日统计',
+      models: 'cm1AkKr12ylNK / cm1ckcalEwtSo', pid: '21、312', memo: '同量纲写法差异，统一为 km' },
+    { idx: 4,  cat: '里程/距离类', name: '总里程', code: 'totalMileage', unit: 'km',
+      codes: 'mileage / mileageHistory / totalMileage', alias: '累计里程', raws: 'mileage / totalMileage', units: 'km / m', src: '日统计 / 历史工况',
+      models: 'cm1c34dg1DZ84 / cm1msBRfRue2c', pid: '25、409', memo: '单位量纲不同，需确认换算' },
+    { idx: 5,  cat: '电耗/电量类', name: '电耗', code: 'dailyPower', unit: 'kWh',
+      codes: 'dailyPower / dailyPowerConsumption / totalSOC', alias: '电量', raws: 'inc_construction_data31', units: 'kWh', src: '日统计',
+      models: 'cm1eWYxjB0uT7 / cm1foL0ixWvNC', pid: '22、356', memo: '同一指标存在多个指标编码' },
+    { idx: 6,  cat: '燃油消耗类', name: '油耗', code: 'dailyFuelConsumption', unit: 'L',
+      codes: 'dailyFuelConsumption', alias: '燃油消耗', raws: 'inc_work_fuel', units: 'L', src: '日统计',
+      models: '1bg3JoEC0wM / cm1c83DPlqRMI', pid: '30、501', memo: '' },
+    { idx: 7,  cat: '作业量/产量类', name: '施工量', code: 'dailyWorkLoad_4', unit: 'm³',
+      codes: 'dailyWorkLoad', alias: '作业量', raws: 'inc_work_load', units: 'm³', src: '日统计',
+      models: 'cm2JbeGqdLVas', pid: '100', memo: '编码冲突 → 编码+序号' },
+    { idx: 8,  cat: '作业量/产量类', name: '泵送方量', code: 'dailyWorkLoad_2', unit: 'm³',
+      codes: 'dailyWorkLoad / totalWorkLoadHistory', alias: '作业量', raws: 'inc_work_load', units: 'm³', src: '日统计 / 历史工况',
+      models: 'cm1m75B0zihKU', pid: '1070', memo: '多编码多来源，待确认' },
+    { idx: 9,  cat: '次数/计数类', name: '吊载次数', code: 'dailyWorkLoad', unit: '次',
+      codes: 'craneLoadTimesHistory / dailyWorkLoad', alias: '吊载次数', raws: 'crane_load_times', units: '次', src: '日统计 / 历史工况',
+      models: 'cm1ckoJOcELnO / cm1dJJByLfyPC', pid: '304、990', memo: '保留编码（记录数最多）' },
+    { idx: 10, cat: '次数/计数类', name: '超载次数', code: 'overloadTimesHistory', unit: '次',
+      codes: 'overloadTimesHistory', alias: '超载次数', raws: 'overload_times', units: '次', src: '历史工况',
+      models: 'cm1hXS84jUtDG', pid: '3011、3758', memo: '' },
+    { idx: 11, cat: '电气参数类', name: '蓄电池电压', code: 'voltageHistory', unit: 'V',
+      codes: 'voltageHistory', alias: '蓄电池电压', raws: 'voltage', units: 'V', src: '历史工况',
+      models: 'cm1c34dg1DZ84', pid: '3759', memo: '' },
+    { idx: 12, cat: '工时/时间类', name: '待料时间', code: 'waitingTimeHistory', unit: 'h',
+      codes: 'waitingTimeHistory', alias: '待料时间', raws: 'waiting_time', units: 'h', src: '历史工况',
+      models: 'cm1tQKNQQ7yQo', pid: '3801', memo: '' }
+];
+
+/* ---------- 状态 ---------- */
+let rows = [];
+let page = 1;
+const PAGE_SIZE = 10;
+let kw = '';
+let fCat = '';
+let fSrc = '';
+let fField = 'name';      /* 搜索字段 */
+
+let _seqId = 1;
+function ensureIds() {
+    rows.forEach(function (r) {
+        if (!r._id) r._id = 'm' + (_seqId++);
+    });
+}
+
+function load() {
+    try {
+        const raw = localStorage.getItem(STORE_KEY);
+        if (raw) { rows = JSON.parse(raw); ensureIds(); return; }
+    } catch (e) {}
+    rows = DEMO.map(r => Object.assign({}, r));
+    ensureIds();
+}
+function save() {
+    try { localStorage.setItem(STORE_KEY, JSON.stringify(rows)); } catch (e) {}
+}
+
+function toast(msg) {
+    const el = document.getElementById('toast');
+    el.textContent = msg;
+    el.classList.add('show');
+    clearTimeout(el._t);
+    el._t = setTimeout(() => el.classList.remove('show'), 2000);
+}
+
+function esc(v) {
+    return String(v == null ? '' : v).replace(/[&<>"]/g, c => ({ '&': '&amp;', '<': '&lt;', '>': '&gt;', '"': '&quot;' }[c]));
+}
+
+/* ---------- 筛选 ---------- */
+function filtered() {
+    const k = kw.trim().toLowerCase();
+    return rows.filter(r => {
+        if (fCat && r.cat !== fCat) return false;
+        if (fSrc && String(r.src || '').indexOf(fSrc) < 0) return false;
+        if (k) {
+            const keys = fField === '__all'
+                ? ['name', 'code', 'codes', 'raws', 'models', 'pid', 'memo']
+                : [fField];
+            const hay = keys.map(x => String(r[x] == null ? '' : r[x])).join(' ').toLowerCase();
+            if (hay.indexOf(k) < 0) return false;
+        }
+        return true;
+    });
+}
+
+function fillFilters() {
+    const cats = Array.from(new Set(rows.map(r => r.cat).filter(Boolean))).sort();
+    const srcs = [];
+    rows.forEach(r => String(r.src || '').split('/').forEach(s => {
+        const v = s.trim();
+        if (v && srcs.indexOf(v) < 0) srcs.push(v);
+    }));
+    const selCat = document.getElementById('fCat');
+    const selSrc = document.getElementById('fSrc');
+    if (selCat) {
+        selCat.innerHTML = '<option value="">全部分类</option>'
+            + cats.map(c => '<option value="' + esc(c) + '">' + esc(c) + '</option>').join('');
+        selCat.value = fCat;
+    }
+    if (selSrc) {
+        selSrc.innerHTML = '<option value="">全部数据来源</option>'
+            + srcs.map(s => '<option value="' + esc(s) + '">' + esc(s) + '</option>').join('');
+        selSrc.value = fSrc;
+    }
+}
+
+/* ---------- 渲染 ---------- */
+function render() {
+    const list = filtered();
+    const pages = Math.max(1, Math.ceil(list.length / PAGE_SIZE));
+    if (page > pages) page = pages;
+    const slice = list.slice((page - 1) * PAGE_SIZE, page * PAGE_SIZE);
+
+    const tbody = document.getElementById('tbody');
+    const empty = document.getElementById('empty');
+
+    const statEl = document.getElementById('statText');
+    if (statEl) {
+        statEl.textContent = '共 ' + rows.length + ' 条'
+            + (list.length !== rows.length ? '（筛选后 ' + list.length + ' 条）' : '');
+    }
+
+    if (!list.length) {
+        tbody.innerHTML = '';
+        empty.style.display = '';
+        empty.textContent = rows.length ? '没有匹配的映射数据，试试调整筛选条件' : '暂无映射数据，点右上角「＋ 导入表格」上传 Excel / CSV';
+        document.getElementById('pager').innerHTML = '';
+        return;
+    }
+    empty.style.display = 'none';
+
+    tbody.innerHTML = slice.map((r, i) => {
+        const seq = (page - 1) * PAGE_SIZE + i + 1;
+        return '<tr>'
+            + '<td class="c-chk"><input type="checkbox" class="row-chk" data-key="' + esc(r._id || '') + '" /></td>'
+            + '<td class="c-idx">' + (r.idx || seq) + '</td>'
+            + '<td class="clip"><b title="' + esc(r.name) + '">' + esc(r.name) + '</b></td>'
+            + '<td class="clip"><span title="' + esc(r.alias) + '">' + (esc(r.alias) || '—') + '</span></td>'
+            + '<td class="mono clip"><span title="' + esc(r.code) + '">' + esc(r.code) + '</span></td>'
+            + '<td class="mono clip"><span title="' + esc(r.codes) + '">' + esc(r.codes) + '</span></td>'
+            + '<td class="mono clip"><span title="' + esc(r.raws) + '">' + (esc(r.raws) || '—') + '</span></td>'
+            + '<td class="clip">' + (r.unit ? '<span class="tag grey">' + esc(r.unit) + '</span>' : '—') + '</td>'
+            + '<td class="clip"><span title="' + esc(r.units) + '">' + esc(r.units) + '</span></td>'
+            + '<td class="clip">' + (String(r.src || '').indexOf('历史工况') >= 0
+                ? '<span class="tag orange">' + esc(r.src) + '</span>'
+                : '<span class="tag grey">' + esc(r.src) + '</span>') + '</td>'
+            + '<td class="mono clip"><span title="' + esc(r.pid) + '">' + esc(r.pid) + '</span></td>'
+            + '<td class="mono clip"><span title="' + esc(r.models) + '">' + esc(r.models) + '</span></td>'
+            + '<td class="clip"><span title="' + esc(r.memo) + '">' + (esc(r.memo) || '—') + '</span></td>'
+            + '<td class="c-op">'
+            + '<button class="btn link" onclick="openEdit(\'' + esc(r._id || '') + '\')">编辑</button>'
+            + '<button class="btn danger-link" onclick="askDelete(\'' + esc(r._id || '') + '\')">删除</button>'
+            + '</td>'
+            + '</tr>';
+    }).join('');
+
+    renderPager(list.length, pages, slice.length);
+    syncBatchBtn();
+}
+
+function renderPager(total, pages, pageCount) {
+    const box = document.getElementById('pager');
+    if (pages <= 1) {
+        box.innerHTML = '<span class="range">共 ' + total + ' 条</span><span></span>';
+        return;
+    }
+    const btn = (label, p, on, dis) => '<button class="pg-btn' + (on ? ' on' : '') + '"' + (dis ? ' disabled' : '')
+        + ' onclick="goPage(' + p + ')">' + label + '</button>';
+    const nums = [1, pages];
+    for (let n = page - 1; n <= page + 1; n++) if (n >= 1 && n <= pages) nums.push(n);
+    const uniq = nums.filter((v, i, a) => a.indexOf(v) === i).sort((a, b) => a - b);
+    const win = uniq.map((n, i) => (i && n - uniq[i - 1] > 1 ? '<span class="pg-gap">…</span>' : '') + btn(n, n, n === page, false)).join('');
+    box.innerHTML = '<span class="range">共 ' + total + ' 条</span>'
+        + '<span class="pages">' + btn('‹', page - 1, false, page === 1) + win + btn('›', page + 1, false, page === pages) + '</span>';
+}
+
+function goPage(p) {
+    page = p;
+    render();
+    document.querySelector('.table-wrap').scrollTop = 0;
+}
+
+/* ---------- 编辑 ---------- */
+let editId = null;
+
+const EDIT_FIELDS = [
+    { key: 'name',   label: '映射指标名称', req: true },
+    { key: 'alias',  label: '字段别名' },
+    { key: 'code',   label: '映射指标编码', req: true },
+    { key: 'codes',  label: '字典指标编码（全部）', textarea: true },
+    { key: 'raws',   label: 'IOT原始字段名（全部）', textarea: true },
+    { key: 'unit',   label: '映射单位' },
+    { key: 'units',  label: '字典单位（原始写法）' },
+    { key: 'src',    label: '数据来源', list: 'dlSrc' },
+    { key: 'pid',    label: '主键ID（参考）', textarea: true },
+    { key: 'models', label: '涉及的物模型ID', textarea: true },
+    { key: 'memo',   label: '备注', textarea: true }
+];
+
+function openCreate() {
+    editId = null;
+    renderEditForm({});
+    document.getElementById('editTitle').textContent = '新增指标映射';
+    document.getElementById('editMask').classList.add('show');
+}
+
+function openEdit(id) {
+    const row = rows.find(r => r._id === id);
+    if (!row) return;
+    editId = id;
+    renderEditForm(row);
+    document.getElementById('editTitle').textContent = '编辑指标映射';
+    document.getElementById('editMask').classList.add('show');
+}
+
+function renderEditForm(row) {
+
+    const box = document.getElementById('editFields');
+    box.innerHTML = EDIT_FIELDS.map(function (f) {
+        const val = row[f.key] == null ? '' : String(row[f.key]);
+        const ph = f.textarea ? '' : ' placeholder="' + (f.req ? '必填' : '选填') + '"';
+        const input = f.textarea
+            ? '<textarea class="f-input" id="ef_' + f.key + '"' + ph + '>' + esc(val) + '</textarea>'
+            : '<input class="f-input" id="ef_' + f.key + '" value="' + esc(val) + '"' + ph
+              + (f.list ? ' list="' + f.list + '"' : '') + ' />';
+        return '<div class="f-item' + (f.textarea ? ' f-full' : '') + '">'
+            + '<label class="f-label">' + f.label + (f.req ? ' <i>*</i>' : '') + '</label>' + input
+            + '</div>';
+    }).join('');
+
+    /* 分类 / 来源下拉候选 */
+    const cats = Array.from(new Set(rows.map(r => r.cat).filter(Boolean)));
+    const srcs = [];
+    rows.forEach(r => String(r.src || '').split('/').forEach(v => {
+        const t = v.trim();
+        if (t && srcs.indexOf(t) < 0) srcs.push(t);
+    }));
+    document.getElementById('dlCat').innerHTML = cats.map(c => '<option value="' + esc(c) + '"></option>').join('');
+    document.getElementById('dlSrc').innerHTML = srcs.map(c => '<option value="' + esc(c) + '"></option>').join('');
+
+}
+
+function closeEdit() {
+    document.getElementById('editMask').classList.remove('show');
+    editId = null;
+}
+
+function saveEdit() {
+    const isCreate = !editId;
+    const row = isCreate ? {} : rows.find(r => r._id === editId);
+    if (!isCreate && !row) { closeEdit(); return; }
+
+    const next = {};
+    EDIT_FIELDS.forEach(function (f) {
+        const el = document.getElementById('ef_' + f.key);
+        next[f.key] = el ? el.value.trim() : '';
+    });
+
+    if (!next.name) { toast('请填写「映射指标名称」'); return; }
+    if (!next.code) { toast('请填写「映射指标编码」'); return; }
+
+    if (isCreate) {
+        const rec = Object.assign({}, next);
+        rec._id = 'm' + (_seqId++);
+        rec.idx = rows.length + 1;
+        rows.push(rec);
+    } else {
+        Object.assign(row, next);
+    }
+    save();
+    fillFilters();
+    render();
+    closeEdit();
+    toast(isCreate ? '新增成功' : '保存成功');
+}
+
+/* ---------- 删除 ---------- */
+const selectedKeys = new Set();
+let delTarget = null;        /* 'batch' 或某行 _id */
+
+function syncBatchBtn() {
+    const btn = document.getElementById('btnBatchDel');
+    if (!btn) return;
+    const n = selectedKeys.size;
+    btn.textContent = '删除选中（' + n + '）';
+    btn.disabled = n === 0;
+    const all = document.getElementById('chkAll');
+    if (all) {
+        const boxes = Array.from(document.querySelectorAll('.row-chk'));
+        all.checked = boxes.length > 0 && boxes.every(b => b.checked);
+        all.indeterminate = boxes.some(b => b.checked) && !all.checked;
+    }
+}
+
+function askDelete(key) {
+    if (key === 'batch') {
+        if (!selectedKeys.size) return;
+        delTarget = 'batch';
+        document.getElementById('delTitle').textContent = '批量删除';
+        document.getElementById('delText').innerHTML =
+            '确定删除选中的 <b>' + selectedKeys.size + '</b> 条指标映射吗？';
+    } else {
+        const row = rows.find(r => r._id === key);
+        if (!row) return;
+        delTarget = key;
+        document.getElementById('delTitle').textContent = '删除指标映射';
+        document.getElementById('delText').innerHTML =
+            '确定删除「<b>' + esc(row.name || row.code || '') + '</b>」的映射记录吗？';
+    }
+    document.getElementById('delMask').classList.add('show');
+}
+
+function closeDelete() {
+    document.getElementById('delMask').classList.remove('show');
+    delTarget = null;
+}
+
+function confirmDelete() {
+    if (!delTarget) return;
+    let n = 0;
+    if (delTarget === 'batch') {
+        const before = rows.length;
+        rows = rows.filter(r => !selectedKeys.has(r._id));
+        n = before - rows.length;
+        selectedKeys.clear();
+    } else {
+        const before = rows.length;
+        rows = rows.filter(r => r._id !== delTarget);
+        n = before - rows.length;
+        selectedKeys.delete(delTarget);
+    }
+    save();
+    fillFilters();
+    render();
+    closeDelete();
+    toast('已删除 ' + n + ' 条');
+}
+
+/* ---------- 导入 ---------- */
+function openImport() {
+    document.getElementById('impMask').classList.add('show');
+}
+function closeImport() {
+    document.getElementById('impMask').classList.remove('show');
+    document.getElementById('fileInput').value = '';
+}
+
+function pickAlias(obj, aliases) {
+    const keys = Object.keys(obj);
+    for (const a of aliases) {
+        const hit = keys.find(k => String(k).trim() === a);
+        if (hit != null) return obj[hit];
+    }
+    for (const a of aliases) {
+        const hit = keys.find(k => String(k).trim().indexOf(a) === 0);
+        if (hit != null) return obj[hit];
+    }
+    return '';
+}
+
+function importFile(file) {
+    if (!file) return;
+    if (typeof XLSX === 'undefined') {
+        toast('解析库未加载，请检查网络后重试');
+        return;
+    }
+    const reader = new FileReader();
+    reader.onload = function (e) {
+        try {
+            const wb = XLSX.read(new Uint8Array(e.target.result), { type: 'array' });
+            let sheetName = wb.SheetNames.find(n => String(n).trim() === SHEET_NAME);
+            if (!sheetName) sheetName = wb.SheetNames.find(n => String(n).indexOf('指标映射') >= 0);
+            if (!sheetName) {
+                toast('未找到「' + SHEET_NAME + '」工作表（当前：' + wb.SheetNames.join(' / ') + '）');
+                return;
+            }
+            const aoa = XLSX.utils.sheet_to_json(wb.Sheets[sheetName], { defval: '' });
+            if (!aoa.length) { toast('工作表为空'); return; }
+
+            const parsed = aoa.map((o, i) => {
+                const rec = { idx: pickAlias(o, COLS[0].aliases) || (i + 1) };
+                COLS.slice(1).forEach(c => { rec[c.key] = pickAlias(o, c.aliases); });
+                return rec;
+            }).filter(r => r.name || r.code);
+
+            if (!parsed.length) {
+                toast('未识别到有效数据，请检查表头是否为「映射指标名称 / 映射指标编码」');
+                return;
+            }
+            rows = parsed;
+            ensureIds();
+            selectedKeys.clear();
+            page = 1;
+            kw = ''; fCat = ''; fSrc = '';
+            document.getElementById('kw').value = '';
+            save();
+            fillFilters();
+            render();
+            closeImport();
+            toast('导入成功：' + parsed.length + ' 条（来自「' + sheetName + '」）');
+        } catch (err) {
+            toast('导入失败：' + err.message);
+        }
+    };
+    reader.readAsArrayBuffer(file);
+}
+
+/* ---------- 导出 / 模板 ---------- */
+function toCsv(data) {
+    const head = ['序号', '映射指标名称', '字段别名', '映射指标编码', '字典指标编码（全部）',
+                  'IOT原始字段名（全部）', '映射单位', '字典单位（原始写法）', '数据来源', '主键ID（参考）', '涉及的物模型ID', '备注'];
+    const body = data.map((r, i) => [
+        r.idx || i + 1, r.name, r.alias, r.code, r.codes, r.raws, r.unit, r.units, r.src, r.pid, r.models, r.memo
+    ].map(v => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"').join(','));
+    return '\ufeff' + head.join(',') + '\n' + body.join('\n');
+}
+
+function download(name, text) {
+    const blob = new Blob([text], { type: 'text/csv;charset=utf-8' });
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = name;
+    document.body.appendChild(a);
+    a.click();
+    setTimeout(() => { URL.revokeObjectURL(a.href); a.remove(); }, 200);
+}
+
+function exportCsv() {
+    if (!rows.length) { toast('没有可导出的数据'); return; }
+    download('指标映射关系.csv', toCsv(rows));
+    toast('已导出 ' + rows.length + ' 条');
+}
+
+function downloadTemplate() {
+    download('指标映射关系-模板.csv', toCsv([]));
+    toast('模板已下载，可填入数据后导入');
+}
+
+/* ---------- 事件 ---------- */
+function applySearch() {
+    kw = document.getElementById('kw').value || '';
+    const ff = document.getElementById('fField');
+    fField = ff ? ff.value : 'name';
+    page = 1;
+    render();
+}
+
+document.getElementById('kw').addEventListener('keydown', function (e) {
+    if (e.key === 'Enter') { e.preventDefault(); applySearch(); }
+});
+const elField = document.getElementById('fField');
+if (elField) elField.addEventListener('change', function () { fField = this.value; });
+const elCat = document.getElementById('fCat');
+if (elCat) elCat.addEventListener('change', function () { fCat = this.value; page = 1; render(); });
+document.getElementById('fSrc').addEventListener('change', function () { fSrc = this.value; page = 1; render(); });
+document.getElementById('fileInput').addEventListener('change', function () { importFile(this.files[0]); });
+
+/* 勾选：单行 + 全选本页 */
+document.getElementById('tbody').addEventListener('change', function (e) {
+    const t = e.target;
+    if (!t.classList || !t.classList.contains('row-chk')) return;
+    const key = t.getAttribute('data-key');
+    if (t.checked) selectedKeys.add(key); else selectedKeys.delete(key);
+    syncBatchBtn();
+});
+document.getElementById('chkAll').addEventListener('change', function () {
+    const on = this.checked;
+    Array.prototype.forEach.call(document.querySelectorAll('.row-chk'), function (b) {
+        b.checked = on;
+        const key = b.getAttribute('data-key');
+        if (on) selectedKeys.add(key); else selectedKeys.delete(key);
+    });
+    syncBatchBtn();
+});
+
+/* Esc 关闭删除弹层 */
+document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && document.getElementById('delMask').classList.contains('show')) { closeDelete(); return; }
+    if (e.key === 'Escape' && document.getElementById('editMask').classList.contains('show')) closeEdit();
+});
+
+function resetFilters() {
+    kw = ''; fCat = ''; fSrc = ''; fField = 'name'; page = 1;
+    document.getElementById('kw').value = '';
+    const elC = document.getElementById('fCat'); if (elC) elC.value = '';
+    const elS = document.getElementById('fSrc'); if (elS) elS.value = '';
+    const elF = document.getElementById('fField'); if (elF) elF.value = 'name';
+    render();
+}
+
+/* 拖拽上传 */
+(function () {
+    const dz = document.getElementById('dropZone');
+    ['dragenter', 'dragover'].forEach(ev => dz.addEventListener(ev, e => { e.preventDefault(); dz.classList.add('over'); }));
+    ['dragleave', 'drop'].forEach(ev => dz.addEventListener(ev, e => { e.preventDefault(); dz.classList.remove('over'); }));
+    dz.addEventListener('drop', e => { if (e.dataTransfer.files[0]) importFile(e.dataTransfer.files[0]); });
+})();
+
+document.addEventListener('keydown', function (e) {
+    if (e.key === 'Escape' && document.getElementById('impMask').classList.contains('show')) closeImport();
+});
+
+/* ---------- 启动 ---------- */
+load();
+fillFilters();
+render();
+</script>
+</body>
+</html>

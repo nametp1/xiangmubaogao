@@ -238,9 +238,25 @@
             </span>
             <input class="search-input" id="searchInput" type="search" placeholder="搜索报表名称 / 类型 / 收件人" oninput="renderAll()">
         </div>
-        <button class="add-btn" onclick="location.href='机群报表.html'">＋ 添加报表</button>
+        <button class="add-btn" onclick="focusSearch()" aria-label="搜索报表">
+            <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" style="vertical-align:-2px;margin-right:4px;">
+                <circle cx="11" cy="11" r="7"/><line x1="16.5" y1="16.5" x2="21" y2="21"/>
+            </svg>搜索
+        </button>
     </div>
     <div class="screen" id="screen"></div>
+    <script>
+        /* 「搜索」按钮：滚动到搜索区并聚焦输入框 */
+        function focusSearch() {
+            const inp = document.getElementById('searchInput');
+            if (!inp) return;
+            const box = inp.closest('.search-box') || inp;
+            if (box.scrollIntoView) box.scrollIntoView({ block: 'center', behavior: 'smooth' });
+            inp.focus();
+            inp.select && inp.select();
+        }
+    </script>
+
 </div>
 
 <!-- ==================== 报表详情 ==================== -->
@@ -772,7 +788,7 @@ function askDelete(id) {
     if (!r) return;
     delId = id;
     document.getElementById('delText').innerHTML =
-        '确定要删除该报表吗？<br>删除后将停止推送且无法恢复。';
+        '删除后将停止推送且无法恢复，确定要删除该报表吗？';
     document.getElementById('delMask').classList.add('show');
 }
 
